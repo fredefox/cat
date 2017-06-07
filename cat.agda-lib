@@ -1,0 +1,8 @@
+name: cat
+include:
+  src
+  --libs/cubical-demo
+depend:
+  agda-prelude
+  standard-library
+  --cubical-demo

@@ -1,0 +1,3 @@
+[submodule "libs/cubical-demo"]
+	path = libs/cubical-demo
+	url = git@github.com:Saizan/cubical-demo.git
