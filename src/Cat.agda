@@ -3,7 +3,6 @@ module Cat where
 
 open import Agda.Primitive
 open import Prelude.Function
--- import Prelude.Equality
 open import PathPrelude
 open ≡-Reasoning
 
@@ -52,19 +51,13 @@ data Maybe ( A : Set ) : Set where
   nothing : Maybe A
   just    : A -> Maybe A
 
--- postulate
---   fun-ext : ∀ {a b} {A : Set a} {B : A → Set b} → {f g : (x : A) → B x}
---     → (∀ x → (f x) ≡ (g x)) → f ≡ g
--- fun-ext p = λ i → \ x → p x i
-
 instance
   MaybeFunctor : Functor Maybe
   Functor.fmap MaybeFunctor f nothing = nothing
   Functor.fmap MaybeFunctor f (just x) = just (f x)
-  -- how the heck can I use `fun-ext` which produces `Path id (fmap id)` wheras the type of the whole is `id ≡ fmap id`.
   Functor.identity MaybeFunctor = fun-ext (λ { nothing → refl ; (just x) → refl })
   Functor.fusion MaybeFunctor f g = fun-ext (λ
-    -- Why does inlining `lem₀` give rise to an error?
+    -- QUESTION: Why does inlining `lem₀` give rise to an error?
     { nothing → lem₀
     ; (just x) → {! refl!}
 {-    ; (just x) → begin
@@ -118,7 +111,7 @@ instance
   Applicative.homomorphism IdentityApplicative = refl
   Applicative.interchange IdentityApplicative _ _ = refl
 
--- Is this provable? How?
+-- QUESTION: Is this provable? How?
 -- I suppose this would be `≡`'s functor-instance.
 equiv-app : {A B : Set} -> {f g : A -> B} -> {a : A} -> f ≡ g -> f a ≡ g a
 equiv-app f≡g = {!!}
@@ -128,7 +121,7 @@ instance
   Applicative.pure MaybeApplicative = just
   Applicative.ap MaybeApplicative nothing _ = nothing
   Applicative.ap MaybeApplicative (just f) x = fmap f x
-  -- Why does termination-check fail when I use `refl` in both cases below?
+  -- QUESTION: Why does termination-check fail when I use `refl` in both cases below?
   Applicative.ap-identity MaybeApplicative = fun-ext (λ
     { nothing → {!refl!}
     ; (just x) → {!refl!}
@@ -139,6 +132,7 @@ instance
   --  Applicative.composition MaybeApplicative {u = just f} {just g} {nothing} = refl
   --  Applicative.composition MaybeApplicative {u = just f} {just g} {just x} = refl
   -- Re-use mode:
+  -- QUESTION: What's wrong here?
   Applicative.composition MaybeApplicative (just f) (just g) w = sym (equiv-app lem)
     where
     lem : ∀ {A B C} {f : B → C} {g : A → B} {w : Maybe A} →
