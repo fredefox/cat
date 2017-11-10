@@ -1,3 +1,6 @@
-[submodule "libs/cubical-demo"]
-	path = libs/cubical-demo
-	url = git@github.com:Saizan/cubical-demo.git
+[submodule "libs/cubical"]
+	path = libs/cubical
+	url = git@github.com:fredefox/cubical.git
+[submodule "libs/agda-stdlib"]
+	path = libs/agda-stdlib
+	url = git@github.com:agda/agda-stdlib.git
