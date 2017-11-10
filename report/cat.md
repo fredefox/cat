@@ -10,23 +10,53 @@ Background
 
 Functional extensionality gives rise to a notion of equality of functions not
 present in intensional dependent type theory. A type-system called cubical
-type-theory is outlined in [@cohen-2016] that recovers the computational interprtation of the univalence theorem.
+type-theory is outlined in [@cohen-2016] that recovers the computational
+interprtation of the univalence theorem.
 
 Keywords: The category of sets, limits, colimits, functors, natural
 transformations, kleisly category, yoneda lemma, closed cartesian categories,
 propositional logic.
+
+<!--
+"[...] These foundations promise to resolve several seemingly unconnected
+problems-provide a support for categorical and higher categorical arguments
+directly on the level of the language, make formalizations of usual mathematics
+much more concise and much better adapted to the use with existing proof
+assistants such as Coq [...]"
+
+From "Univalent Foundations of Mathematics" by "Voevodsky".
+
+-->
 
 Aim
 ===
 
 The aim of the project is two-fold. The first part of the project will be
 concerned with formalizing some concepts from category theory in Agda's
-type-system: functors, applicative functors, monads, etc.. The second part of
-the project could take different directions:
+type-system. This formalization should aim to incorporate definitions and
+theorems that allow us to express the correpondence in the second part: Namely
+showing the correpondence between well-typed terms in cubical type theory as
+presented in Huber and Thierry's paper and with that of some concepts from Category Theory.
 
-* It might involve using this formalization to prove properties of functional
-  programs.
-* It may be used to prove the Modal used in Cubical Type Theory using Preshiefs.
+This latter part is not entirely clear for me yet, I know that all these are relevant keywords:
+
+  * The category, C, of names and substitutions
+  * Cubical Sets, i.e.: Functors from C to Set (the category of sets)
+  * Presheaves
+  * Fibers and fibrations
+
+These are all formulated in the language of Category Theory. The purpose it to
+show what they correspond to in the in Cubical Type Theory. As I understand it
+at least the last buzzword on this list corresponds to Type Families.
+
+I'm not sure how I'll go about expressing this in Agda. I suspect it might
+be a matter of demostrating that these two formulations are isomorphic.
+
+So far I have some experience with at least expressing some categorical
+concepts in Agda using this new notion of equality. That is, equaility is in
+some sense a continuuous path from a point of some type to another. So at the
+moment, my understanding of cubical type theory is just that it has another
+notion of equality but is otherwise pretty much the same.
 
 Timeplan
 ========
@@ -53,8 +83,8 @@ Resources
 * Paper on cubical type theory [@cohen-2016]
 * Book on homotopy type theory: [@hott-2013]
 * Book on category theory: [@awodey-2006]
-* Modal logic - Modal type theory, see
-  [ncatlab](https://ncatlab.org/nlab/show/modal+type+theory).
+* Modal logic - Modal type theory,
+  see [ncatlab](https://ncatlab.org/nlab/show/modal+type+theory).
 
 References
 ==========
