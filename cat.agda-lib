@@ -1,8 +1,7 @@
 name: cat
-include:
-  src
-  --libs/cubical-demo
+-- description:
+--   A formalization of category theory in Agda using cubical type theory.
 depend:
-  agda-prelude
   standard-library
-  --cubical-demo
+  cubical
+include: src
