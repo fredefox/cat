@@ -127,13 +127,52 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
       ≡ ab ∈ S
     ident-r = equivToPath equi
 
+module _ {A B C D : Set} {S : Subset (A × B)} {R : Subset (B × C)} {Q : Subset (C × D)} (ad : A × D) where
+  private
+    a : A
+    a = fst ad
+    d : D
+    d = snd ad
+
+    Q⊕⟨R⊕S⟩ : Set
+    Q⊕⟨R⊕S⟩ = Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q
+    ⟨Q⊕R⟩⊕S : Set
+    ⟨Q⊕R⟩⊕S = Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q)
+
+    fwd : Q⊕⟨R⊕S⟩ → ⟨Q⊕R⟩⊕S
+    fwd (c , (b , (ab∈S , bc∈R)) , cd∈Q) = b , (ab∈S , (c , (bc∈R , cd∈Q)))
+
+    bwd : ⟨Q⊕R⟩⊕S → Q⊕⟨R⊕S⟩
+    bwd (b , (ab∈S , (c , (bc∈R , cd∈Q)))) = c , (b , ab∈S , bc∈R) , cd∈Q
+
+    fwd-bwd : (x : ⟨Q⊕R⟩⊕S) → (fwd ∘ bwd) x ≡ x
+    fwd-bwd x = refl
+
+    bwd-fwd : (x : Q⊕⟨R⊕S⟩) → (bwd ∘ fwd) x ≡ x
+    bwd-fwd x = refl
+
+    isequiv : isEquiv
+      (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
+      (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
+      fwd
+    isequiv = gradLemma fwd bwd fwd-bwd bwd-fwd
+
+    equi : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
+      ≃ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
+    equi = fwd , isequiv
+
+    -- assocc : Q + (R + S) ≡ (Q + R) + S
+  assocc : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
+         ≡ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
+  assocc = equivToPath equi
+
 Rel-as-Cat : Category
 Rel-as-Cat = record
   { Object = Set
   ; Arrow = λ S R → Subset (S × R)
   ; 𝟙 = λ {S} → Diag S
   ; _⊕_ = λ {A B C} S R → λ {( a , c ) → Σ[ b ∈ B ] ( (a , b) ∈ R × (b , c) ∈ S )}
-  ; assoc = {!!}
+  ; assoc = funExt assocc
   ; ident = funExt ident-l , funExt ident-r
   }
 
