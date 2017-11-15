@@ -7,21 +7,6 @@ open import Cubical.GradLemma
 open import Agda.Primitive
 open import Category
 
--- Sets are built-in to Agda. The set of all small sets is called Set.
-
-Fun : {ℓ : Level} → ( T U : Set ℓ ) → Set ℓ
-Fun T U = T → U
-
-𝕊et-as-Cat : {ℓ : Level} → Category {lsuc ℓ} {ℓ}
-𝕊et-as-Cat {ℓ} = record
-  { Object = Set ℓ
-  ; Arrow = λ T U → Fun {ℓ} T U
-  ; 𝟙 = λ x → x
-  ; _⊕_  = λ g f x → g ( f x )
-  ; assoc = refl
-  ; ident = funExt (λ x → refl) , funExt (λ x → refl)
-  }
-
 -- Subsets are predicates over some type.
 Subset : {ℓ : Level} → ( A : Set ℓ ) → Set (ℓ ⊔ lsuc lzero)
 Subset A = A → Set
@@ -166,8 +151,8 @@ module _ {A B C D : Set} {S : Subset (A × B)} {R : Subset (B × C)} {Q : Subset
          ≡ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
   assocc = equivToPath equi
 
-Rel-as-Cat : Category
-Rel-as-Cat = record
+Rel : Category
+Rel = record
   { Object = Set
   ; Arrow = λ S R → Subset (S × R)
   ; 𝟙 = λ {S} → Diag S
@@ -175,17 +160,3 @@ Rel-as-Cat = record
   ; assoc = funExt assocc
   ; ident = funExt ident-l , funExt ident-r
   }
-
-module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ}} where
-  private
-    C-Obj = Object ℂ
-    _+_   = Arrow ℂ
-
-  RepFunctor : Functor ℂ 𝕊et-as-Cat
-  RepFunctor =
-    record
-      { F = λ A → (B : C-Obj) → Hom {ℂ = ℂ} A B
-      ; f = λ { {c' = c'} f g → {!HomFromArrow {ℂ = } c' g!}}
-      ; ident = {!!}
-      ; distrib = {!!}
-      }
