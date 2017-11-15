@@ -67,33 +67,23 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
         → (a , b) ∈ S
       backwards (a' , (a=a' , a'b∈S)) = subst (sym a=a') a'b∈S
 
-      isbijective : (x : (a , b) ∈ S) → (backwards ∘ forwards) x ≡ x
+      fwd-bwd : (x : (a , b) ∈ S) → (backwards ∘ forwards) x ≡ x
       -- isbijective x = pathJ (λ y x₁ → (backwards ∘ forwards) x ≡ x) {!!} {!!} {!!}
-      isbijective x = pathJprop (λ y _ → y) x
+      fwd-bwd x = pathJprop (λ y _ → y) x
 
-      postulate
-        back-fwd : (x : Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
+      bwd-fwd : (x : Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
           → (forwards ∘ backwards) x ≡ x
-      -- back-fwd (a , (p , ab∈S))
-      -- = =-ind (λ x y p → {!(forwards ∘ backwards) x ≡ x!}) {!!} {!!} {!!} p
-      -- = pathJprop (λ y _ → snd (snd y)) ab∈S
-      -- has type P x refl where P is the first argument
-{-
+      -- bwd-fwd (y , a≡y , z) = ?
+      bwd-fwd (a' , a≡y , z) = pathJ lem0 lem1 a' a≡y z
+        where
+          lem0 = (λ a'' a≡a'' → ∀ a''b∈S → (forwards ∘ backwards) (a'' , a≡a'' , a''b∈S) ≡ (a'' , a≡a'' , a''b∈S))
+          lem1 = (λ z₁ → cong (\ z → a , refl , z) (pathJprop (\ y _ → y) z₁))
 
-module _ {ℓ ℓ'} {A : Set ℓ} {x : A}
-  (P : ∀ y → x ≡ y → Set ℓ') (d : P x ((λ i → x))) where
-  pathJ : (y : A) → (p : x ≡ y) → P y p
-  pathJ _ p = transp (λ i → uncurry P (contrSingl p i)) d
-
-  pathJprop : pathJ _ refl ≡ d
-  pathJprop i = primComp (λ _ → P x refl) i (λ {j (i = i1) → d}) d
--}
       isequiv : isEquiv
         (Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
         ((a , b) ∈ S)
         backwards
---      isequiv ab∈S = (forwards ab∈S , sym (isbijective ab∈S)) , λ y → fiberhelp y
-      isequiv y = gradLemma backwards forwards isbijective back-fwd y
+      isequiv y = gradLemma backwards forwards fwd-bwd bwd-fwd y
 
       equi : (Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
         ≃ (a , b) ∈ S
@@ -113,18 +103,22 @@ module _ {ℓ ℓ'} {A : Set ℓ} {x : A}
         → (a , b) ∈ S
       backwards (b' , (ab'∈S , b'=b)) = subst b'=b ab'∈S
 
-      isbijective : (x : (a , b) ∈ S) → (backwards ∘ forwards) x ≡ x
-      isbijective x = pathJprop (λ y _ → y) x
+      bwd-fwd : (x : (a , b) ∈ S) → (backwards ∘ forwards) x ≡ x
+      bwd-fwd x = pathJprop (λ y _ → y) x
 
       fwd-bwd : (x : Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
         → (forwards ∘ backwards) x ≡ x
-      fwd-bwd (b , (ab∈S , refl)) = pathJprop (λ y _ → fst (snd y)) ab∈S
+      -- fwd-bwd (b , (ab∈S , refl)) = pathJprop (λ y _ → fst (snd y)) ab∈S
+      fwd-bwd (b' , (ab'∈S , b'≡b)) = pathJ lem0 lem1 b' (sym b'≡b) ab'∈S
+        where
+          lem0 = (λ b'' b≡b'' → (ab''∈S : (a , b'') ∈ S) → (forwards ∘ backwards) (b'' , ab''∈S , sym b≡b'') ≡ (b'' , ab''∈S , sym b≡b''))
+          lem1 = (λ ab''∈S → cong (\z → b , z , refl) (pathJprop (λ y _ → y) ab''∈S))
 
       isequiv : isEquiv
         (Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
         ((a , b) ∈ S)
         backwards
-      isequiv ab∈S = gradLemma backwards forwards isbijective fwd-bwd ab∈S
+      isequiv ab∈S = gradLemma backwards forwards bwd-fwd fwd-bwd ab∈S
 
       equi : (Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
         ≃ ab ∈ S
@@ -153,7 +147,7 @@ module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ}} where
   RepFunctor =
     record
       { F = λ A → (B : C-Obj) → Hom {ℂ = ℂ} A B
-      ; f = λ { {c' = c'} f g → HomFromArrow {ℂ = {!𝕊et-as-Cat!}} c' g}
+      ; f = λ { {c' = c'} f g → {!HomFromArrow {ℂ = } c' g!}}
       ; ident = {!!}
       ; distrib = {!!}
       }
