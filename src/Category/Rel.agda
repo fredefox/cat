@@ -22,7 +22,7 @@ Subset A = A → Set
 -- syntax subset P = ⦃ a ∈ A | P a ⦄
 -- syntax subset-syntax A (λ a → B) = ⟨ a foo A ∣ B ⟩
 
--- Membership is function applicatiom.
+-- Membership is (dependent) function applicatiom.
 _∈_ : {ℓ : Level} {A : Set ℓ} → A → Subset A → Set
 s ∈ S = S s
 
@@ -30,7 +30,7 @@ infixl 45 _∈_
 
 -- The diagnoal of a set is a synonym for equality.
 Diag : ∀ S → Subset (S × S)
-Diag S (s₀ , s₁) = s₀ ≡ s₁
+Diag S (x , y) = x ≡ y
 -- Diag S = subset (S × S) (λ {(p , q) → p ≡ q})
 -- Diag S = ⟨ ? foo ? ∣ ? ⟩
 -- Diag S (s₀ , s₁) = ⦃ (s₀ , s₁) ∈ S | s₀ ≡ s₁ ⦄
@@ -147,9 +147,9 @@ module _ {A B C D : Set} {S : Subset (A × B)} {R : Subset (B × C)} {Q : Subset
     equi = fwd , isequiv
 
     -- assocc : Q + (R + S) ≡ (Q + R) + S
-  assocc : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
+  is-assoc : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
          ≡ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
-  assocc = equivToPath equi
+  is-assoc = equivToPath equi
 
 Rel : Category
 Rel = record
@@ -157,6 +157,6 @@ Rel = record
   ; Arrow = λ S R → Subset (S × R)
   ; 𝟙 = λ {S} → Diag S
   ; _⊕_ = λ {A B C} S R → λ {( a , c ) → Σ[ b ∈ B ] ( (a , b) ∈ R × (b , c) ∈ S )}
-  ; assoc = funExt assocc
+  ; assoc = funExt is-assoc
   ; ident = funExt ident-l , funExt ident-r
   }
