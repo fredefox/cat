@@ -6,6 +6,7 @@ open import Agda.Primitive
 open import Data.Unit.Base
 open import Data.Product
 open import Cubical.PathPrelude
+open import Data.Empty
 
 postulate undefined : {ℓ : Level} → {A : Set ℓ} → A
 
@@ -114,8 +115,6 @@ module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} { A B : Object ℂ } w
 
   iso-is-epi-mono : ∀ {X} (f : ℂ.Arrow A B ) → Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
   iso-is-epi-mono f iso = iso-is-epi f iso , iso-is-mono f iso
-
-data ⊥ : Set where
 
 ¬_ : {ℓ : Level} → Set ℓ → Set ℓ
 ¬ A = A → ⊥

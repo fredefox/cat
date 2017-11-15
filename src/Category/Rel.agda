@@ -7,21 +7,6 @@ open import Cubical.GradLemma
 open import Agda.Primitive
 open import Category
 
--- Sets are built-in to Agda. The set of all small sets is called Set.
-
-Fun : {ℓ : Level} → ( T U : Set ℓ ) → Set ℓ
-Fun T U = T → U
-
-𝕊et-as-Cat : {ℓ : Level} → Category {lsuc ℓ} {ℓ}
-𝕊et-as-Cat {ℓ} = record
-  { Object = Set ℓ
-  ; Arrow = λ T U → Fun {ℓ} T U
-  ; 𝟙 = λ x → x
-  ; _⊕_  = λ g f x → g ( f x )
-  ; assoc = refl
-  ; ident = funExt (λ x → refl) , funExt (λ x → refl)
-  }
-
 -- Subsets are predicates over some type.
 Subset : {ℓ : Level} → ( A : Set ℓ ) → Set (ℓ ⊔ lsuc lzero)
 Subset A = A → Set
@@ -37,7 +22,7 @@ Subset A = A → Set
 -- syntax subset P = ⦃ a ∈ A | P a ⦄
 -- syntax subset-syntax A (λ a → B) = ⟨ a foo A ∣ B ⟩
 
--- Membership is function applicatiom.
+-- Membership is (dependent) function applicatiom.
 _∈_ : {ℓ : Level} {A : Set ℓ} → A → Subset A → Set
 s ∈ S = S s
 
@@ -45,7 +30,7 @@ infixl 45 _∈_
 
 -- The diagnoal of a set is a synonym for equality.
 Diag : ∀ S → Subset (S × S)
-Diag S (s₀ , s₁) = s₀ ≡ s₁
+Diag S (x , y) = x ≡ y
 -- Diag S = subset (S × S) (λ {(p , q) → p ≡ q})
 -- Diag S = ⟨ ? foo ? ∣ ? ⟩
 -- Diag S (s₀ , s₁) = ⦃ (s₀ , s₁) ∈ S | s₀ ≡ s₁ ⦄
@@ -108,11 +93,10 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
 
       fwd-bwd : (x : Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
         → (forwards ∘ backwards) x ≡ x
-      -- fwd-bwd (b , (ab∈S , refl)) = pathJprop (λ y _ → fst (snd y)) ab∈S
       fwd-bwd (b' , (ab'∈S , b'≡b)) = pathJ lem0 lem1 b' (sym b'≡b) ab'∈S
         where
           lem0 = (λ b'' b≡b'' → (ab''∈S : (a , b'') ∈ S) → (forwards ∘ backwards) (b'' , ab''∈S , sym b≡b'') ≡ (b'' , ab''∈S , sym b≡b''))
-          lem1 = (λ ab''∈S → cong (\z → b , z , refl) (pathJprop (λ y _ → y) ab''∈S))
+          lem1 = (λ ab''∈S → cong (λ φ → b , φ , refl) (pathJprop (λ y _ → y) ab''∈S))
 
       isequiv : isEquiv
         (Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
@@ -128,26 +112,51 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
       ≡ ab ∈ S
     ident-r = equivToPath equi
 
-Rel-as-Cat : Category
-Rel-as-Cat = record
+module _ {A B C D : Set} {S : Subset (A × B)} {R : Subset (B × C)} {Q : Subset (C × D)} (ad : A × D) where
+  private
+    a : A
+    a = fst ad
+    d : D
+    d = snd ad
+
+    Q⊕⟨R⊕S⟩ : Set
+    Q⊕⟨R⊕S⟩ = Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q
+    ⟨Q⊕R⟩⊕S : Set
+    ⟨Q⊕R⟩⊕S = Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q)
+
+    fwd : Q⊕⟨R⊕S⟩ → ⟨Q⊕R⟩⊕S
+    fwd (c , (b , (ab∈S , bc∈R)) , cd∈Q) = b , (ab∈S , (c , (bc∈R , cd∈Q)))
+
+    bwd : ⟨Q⊕R⟩⊕S → Q⊕⟨R⊕S⟩
+    bwd (b , (ab∈S , (c , (bc∈R , cd∈Q)))) = c , (b , ab∈S , bc∈R) , cd∈Q
+
+    fwd-bwd : (x : ⟨Q⊕R⟩⊕S) → (fwd ∘ bwd) x ≡ x
+    fwd-bwd x = refl
+
+    bwd-fwd : (x : Q⊕⟨R⊕S⟩) → (bwd ∘ fwd) x ≡ x
+    bwd-fwd x = refl
+
+    isequiv : isEquiv
+      (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
+      (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
+      fwd
+    isequiv = gradLemma fwd bwd fwd-bwd bwd-fwd
+
+    equi : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
+      ≃ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
+    equi = fwd , isequiv
+
+    -- assocc : Q + (R + S) ≡ (Q + R) + S
+  is-assoc : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
+         ≡ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
+  is-assoc = equivToPath equi
+
+Rel : Category
+Rel = record
   { Object = Set
   ; Arrow = λ S R → Subset (S × R)
   ; 𝟙 = λ {S} → Diag S
   ; _⊕_ = λ {A B C} S R → λ {( a , c ) → Σ[ b ∈ B ] ( (a , b) ∈ R × (b , c) ∈ S )}
-  ; assoc = {!!}
+  ; assoc = funExt is-assoc
   ; ident = funExt ident-l , funExt ident-r
   }
-
-module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ}} where
-  private
-    C-Obj = Object ℂ
-    _+_   = Arrow ℂ
-
-  RepFunctor : Functor ℂ 𝕊et-as-Cat
-  RepFunctor =
-    record
-      { F = λ A → (B : C-Obj) → Hom {ℂ = ℂ} A B
-      ; f = λ { {c' = c'} f g → {!HomFromArrow {ℂ = } c' g!}}
-      ; ident = {!!}
-      ; distrib = {!!}
-      }
