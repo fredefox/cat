@@ -5,155 +5,319 @@
 \usepackage[utf8]{inputenc}
 
 \usepackage{natbib}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 
 \usepackage{graphicx}
+\usepackage{color,soul}
 
 \usepackage[colorinlistoftodos]{todonotes}
 
 \usepackage{parskip}
-\setlength{\parskip}{10pt}
+\usepackage{multicol}
+\usepackage{amsmath,amssymb}
+% \setlength{\parskip}{10pt}
 
-\usepackage{tikz}
-\usetikzlibrary{arrows, decorations.markings}
+% \usepackage{tikz}
+% \usetikzlibrary{arrows, decorations.markings}
 
-\usepackage{chngcntr}
-\counterwithout{figure}{section}
+% \usepackage{chngcntr}
+% \counterwithout{figure}{section}
 
+\usepackage{chalmerstitle}
+\input{macros.tex}
+% \newcommand{\sectiondescription}[1]{\todo[inline,color=green!40]{#1}}
+\newcommand{\sectiondescription}[1]{\iffalse #1\fi}
+\newcommand{\mycomment}[1]{\hl{#1}}
 
+\title{Category Theory and Cubical Type Theory}
+\author{Frederik Hanghøj Iversen}
+\authoremail{hanghj@student.chalmers.se}
+\supervisor{Thierry Coquand}
+\supervisoremail{coquand@chalmers.se}
+\cosupervisor{Andrea Vezzosi}
+\cosupervisoremail{vezzosi@chalmers.se}
+\institution{Chalmers University of Technology}
 
 \begin{document}
 
-
-\begin{titlepage}
-
-
-\centering
-
-
-{\scshape\LARGE Master thesis project proposal\\}
-
-\vspace{0.5cm}
-
-{\huge\bfseries Title of the project\\}
-
-\vspace{2cm}
-
-{\Large name and email adress of student 1\\}
-
-\vspace{0.2cm}
-
-{\Large name and email adress of student 2\\}
-
-\vspace{1.0cm}
-
-{\large Suggested Supervisor at CSE (if you have one, otherwise skip this row): Name of supervisor\\}
-
-\vspace{1.5cm}
-
-{\large Supervisor at Company (if applicable): Name of supervisor, name of company\\}
-
-\vspace{1.5cm}
-
-{\large Relevant completed courses student 1:\par}
-
-{\itshape List (course code, name of course)\\}
-
-\vspace{1.5cm}
-
-{\large Relevant completed courses student 2:\par}
-
-{\itshape List (course code, name of course)\\}
-
-\vfill
-
-
-
-\vfill
-
-{\large \today\\}
-
-
-\end{titlepage}
-
+\maketitle
+%
+\mycomment{Text marked like this are todo-comments.}
+\sectiondescription{Text marked like this describe what should go in the section.}
+%
 \section{Introduction}
+%
+\sectiondescription{%
+Briefly describe and motivate the project, and convince the reader of the
+importance of the proposed thesis work. A good introduction will answer these
+questions: Why is addressing these challenges significant for gaining new
+knowledge in the studied domain? How and where can this new knowledge be
+applied?
+}
+%
+Functional extensionality and univalence is not expressible in
+\nomen{Intensional Martin Löf Type Theory} (ITT). This poses a severe limitation
+on both 1) what is \emph{provable} and 2) the \emph{reusability} of proofs.
+Recent developments have, however, resulted in \nomen{Cubical Type Theory} (CTT)
+which permits a constructive proof of these two important notions.
 
+Furthermore an extension has been implemented for the proof assistant Agda that
+allows us to work in such a ``cubical setting''. This project will be concerned
+with exploring the usefulness of this extension. As a case-study I will consider
+\nomen{category theory}. This case-study will serve a dual purpose: First off
+category theory is a field where the notion of functional extensionality and
+univalence wil be particularly useful. Secondly, Category Theory gives rise to
+a \nomen{model} for CTT.
 
-Briefly describe and motivate the project, and convince the reader of the importance of the proposed thesis work.
-A good introduction will answer these questions: Why is addressing these challenges significant for gaining new knowledge
-in the studied domain? How and where can this new knowledge be applied?
-
-
-
+The project will consist of two parts: The first part will be concerned with
+formalizing concepts from category theory. The focus will be on formalizing
+parts that will be useful in the second part of the project: Showing that
+\nomen{Cubical Sets} give rise to a \emph{model} for CTT.
+%
 \section{Problem}
+%
+\sectiondescription{%
+This section is optional. It may be used if there is a need to describe the
+problem that you want to solve in more technical detail and if this problem
+description is too extensive to fit in the introduction.
+}
+%
+In the following two subsections I present two examples that illustrate the
+limitaiton inherent in ITT and by extension to the expressiveness of Agda.
+%
+\subsection{Functional extensionality}
+Consider the functions:
+%
+\begin{multicols}{2}
+$f \defeq (n : \bN) \mapsto (0 + n : \bN)$
 
+$g \defeq (n : \bN) \mapsto (n + 0 : \bN)$
+\end{multicols}
+%
+$n + 0$ is definitionally equal to $n$. We call this \nomen{defnitional equality}
+and write $n + 0 = n$ to assert this fact. We call it definitional
+equality because the \emph{equality} arises from the \emph{definition} of $+$
+which is:
+%
+\newcommand{\suc}[1]{\mathit{suc}\ #1}
+\begin{align*}
+  +           & : \bN \to \bN              \\
+  n + 0       & \defeq n                   \\
+  n + (\suc{m}) & \defeq \suc{(n + m)}
+\end{align*}
+%
+Note that $0 + n$ is \emph{not} definitionally equal to $n$. $0 + n$ is in
+normal form. I.e.; there is no rule for $+$ whose left-hand-side matches this
+expression. We \emph{do}, however, have that they are propositionally equal. We
+write $n + 0 \equiv n$ to assert this fact. Propositional equality means that
+there is a proof that exhibits this relation. Since equality is a transitive
+relation we have that $n + 0 \equiv 0 + n$.
 
+Unfortunately we don't have $f \equiv g$.\footnote{Actually showing this is
+outside the scope of this text. Essentially it would involve giving a model
+for our type theory that validates all our axioms but where $f \equiv g$ is
+not true.} There is no way to construct a proof asserting the obvious
+equivalence of $f$ and $g$ -- even though we can prove them equal for all
+points. This is exactly the notion of equality of functions that we are
+interested in; that they are equal for all inputs. We call this
+\nomen{pointwise equality}. Where the \emph{points} of a function refers
+to it's arguments.
+%
+\iffalse
+I also want to talk about:
+\begin{itemize}
+\item
+  Foundational systems
+\item
+  Theory vs. metatheory
+\item
+  Internal type theory
+\end{itemize}
+\fi
+\subsection{Equality of isomorphic types}
+%
+The type $A \x \top$ and $A$ has an element for each $a : A$. So in a sense they
+are the same. The second element of the pair does not add any ``interesting
+information''. It can be useful to identify such types. In fact, it is quite
+commonplace in mathematics. Say we look at a set $\{x \mid \phi\ x \land
+\psi\ x\}$ and somehow conclude that $\psi\ x \equiv \top$ for all $x$. A
+mathematician would immediately conclude $\{x \mid \phi\ x \land \psi\ x\}
+\equiv \{x \mid \phi\ x\}$ without thinking twice. Unfortunately such an
+identification can not be performed in ITT. 
 
-This section is optional. It may be used if there is a need to describe the problem that you want to solve in more technical
-detail and if this problem description is too extensive to fit in the introduction.
+More specifically; what we are interested in is a way of identifying types that
+are in a one-to-one correspondence. We say that such types are
+\nomen{isomorphic} and write $A \cong B$ to assert this.
 
+To prove an isomorphism is give an \nomen{isomorphism} between the two types.
+That is, a function $f : A \to B$ for which it has an inverse $f^{-1} : B \to
+A$, i.e.: $f^{-1} \comp f \equiv id_A$. If such a function exist we say that $A$
+and $B$ are isomorphic and write $A \cong B$.
 
+What we want is to identify isomorphic types. This is the principle of
+univalence:\footnote{It's often referred to as the univalence axiom, but since
+it is not an axiom in this setting but rather a theorem I refer to this just
+as a `principle'.}
+%
+$$(A \cong B) \cong (A \equiv B)$$
+%
+\subsection{Category Theory as a case-study}
+%
+The above examples serves to illustrate the limitation of Agda. One case where
+these limitations are particularly prohibitive is in the case of Category
+Theory. Category Theory -- at a glance -- is ``is the mathematical study of
+(abstract) algebras of functions'' (\cite{awodey-2006}). So by that token
+functional extensionality is particularly useful for formulating Category
+Theory. Another aspect of Category Theory is that one usually want to talk about
+things ``up to isomorphism''. Another way of phrasing this is that we want to
+identify isomorphic objects. This is exactly what we get from univalence.
 
+\mycomment{Can there be issues with identifying isomoprhic types? Suddenly many
+seemingly different objects collaps into the same thing (e.g.: $\{1\} \equiv
+\{2\}$, $\mathbb{Z} \equiv \mathbb{N}$, \ldots)}
 
+\subsection{Category Theory as a model for Cubical Type Theory}
+%
+Certain categories give rise to a model for Cubical Type Theory
+(\cite{bezem-2014}). \cite{dybjer-1995} describe how to construct a model for a
+type theory. One part of which is to `check equations' - that is, that the model
+satisfies the axioms -- i.e. typing rules -- for the type theory under study. In
+this case the Cubical Sets have to satisfy the corresponding `translation' of
+those axioms in the categorical setting. The \emph{translation} will not be
+given formally (i.e. as a function in Agda). That translation will be given
+informally, and I will show that the model satisfies these.
+%
+\mycomment{Quickly explain that we can formulate the language of Cubical Type
+Theory and show that Cubical Sets are a model of this.}
+%
 \section{Context}
+%
+\sectiondescription{%
+Use one or two relevant and high quality references for providing evidence from
+the literature that the proposed study indeed includes scientific and
+engineering challenges, or is related to existing ones. Convince the reader that
+the problem addressed in this thesis has not been solved prior to this project.
+}
+%
+Work by \citeauthor{bezem-2014} resulted in a model for type theory where
+univalence is expressible. This model is an example of a \nomen{categorical
+model} -- that is, a model formulated in terms of categories. As such this
+paper will also serve as a further object of study for the concepts from
+Category Theory that I will have formalized.
 
+Work by \citeauthor{cohen-2016} have resulted in a type system where univalence
+is expressible. The categorical model from above is a model of this type theory.
+So these two ideas are closely related.
 
+An implementation of cubical type theory can be found as an extension to Agda.
+This is due to \citeauthor{cubical-agda}. This, of course, will be central to
+this thesis. As such, my work with this extension will serve as evidence to the
+merrit of this implementation.
 
-Use one or two relevant and high quality references for providing evidence from the literature that the proposed study indeed
-includes scientific and engineering challenges, or is related to existing ones. Convince the reader that the problem addressed
-in this thesis has not been solved prior to this project.
+The idea of formalizing Category Theory in proof assistants is not a new idea
+(\mycomment{citations \ldots}). The contribution of this thesis is to explore
+how working in a cubical setting will make it possible to proove more things and
+to resuse proofs. There are alternative approaches to working in a cubical
+setting where one can still have univalence and functional extensionality. One
+could e.g. postulate these as axioms. This approach has other shortcomings,
+e.g.; you loose canonicity (\mycomment{citation}). \mycomment{Perhaps we could
+  also formulate equality as another type. What are some downsides of this
+  approach?}
 
+\mycomment{Mention internal type theory c.f. Dybjers paper? He talks about two
+types of internal type theory. One of them is where you express the typing
+rules of your languages within that languages}
 
+\mycomment{Other aspects that I think are interesting: Type Theory as a foundational
+system; why is ``nice'' to have a categorical model?}
 
-
-
+\mycomment{Should perhaps mention how Cubical Type Theory came out out of Homotopy
+Type Theory that came out of Topology}
+%
 \section{Goals and Challenges}
+%
+\sectiondescription{%
+Describe your contribution with respect to concepts, theory and technical goals.
+Ensure that the scientific and engineering challenges stand out so that the
+reader can easily recognize that you are planning to solve an advanced problem.
+}
+%
+In summary, the aim of the project is to:
+%
+\begin{itemize}
+\item
+Formalize Category Theory in Cubical Agda
+\item
+Formalize Cubical Sets in Agda
+% \item
+% Formalize Cubical Type Theory in Agda
+\item
+Show that Cubical Sets are a model for Cubical Type Theory
+\end{itemize}
+%
+The formalization of category theory will focus on extracting the elements from
+Category Theory that we need in the latter part of the project. In doing so I'll
+be gaining experience with working with Cubical Agda. Equality proofs using
+cubical Agda can be tricky, so working with that will be a challenge in itself.
+Most of the proofs I will do will be based on previous work. These proofs are
+pen-and-paper proof. Translating such proofs to a type system is not always
+straight-forward. A further challenge is that in cubical Agda there can be
+multiple distinct terms that inhabit a given equality proof. This means that the
+choice for a given equality proof can influence later proofs that refer back to
+said proof. This is new and relatively unexplored territory. Another challenge
+is that Category Theory is something that I only know the basics of. So learning
+the necessary concepts from Category Theory will also be a goal and a challenge
+in itself.
 
+After this has been implemented it would also be possible to formalize Cubical
+Type Theory and formally show that Cubical Sets are a model of this. This is not
+a strict goal for this thesis but would certainly be a natural extension of it.
 
-
-Describe your contribution with respect to concepts, theory and technical goals. Ensure that the scientific and engineering
-challenges stand out so that the reader can easily recognize that you are planning to solve an advanced problem.
-
-
+The final thesis should also include a discussion about the pros/cons of using
+Cubical Agda; \mycomment{have Agda become more useful, easy to work with,
+\ldots ? } Ideally my work will serve as an argument that working in a Cubical
+setting is useful.
+%
 \section{Approach}
+%
+\sectiondescription{%
+Various scientific approaches are appropriate for different challenges and
+project goals. Outline and justify the ones that you have selected. For example,
+when your project considers systematic data collection, you need to explain how
+you will analyze the data, in order to address your challenges and project
+goals.
 
+One scientific approach is to use formal models and rigorous mathematical
+argumentation to address aspects like correctness and efficiency. If this is
+relevant, describe the related algorithmic subjects, and how you plan to address
+the studied problem. For example, if your plan is to study the problem from a
+computability aspect, address the relevant issues, such as algorithm and data
+structure design, complexity analysis, etc. If you plan to develop and evaluate
+a prototype, briefly describe your plans to design, implement, and evaluate your
+prototype by reviewing at most two relevant issues, such as key functionalities
+and their evaluation criteria.
 
+The design and implementation should specify prototype properties, such as
+functionalities and performance goals, e.g., scalability, memory, energy.
+Motivate key design selection, with respect to state of the art and existing
+platforms, libraries, etc.
 
-Various scientific approaches are appropriate for different challenges and project goals. Outline and justify the ones that
-you have selected. For example, when your project considers systematic data collection, you need to explain how you will analyze
-the data, in order to address your challenges and project goals.
-
-One scientific approach is to use formal models and rigorous
-mathematical argumentation to address aspects like correctness and efficiency. If this is relevant, describe the related algorithmic
-subjects, and how you plan to address the studied problem. For example, if your plan is to study the problem from a computability aspect,
-address the relevant issues, such as algorithm and data structure design, complexity analysis, etc.  If you plan to develop and
-evaluate a prototype, briefly describe your plans to design, implement, and evaluate your prototype by reviewing at most two relevant
-issues, such as key functionalities and their evaluation criteria.
-
-The design and implementation should specify prototype properties,
-such as functionalities and performance goals, e.g., scalability, memory, energy. Motivate key design selection, with respect to state
-of the art and existing platforms, libraries, etc.
-
-When discussing evaluation criteria, describe the testing environment, e.g., test-bed
-experiments, simulation, and user studies, which you plan to use when assessing your prototype. Specify key tools, and preliminary
-test-case scenarios. Explain how and why you plan to use the evaluation criteria in order to demonstrate the functionalities and
-design goals. Explain how you plan to compare your prototype to the state of the art using the proposed test-case evaluation scenarios
-and benchmarks.
-
-
-
+When discussing evaluation criteria, describe the testing environment, e.g.,
+test-bed experiments, simulation, and user studies, which you plan to use when
+assessing your prototype. Specify key tools, and preliminary test-case
+scenarios. Explain how and why you plan to use the evaluation criteria in order
+to demonstrate the functionalities and design goals. Explain how you plan to
+compare your prototype to the state of the art using the proposed test-case
+evaluation scenarios and benchmarks.
+}
+%
+\mycomment{I don't know what more I can say here than has already been
+explained. Perhaps this section is not needed for me?}
+%
 \section{References}
+%
+\bibliographystyle{plainnat}
 
-
-
-%\bibliographystyle{plain}
-
-%\bibliography{references}
-
-
-
-Reference all sources that are cited in your proposal using, e.g. the APA, Harvard2, or IEEE3 style.
-
-
-
+\bibliography{refs} \mycomment{I have a bunch of other relevant references that
+I haven't been able to incorporate into my text yet...}
 \end{document}
