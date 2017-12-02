@@ -11,6 +11,7 @@ open import Data.Empty
 postulate undefined : {ℓ : Level} → {A : Set ℓ} → A
 
 record Category {ℓ ℓ'} : Set (lsuc (ℓ' ⊔ ℓ)) where
+  constructor category
   field
     Object : Set ℓ
     Arrow  : Object → Object → Set ℓ'
@@ -21,51 +22,67 @@ record Category {ℓ ℓ'} : Set (lsuc (ℓ' ⊔ ℓ)) where
     ident  : { A B : Object } { f : Arrow A B }
       → f ⊕ 𝟙 ≡ f × 𝟙 ⊕ f ≡ f
   infixl 45 _⊕_
-  dom : { a b : Object } → Arrow a b → Object
-  dom {a = a} _ = a
-  cod : { a b : Object } → Arrow a b → Object
-  cod {b = b} _ = b
+  domain : { a b : Object } → Arrow a b → Object
+  domain {a = a} _ = a
+  codomain : { a b : Object } → Arrow a b → Object
+  codomain {b = b} _ = b
 
 open Category public
 
 record Functor {ℓc ℓc' ℓd ℓd'} (C : Category {ℓc} {ℓc'}) (D : Category {ℓd} {ℓd'})
   : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
+  constructor functor
   private
     open module C = Category C
     open module D = Category D
   field
-    F : C.Object → D.Object
-    f : {c c' : C.Object} → C.Arrow c c' → D.Arrow (F c) (F c')
-    ident   : { c : C.Object } → f (C.𝟙 {c}) ≡ D.𝟙 {F c}
+    func* : C.Object → D.Object
+    func→ : {dom cod : C.Object} → C.Arrow dom cod → D.Arrow (func* dom) (func* cod)
+    ident   : { c : C.Object } → func→ (C.𝟙 {c}) ≡ D.𝟙 {func* c}
     -- TODO: Avoid use of ugly explicit arguments somehow.
     -- This guy managed to do it:
     --    https://github.com/copumpkin/categories/blob/master/Categories/Functor/Core.agda
     distrib : { c c' c'' : C.Object} {a : C.Arrow c c'} {a' : C.Arrow c' c''}
-      → f (a' C.⊕ a) ≡ f a' D.⊕ f a
+      → func→ (a' C.⊕ a) ≡ func→ a' D.⊕ func→ a
 
-FunctorComp : ∀ {ℓ ℓ'} {a b c : Category {ℓ} {ℓ'}} → Functor b c → Functor a b → Functor a c
-FunctorComp {a = a} {b = b} {c = c} F G =
-  record
-    { F = F.F ∘ G.F
-    ; f = F.f ∘ G.f
-    ; ident = λ { {c = obj} →
-      let --t : (F.f ∘ G.f) (𝟙 a) ≡ (𝟙 c)
-          g-ident = G.ident
-          k : F.f (G.f {c' = obj} (𝟙 a)) ≡ F.f (G.f (𝟙 a))
-          k = refl {x = F.f (G.f (𝟙 a))}
-          t : F.f (G.f (𝟙 a)) ≡ (𝟙 c)
-          -- t = subst F.ident (subst G.ident k)
-          t = undefined
-      in t }
-    ; distrib = undefined -- subst F.distrib (subst G.distrib refl)
-    }
-    where
-      open module F = Functor F
-      open module G = Functor G
+module _ {ℓ ℓ' : Level} {A B C : Category {ℓ} {ℓ'}} (F : Functor B C) (G : Functor A B) where
+  private
+    open module F = Functor F
+    open module G = Functor G
+    open module A = Category A
+    open module B = Category B
+    open module C = Category C
+
+    F* = F.func*
+    F→ = F.func→
+    G* = G.func*
+    G→ = G.func→
+    module _ {a0 a1 a2 : A.Object} {α0 : A.Arrow a0 a1} {α1 : A.Arrow a1 a2} where
+
+      dist : (F→ ∘ G→) (α1 A.⊕ α0) ≡ (F→ ∘ G→) α1 C.⊕ (F→ ∘ G→) α0
+      dist = begin
+        (F→ ∘ G→) (α1 A.⊕ α0)         ≡⟨ refl ⟩
+        F→ (G→ (α1 A.⊕ α0))           ≡⟨ cong F→ G.distrib ⟩
+        F→ ((G→ α1) B.⊕ (G→ α0))      ≡⟨ F.distrib ⟩
+        (F→ ∘ G→) α1 C.⊕ (F→ ∘ G→) α0 ∎
+
+  functor-comp : Functor A C
+  functor-comp =
+    record
+      { func* = F* ∘ G*
+      ; func→ = F→ ∘ G→
+      ; ident = begin
+        (F→ ∘ G→) (A.𝟙) ≡⟨ refl ⟩
+        F→ (G→ (A.𝟙))   ≡⟨ cong F→ G.ident ⟩
+        F→ (B.𝟙)        ≡⟨ F.ident ⟩
+        C.𝟙             ∎
+      ; distrib = dist
+      }
 
 -- The identity functor
-Identity : {ℓ ℓ' : Level} → {C : Category {ℓ} {ℓ'}} → Functor C C
-Identity = record { F = λ x → x ; f = λ x → x ; ident = refl ; distrib = refl }
+identity : {ℓ ℓ' : Level} → {C : Category {ℓ} {ℓ'}} → Functor C C
+-- Identity = record { F* = λ x → x ; F→ = λ x → x ; ident = refl ; distrib = refl }
+identity = functor (λ x → x) (λ x → x) (refl) (refl)
 
 module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} { A B : Object ℂ } where
   private
@@ -116,9 +133,6 @@ module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} { A B : Object ℂ } w
   iso-is-epi-mono : ∀ {X} (f : ℂ.Arrow A B ) → Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
   iso-is-epi-mono f iso = iso-is-epi f iso , iso-is-mono f iso
 
-¬_ : {ℓ : Level} → Set ℓ → Set ℓ
-¬ A = A → ⊥
-
 {-
 epi-mono-is-not-iso : ∀ {ℓ ℓ'} → ¬ ((ℂ : Category {ℓ} {ℓ'}) {A B X : Object ℂ} (f : Arrow ℂ A B ) → Epimorphism {ℂ = ℂ} {X = X} f → Monomorphism {ℂ = ℂ} {X = X} f → Isomorphism {ℂ = ℂ} f)
 epi-mono-is-not-iso f =
@@ -126,6 +140,7 @@ epi-mono-is-not-iso f =
   in {!!}
 -}
 
+-- Isomorphism of objects
 _≅_ : { ℓ ℓ' : Level } → { ℂ : Category {ℓ} {ℓ'} } → ( A B : Object ℂ ) → Set ℓ'
 _≅_ {ℂ = ℂ} A B = Σ[ f ∈ ℂ.Arrow A B ] (Isomorphism {ℂ = ℂ} f)
   where
@@ -167,19 +182,50 @@ Opposite ℂ =
   where
     open module ℂ = Category ℂ
 
-CatCat : {ℓ ℓ' : Level} → Category {ℓ-suc (ℓ ⊔ ℓ')} {ℓ ⊔ ℓ'}
-CatCat {ℓ} {ℓ'} =
-  record
-    { Object = Category {ℓ} {ℓ'}
-    ; Arrow = Functor
-    ; 𝟙 = Identity
-    ; _⊕_ = FunctorComp
-    ; assoc = undefined
-    ; ident = λ { {f = f} →
-      let eq : f ≡ f
-          eq = refl
-      in undefined , undefined}
-    }
+-- The category of categories
+module _ {ℓ ℓ' : Level} where
+  private
+    _⊛_ = functor-comp
+    module _ {A B C D : Category {ℓ} {ℓ'}} {f : Functor A B} {g : Functor B C} {h : Functor C D} where
+      assc : h ⊛ (g ⊛ f) ≡ (h ⊛ g) ⊛ f
+      assc = {!!}
+
+    module _ {A B : Category {ℓ} {ℓ'}} where
+      lift-eq : (f g : Functor A B)
+        → (eq* : Functor.func* f ≡ Functor.func* g)
+        -- TODO: Must transport here using the equality from above.
+        -- Reason:
+        --   func→  : Arrow A dom cod → Arrow B (func* dom) (func* cod)
+        --   func→₁ : Arrow A dom cod → Arrow B (func*₁ dom) (func*₁ cod)
+        -- In other words, func→ and func→₁ does not have the same type.
+  --      → Functor.func→ f ≡ Functor.func→ g
+  --      → Functor.ident f ≡ Functor.ident g
+  --       → Functor.distrib f ≡ Functor.distrib g
+        → f ≡ g
+      lift-eq
+        (functor func* func→ idnt distrib)
+        (functor func*₁ func→₁ idnt₁ distrib₁)
+        eq-func* = {!!}
+
+    module _ {A B : Category {ℓ} {ℓ'}} {f : Functor A B} where
+      idHere = identity {ℓ} {ℓ'} {A}
+      lem : (Functor.func* f) ∘ (Functor.func* idHere) ≡ Functor.func* f
+      lem = refl
+      ident-r : f ⊛ identity ≡ f
+      ident-r = lift-eq (f ⊛ identity) f refl
+      ident-l : identity ⊛ f ≡ f
+      ident-l = {!!}
+
+  CatCat : Category {ℓ-suc (ℓ ⊔ ℓ')} {ℓ ⊔ ℓ'}
+  CatCat =
+    record
+      { Object = Category {ℓ} {ℓ'}
+      ; Arrow = Functor
+      ; 𝟙 = identity
+      ; _⊕_ = functor-comp
+      ; assoc = {!!}
+      ; ident = ident-r , ident-l
+      }
 
 Hom : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → (A B : Object ℂ) → Set ℓ'
 Hom {ℂ = ℂ} A B = Arrow ℂ A B
