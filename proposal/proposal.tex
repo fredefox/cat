@@ -42,7 +42,6 @@
 
 \maketitle
 %
-\mycomment{Text marked like this are todo-comments.}
 \sectiondescription{Text marked like this describe what should go in the section.}
 %
 \section{Introduction}
@@ -61,18 +60,18 @@ on both 1) what is \emph{provable} and 2) the \emph{reusability} of proofs.
 Recent developments have, however, resulted in \nomen{Cubical Type Theory} (CTT)
 which permits a constructive proof of these two important notions.
 
-Furthermore an extension has been implemented for the proof assistant Agda that
-allows us to work in such a ``cubical setting''. This project will be concerned
-with exploring the usefulness of this extension. As a case-study I will consider
-\nomen{category theory}. This case-study will serve a dual purpose: First off
-category theory is a field where the notion of functional extensionality and
-univalence wil be particularly useful. Secondly, Category Theory gives rise to
-a \nomen{model} for CTT.
+Furthermore an extension has been implemented for the proof assistant Agda
+(\cite{agda}) that allows us to work in such a ``cubical setting''. This project
+will be concerned with exploring the usefulness of this extension. As a
+case-study I will consider \nomen{category theory}. This will serve a dual
+purpose: First off category theory is a field where the notion of functional
+extensionality and univalence wil be particularly useful. Secondly, Category
+Theory gives rise to a \nomen{model} for CTT.
 
 The project will consist of two parts: The first part will be concerned with
 formalizing concepts from category theory. The focus will be on formalizing
 parts that will be useful in the second part of the project: Showing that
-\nomen{Cubical Sets} give rise to a \emph{model} for CTT.
+\nomen{Cubical Sets} give rise to a model of CTT.
 %
 \section{Problem}
 %
@@ -94,8 +93,8 @@ $f \defeq (n : \bN) \mapsto (0 + n : \bN)$
 $g \defeq (n : \bN) \mapsto (n + 0 : \bN)$
 \end{multicols}
 %
-$n + 0$ is definitionally equal to $n$. We call this \nomen{defnitional equality}
-and write $n + 0 = n$ to assert this fact. We call it definitional
+$n + 0$ is definitionally equal to $n$. We call this \nomen{defnitional
+equality} and write $n + 0 = n$ to assert this fact. We call it definitional
 equality because the \emph{equality} arises from the \emph{definition} of $+$
 which is:
 %
@@ -108,10 +107,10 @@ which is:
 %
 Note that $0 + n$ is \emph{not} definitionally equal to $n$. $0 + n$ is in
 normal form. I.e.; there is no rule for $+$ whose left-hand-side matches this
-expression. We \emph{do}, however, have that they are propositionally equal. We
-write $n + 0 \equiv n$ to assert this fact. Propositional equality means that
-there is a proof that exhibits this relation. Since equality is a transitive
-relation we have that $n + 0 \equiv 0 + n$.
+expression. We \emph{do}, however, have that they are \nomen{propositionally}
+equal. We write $n + 0 \equiv n$ to assert this fact. Propositional equality
+means that there is a proof that exhibits this relation. Since equality is a
+transitive relation we have that $n + 0 \equiv 0 + n$.
 
 Unfortunately we don't have $f \equiv g$.\footnote{Actually showing this is
 outside the scope of this text. Essentially it would involve giving a model
@@ -136,59 +135,62 @@ I also want to talk about:
 \fi
 \subsection{Equality of isomorphic types}
 %
-The type $A \x \top$ and $A$ has an element for each $a : A$. So in a sense they
-are the same. The second element of the pair does not add any ``interesting
-information''. It can be useful to identify such types. In fact, it is quite
-commonplace in mathematics. Say we look at a set $\{x \mid \phi\ x \land
-\psi\ x\}$ and somehow conclude that $\psi\ x \equiv \top$ for all $x$. A
-mathematician would immediately conclude $\{x \mid \phi\ x \land \psi\ x\}
-\equiv \{x \mid \phi\ x\}$ without thinking twice. Unfortunately such an
-identification can not be performed in ITT. 
+Let $\top$ denote the unit type -- a type with a single constructor. In the
+propositions-as-types interpretation of type theory $\top$ is the proposition
+that is always true. The type $A \x \top$ and $A$ has an element for each $a :
+A$. So in a sense they are the same. The second element of the pair does not add
+any ``interesting information''. It can be useful to identify such types. In
+fact, it is quite commonplace in mathematics. Say we look at a set $\{x \mid
+\phi\ x \land \psi\ x\}$ and somehow conclude that $\psi\ x \equiv \top$ for all
+$x$. A mathematician would immediately conclude $\{x \mid \phi\ x \land
+\psi\ x\} \equiv \{x \mid \phi\ x\}$ without thinking twice. Unfortunately such
+an identification can not be performed in ITT.
 
 More specifically; what we are interested in is a way of identifying types that
 are in a one-to-one correspondence. We say that such types are
 \nomen{isomorphic} and write $A \cong B$ to assert this.
 
-To prove an isomorphism is give an \nomen{isomorphism} between the two types.
-That is, a function $f : A \to B$ for which it has an inverse $f^{-1} : B \to
-A$, i.e.: $f^{-1} \comp f \equiv id_A$. If such a function exist we say that $A$
-and $B$ are isomorphic and write $A \cong B$.
+To prove two types isomorphic is to give an \nomen{isomorphism} between them.
+That is, a function $f : A \to B$ with an inverse $f^{-1} : B \to A$, i.e.:
+$f^{-1} \comp f \equiv id_A$. If such a function exist we say that $A$ and $B$
+are isomorphic and write $A \cong B$.
 
-What we want is to identify isomorphic types. This is the principle of
-univalence:\footnote{It's often referred to as the univalence axiom, but since
-it is not an axiom in this setting but rather a theorem I refer to this just
-as a `principle'.}
+Furthermore we want to \emph{identify} such isomorphic types. This, we get from
+the principle of univalence:\footnote{It's often referred to as the univalence
+axiom, but since it is not an axiom in this setting but rather a theorem I
+refer to this just as a `principle'.}
 %
 $$(A \cong B) \cong (A \equiv B)$$
 %
-\subsection{Category Theory as a case-study}
+\subsection{Formalizing Category Theory}
 %
 The above examples serves to illustrate the limitation of Agda. One case where
-these limitations are particularly prohibitive is in the case of Category
-Theory. Category Theory -- at a glance -- is ``is the mathematical study of
-(abstract) algebras of functions'' (\cite{awodey-2006}). So by that token
+these limitations are particularly prohibitive is in the study of Category
+Theory. At a glance category theory can be described as ``the mathematical study
+of (abstract) algebras of functions'' (\cite{awodey-2006}). So by that token
 functional extensionality is particularly useful for formulating Category
-Theory. Another aspect of Category Theory is that one usually want to talk about
-things ``up to isomorphism''. Another way of phrasing this is that we want to
-identify isomorphic objects. This is exactly what we get from univalence.
+Theory. In Category theory it is also common to identify isomorphic structures
+and this is exactly what we get from univalence.
 
-\mycomment{Can there be issues with identifying isomoprhic types? Suddenly many
-seemingly different objects collaps into the same thing (e.g.: $\{1\} \equiv
-\{2\}$, $\mathbb{Z} \equiv \mathbb{N}$, \ldots)}
+\subsection{Cubical model for Cubical Type Theory}
+%
+A model is a way of giving meaning to a formal system in a \emph{meta-theory}. A
+typical example of a model is that of sets as models for predicate logic. Thus
+set-theory becomes the meta-theory of the formal language of predicate logic.
 
-\subsection{Category Theory as a model for Cubical Type Theory}
-%
-Certain categories give rise to a model for Cubical Type Theory
-(\cite{bezem-2014}). \cite{dybjer-1995} describe how to construct a model for a
-type theory. One part of which is to `check equations' - that is, that the model
-satisfies the axioms -- i.e. typing rules -- for the type theory under study. In
-this case the Cubical Sets have to satisfy the corresponding `translation' of
-those axioms in the categorical setting. The \emph{translation} will not be
-given formally (i.e. as a function in Agda). That translation will be given
-informally, and I will show that the model satisfies these.
-%
-\mycomment{Quickly explain that we can formulate the language of Cubical Type
-Theory and show that Cubical Sets are a model of this.}
+In the context of a given type theory and restricting ourselves to
+\emph{categorical} models a model will consists of mapping `things' from the
+type-theory (types, terms, contexts, context morphisms) to `things' in the
+meta-theory (objects, morphisms) in such a way that the axioms of the
+type-theory (typing-rules) are validated in the meta-theory. In
+\cite{dybjer-1995} the author describes a way of constructing such models for
+dependent type theory called \emph{Categories with Families} (CwFs).
+
+In \cite{bezem-2014} the authors device a CwF for Cubical Type Theory. This
+project will study and formalize this model. Note that I will \emph{not} aim to
+formalize CTT itself and therefore also not give the formal translation between
+the type theory and the meta-theory. In stead the translation will be accounted
+for informally.
 %
 \section{Context}
 %
@@ -199,40 +201,38 @@ engineering challenges, or is related to existing ones. Convince the reader that
 the problem addressed in this thesis has not been solved prior to this project.
 }
 %
-Work by \citeauthor{bezem-2014} resulted in a model for type theory where
-univalence is expressible. This model is an example of a \nomen{categorical
-model} -- that is, a model formulated in terms of categories. As such this
-paper will also serve as a further object of study for the concepts from
-Category Theory that I will have formalized.
-
-Work by \citeauthor{cohen-2016} have resulted in a type system where univalence
-is expressible. The categorical model from above is a model of this type theory.
-So these two ideas are closely related.
+In \cite{bezem-2014} a categorical model for cubical type theory is presented.
+In \cite{cohen-2016} a type-theory where univalence is expressible is presented.
+The categorical model in the previous reference serve as a model of this type
+theory. So these two ideas are closely related. Cubical type theory arose out of
+\nomen{Homotopy Type Theory} (\cite{hott-2013}) and is also of interest as a
+foundation of mathematics (\cite{voevodsky-2011}).
 
 An implementation of cubical type theory can be found as an extension to Agda.
 This is due to \citeauthor{cubical-agda}. This, of course, will be central to
-this thesis. As such, my work with this extension will serve as evidence to the
-merrit of this implementation.
+this thesis.
 
-The idea of formalizing Category Theory in proof assistants is not a new idea
-(\mycomment{citations \ldots}). The contribution of this thesis is to explore
-how working in a cubical setting will make it possible to proove more things and
-to resuse proofs. There are alternative approaches to working in a cubical
-setting where one can still have univalence and functional extensionality. One
-could e.g. postulate these as axioms. This approach has other shortcomings,
-e.g.; you loose canonicity (\mycomment{citation}). \mycomment{Perhaps we could
-  also formulate equality as another type. What are some downsides of this
-  approach?}
+The idea of formalizing Category Theory in proof assistants is not a new
+idea\footnote{There are a multitude of these available online. Just as first
+reference see this question on Math Overflow: \cite{so-formalizations}}. The
+contribution of this thesis is to explore how working in a cubical setting will
+make it possible to prove more things and to reuse proofs.
 
-\mycomment{Mention internal type theory c.f. Dybjers paper? He talks about two
-types of internal type theory. One of them is where you express the typing
-rules of your languages within that languages}
+There are alternative approaches to working in a cubical setting where one can
+still have univalence and functional extensionality. One option is to postulate
+these as axioms. This approach, however, has other shortcomings, e.g.; you lose
+\nomen{canonicity} (\cite{huber-2016}). Canonicity means that any well-type
+term will (under evaluation) reduce to a \emph{canonical} form. For example for
+an integer $e : \bN$ it will be the case that $e$ is definitionally equal to $n$
+application of $\mathit{suc}$ to $0$ for some $n$; $e = \mathit{suc}^n\ 0$.
+Without canonicity terms in the language can get ``stuck'' when they are
+evaluated.
 
-\mycomment{Other aspects that I think are interesting: Type Theory as a foundational
-system; why is ``nice'' to have a categorical model?}
-
-\mycomment{Should perhaps mention how Cubical Type Theory came out out of Homotopy
-Type Theory that came out of Topology}
+Another approach is to use the \emph{setoid interpretation} of type theory
+(\cite{hofmann-1995,huber-2016}). Types should additionally `carry around' an
+equivalence relation that should serve as propositional equality. This approach
+has other drawbacks; it does not satisfy all judgemental equalites of type
+theory and is cumbersome to work with in practice (\cite[p. 4]{huber-2016}).
 %
 \section{Goals and Challenges}
 %
@@ -259,25 +259,28 @@ The formalization of category theory will focus on extracting the elements from
 Category Theory that we need in the latter part of the project. In doing so I'll
 be gaining experience with working with Cubical Agda. Equality proofs using
 cubical Agda can be tricky, so working with that will be a challenge in itself.
-Most of the proofs I will do will be based on previous work. These proofs are
-pen-and-paper proof. Translating such proofs to a type system is not always
-straight-forward. A further challenge is that in cubical Agda there can be
-multiple distinct terms that inhabit a given equality proof. This means that the
-choice for a given equality proof can influence later proofs that refer back to
-said proof. This is new and relatively unexplored territory. Another challenge
-is that Category Theory is something that I only know the basics of. So learning
-the necessary concepts from Category Theory will also be a goal and a challenge
-in itself.
+Most of the proofs in the context of cubical models I will formalize are based
+on previous work. Those proofs, however, are not formalized in a proof
+assistant.
+
+One particular challenge in this context is that in a cubical setting there can
+be multiple distinct terms that inhabit a given equality proof.\footnote{This is
+in contrast with ITT that enjoys \nomen{Uniqueness of identity proofs}
+(\cite[p. 4]{huber-2016}).} This means that the choice for a given equality
+proof can influence later proofs that refer back to said proof. This is new and
+relatively unexplored territory.
+
+Another challenge is that Category Theory is something that I only know the
+basics of. So learning the necessary concepts from Category Theory will also be
+a goal and a challenge in itself.
 
 After this has been implemented it would also be possible to formalize Cubical
 Type Theory and formally show that Cubical Sets are a model of this. This is not
-a strict goal for this thesis but would certainly be a natural extension of it.
+a goal for this thesis but rather a natural extension of it.
 
-The final thesis should also include a discussion about the pros/cons of using
-Cubical Agda; \mycomment{have Agda become more useful, easy to work with,
-\ldots ? } Ideally my work will serve as an argument that working in a Cubical
-setting is useful.
+The thesis shall conclude with a discussion about the benefits of Cubical Agda.
 %
+\iffalse
 \section{Approach}
 %
 \sectiondescription{%
@@ -314,10 +317,11 @@ evaluation scenarios and benchmarks.
 \mycomment{I don't know what more I can say here than has already been
 explained. Perhaps this section is not needed for me?}
 %
+\fi
 \section{References}
 %
 \bibliographystyle{plainnat}
-
-\bibliography{refs} \mycomment{I have a bunch of other relevant references that
-I haven't been able to incorporate into my text yet...}
+\nocite{cubical-demo}
+\nocite{coquand-2013}
+\bibliography{refs}
 \end{document}
