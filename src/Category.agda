@@ -4,9 +4,11 @@ module Category where
 
 open import Agda.Primitive
 open import Data.Unit.Base
-open import Data.Product
-open import Cubical.PathPrelude
+open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
 open import Data.Empty
+open import Function
+
+open import Cubical
 
 postulate undefined : {ℓ : Level} → {A : Set ℓ} → A
 
@@ -216,7 +218,7 @@ module _ {ℓ ℓ' : Level} where
       ident-l : identity ⊛ f ≡ f
       ident-l = {!!}
 
-  CatCat : Category {ℓ-suc (ℓ ⊔ ℓ')} {ℓ ⊔ ℓ'}
+  CatCat : Category {lsuc (ℓ ⊔ ℓ')} {ℓ ⊔ ℓ'}
   CatCat =
     record
       { Object = Category {ℓ} {ℓ'}
