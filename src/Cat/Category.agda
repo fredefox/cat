@@ -1,6 +1,6 @@
 {-# OPTIONS --cubical #-}
 
-module Category where
+module Cat.Category where
 
 open import Agda.Primitive
 open import Data.Unit.Base

@@ -1,12 +1,13 @@
-module Category.Cubical where
+module Cat.Cubical where
 
 open import Agda.Primitive
-open import Category
 open import Data.Bool
 open import Data.Product
 open import Data.Sum
 open import Data.Unit
 open import Data.Empty
+
+open import Cat.Category
 
 module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
   -- Σ is the "namespace"
