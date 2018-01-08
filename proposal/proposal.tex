@@ -8,9 +8,6 @@
 \usepackage[hidelinks]{hyperref}
 
 \usepackage{graphicx}
-\usepackage{color,soul}
-
-\usepackage[colorinlistoftodos]{todonotes}
 
 \usepackage{parskip}
 \usepackage{multicol}
@@ -25,9 +22,6 @@
 
 \usepackage{chalmerstitle}
 \input{macros.tex}
-% \newcommand{\sectiondescription}[1]{\todo[inline,color=green!40]{#1}}
-\newcommand{\sectiondescription}[1]{\iffalse #1\fi}
-\newcommand{\mycomment}[1]{\hl{#1}}
 
 \title{Category Theory and Cubical Type Theory}
 \author{Frederik Hanghøj Iversen}
@@ -42,17 +36,7 @@
 
 \maketitle
 %
-\sectiondescription{Text marked like this describe what should go in the section.}
-%
 \section{Introduction}
-%
-\sectiondescription{%
-Briefly describe and motivate the project, and convince the reader of the
-importance of the proposed thesis work. A good introduction will answer these
-questions: Why is addressing these challenges significant for gaining new
-knowledge in the studied domain? How and where can this new knowledge be
-applied?
-}
 %
 Functional extensionality and univalence is not expressible in
 \nomen{Intensional Martin Löf Type Theory} (ITT). This poses a severe limitation
@@ -74,12 +58,6 @@ parts that will be useful in the second part of the project: Showing that
 \nomen{Cubical Sets} give rise to a model of CTT.
 %
 \section{Problem}
-%
-\sectiondescription{%
-This section is optional. It may be used if there is a need to describe the
-problem that you want to solve in more technical detail and if this problem
-description is too extensive to fit in the introduction.
-}
 %
 In the following two subsections I present two examples that illustrate the
 limitaiton inherent in ITT and by extension to the expressiveness of Agda.
@@ -194,13 +172,6 @@ for informally.
 %
 \section{Context}
 %
-\sectiondescription{%
-Use one or two relevant and high quality references for providing evidence from
-the literature that the proposed study indeed includes scientific and
-engineering challenges, or is related to existing ones. Convince the reader that
-the problem addressed in this thesis has not been solved prior to this project.
-}
-%
 In \cite{bezem-2014} a categorical model for cubical type theory is presented.
 In \cite{cohen-2016} a type-theory where univalence is expressible is presented.
 The categorical model in the previous reference serve as a model of this type
@@ -214,7 +185,7 @@ this thesis.
 
 The idea of formalizing Category Theory in proof assistants is not a new
 idea\footnote{There are a multitude of these available online. Just as first
-reference see this question on Math Overflow: \cite{so-formalizations}}. The
+reference see this question on Math Overflow: \cite{mo-formalizations}}. The
 contribution of this thesis is to explore how working in a cubical setting will
 make it possible to prove more things and to reuse proofs.
 
@@ -235,12 +206,6 @@ has other drawbacks; it does not satisfy all judgemental equalites of type
 theory and is cumbersome to work with in practice (\cite[p. 4]{huber-2016}).
 %
 \section{Goals and Challenges}
-%
-\sectiondescription{%
-Describe your contribution with respect to concepts, theory and technical goals.
-Ensure that the scientific and engineering challenges stand out so that the
-reader can easily recognize that you are planning to solve an advanced problem.
-}
 %
 In summary, the aim of the project is to:
 %
@@ -280,44 +245,6 @@ a goal for this thesis but rather a natural extension of it.
 
 The thesis shall conclude with a discussion about the benefits of Cubical Agda.
 %
-\iffalse
-\section{Approach}
-%
-\sectiondescription{%
-Various scientific approaches are appropriate for different challenges and
-project goals. Outline and justify the ones that you have selected. For example,
-when your project considers systematic data collection, you need to explain how
-you will analyze the data, in order to address your challenges and project
-goals.
-
-One scientific approach is to use formal models and rigorous mathematical
-argumentation to address aspects like correctness and efficiency. If this is
-relevant, describe the related algorithmic subjects, and how you plan to address
-the studied problem. For example, if your plan is to study the problem from a
-computability aspect, address the relevant issues, such as algorithm and data
-structure design, complexity analysis, etc. If you plan to develop and evaluate
-a prototype, briefly describe your plans to design, implement, and evaluate your
-prototype by reviewing at most two relevant issues, such as key functionalities
-and their evaluation criteria.
-
-The design and implementation should specify prototype properties, such as
-functionalities and performance goals, e.g., scalability, memory, energy.
-Motivate key design selection, with respect to state of the art and existing
-platforms, libraries, etc.
-
-When discussing evaluation criteria, describe the testing environment, e.g.,
-test-bed experiments, simulation, and user studies, which you plan to use when
-assessing your prototype. Specify key tools, and preliminary test-case
-scenarios. Explain how and why you plan to use the evaluation criteria in order
-to demonstrate the functionalities and design goals. Explain how you plan to
-compare your prototype to the state of the art using the proposed test-case
-evaluation scenarios and benchmarks.
-}
-%
-\mycomment{I don't know what more I can say here than has already been
-explained. Perhaps this section is not needed for me?}
-%
-\fi
 \section{References}
 %
 \bibliographystyle{plainnat}
