@@ -8,7 +8,6 @@ open import Cat.Category
 
 record Functor {ℓc ℓc' ℓd ℓd'} (C : Category {ℓc} {ℓc'}) (D : Category {ℓd} {ℓd'})
   : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
-  constructor functor
   private
     open module C = Category C
     open module D = Category D
@@ -59,4 +58,9 @@ module _ {ℓ ℓ' : Level} {A B C : Category {ℓ} {ℓ'}} (F : Functor B C) (G
 -- The identity functor
 identity : {ℓ ℓ' : Level} → {C : Category {ℓ} {ℓ'}} → Functor C C
 -- Identity = record { F* = λ x → x ; F→ = λ x → x ; ident = refl ; distrib = refl }
-identity = functor (λ x → x) (λ x → x) (refl) (refl)
+identity = record
+  { func* = λ x → x
+  ; func→ = λ x → x
+  ; ident = refl
+  ; distrib = refl
+  }

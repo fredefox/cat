@@ -1,8 +1,14 @@
-module Category.Sets where
+{-# OPTIONS --allow-unsolved-metas #-}
+
+module Cat.Categories.Sets where
 
 open import Cubical.PathPrelude
 open import Agda.Primitive
-open import Category
+open import Data.Product
+open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
+
+open import Cat.Category
+open import Cat.Functor
 
 -- Sets are built-in to Agda. The set of all small sets is called Set.
 
@@ -27,8 +33,28 @@ module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ}} where
   RepFunctor : Functor ℂ Sets
   RepFunctor =
     record
-    { F = λ A → (B : C-Obj) → Hom {ℂ = ℂ} A B
-    ; f = λ { {c' = c'} f g → {!HomFromArrow {ℂ = } c' g!}}
-    ; ident = {!!}
-    ; distrib = {!!}
-    }
+      { func* = λ A → (B : C-Obj) → Hom {ℂ = ℂ} A B
+      ; func→ = λ { {c} {c'} f g → {!HomFromArrow {ℂ = {!!}} c' g!} }
+      ; ident = {!!}
+      ; distrib = {!!}
+      }
+
+Hom0 : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object ℂ → Functor ℂ (Sets {ℓ'})
+Hom0 {ℂ = ℂ} A = record
+  { func* = λ B → ℂ.Arrow A B
+  ; func→ = λ f g → f ℂ.⊕ g
+  ; ident = funExt λ _ → snd ℂ.ident
+  ; distrib = funExt λ x → sym ℂ.assoc
+  }
+  where
+    open module ℂ = Category ℂ
+
+Hom1 : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object ℂ → Functor (Opposite ℂ) (Sets {ℓ'})
+Hom1 {ℂ = ℂ} B = record
+  { func* = λ A → ℂ.Arrow A B
+  ; func→ = λ f g → {!!} ℂ.⊕ {!!}
+  ; ident = {!!}
+  ; distrib = {!!}
+  }
+  where
+    open module ℂ = Category ℂ
