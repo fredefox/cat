@@ -60,7 +60,7 @@ parts that will be useful in the second part of the project: Showing that
 \section{Problem}
 %
 In the following two subsections I present two examples that illustrate the
-limitaiton inherent in ITT and by extension to the expressiveness of Agda.
+limitation inherent in ITT and by extension to the expressiveness of Agda.
 %
 \subsection{Functional extensionality}
 Consider the functions:
@@ -71,7 +71,7 @@ $f \defeq (n : \bN) \mapsto (0 + n : \bN)$
 $g \defeq (n : \bN) \mapsto (n + 0 : \bN)$
 \end{multicols}
 %
-$n + 0$ is definitionally equal to $n$. We call this \nomen{defnitional
+$n + 0$ is definitionally equal to $n$. We call this \nomen{definitional
 equality} and write $n + 0 = n$ to assert this fact. We call it definitional
 equality because the \emph{equality} arises from the \emph{definition} of $+$
 which is:
@@ -97,7 +97,7 @@ not true.} There is no way to construct a proof asserting the obvious
 equivalence of $f$ and $g$ -- even though we can prove them equal for all
 points. This is exactly the notion of equality of functions that we are
 interested in; that they are equal for all inputs. We call this
-\nomen{pointwise equality}. Where the \emph{points} of a function refers
+\nomen{pointwise equality}, where the \emph{points} of a function refers
 to it's arguments.
 %
 \iffalse
@@ -142,7 +142,7 @@ $$(A \cong B) \cong (A \equiv B)$$
 %
 \subsection{Formalizing Category Theory}
 %
-The above examples serves to illustrate the limitation of Agda. One case where
+The above examples serve to illustrate the limitation of Agda. One case where
 these limitations are particularly prohibitive is in the study of Category
 Theory. At a glance category theory can be described as ``the mathematical study
 of (abstract) algebras of functions'' (\cite{awodey-2006}). So by that token
@@ -157,17 +157,17 @@ typical example of a model is that of sets as models for predicate logic. Thus
 set-theory becomes the meta-theory of the formal language of predicate logic.
 
 In the context of a given type theory and restricting ourselves to
-\emph{categorical} models a model will consists of mapping `things' from the
+\emph{categorical} models a model will consist of mapping `things' from the
 type-theory (types, terms, contexts, context morphisms) to `things' in the
 meta-theory (objects, morphisms) in such a way that the axioms of the
 type-theory (typing-rules) are validated in the meta-theory. In
 \cite{dybjer-1995} the author describes a way of constructing such models for
 dependent type theory called \emph{Categories with Families} (CwFs).
 
-In \cite{bezem-2014} the authors device a CwF for Cubical Type Theory. This
+In \cite{bezem-2014} the authors devise a CwF for Cubical Type Theory. This
 project will study and formalize this model. Note that I will \emph{not} aim to
 formalize CTT itself and therefore also not give the formal translation between
-the type theory and the meta-theory. In stead the translation will be accounted
+the type theory and the meta-theory. Instead the translation will be accounted
 for informally.
 %
 \section{Context}
@@ -195,7 +195,7 @@ these as axioms. This approach, however, has other shortcomings, e.g.; you lose
 \nomen{canonicity} (\cite{huber-2016}). Canonicity means that any well-type
 term will (under evaluation) reduce to a \emph{canonical} form. For example for
 an integer $e : \bN$ it will be the case that $e$ is definitionally equal to $n$
-application of $\mathit{suc}$ to $0$ for some $n$; $e = \mathit{suc}^n\ 0$.
+applications of $\mathit{suc}$ to $0$ for some $n$; $e = \mathit{suc}^n\ 0$.
 Without canonicity terms in the language can get ``stuck'' when they are
 evaluated.
 
