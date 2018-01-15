@@ -99,6 +99,26 @@ points. This is exactly the notion of equality of functions that we are
 interested in; that they are equal for all inputs. We call this
 \nomen{pointwise equality}, where the \emph{points} of a function refers
 to it's arguments.
+
+In the context of category theory the principle of functional extensionality is
+for instance useful in the context of showing that representable functors are
+indeed functors. The representable functor for a category $\bC$ and a fixed
+object in $A \in \bC$ is defined to be:
+%
+\begin{align*}
+\fmap \defeq X \mapsto \Hom_{\bC}(A, X)
+\end{align*}
+%
+The proof obligation that this satisfies the identity law of functors
+($\fmap\ \idFun \equiv \idFun$) becomes:
+%
+\begin{align*}
+\Hom(A, \idFun_{\bX}) = (g \mapsto \idFun \comp g) \equiv \idFun_{\Sets}
+\end{align*}
+%
+One needs functional extensionality to ``go under'' the function arrow and apply
+the (left) identity law of the underlying category to proove $\idFun \comp g
+\equiv g$ and thus closing the above proof.
 %
 \iffalse
 I also want to talk about:
@@ -169,6 +189,15 @@ project will study and formalize this model. Note that I will \emph{not} aim to
 formalize CTT itself and therefore also not give the formal translation between
 the type theory and the meta-theory. Instead the translation will be accounted
 for informally.
+
+The project will formalize CwF's. It will also define what pieces of data are
+needed for a model of CTT (without explicitly showing that it does in fact model
+CTT). It will then show that a CwF gives rise to such a model. Furthermore I
+will show that cubical sets are presheaf categories and that any presheaf
+category is itself a CwF. This is the precise way by which the project aims to
+provide a model of CTT. Note that this formalization specifcally does not
+mention the language of CTT itself. Only be referencing this previous work do we
+arrive at a model of CTT.
 %
 \section{Context}
 %
@@ -230,7 +259,7 @@ assistant.
 
 One particular challenge in this context is that in a cubical setting there can
 be multiple distinct terms that inhabit a given equality proof.\footnote{This is
-in contrast with ITT that enjoys \nomen{Uniqueness of identity proofs}
+in contrast with ITT where one \emph{can} have \nomen{Uniqueness of identity proofs}
 (\cite[p. 4]{huber-2016}).} This means that the choice for a given equality
 proof can influence later proofs that refer back to said proof. This is new and
 relatively unexplored territory.
@@ -240,8 +269,9 @@ basics of. So learning the necessary concepts from Category Theory will also be
 a goal and a challenge in itself.
 
 After this has been implemented it would also be possible to formalize Cubical
-Type Theory and formally show that Cubical Sets are a model of this. This is not
-a goal for this thesis but rather a natural extension of it.
+Type Theory and formally show that Cubical Sets are a model of this. I do not
+intend to formally implement the language of dependent type theory in this
+project.
 
 The thesis shall conclude with a discussion about the benefits of Cubical Agda.
 %
