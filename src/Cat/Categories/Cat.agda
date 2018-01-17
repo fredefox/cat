@@ -1,13 +1,14 @@
-{-# OPTIONS --cubical #-}
+{-# OPTIONS --cubical --allow-unsolved-metas #-}
 
-module Category.Categories.Cat where
+module Cat.Categories.Cat where
 
 open import Agda.Primitive
 open import Cubical
 open import Function
 open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
 
-open import Category
+open import Cat.Category
+open import Cat.Functor
 
 -- The category of categories
 module _ {ℓ ℓ' : Level} where
@@ -29,10 +30,7 @@ module _ {ℓ ℓ' : Level} where
   --      → Functor.ident f ≡ Functor.ident g
   --       → Functor.distrib f ≡ Functor.distrib g
         → f ≡ g
-      lift-eq
-        (functor func* func→ idnt distrib)
-        (functor func*₁ func→₁ idnt₁ distrib₁)
-        eq-func* = {!!}
+      lift-eq f g eq* x = {!!}
 
     module _ {A B : Category {ℓ} {ℓ'}} {f : Functor A B} where
       idHere = identity {ℓ} {ℓ'} {A}

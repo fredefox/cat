@@ -1,6 +1,9 @@
-{-# OPTIONS --cubical #-}
+{-# OPTIONS --cubical --allow-unsolved-metas #-}
+
+module Cat.Category.Bij where
 
 open import Cubical.PathPrelude hiding ( Id )
+open import Cubical.FromStdLib
 
 module _ {A : Set} {a : A} {P : A → Set} where
   Q : A → Set
@@ -20,7 +23,7 @@ module _ {A : Set} {a : A} {P : A → Set} where
   w x = {!!}
 
   vw-bij : (a : P a) → (w ∘ v) a ≡ a
-  vw-bij a = refl
+  vw-bij a = ?
   -- tubij a with (t ∘ u) a
   -- ... | q = {!!}
 

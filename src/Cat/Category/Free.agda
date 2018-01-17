@@ -1,9 +1,10 @@
-module Category.Free where
+module Cat.Category.Free where
 
 open import Agda.Primitive
 open import Cubical.PathPrelude hiding (Path)
+open import Data.Product
 
-open import Category as C
+open import Cat.Category as C
 
 module _ {ℓ ℓ' : Level} (ℂ : Category {ℓ} {ℓ'}) where
   private

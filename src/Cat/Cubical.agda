@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 module Cat.Cubical where
 
 open import Agda.Primitive
