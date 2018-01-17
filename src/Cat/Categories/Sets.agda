@@ -25,7 +25,10 @@ Sets {ℓ} = record
   ; ident = funExt (λ x → refl) , funExt (λ x → refl)
   }
 
-representable : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object ℂ → Functor ℂ (Sets {ℓ'})
+Representable : {ℓ ℓ' : Level} → (ℂ : Category {ℓ} {ℓ'}) → Set (ℓ ⊔ lsuc ℓ')
+Representable {ℓ' = ℓ'} ℂ = Functor ℂ (Sets {ℓ'})
+
+representable : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object ℂ → Representable ℂ
 representable {ℂ = ℂ} A = record
   { func* = λ B → ℂ.Arrow A B
   ; func→ = λ f g → f ℂ.⊕ g
@@ -35,8 +38,11 @@ representable {ℂ = ℂ} A = record
   where
     open module ℂ = Category ℂ
 
-coRepresentable : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object (Opposite ℂ) → Functor (Opposite ℂ) (Sets {ℓ'})
-coRepresentable {ℂ = ℂ} B = record
+Presheaf : {ℓ ℓ' : Level} → (ℂ : Category {ℓ} {ℓ'}) → Set (ℓ ⊔ lsuc ℓ')
+Presheaf {ℓ' = ℓ'} ℂ = Functor (Opposite ℂ) (Sets {ℓ'})
+
+presheaf : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object (Opposite ℂ) → Presheaf ℂ
+presheaf {ℂ = ℂ} B = record
   { func* = λ A → ℂ.Arrow A B
   ; func→ = λ f g → g ℂ.⊕ f
   ; ident = funExt λ x → fst ℂ.ident
