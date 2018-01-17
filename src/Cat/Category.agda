@@ -1,16 +1,18 @@
 {-# OPTIONS --cubical #-}
 
-module Category where
+module Cat.Category where
 
 open import Agda.Primitive
 open import Data.Unit.Base
-open import Data.Product
-open import Cubical.PathPrelude
+open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
 open import Data.Empty
+open import Function
+open import Cubical
 
 postulate undefined : {ℓ : Level} → {A : Set ℓ} → A
 
 record Category {ℓ ℓ'} : Set (lsuc (ℓ' ⊔ ℓ)) where
+  constructor category
   field
     Object : Set ℓ
     Arrow  : Object → Object → Set ℓ'
@@ -21,51 +23,12 @@ record Category {ℓ ℓ'} : Set (lsuc (ℓ' ⊔ ℓ)) where
     ident  : { A B : Object } { f : Arrow A B }
       → f ⊕ 𝟙 ≡ f × 𝟙 ⊕ f ≡ f
   infixl 45 _⊕_
-  dom : { a b : Object } → Arrow a b → Object
-  dom {a = a} _ = a
-  cod : { a b : Object } → Arrow a b → Object
-  cod {b = b} _ = b
+  domain : { a b : Object } → Arrow a b → Object
+  domain {a = a} _ = a
+  codomain : { a b : Object } → Arrow a b → Object
+  codomain {b = b} _ = b
 
 open Category public
-
-record Functor {ℓc ℓc' ℓd ℓd'} (C : Category {ℓc} {ℓc'}) (D : Category {ℓd} {ℓd'})
-  : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
-  private
-    open module C = Category C
-    open module D = Category D
-  field
-    F : C.Object → D.Object
-    f : {c c' : C.Object} → C.Arrow c c' → D.Arrow (F c) (F c')
-    ident   : { c : C.Object } → f (C.𝟙 {c}) ≡ D.𝟙 {F c}
-    -- TODO: Avoid use of ugly explicit arguments somehow.
-    -- This guy managed to do it:
-    --    https://github.com/copumpkin/categories/blob/master/Categories/Functor/Core.agda
-    distrib : { c c' c'' : C.Object} {a : C.Arrow c c'} {a' : C.Arrow c' c''}
-      → f (a' C.⊕ a) ≡ f a' D.⊕ f a
-
-FunctorComp : ∀ {ℓ ℓ'} {a b c : Category {ℓ} {ℓ'}} → Functor b c → Functor a b → Functor a c
-FunctorComp {a = a} {b = b} {c = c} F G =
-  record
-    { F = F.F ∘ G.F
-    ; f = F.f ∘ G.f
-    ; ident = λ { {c = obj} →
-      let --t : (F.f ∘ G.f) (𝟙 a) ≡ (𝟙 c)
-          g-ident = G.ident
-          k : F.f (G.f {c' = obj} (𝟙 a)) ≡ F.f (G.f (𝟙 a))
-          k = refl {x = F.f (G.f (𝟙 a))}
-          t : F.f (G.f (𝟙 a)) ≡ (𝟙 c)
-          -- t = subst F.ident (subst G.ident k)
-          t = undefined
-      in t }
-    ; distrib = undefined -- subst F.distrib (subst G.distrib refl)
-    }
-    where
-      open module F = Functor F
-      open module G = Functor G
-
--- The identity functor
-Identity : {ℓ ℓ' : Level} → {C : Category {ℓ} {ℓ'}} → Functor C C
-Identity = record { F = λ x → x ; f = λ x → x ; ident = refl ; distrib = refl }
 
 module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} { A B : Object ℂ } where
   private
@@ -116,9 +79,6 @@ module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} { A B : Object ℂ } w
   iso-is-epi-mono : ∀ {X} (f : ℂ.Arrow A B ) → Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
   iso-is-epi-mono f iso = iso-is-epi f iso , iso-is-mono f iso
 
-¬_ : {ℓ : Level} → Set ℓ → Set ℓ
-¬ A = A → ⊥
-
 {-
 epi-mono-is-not-iso : ∀ {ℓ ℓ'} → ¬ ((ℂ : Category {ℓ} {ℓ'}) {A B X : Object ℂ} (f : Arrow ℂ A B ) → Epimorphism {ℂ = ℂ} {X = X} f → Monomorphism {ℂ = ℂ} {X = X} f → Isomorphism {ℂ = ℂ} f)
 epi-mono-is-not-iso f =
@@ -126,6 +86,7 @@ epi-mono-is-not-iso f =
   in {!!}
 -}
 
+-- Isomorphism of objects
 _≅_ : { ℓ ℓ' : Level } → { ℂ : Category {ℓ} {ℓ'} } → ( A B : Object ℂ ) → Set ℓ'
 _≅_ {ℂ = ℂ} A B = Σ[ f ∈ ℂ.Arrow A B ] (Isomorphism {ℂ = ℂ} f)
   where
@@ -167,22 +128,8 @@ Opposite ℂ =
   where
     open module ℂ = Category ℂ
 
-CatCat : {ℓ ℓ' : Level} → Category {ℓ-suc (ℓ ⊔ ℓ')} {ℓ ⊔ ℓ'}
-CatCat {ℓ} {ℓ'} =
-  record
-    { Object = Category {ℓ} {ℓ'}
-    ; Arrow = Functor
-    ; 𝟙 = Identity
-    ; _⊕_ = FunctorComp
-    ; assoc = undefined
-    ; ident = λ { {f = f} →
-      let eq : f ≡ f
-          eq = refl
-      in undefined , undefined}
-    }
-
-Hom : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → (A B : Object ℂ) → Set ℓ'
-Hom {ℂ = ℂ} A B = Arrow ℂ A B
+Hom : {ℓ ℓ' : Level} → (ℂ : Category {ℓ} {ℓ'}) → (A B : Object ℂ) → Set ℓ'
+Hom ℂ A B = Arrow ℂ A B
 
 module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} where
   private
@@ -191,5 +138,5 @@ module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} where
     _+_ = _⊕_ ℂ
 
   HomFromArrow : (A : Obj) → {B B' : Obj} → (g : Arr B B')
-    → Hom {ℂ = ℂ} A B → Hom {ℂ = ℂ} A B'
+    → Hom ℂ A B → Hom ℂ A B'
   HomFromArrow _A g = λ f → g + f

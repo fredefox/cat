@@ -1,0 +1,56 @@
+% Requires: hypperref
+\ProvidesPackage{chalmerstitle}
+
+\newcommand*{\authoremail}[1]{\gdef\@authoremail{#1}}
+\newcommand*{\supervisor}[1]{\gdef\@supervisor{#1}}
+\newcommand*{\supervisoremail}[1]{\gdef\@supervisoremail{#1}}
+\newcommand*{\cosupervisor}[1]{\gdef\@cosupervisor{#1}}
+\newcommand*{\cosupervisoremail}[1]{\gdef\@cosupervisoremail{#1}}
+\newcommand*{\institution}[1]{\gdef\@institution{#1}}
+
+\renewcommand*{\maketitle}{%
+\begin{titlepage}
+
+
+\begin{center}
+
+
+{\scshape\LARGE Master thesis project proposal\\}
+
+\vspace{0.5cm}
+
+{\LARGE\bfseries \@title\\}
+
+\vspace{2cm}
+
+{\Large \@author\\ \href{mailto:\@authoremail>}{\texttt{<\@authoremail>}} \\}
+
+% \vspace{0.2cm}
+% 
+% {\Large name and email adress of student 2\\}
+
+\vspace{1.0cm}
+
+{\large Supervisor: \@supervisor\\ \href{mailto:\@supervisoremail>}{\texttt{<\@supervisoremail>}}\\}
+
+\vspace{0.2cm}
+
+{\large Co-supervisor: \@cosupervisor\\ \href{mailto:\@cosupervisoremail>}{\texttt{<\@cosupervisoremail>}}\\}
+
+\vspace{1.5cm}
+
+{\large Relevant completed courses:\par}
+{\itshape
+Logic in Computer Science -- DAT060\\
+Models of Computation -- TDA184\\
+Research topic in Computer Science -- DAT235\\
+Types for programs and proofs -- DAT140
+}
+
+\vfill
+
+{\large \@institution\\\today\\}
+
+\end{center}
+\end{titlepage}
+}
