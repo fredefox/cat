@@ -25,22 +25,8 @@ Sets {ℓ} = record
   ; ident = funExt (λ x → refl) , funExt (λ x → refl)
   }
 
-module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ}} where
-  private
-    C-Obj = Object ℂ
-    _+_   = Arrow ℂ
-
-  RepFunctor : Functor ℂ Sets
-  RepFunctor =
-    record
-      { func* = λ A → (B : C-Obj) → Hom {ℂ = ℂ} A B
-      ; func→ = λ { {c} {c'} f g → {!HomFromArrow {ℂ = {!!}} c' g!} }
-      ; ident = {!!}
-      ; distrib = {!!}
-      }
-
-Hom0 : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object ℂ → Functor ℂ (Sets {ℓ'})
-Hom0 {ℂ = ℂ} A = record
+representable : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object ℂ → Functor ℂ (Sets {ℓ'})
+representable {ℂ = ℂ} A = record
   { func* = λ B → ℂ.Arrow A B
   ; func→ = λ f g → f ℂ.⊕ g
   ; ident = funExt λ _ → snd ℂ.ident
@@ -49,12 +35,12 @@ Hom0 {ℂ = ℂ} A = record
   where
     open module ℂ = Category ℂ
 
-Hom1 : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object ℂ → Functor (Opposite ℂ) (Sets {ℓ'})
-Hom1 {ℂ = ℂ} B = record
+coRepresentable : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object (Opposite ℂ) → Functor (Opposite ℂ) (Sets {ℓ'})
+coRepresentable {ℂ = ℂ} B = record
   { func* = λ A → ℂ.Arrow A B
-  ; func→ = λ f g → {!!} ℂ.⊕ {!!}
-  ; ident = {!!}
-  ; distrib = {!!}
+  ; func→ = λ f g → g ℂ.⊕ f
+  ; ident = funExt λ x → fst ℂ.ident
+  ; distrib = funExt λ x → ℂ.assoc
   }
   where
     open module ℂ = Category ℂ

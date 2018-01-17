@@ -128,8 +128,8 @@ Opposite ℂ =
   where
     open module ℂ = Category ℂ
 
-Hom : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → (A B : Object ℂ) → Set ℓ'
-Hom {ℂ = ℂ} A B = Arrow ℂ A B
+Hom : {ℓ ℓ' : Level} → (ℂ : Category {ℓ} {ℓ'}) → (A B : Object ℂ) → Set ℓ'
+Hom ℂ A B = Arrow ℂ A B
 
 module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} where
   private
@@ -138,5 +138,5 @@ module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} where
     _+_ = _⊕_ ℂ
 
   HomFromArrow : (A : Obj) → {B B' : Obj} → (g : Arr B B')
-    → Hom {ℂ = ℂ} A B → Hom {ℂ = ℂ} A B'
+    → Hom ℂ A B → Hom ℂ A B'
   HomFromArrow _A g = λ f → g + f
