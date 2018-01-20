@@ -10,8 +10,13 @@ open import Data.Empty
 
 open import Cat.Category
 
+-- See chapter 1 for a discussion on how presheaf categories are CwF's.
+
+-- See section 6.8 in Huber's thesis for details on how to implement the
+-- categorical version of CTT
+
 module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
-  -- Σ is the "namespace"
+  -- Ns is the "namespace"
   ℓo = (lsuc lzero ⊔ ℓ)
 
   FiniteDecidableSubset : Set ℓ

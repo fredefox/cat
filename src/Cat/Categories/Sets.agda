@@ -25,9 +25,11 @@ Sets {ℓ} = record
   ; ident = funExt (λ x → refl) , funExt (λ x → refl)
   }
 
+-- Covariant Presheaf
 Representable : {ℓ ℓ' : Level} → (ℂ : Category {ℓ} {ℓ'}) → Set (ℓ ⊔ lsuc ℓ')
 Representable {ℓ' = ℓ'} ℂ = Functor ℂ (Sets {ℓ'})
 
+-- The "co-yoneda" embedding.
 representable : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object ℂ → Representable ℂ
 representable {ℂ = ℂ} A = record
   { func* = λ B → ℂ.Arrow A B
@@ -38,9 +40,11 @@ representable {ℂ = ℂ} A = record
   where
     open module ℂ = Category ℂ
 
+-- Contravariant Presheaf
 Presheaf : {ℓ ℓ' : Level} → (ℂ : Category {ℓ} {ℓ'}) → Set (ℓ ⊔ lsuc ℓ')
 Presheaf {ℓ' = ℓ'} ℂ = Functor (Opposite ℂ) (Sets {ℓ'})
 
+-- Alternate name: `yoneda`
 presheaf : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object (Opposite ℂ) → Presheaf ℂ
 presheaf {ℂ = ℂ} B = record
   { func* = λ A → ℂ.Arrow A B

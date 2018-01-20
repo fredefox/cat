@@ -4,15 +4,29 @@ module Cat.Category where
 
 open import Agda.Primitive
 open import Data.Unit.Base
-open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
+open import Data.Product renaming
+  ( proj₁ to fst
+  ; proj₂ to snd
+  ; ∃! to ∃!≈
+  )
 open import Data.Empty
 open import Function
 open import Cubical
 
+∃! : ∀ {a b} {A : Set a}
+  → (A → Set b) → Set (a ⊔ b)
+∃! = ∃!≈ _≡_
+
+∃!-syntax : ∀ {a b} {A : Set a} → (A → Set b) → Set (a ⊔ b)
+∃!-syntax = ∃
+
+syntax ∃!-syntax (λ x → B) = ∃![ x ] B
+
 postulate undefined : {ℓ : Level} → {A : Set ℓ} → A
 
 record Category {ℓ ℓ'} : Set (lsuc (ℓ' ⊔ ℓ)) where
-  constructor category
+  -- adding no-eta-equality can speed up type-checking.
+  no-eta-equality
   field
     Object : Set ℓ
     Arrow  : Object → Object → Set ℓ'
@@ -36,7 +50,7 @@ module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} { A B : Object ℂ } w
     _+_ = ℂ._⊕_
 
   Isomorphism : (f : ℂ.Arrow A B) → Set ℓ'
-  Isomorphism f = Σ[ g ∈ ℂ.Arrow B A ] g + f ≡ ℂ.𝟙 × f + g ≡ ℂ.𝟙
+  Isomorphism f = Σ[ g ∈ ℂ.Arrow B A ] g ℂ.⊕ f ≡ ℂ.𝟙 × f + g ≡ ℂ.𝟙
 
   Epimorphism : {X : ℂ.Object } → (f : ℂ.Arrow A B) → Set ℓ'
   Epimorphism {X} f = ( g₀ g₁ : ℂ.Arrow B X ) → g₀ + f ≡ g₁ + f → g₀ ≡ g₁
@@ -92,28 +106,55 @@ _≅_ {ℂ = ℂ} A B = Σ[ f ∈ ℂ.Arrow A B ] (Isomorphism {ℂ = ℂ} f)
   where
     open module ℂ = Category ℂ
 
-Product : {ℓ : Level} → ( C D : Category {ℓ} {ℓ} ) → Category {ℓ} {ℓ}
-Product C D =
-  record
-    { Object = C.Object × D.Object
-    ; Arrow = λ { (c , d) (c' , d') →
-      let carr = C.Arrow c c'
-          darr = D.Arrow d d'
-      in carr × darr}
-    ; 𝟙 = C.𝟙 , D.𝟙
-    ; _⊕_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → bc∈C C.⊕ ab∈C , bc∈D D.⊕ ab∈D}
-    ; assoc = eqpair C.assoc D.assoc
-    ; ident =
-      let (Cl , Cr) = C.ident
-          (Dl , Dr) = D.ident
-      in eqpair Cl Dl , eqpair Cr Dr
-    }
+IsProduct : ∀ {ℓ ℓ'} (ℂ : Category {ℓ} {ℓ'}) {A B obj : Object ℂ} (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) → Set (ℓ ⊔ ℓ')
+IsProduct ℂ {A = A} {B = B} π₁ π₂
+  = ∀ {X : ℂ.Object} (x₁ : ℂ.Arrow X A) (x₂ : ℂ.Arrow X B)
+  → ∃![ x ] (π₁ ℂ.⊕ x ≡ x₁ × π₂ ℂ.⊕ x ≡ x₂)
   where
-    open module C = Category C
-    open module D = Category D
-    -- Two pairs are equal if their components are equal.
-    eqpair : {ℓ : Level} → { A : Set ℓ } → { B : Set ℓ } → { a a' : A } → { b b' : B } → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
-    eqpair {a = a} {b = b} eqa eqb = subst eqa (subst eqb (refl {x = (a , b)}))
+    open module ℂ = Category ℂ
+
+-- Consider this style for efficiency:
+-- record R : Set where
+--   field
+--     isP : IsProduct {!!} {!!} {!!}
+
+record Product {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} (A B : Category.Object ℂ) : Set (ℓ ⊔ ℓ') where
+  no-eta-equality
+  field
+    obj : Category.Object ℂ
+    proj₁ : Category.Arrow ℂ obj A
+    proj₂ : Category.Arrow ℂ obj B
+    {{isProduct}} : IsProduct ℂ proj₁ proj₂
+
+mutual
+  catProduct : {ℓ : Level} → ( C D : Category {ℓ} {ℓ} ) → Category {ℓ} {ℓ}
+  catProduct C D =
+    record
+      { Object = C.Object × D.Object
+      -- Why does "outlining   with `arrowProduct` not work?
+      ; Arrow = λ {(c , d) (c' , d') → Arrow C c c' × Arrow D d d'}
+      ; 𝟙 = C.𝟙 , D.𝟙
+      ; _⊕_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → bc∈C C.⊕ ab∈C , bc∈D D.⊕ ab∈D}
+      ; assoc = eqpair C.assoc D.assoc
+      ; ident =
+        let (Cl , Cr) = C.ident
+            (Dl , Dr) = D.ident
+        in eqpair Cl Dl , eqpair Cr Dr
+      }
+    where
+      open module C = Category C
+      open module D = Category D
+      -- Two pairs are equal if their components are equal.
+      eqpair : {ℓ : Level} → { A : Set ℓ } → { B : Set ℓ } → { a a' : A } → { b b' : B } → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
+      eqpair {a = a} {b = b} eqa eqb = subst eqa (subst eqb (refl {x = (a , b)}))
+
+
+  -- arrowProduct : ∀ {ℓ} {C D : Category {ℓ} {ℓ}} → (Object C) × (Object D) → (Object C) × (Object D) → Set ℓ
+  -- arrowProduct = {!!}
+
+  -- Arrows in the product-category
+  arrowProduct : ∀ {ℓ} {C D : Category {ℓ} {ℓ}} (c d : Object (catProduct C D)) → Set ℓ
+  arrowProduct {C = C} {D = D} (c , d) (c' , d') = Arrow C c c' × Arrow D d d'
 
 Opposite : ∀ {ℓ ℓ'} → Category {ℓ} {ℓ'} → Category {ℓ} {ℓ'}
 Opposite ℂ =
@@ -128,15 +169,21 @@ Opposite ℂ =
   where
     open module ℂ = Category ℂ
 
+-- A consequence of no-eta-equality; `Opposite-is-involution` is no longer
+-- definitional - i.e.; you must match on the fields:
+--
+-- Opposite-is-involution : ∀ {ℓ ℓ'} → {C : Category {ℓ} {ℓ'}} → Opposite (Opposite C) ≡ C
+-- Object (Opposite-is-involution {C = C} i) = Object C
+-- Arrow (Opposite-is-involution i) = {!!}
+-- 𝟙 (Opposite-is-involution i) = {!!}
+-- _⊕_ (Opposite-is-involution i) = {!!}
+-- assoc (Opposite-is-involution i) = {!!}
+-- ident (Opposite-is-involution i) = {!!}
+
 Hom : {ℓ ℓ' : Level} → (ℂ : Category {ℓ} {ℓ'}) → (A B : Object ℂ) → Set ℓ'
 Hom ℂ A B = Arrow ℂ A B
 
 module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} where
-  private
-    Obj = Object ℂ
-    Arr = Arrow ℂ
-    _+_ = _⊕_ ℂ
-
-  HomFromArrow : (A : Obj) → {B B' : Obj} → (g : Arr B B')
+  HomFromArrow : (A : ℂ .Object) → {B B' : ℂ .Object} → (g : ℂ .Arrow B B')
     → Hom ℂ A B → Hom ℂ A B'
-  HomFromArrow _A g = λ f → g + f
+  HomFromArrow _A = _⊕_ ℂ
