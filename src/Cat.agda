@@ -10,3 +10,4 @@ import Cat.Category.Properties
 import Cat.Category
 import Cat.Cubical
 import Cat.Functor
+import Cat.Naturality
