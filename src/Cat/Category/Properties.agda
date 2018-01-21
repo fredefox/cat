@@ -7,14 +7,13 @@ open import Cat.Functor
 open import Cat.Categories.Sets
 
 module _ {ℓa ℓa' ℓb ℓb'} where
-  Exponential : Category ℓa ℓa' → Category ℓb ℓb' → Category ? ?
+  Exponential : Category ℓa ℓa' → Category ℓb ℓb' → Category {!!} {!!}
   Exponential A B = record
     { Object = {!!}
     ; Arrow = {!!}
     ; 𝟙 = {!!}
     ; _⊕_ = {!!}
-    ; assoc = {!!}
-    ; ident = {!!}
+    ; isCategory = ?
     }
 
 _⇑_ = Exponential

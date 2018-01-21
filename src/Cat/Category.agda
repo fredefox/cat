@@ -24,6 +24,20 @@ syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
 postulate undefined : {ℓ : Level} → {A : Set ℓ} → A
 
+record IsCategory {ℓ ℓ' : Level}
+  (Object : Set ℓ)
+  (Arrow  : Object → Object → Set ℓ')
+  (𝟙      : {o : Object} → Arrow o o)
+  (_⊕_    : { a b c : Object } → Arrow b c → Arrow a b → Arrow a c)
+  : Set (lsuc (ℓ' ⊔ ℓ)) where
+  field
+    assoc : {A B C D : Object} { f : Arrow A B } { g : Arrow B C } { h : Arrow C D }
+      → h ⊕ (g ⊕ f) ≡ (h ⊕ g) ⊕ f
+    ident : {A B : Object} {f : Arrow A B}
+      → f ⊕ 𝟙 ≡ f × 𝟙 ⊕ f ≡ f
+
+-- open IsCategory public
+
 record Category (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
   -- adding no-eta-equality can speed up type-checking.
   no-eta-equality
@@ -32,17 +46,14 @@ record Category (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
     Arrow  : Object → Object → Set ℓ'
     𝟙      : {o : Object} → Arrow o o
     _⊕_    : { a b c : Object } → Arrow b c → Arrow a b → Arrow a c
-    assoc : { A B C D : Object } { f : Arrow A B } { g : Arrow B C } { h : Arrow C D }
-      → h ⊕ (g ⊕ f) ≡ (h ⊕ g) ⊕ f
-    ident  : { A B : Object } { f : Arrow A B }
-      → f ⊕ 𝟙 ≡ f × 𝟙 ⊕ f ≡ f
+    {{isCategory}} : IsCategory Object Arrow 𝟙 _⊕_
   infixl 45 _⊕_
   domain : { a b : Object } → Arrow a b → Object
   domain {a = a} _ = a
   codomain : { a b : Object } → Arrow a b → Object
   codomain {b = b} _ = b
 
-open Category public
+open Category
 
 module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : ℂ .Object } where
   private
@@ -61,26 +72,30 @@ module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : ℂ .Object } wher
   iso-is-epi : ∀ {X} (f : ℂ.Arrow A B) → Isomorphism f → Epimorphism {X = X} f
   iso-is-epi f (f- , left-inv , right-inv) g₀ g₁ eq =
     begin
-    g₀              ≡⟨ sym (fst ℂ.ident) ⟩
+    g₀              ≡⟨ sym (fst ident) ⟩
     g₀ + ℂ.𝟙        ≡⟨ cong (_+_ g₀) (sym right-inv) ⟩
-    g₀ + (f + f-)   ≡⟨ ℂ.assoc ⟩
+    g₀ + (f + f-)   ≡⟨ assoc ⟩
     (g₀ + f) + f-   ≡⟨ cong (λ x → x + f-) eq ⟩
-    (g₁ + f) + f-   ≡⟨ sym ℂ.assoc ⟩
+    (g₁ + f) + f-   ≡⟨ sym assoc ⟩
     g₁ + (f + f-)   ≡⟨ cong (_+_ g₁) right-inv ⟩
-    g₁ + ℂ.𝟙        ≡⟨ fst ℂ.ident ⟩
+    g₁ + ℂ.𝟙        ≡⟨ fst ident ⟩
     g₁              ∎
+    where
+      open IsCategory ℂ.isCategory
 
   iso-is-mono : ∀ {X} (f : ℂ.Arrow A B ) → Isomorphism f → Monomorphism {X = X} f
   iso-is-mono f (f- , (left-inv , right-inv)) g₀ g₁ eq =
     begin
-    g₀            ≡⟨ sym (snd ℂ.ident) ⟩
+    g₀            ≡⟨ sym (snd ident) ⟩
     ℂ.𝟙 + g₀      ≡⟨ cong (λ x → x + g₀) (sym left-inv) ⟩
-    (f- + f) + g₀ ≡⟨ sym ℂ.assoc ⟩
+    (f- + f) + g₀ ≡⟨ sym assoc ⟩
     f- + (f + g₀) ≡⟨ cong (_+_ f-) eq ⟩
-    f- + (f + g₁) ≡⟨ ℂ.assoc ⟩
+    f- + (f + g₁) ≡⟨ assoc ⟩
     (f- + f) + g₁ ≡⟨ cong (λ x → x + g₁) left-inv ⟩
-    ℂ.𝟙 + g₁      ≡⟨ snd ℂ.ident ⟩
+    ℂ.𝟙 + g₁      ≡⟨ snd ident ⟩
     g₁            ∎
+    where
+      open IsCategory ℂ.isCategory
 
   iso-is-epi-mono : ∀ {X} (f : ℂ.Arrow A B ) → Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
   iso-is-epi-mono f iso = iso-is-epi f iso , iso-is-mono f iso
@@ -118,49 +133,27 @@ record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : ℂ .Object) 
     proj₂ : ℂ .Arrow obj B
     {{isProduct}} : IsProduct ℂ proj₁ proj₂
 
-mutual
-  catProduct : ∀ {ℓ} (C D : Category ℓ ℓ) → Category ℓ ℓ
-  catProduct C D =
+-- Two pairs are equal if their components are equal.
+eqpair : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} {a a' : A} {b b' : B}
+  → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
+eqpair eqa eqb i = eqa i , eqb i
+
+module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
+  private
+    instance
+      _ : IsCategory (ℂ .Object) (flip (ℂ .Arrow)) (ℂ .𝟙) (flip (ℂ ._⊕_))
+      _ = record { assoc = sym assoc ; ident = swap ident }
+        where
+          open IsCategory (ℂ .isCategory)
+
+  Opposite : Category ℓ ℓ'
+  Opposite =
     record
-      { Object = C.Object × D.Object
-      -- Why does "outlining   with `arrowProduct` not work?
-      ; Arrow = λ {(c , d) (c' , d') → Arrow C c c' × Arrow D d d'}
-      ; 𝟙 = C.𝟙 , D.𝟙
-      ; _⊕_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → bc∈C C.⊕ ab∈C , bc∈D D.⊕ ab∈D}
-      ; assoc = eqpair C.assoc D.assoc
-      ; ident =
-        let (Cl , Cr) = C.ident
-            (Dl , Dr) = D.ident
-        in eqpair Cl Dl , eqpair Cr Dr
+      { Object = ℂ .Object
+      ; Arrow = flip (ℂ .Arrow)
+      ; 𝟙 = ℂ .𝟙
+      ; _⊕_ = flip (ℂ ._⊕_)
       }
-    where
-      open module C = Category C
-      open module D = Category D
-      -- Two pairs are equal if their components are equal.
-      eqpair : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} {a a' : A} {b b' : B}
-        → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
-      eqpair eqa eqb i = eqa i , eqb i
-
-
-  -- arrowProduct : ∀ {ℓ} {C D : Category {ℓ} {ℓ}} → (Object C) × (Object D) → (Object C) × (Object D) → Set ℓ
-  -- arrowProduct = {!!}
-
-  -- Arrows in the product-category
-  arrowProduct : ∀ {ℓ} {C D : Category ℓ ℓ} (c d : Object (catProduct C D)) → Set ℓ
-  arrowProduct {C = C} {D = D} (c , d) (c' , d') = Arrow C c c' × Arrow D d d'
-
-Opposite : ∀ {ℓ ℓ'} → Category ℓ ℓ' → Category ℓ ℓ'
-Opposite ℂ =
-  record
-    { Object = ℂ.Object
-    ; Arrow = λ A B → ℂ.Arrow B A
-    ; 𝟙 = ℂ.𝟙
-    ; _⊕_ = λ g f → f ℂ.⊕ g
-    ; assoc = sym ℂ.assoc
-    ; ident = swap ℂ.ident
-    }
-  where
-    open module ℂ = Category ℂ
 
 -- A consequence of no-eta-equality; `Opposite-is-involution` is no longer
 -- definitional - i.e.; you must match on the fields:

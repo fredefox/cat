@@ -49,6 +49,5 @@ module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
     ; Arrow = Mor
     ; 𝟙 = {!!}
     ; _⊕_ = {!!}
-    ; assoc = {!!}
-    ; ident = {!!}
+    ; isCategory = ?
     }

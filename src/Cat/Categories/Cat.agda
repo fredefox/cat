@@ -70,16 +70,49 @@ module _ {ℓ ℓ' : Level} where
       ; 𝟙 = identity
       ; _⊕_ = functor-comp
       -- What gives here? Why can I not name the variables directly?
-      ; assoc = λ {_ _ _ _ f g h} → assc {f = f} {g = g} {h = h}
-      ; ident = ident-r , ident-l
+      ; isCategory = {!!}
+--      ; assoc = λ {_ _ _ _ f g h} → assc {f = f} {g = g} {h = h}
+--      ; ident = ident-r , ident-l
       }
 
-module _  {ℓ : Level} (C D : Category ℓ ℓ) where
+module _ {ℓ : Level} (C D : Category ℓ ℓ) where
   private
-    proj₁ : Arrow CatCat (catProduct C D) C
+    :Object: = C .Object × D .Object
+    :Arrow:  : :Object: → :Object: → Set ℓ
+    :Arrow: (c , d) (c' , d') = Arrow C c c' × Arrow D d d'
+    :𝟙: : {o : :Object:} → :Arrow: o o
+    :𝟙: = C .𝟙 , D .𝟙
+    _:⊕:_ :
+      {a b c : :Object:} →
+      :Arrow: b c →
+      :Arrow: a b →
+      :Arrow: a c
+    _:⊕:_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → (C ._⊕_) bc∈C ab∈C , D ._⊕_ bc∈D ab∈D}
+
+    instance
+      :isCategory: : IsCategory :Object: :Arrow: :𝟙: _:⊕:_
+      :isCategory: = record
+        { assoc = eqpair C.assoc D.assoc
+        ; ident
+        = eqpair (fst C.ident) (fst D.ident)
+        , eqpair (snd C.ident) (snd D.ident)
+        }
+        where
+          open module C = IsCategory (C .isCategory)
+          open module D = IsCategory (D .isCategory)
+
+    :product: : Category ℓ ℓ
+    :product: = record
+      { Object = :Object:
+      ; Arrow = :Arrow:
+      ; 𝟙 = :𝟙:
+      ; _⊕_ = _:⊕:_
+      }
+
+    proj₁ : Arrow CatCat :product: C
     proj₁ = record { func* = fst ; func→ = fst ; ident = refl ; distrib = refl }
 
-    proj₂ : Arrow CatCat (catProduct C D) D
+    proj₂ : Arrow CatCat :product: D
     proj₂ = record { func* = snd ; func→ = snd ; ident = refl ; distrib = refl }
 
     module _ {X : Object (CatCat {ℓ} {ℓ})} (x₁ : Arrow CatCat X C) (x₂ : Arrow CatCat X D) where
@@ -88,7 +121,7 @@ module _  {ℓ : Level} (C D : Category ℓ ℓ) where
       -- ident' : {c : Object X} → ((func→ x₁) {dom = c} (𝟙 X) , (func→ x₂) {dom = c} (𝟙 X)) ≡ 𝟙 (catProduct C D)
       -- ident' {c = c} = lift-eq (ident x₁) (ident x₂)
 
-      x : Functor X (catProduct C D)
+      x : Functor X :product:
       x = record
         { func* = λ x → (func* x₁) x , (func* x₂) x
         ; func→ = λ x → func→ x₁ x , func→ x₂ x
@@ -116,7 +149,7 @@ module _  {ℓ : Level} (C D : Category ℓ ℓ) where
 
   product : Product {ℂ = CatCat} C D
   product = record
-    { obj = catProduct C D
+    { obj = :product:
     ; proj₁ = proj₁
     ; proj₂ = proj₂
     }

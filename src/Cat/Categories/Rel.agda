@@ -160,6 +160,5 @@ Rel = record
   ; Arrow = λ S R → Subset (S × R)
   ; 𝟙 = λ {S} → Diag S
   ; _⊕_ = λ {A B C} S R → λ {( a , c ) → Σ[ b ∈ B ] ( (a , b) ∈ R × (b , c) ∈ S )}
-  ; assoc = funExt is-assoc
-  ; ident = funExt ident-l , funExt ident-r
+  ; isCategory = record { assoc = funExt is-assoc ; ident = funExt ident-l , funExt ident-r }
   }
