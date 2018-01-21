@@ -11,12 +11,10 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
     open module ℂ = Category ℂ
     Obj = ℂ.Object
 
-  Path : ( a b : Obj ) → Set ℓ'
-  Path a b = undefined
-
-  postulate emptyPath : (o : Obj) → Path o o
-
-  postulate concatenate : {a b c : Obj} → Path b c → Path a b → Path a c
+  postulate
+    Path : ( a b : Obj ) → Set ℓ'
+    emptyPath : (o : Obj) → Path o o
+    concatenate : {a b c : Obj} → Path b c → Path a b → Path a c
 
   private
     module _ {A B C D : Obj} {r : Path A B} {q : Path B C} {p : Path C D} where

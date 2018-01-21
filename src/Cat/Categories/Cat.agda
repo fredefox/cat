@@ -10,13 +10,15 @@ open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
 open import Cat.Category
 open import Cat.Functor
 
+-- Tip from Andrea:
 -- Use co-patterns - they help with showing more understandable types in goals.
 lift-eq : ∀ {ℓ} {A B : Set ℓ} {a a' : A} {b b' : B} → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
 fst (lift-eq a b i) = a i
 snd (lift-eq a b i) = b i
---lift-eq a b = λ i → a i , b i
 
-
+eqpair : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} {a a' : A} {b b' : B}
+  → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
+eqpair eqa eqb i = eqa i , eqb i
 
 open Functor
 open Category
