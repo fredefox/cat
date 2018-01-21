@@ -63,8 +63,8 @@ module _ {ℓ ℓ' : Level} where
       postulate ident-l : identity ∘f f ≡ f
       -- ident-l = lift-eq-functors lem lemmm {!refl!} {!!}
 
-  CatCat : Category (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
-  CatCat =
+  Cat : Category (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
+  Cat =
     record
       { Object = Category ℓ ℓ'
       ; Arrow = Functor
@@ -110,13 +110,13 @@ module _ {ℓ : Level} (C D : Category ℓ ℓ) where
       ; _⊕_ = _:⊕:_
       }
 
-    proj₁ : Arrow CatCat :product: C
+    proj₁ : Arrow Cat :product: C
     proj₁ = record { func* = fst ; func→ = fst ; ident = refl ; distrib = refl }
 
-    proj₂ : Arrow CatCat :product: D
+    proj₂ : Arrow Cat :product: D
     proj₂ = record { func* = snd ; func→ = snd ; ident = refl ; distrib = refl }
 
-    module _ {X : Object (CatCat {ℓ} {ℓ})} (x₁ : Arrow CatCat X C) (x₂ : Arrow CatCat X D) where
+    module _ {X : Object (Cat {ℓ} {ℓ})} (x₁ : Arrow Cat X C) (x₂ : Arrow Cat X D) where
       open Functor
 
       -- ident' : {c : Object X} → ((func→ x₁) {dom = c} (𝟙 X) , (func→ x₂) {dom = c} (𝟙 X)) ≡ 𝟙 (catProduct C D)
@@ -132,23 +132,23 @@ module _ {ℓ : Level} (C D : Category ℓ ℓ) where
 
       -- Need to "lift equality of functors"
       -- If I want to do this like I do it for pairs it's gonna be a pain.
-      isUniqL : (CatCat ⊕ proj₁) x ≡ x₁
+      isUniqL : (Cat ⊕ proj₁) x ≡ x₁
       isUniqL = lift-eq-functors refl refl {!!} {!!}
 
-      isUniqR : (CatCat ⊕ proj₂) x ≡ x₂
+      isUniqR : (Cat ⊕ proj₂) x ≡ x₂
       isUniqR = lift-eq-functors refl refl {!!} {!!}
 
-      isUniq : (CatCat ⊕ proj₁) x ≡ x₁ × (CatCat ⊕ proj₂) x ≡ x₂
+      isUniq : (Cat ⊕ proj₁) x ≡ x₁ × (Cat ⊕ proj₂) x ≡ x₂
       isUniq = isUniqL , isUniqR
 
-      uniq : ∃![ x ] ((CatCat ⊕ proj₁) x ≡ x₁ × (CatCat ⊕ proj₂) x ≡ x₂)
+      uniq : ∃![ x ] ((Cat ⊕ proj₁) x ≡ x₁ × (Cat ⊕ proj₂) x ≡ x₂)
       uniq = x , isUniq
 
     instance
-      isProduct : IsProduct CatCat proj₁ proj₂
+      isProduct : IsProduct Cat proj₁ proj₂
       isProduct = uniq
 
-  product : Product {ℂ = CatCat} C D
+  product : Product {ℂ = Cat} C D
   product = record
     { obj = :product:
     ; proj₁ = proj₁
