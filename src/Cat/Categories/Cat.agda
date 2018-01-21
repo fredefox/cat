@@ -42,26 +42,25 @@ module _ {ℓ ℓ' : Level} {A B : Category ℓ ℓ'} where
 -- The category of categories
 module _ {ℓ ℓ' : Level} where
   private
-    _⊛_ = functor-comp
     module _ {A B C D : Category ℓ ℓ'} {f : Functor A B} {g : Functor B C} {h : Functor C D} where
-      postulate assc : h ⊛ (g ⊛ f) ≡ (h ⊛ g) ⊛ f
+      postulate assc : h ∘f (g ∘f f) ≡ (h ∘f g) ∘f f
       -- assc = lift-eq-functors refl refl {!refl!} λ i j → {!!}
 
     module _ {A B : Category ℓ ℓ'} {f : Functor A B} where
       lem : (func* f) ∘ (func* (identity {C = A})) ≡ func* f
       lem = refl
-      -- lemmm : func→ {C = A} {D = B} (f ⊛ identity) ≡ func→ f
+      -- lemmm : func→ {C = A} {D = B} (f ∘f identity) ≡ func→ f
       lemmm : PathP
         (λ i →
         {x y : Object A} → Arrow A x y → Arrow B (func* f x) (func* f y))
-        (func→ (f ⊛ identity)) (func→ f)
+        (func→ (f ∘f identity)) (func→ f)
       lemmm = refl
       postulate lemz : PathP (λ i → {c : A .Object} → PathP (λ _ → Arrow B (func* f c) (func* f c)) (func→ f (A .𝟙)) (B .𝟙))
-                  (ident (f ⊛ identity)) (ident f)
+                  (ident (f ∘f identity)) (ident f)
       -- lemz = {!!}
-      postulate ident-r : f ⊛ identity ≡ f
+      postulate ident-r : f ∘f identity ≡ f
       -- ident-r = lift-eq-functors lem lemmm {!lemz!} {!!}
-      postulate ident-l : identity ⊛ f ≡ f
+      postulate ident-l : identity ∘f f ≡ f
       -- ident-l = lift-eq-functors lem lemmm {!refl!} {!!}
 
   CatCat : Category (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
@@ -70,7 +69,7 @@ module _ {ℓ ℓ' : Level} where
       { Object = Category ℓ ℓ'
       ; Arrow = Functor
       ; 𝟙 = identity
-      ; _⊕_ = functor-comp
+      ; _⊕_ = _∘f_
       -- What gives here? Why can I not name the variables directly?
       ; isCategory = {!!}
 --      ; assoc = λ {_ _ _ _ f g h} → assc {f = f} {g = g} {h = h}

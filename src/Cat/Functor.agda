@@ -41,8 +41,8 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
         F→ ((G→ α1) B⊕ (G→ α0))      ≡⟨ F .distrib ⟩
         (F→ ∘ G→) α1 C⊕ (F→ ∘ G→) α0 ∎
 
-  functor-comp : Functor A C
-  functor-comp =
+  _∘f_ : Functor A C
+  _∘f_ =
     record
       { func* = F* ∘ G*
       ; func→ = F→ ∘ G→
@@ -56,7 +56,6 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
 
 -- The identity functor
 identity : ∀ {ℓ ℓ'} → {C : Category ℓ ℓ'} → Functor C C
--- Identity = record { F* = λ x → x ; F→ = λ x → x ; ident = refl ; distrib = refl }
 identity = record
   { func* = λ x → x
   ; func→ = λ x → x
