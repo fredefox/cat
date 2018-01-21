@@ -88,6 +88,13 @@ record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : ℂ .Object) 
     proj₁ : ℂ .Arrow obj A
     proj₂ : ℂ .Arrow obj B
     {{isProduct}} : IsProduct ℂ proj₁ proj₂
+  arrowProduct : ∀ {X} → (π₁ : Arrow ℂ X A) (π₂ : Arrow ℂ X B)
+    → Arrow ℂ X obj
+  arrowProduct π₁ π₂ = fst (isProduct π₁ π₂)
+
+record HasProducts {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ ⊔ ℓ') where
+  field
+    product : ∀ (A B : ℂ .Object) → Product {ℂ = ℂ} A B
 
 module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
   Opposite : Category ℓ ℓ'

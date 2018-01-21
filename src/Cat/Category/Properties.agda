@@ -49,17 +49,32 @@ epi-mono-is-not-iso f =
 -}
 
 
-module _ {ℓa ℓa' ℓb ℓb'} where
-  Exponential : Category ℓa ℓa' → Category ℓb ℓb' → Category {!!} {!!}
-  Exponential A B = record
-    { Object = {!!}
-    ; Arrow = {!!}
-    ; 𝟙 = {!!}
-    ; _⊕_ = {!!}
-    ; isCategory = {!!}
-    }
+module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{hasProducts : HasProducts ℂ}} (B C : ℂ .Category.Object) where
+  open Category
+  open HasProducts hasProducts
+  open Product
+  prod-obj : (A B : ℂ .Object) → ℂ .Object
+  prod-obj A B = Product.obj (product A B)
+  -- The product mentioned in awodey in Def 6.1 is not the regular product of arrows.
+  -- It's a "parallel" product
+  ×A : {A A' B B' : ℂ .Object} → ℂ .Arrow A A' → ℂ .Arrow B B'
+    → ℂ .Arrow (prod-obj A B) (prod-obj A' B')
+  ×A {A = A} {A' = A'} {B = B} {B' = B'} a b = arrowProduct (product A' B')
+    (ℂ ._⊕_ a ((product A B) .proj₁))
+    (ℂ ._⊕_ b ((product A B) .proj₂))
+
+  IsExponential : {Cᴮ : ℂ .Object} → ℂ .Arrow (prod-obj Cᴮ B) C → Set (ℓ ⊔ ℓ')
+  IsExponential eval = ∀ (A : ℂ .Object) (f : ℂ .Arrow (prod-obj A B) C)
+    → ∃![ f~ ] (ℂ ._⊕_ eval (×A f~ (ℂ .𝟙)) ≡ f)
+
+  record Exponential : Set (ℓ ⊔ ℓ') where
+    field
+      -- obj ≡ Cᴮ
+      obj : ℂ .Object
+      eval : ℂ .Arrow ( prod-obj obj B ) C
+      {{isExponential}} : IsExponential eval
 
 _⇑_ = Exponential
 
-yoneda : ∀ {ℓ ℓ'} → {ℂ : Category ℓ ℓ'} → Functor ℂ (Sets ⇑ (Opposite ℂ))
-yoneda = {!!}
+-- yoneda : ∀ {ℓ ℓ'} → {ℂ : Category ℓ ℓ'} → Functor ℂ (Sets ⇑ (Opposite ℂ))
+-- yoneda = {!!}
