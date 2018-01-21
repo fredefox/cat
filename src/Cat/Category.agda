@@ -22,8 +22,6 @@ open import Cubical
 
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
-postulate undefined : {ℓ : Level} → {A : Set ℓ} → A
-
 record IsCategory {ℓ ℓ' : Level}
   (Object : Set ℓ)
   (Arrow  : Object → Object → Set ℓ')
