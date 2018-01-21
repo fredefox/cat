@@ -15,7 +15,7 @@ open import Cat.Functor
 Fun : {ℓ : Level} → ( T U : Set ℓ ) → Set ℓ
 Fun T U = T → U
 
-Sets : {ℓ : Level} → Category {lsuc ℓ} {ℓ}
+Sets : {ℓ : Level} → Category (lsuc ℓ) ℓ
 Sets {ℓ} = record
   { Object = Set ℓ
   ; Arrow = λ T U → Fun {ℓ} T U
@@ -26,11 +26,11 @@ Sets {ℓ} = record
   }
 
 -- Covariant Presheaf
-Representable : {ℓ ℓ' : Level} → (ℂ : Category {ℓ} {ℓ'}) → Set (ℓ ⊔ lsuc ℓ')
+Representable : {ℓ ℓ' : Level} → (ℂ : Category ℓ ℓ') → Set (ℓ ⊔ lsuc ℓ')
 Representable {ℓ' = ℓ'} ℂ = Functor ℂ (Sets {ℓ'})
 
 -- The "co-yoneda" embedding.
-representable : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object ℂ → Representable ℂ
+representable : ∀ {ℓ ℓ'} {ℂ : Category ℓ ℓ'} → Category.Object ℂ → Representable ℂ
 representable {ℂ = ℂ} A = record
   { func* = λ B → ℂ.Arrow A B
   ; func→ = λ f g → f ℂ.⊕ g
@@ -41,11 +41,11 @@ representable {ℂ = ℂ} A = record
     open module ℂ = Category ℂ
 
 -- Contravariant Presheaf
-Presheaf : {ℓ ℓ' : Level} → (ℂ : Category {ℓ} {ℓ'}) → Set (ℓ ⊔ lsuc ℓ')
+Presheaf : ∀ {ℓ ℓ'} (ℂ : Category ℓ ℓ') → Set (ℓ ⊔ lsuc ℓ')
 Presheaf {ℓ' = ℓ'} ℂ = Functor (Opposite ℂ) (Sets {ℓ'})
 
 -- Alternate name: `yoneda`
-presheaf : {ℓ ℓ' : Level} → {ℂ : Category {ℓ} {ℓ'}} → Category.Object (Opposite ℂ) → Presheaf ℂ
+presheaf : {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} → Category.Object (Opposite ℂ) → Presheaf ℂ
 presheaf {ℂ = ℂ} B = record
   { func* = λ A → ℂ.Arrow A B
   ; func→ = λ f g → g ℂ.⊕ f

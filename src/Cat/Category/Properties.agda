@@ -7,7 +7,7 @@ open import Cat.Functor
 open import Cat.Categories.Sets
 
 module _ {ℓa ℓa' ℓb ℓb'} where
-  Exponential : Category {ℓa} {ℓa'} → Category {ℓb} {ℓb'} → Category {{!!}} {{!!}}
+  Exponential : Category ℓa ℓa' → Category ℓb ℓb' → Category ? ?
   Exponential A B = record
     { Object = {!!}
     ; Arrow = {!!}
@@ -19,5 +19,5 @@ module _ {ℓa ℓa' ℓb ℓb'} where
 
 _⇑_ = Exponential
 
-yoneda : ∀ {ℓ ℓ'} → {ℂ : Category {ℓ} {ℓ'}} → Functor ℂ (Sets ⇑ (Opposite ℂ))
+yoneda : ∀ {ℓ ℓ'} → {ℂ : Category ℓ ℓ'} → Functor ℂ (Sets ⇑ (Opposite ℂ))
 yoneda = {!!}

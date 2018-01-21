@@ -154,7 +154,7 @@ module _ {A B C D : Set} {S : Subset (A × B)} {R : Subset (B × C)} {Q : Subset
          ≡ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
   is-assoc = equivToPath equi
 
-Rel : Category
+Rel : Category (lsuc lzero) (lsuc lzero)
 Rel = record
   { Object = Set
   ; Arrow = λ S R → Subset (S × R)

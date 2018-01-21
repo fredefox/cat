@@ -24,7 +24,7 @@ syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
 postulate undefined : {ℓ : Level} → {A : Set ℓ} → A
 
-record Category {ℓ ℓ'} : Set (lsuc (ℓ' ⊔ ℓ)) where
+record Category (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
   -- adding no-eta-equality can speed up type-checking.
   no-eta-equality
   field
@@ -44,7 +44,7 @@ record Category {ℓ ℓ'} : Set (lsuc (ℓ' ⊔ ℓ)) where
 
 open Category public
 
-module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} { A B : ℂ .Object } where
+module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : ℂ .Object } where
   private
     open module ℂ = Category ℂ
     _+_ = ℂ._⊕_
@@ -93,10 +93,10 @@ epi-mono-is-not-iso f =
 -}
 
 -- Isomorphism of objects
-_≅_ : { ℓ ℓ' : Level } → { ℂ : Category {ℓ} {ℓ'} } → ( A B : Object ℂ ) → Set ℓ'
+_≅_ : ∀ {ℓ ℓ'} {ℂ : Category ℓ ℓ'} (A B : Object ℂ) → Set ℓ'
 _≅_ {ℂ = ℂ} A B = Σ[ f ∈ ℂ .Arrow A B ] (Isomorphism {ℂ = ℂ} f)
 
-IsProduct : ∀ {ℓ ℓ'} (ℂ : Category {ℓ} {ℓ'}) {A B obj : Object ℂ} (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) → Set (ℓ ⊔ ℓ')
+IsProduct : ∀ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {A B obj : Object ℂ} (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) → Set (ℓ ⊔ ℓ')
 IsProduct ℂ {A = A} {B = B} π₁ π₂
   = ∀ {X : ℂ.Object} (x₁ : ℂ.Arrow X A) (x₂ : ℂ.Arrow X B)
   → ∃![ x ] (π₁ ℂ.⊕ x ≡ x₁ × π₂ ℂ.⊕ x ≡ x₂)
@@ -110,7 +110,7 @@ IsProduct ℂ {A = A} {B = B} π₁ π₂
 --      isProduct : ∀ {X : ℂ .Object} (x₁ : ℂ .Arrow X A) (x₂ : ℂ .Arrow X B)
 --        → ∃![ x ] (ℂ ._⊕_ π₁ x ≡ x₁ × ℂ. _⊕_ π₂ x ≡ x₂)
 
-record Product {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} (A B : ℂ .Object) : Set (ℓ ⊔ ℓ') where
+record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : ℂ .Object) : Set (ℓ ⊔ ℓ') where
   no-eta-equality
   field
     obj : ℂ .Object
@@ -119,7 +119,7 @@ record Product {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} (A B : ℂ .Obje
     {{isProduct}} : IsProduct ℂ proj₁ proj₂
 
 mutual
-  catProduct : {ℓ : Level} → (C D : Category {ℓ} {ℓ}) → Category {ℓ} {ℓ}
+  catProduct : ∀ {ℓ} (C D : Category ℓ ℓ) → Category ℓ ℓ
   catProduct C D =
     record
       { Object = C.Object × D.Object
@@ -146,10 +146,10 @@ mutual
   -- arrowProduct = {!!}
 
   -- Arrows in the product-category
-  arrowProduct : ∀ {ℓ} {C D : Category {ℓ} {ℓ}} (c d : Object (catProduct C D)) → Set ℓ
+  arrowProduct : ∀ {ℓ} {C D : Category ℓ ℓ} (c d : Object (catProduct C D)) → Set ℓ
   arrowProduct {C = C} {D = D} (c , d) (c' , d') = Arrow C c c' × Arrow D d d'
 
-Opposite : ∀ {ℓ ℓ'} → Category {ℓ} {ℓ'} → Category {ℓ} {ℓ'}
+Opposite : ∀ {ℓ ℓ'} → Category ℓ ℓ' → Category ℓ ℓ'
 Opposite ℂ =
   record
     { Object = ℂ.Object
@@ -173,10 +173,10 @@ Opposite ℂ =
 -- assoc (Opposite-is-involution i) = {!!}
 -- ident (Opposite-is-involution i) = {!!}
 
-Hom : {ℓ ℓ' : Level} → (ℂ : Category {ℓ} {ℓ'}) → (A B : Object ℂ) → Set ℓ'
+Hom : {ℓ ℓ' : Level} → (ℂ : Category ℓ ℓ') → (A B : Object ℂ) → Set ℓ'
 Hom ℂ A B = Arrow ℂ A B
 
-module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} where
+module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} where
   HomFromArrow : (A : ℂ .Object) → {B B' : ℂ .Object} → (g : ℂ .Arrow B B')
     → Hom ℂ A B → Hom ℂ A B'
   HomFromArrow _A = _⊕_ ℂ

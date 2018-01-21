@@ -6,7 +6,7 @@ open import Function
 
 open import Cat.Category
 
-record Functor {ℓc ℓc' ℓd ℓd'} (C : Category {ℓc} {ℓc'}) (D : Category {ℓd} {ℓd'})
+record Functor {ℓc ℓc' ℓd ℓd'} (C : Category ℓc ℓc') (D : Category ℓd ℓd')
   : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
   private
     open module C = Category C
@@ -21,7 +21,7 @@ record Functor {ℓc ℓc' ℓd ℓd'} (C : Category {ℓc} {ℓc'}) (D : Catego
     distrib : { c c' c'' : C.Object} {a : C.Arrow c c'} {a' : C.Arrow c' c''}
       → func→ (a' C.⊕ a) ≡ func→ a' D.⊕ func→ a
 
-module _ {ℓ ℓ' : Level} {A B C : Category {ℓ} {ℓ'}} (F : Functor B C) (G : Functor A B) where
+module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : Functor A B) where
   private
     open module F = Functor F
     open module G = Functor G
@@ -56,7 +56,7 @@ module _ {ℓ ℓ' : Level} {A B C : Category {ℓ} {ℓ'}} (F : Functor B C) (G
       }
 
 -- The identity functor
-identity : {ℓ ℓ' : Level} → {C : Category {ℓ} {ℓ'}} → Functor C C
+identity : ∀ {ℓ ℓ'} → {C : Category ℓ ℓ'} → Functor C C
 -- Identity = record { F* = λ x → x ; F→ = λ x → x ; ident = refl ; distrib = refl }
 identity = record
   { func* = λ x → x

@@ -20,7 +20,7 @@ snd (lift-eq a b i) = b i
 
 open Functor
 open Category
-module _ {ℓ ℓ' : Level} {A B : Category {ℓ} {ℓ'}} where
+module _ {ℓ ℓ' : Level} {A B : Category ℓ ℓ'} where
   lift-eq-functors : {f g : Functor A B}
     → (eq* : Functor.func* f ≡ Functor.func* g)
     → (eq→ : PathP (λ i → ∀ {x y} → Arrow A x y → Arrow B (eq* i x) (eq* i y))
@@ -41,11 +41,11 @@ module _ {ℓ ℓ' : Level} {A B : Category {ℓ} {ℓ'}} where
 module _ {ℓ ℓ' : Level} where
   private
     _⊛_ = functor-comp
-    module _ {A B C D : Category {ℓ} {ℓ'}} {f : Functor A B} {g : Functor B C} {h : Functor C D} where
+    module _ {A B C D : Category ℓ ℓ'} {f : Functor A B} {g : Functor B C} {h : Functor C D} where
       postulate assc : h ⊛ (g ⊛ f) ≡ (h ⊛ g) ⊛ f
       -- assc = lift-eq-functors refl refl {!refl!} λ i j → {!!}
 
-    module _ {A B : Category {ℓ} {ℓ'}} {f : Functor A B} where
+    module _ {A B : Category ℓ ℓ'} {f : Functor A B} where
       lem : (func* f) ∘ (func* (identity {C = A})) ≡ func* f
       lem = refl
       -- lemmm : func→ {C = A} {D = B} (f ⊛ identity) ≡ func→ f
@@ -62,10 +62,10 @@ module _ {ℓ ℓ' : Level} where
       postulate ident-l : identity ⊛ f ≡ f
       -- ident-l = lift-eq-functors lem lemmm {!refl!} {!!}
 
-  CatCat : Category {lsuc (ℓ ⊔ ℓ')} {ℓ ⊔ ℓ'}
+  CatCat : Category (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
   CatCat =
     record
-      { Object = Category {ℓ} {ℓ'}
+      { Object = Category ℓ ℓ'
       ; Arrow = Functor
       ; 𝟙 = identity
       ; _⊕_ = functor-comp
@@ -74,7 +74,7 @@ module _ {ℓ ℓ' : Level} where
       ; ident = ident-r , ident-l
       }
 
-module _  {ℓ : Level} (C D : Category {ℓ} {ℓ}) where
+module _  {ℓ : Level} (C D : Category ℓ ℓ) where
   private
     proj₁ : Arrow CatCat (catProduct C D) C
     proj₁ = record { func* = fst ; func→ = fst ; ident = refl ; distrib = refl }

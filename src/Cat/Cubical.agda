@@ -42,7 +42,7 @@ module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
     Mor = Σ themap rules
 
   -- The category of names and substitutions
-  ℂ : Category -- {ℓo} {lsuc lzero ⊔ ℓo}
+  ℂ : Category ℓ ℓ -- ℓo (lsuc lzero ⊔ ℓo)
   ℂ = record
     -- { Object = FiniteDecidableSubset
     { Object = Ns → Bool

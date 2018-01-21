@@ -6,12 +6,12 @@ open import Data.Product
 
 open import Cat.Category as C
 
-module _ {ℓ ℓ' : Level} (ℂ : Category {ℓ} {ℓ'}) where
+module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
   private
     open module ℂ = Category ℂ
     Obj = ℂ.Object
 
-  Path : ( a b : Obj ) → Set
+  Path : ( a b : Obj ) → Set ℓ'
   Path a b = undefined
 
   postulate emptyPath : (o : Obj) → Path o o
@@ -28,7 +28,7 @@ module _ {ℓ ℓ' : Level} (ℂ : Category {ℓ} {ℓ'}) where
         ident-r : concatenate {A} {A} {B} p (emptyPath A) ≡ p
         ident-l : concatenate {A} {B} {B} (emptyPath B) p ≡ p
 
-  Free : Category
+  Free : Category ℓ ℓ'
   Free = record
     { Object = Obj
     ; Arrow = Path
