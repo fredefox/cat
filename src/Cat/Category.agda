@@ -53,68 +53,26 @@ record Category (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
 
 open Category
 
-module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : ℂ .Object } where
-  private
-    open module ℂ = Category ℂ
-    _+_ = ℂ._⊕_
+module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} where
+  module _ { A B : ℂ .Object } where
+    Isomorphism : (f : ℂ .Arrow A B) → Set ℓ'
+    Isomorphism f = Σ[ g ∈ ℂ .Arrow B A ] ℂ ._⊕_ g f ≡ ℂ .𝟙 × ℂ ._⊕_ f g ≡ ℂ .𝟙
 
-  Isomorphism : (f : ℂ.Arrow A B) → Set ℓ'
-  Isomorphism f = Σ[ g ∈ ℂ.Arrow B A ] g ℂ.⊕ f ≡ ℂ.𝟙 × f + g ≡ ℂ.𝟙
+    Epimorphism : {X : ℂ .Object } → (f : ℂ .Arrow A B) → Set ℓ'
+    Epimorphism {X} f = ( g₀ g₁ : ℂ .Arrow B X ) → ℂ ._⊕_ g₀ f ≡ ℂ ._⊕_ g₁ f → g₀ ≡ g₁
 
-  Epimorphism : {X : ℂ.Object } → (f : ℂ.Arrow A B) → Set ℓ'
-  Epimorphism {X} f = ( g₀ g₁ : ℂ.Arrow B X ) → g₀ + f ≡ g₁ + f → g₀ ≡ g₁
+    Monomorphism : {X : ℂ .Object} → (f : ℂ .Arrow A B) → Set ℓ'
+    Monomorphism {X} f = ( g₀ g₁ : ℂ .Arrow X A ) → ℂ ._⊕_ f g₀ ≡ ℂ ._⊕_ f g₁ → g₀ ≡ g₁
 
-  Monomorphism : {X : ℂ.Object} → (f : ℂ.Arrow A B) → Set ℓ'
-  Monomorphism {X} f = ( g₀ g₁ : ℂ.Arrow X A ) → f + g₀ ≡ f + g₁ → g₀ ≡ g₁
+  -- Isomorphism of objects
+  _≅_ : (A B : Object ℂ) → Set ℓ'
+  _≅_ A B = Σ[ f ∈ ℂ .Arrow A B ] (Isomorphism f)
 
-  iso-is-epi : ∀ {X} (f : ℂ.Arrow A B) → Isomorphism f → Epimorphism {X = X} f
-  iso-is-epi f (f- , left-inv , right-inv) g₀ g₁ eq =
-    begin
-    g₀              ≡⟨ sym (fst ident) ⟩
-    g₀ + ℂ.𝟙        ≡⟨ cong (_+_ g₀) (sym right-inv) ⟩
-    g₀ + (f + f-)   ≡⟨ assoc ⟩
-    (g₀ + f) + f-   ≡⟨ cong (λ x → x + f-) eq ⟩
-    (g₁ + f) + f-   ≡⟨ sym assoc ⟩
-    g₁ + (f + f-)   ≡⟨ cong (_+_ g₁) right-inv ⟩
-    g₁ + ℂ.𝟙        ≡⟨ fst ident ⟩
-    g₁              ∎
-    where
-      open IsCategory ℂ.isCategory
-
-  iso-is-mono : ∀ {X} (f : ℂ.Arrow A B ) → Isomorphism f → Monomorphism {X = X} f
-  iso-is-mono f (f- , (left-inv , right-inv)) g₀ g₁ eq =
-    begin
-    g₀            ≡⟨ sym (snd ident) ⟩
-    ℂ.𝟙 + g₀      ≡⟨ cong (λ x → x + g₀) (sym left-inv) ⟩
-    (f- + f) + g₀ ≡⟨ sym assoc ⟩
-    f- + (f + g₀) ≡⟨ cong (_+_ f-) eq ⟩
-    f- + (f + g₁) ≡⟨ assoc ⟩
-    (f- + f) + g₁ ≡⟨ cong (λ x → x + g₁) left-inv ⟩
-    ℂ.𝟙 + g₁      ≡⟨ snd ident ⟩
-    g₁            ∎
-    where
-      open IsCategory ℂ.isCategory
-
-  iso-is-epi-mono : ∀ {X} (f : ℂ.Arrow A B ) → Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
-  iso-is-epi-mono f iso = iso-is-epi f iso , iso-is-mono f iso
-
-{-
-epi-mono-is-not-iso : ∀ {ℓ ℓ'} → ¬ ((ℂ : Category {ℓ} {ℓ'}) {A B X : Object ℂ} (f : Arrow ℂ A B ) → Epimorphism {ℂ = ℂ} {X = X} f → Monomorphism {ℂ = ℂ} {X = X} f → Isomorphism {ℂ = ℂ} f)
-epi-mono-is-not-iso f =
-  let k = f {!!} {!!} {!!} {!!}
-  in {!!}
--}
-
--- Isomorphism of objects
-_≅_ : ∀ {ℓ ℓ'} {ℂ : Category ℓ ℓ'} (A B : Object ℂ) → Set ℓ'
-_≅_ {ℂ = ℂ} A B = Σ[ f ∈ ℂ .Arrow A B ] (Isomorphism {ℂ = ℂ} f)
-
-IsProduct : ∀ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {A B obj : Object ℂ} (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) → Set (ℓ ⊔ ℓ')
-IsProduct ℂ {A = A} {B = B} π₁ π₂
-  = ∀ {X : ℂ.Object} (x₁ : ℂ.Arrow X A) (x₂ : ℂ.Arrow X B)
-  → ∃![ x ] (π₁ ℂ.⊕ x ≡ x₁ × π₂ ℂ.⊕ x ≡ x₂)
-  where
-    open module ℂ = Category ℂ
+module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {A B obj : Object ℂ} where
+  IsProduct : (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) → Set (ℓ ⊔ ℓ')
+  IsProduct π₁ π₂
+    = ∀ {X : ℂ .Object} (x₁ : ℂ .Arrow X A) (x₂ : ℂ .Arrow X B)
+    → ∃![ x ] (ℂ ._⊕_ π₁ x ≡ x₁ × ℂ ._⊕_ π₂ x ≡ x₂)
 
 -- Tip from Andrea; Consider this style for efficiency:
 -- record IsProduct {ℓ ℓ' : Level} (ℂ : Category {ℓ} {ℓ'})
@@ -131,19 +89,7 @@ record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : ℂ .Object) 
     proj₂ : ℂ .Arrow obj B
     {{isProduct}} : IsProduct ℂ proj₁ proj₂
 
--- Two pairs are equal if their components are equal.
-eqpair : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} {a a' : A} {b b' : B}
-  → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
-eqpair eqa eqb i = eqa i , eqb i
-
 module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
-  private
-    instance
-      _ : IsCategory (ℂ .Object) (flip (ℂ .Arrow)) (ℂ .𝟙) (flip (ℂ ._⊕_))
-      _ = record { assoc = sym assoc ; ident = swap ident }
-        where
-          open IsCategory (ℂ .isCategory)
-
   Opposite : Category ℓ ℓ'
   Opposite =
     record
@@ -151,7 +97,10 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
       ; Arrow = flip (ℂ .Arrow)
       ; 𝟙 = ℂ .𝟙
       ; _⊕_ = flip (ℂ ._⊕_)
+      ; isCategory = record { assoc = sym assoc ; ident = swap ident }
       }
+      where
+        open IsCategory (ℂ .isCategory)
 
 -- A consequence of no-eta-equality; `Opposite-is-involution` is no longer
 -- definitional - i.e.; you must match on the fields:
