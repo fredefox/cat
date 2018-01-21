@@ -24,9 +24,9 @@ open Functor
 open Category
 module _ {ℓ ℓ' : Level} {A B : Category ℓ ℓ'} where
   lift-eq-functors : {f g : Functor A B}
-    → (eq* : Functor.func* f ≡ Functor.func* g)
-    → (eq→ : PathP (λ i → ∀ {x y} → Arrow A x y → Arrow B (eq* i x) (eq* i y))
-    (func→ f) (func→ g))
+    → (eq* : f .func* ≡ g .func*)
+    → (eq→ : PathP (λ i → ∀ {x y} → A .Arrow x y → B .Arrow (eq* i x) (eq* i y))
+    (f .func→) (g .func→))
     --        → (eq→ : Functor.func→ f ≡ {!!}) -- Functor.func→ g)
     -- Use PathP
     -- directly to show heterogeneous equalities by using previous
@@ -34,8 +34,8 @@ module _ {ℓ ℓ' : Level} {A B : Category ℓ ℓ'} where
     → (eqI : PathP (λ i → ∀ {c : A .Object} → eq→ i (A .𝟙 {c}) ≡ B .𝟙 {eq* i c})
     (ident f) (ident g))
     → (eqD : PathP (λ i → { c c' c'' : A .Object} {a : A .Arrow c c'} {a' : A .Arrow c' c''}
-    → eq→ i (A ._⊕_ a' a) ≡ B ._⊕_ (eq→ i a') (eq→ i a))
-    (distrib f) (distrib g))
+      → eq→ i (A ._⊕_ a' a) ≡ B ._⊕_ (eq→ i a') (eq→ i a))
+      (distrib f) (distrib g))
     → f ≡ g
   lift-eq-functors eq* eq→ eqI eqD i = record { func* = eq* i ; func→ = eq→ i ; ident = eqI i ; distrib = eqD i }
 
@@ -43,8 +43,25 @@ module _ {ℓ ℓ' : Level} {A B : Category ℓ ℓ'} where
 module _ {ℓ ℓ' : Level} where
   private
     module _ {A B C D : Category ℓ ℓ'} {f : Functor A B} {g : Functor B C} {h : Functor C D} where
-      postulate assc : h ∘f (g ∘f f) ≡ (h ∘f g) ∘f f
-      -- assc = lift-eq-functors refl refl {!refl!} λ i j → {!!}
+      eq* : func* (h ∘f (g ∘f f)) ≡ func* ((h ∘f g) ∘f f)
+      eq* = refl
+      eq→ : PathP
+        (λ i → {x y : A .Object} → A .Arrow x y → D .Arrow (eq* i x) (eq* i y))
+        (func→ (h ∘f (g ∘f f))) (func→ ((h ∘f g) ∘f f))
+      eq→ = refl
+      id-l = (h ∘f (g ∘f f)) .ident -- = func→ (h ∘f (g ∘f f)) (𝟙 A) ≡ 𝟙 D
+      id-r = ((h ∘f g) ∘f f) .ident -- = func→ ((h ∘f g) ∘f f) (𝟙 A) ≡ 𝟙 D
+      postulate eqI : PathP
+                 (λ i → ∀ {c : A .Object} → eq→ i (A .𝟙 {c}) ≡ D .𝟙 {eq* i c})
+                 (ident ((h ∘f (g ∘f f))))
+                 (ident ((h ∘f g) ∘f f))
+      postulate eqD : PathP (λ i → { c c' c'' : A .Object} {a : A .Arrow c c'} {a' : A .Arrow c' c''}
+                        → eq→ i (A ._⊕_ a' a) ≡ D ._⊕_ (eq→ i a') (eq→ i a))
+                        (distrib (h ∘f (g ∘f f))) (distrib ((h ∘f g) ∘f f))
+      -- eqD = {!!}
+
+      assc : h ∘f (g ∘f f) ≡ (h ∘f g) ∘f f
+      assc = lift-eq-functors eq* eq→ eqI eqD
 
     module _ {A B : Category ℓ ℓ'} {f : Functor A B} where
       lem : (func* f) ∘ (func* (identity {C = A})) ≡ func* f
@@ -71,9 +88,10 @@ module _ {ℓ ℓ' : Level} where
       ; 𝟙 = identity
       ; _⊕_ = _∘f_
       -- What gives here? Why can I not name the variables directly?
-      ; isCategory = {!!}
---      ; assoc = λ {_ _ _ _ f g h} → assc {f = f} {g = g} {h = h}
---      ; ident = ident-r , ident-l
+      ; isCategory = record
+        { assoc = λ {_ _ _ _ f g h} → assc {f = f} {g = g} {h = h}
+        ; ident = ident-r , ident-l
+        }
       }
 
 module _ {ℓ : Level} (C D : Category ℓ ℓ) where
@@ -132,11 +150,11 @@ module _ {ℓ : Level} (C D : Category ℓ ℓ) where
 
       -- Need to "lift equality of functors"
       -- If I want to do this like I do it for pairs it's gonna be a pain.
-      isUniqL : (Cat ⊕ proj₁) x ≡ x₁
-      isUniqL = lift-eq-functors refl refl {!!} {!!}
+      postulate isUniqL : (Cat ⊕ proj₁) x ≡ x₁
+      -- isUniqL = lift-eq-functors refl refl {!!} {!!}
 
-      isUniqR : (Cat ⊕ proj₂) x ≡ x₂
-      isUniqR = lift-eq-functors refl refl {!!} {!!}
+      postulate isUniqR : (Cat ⊕ proj₂) x ≡ x₂
+      -- isUniqR = lift-eq-functors refl refl {!!} {!!}
 
       isUniq : (Cat ⊕ proj₁) x ≡ x₁ × (Cat ⊕ proj₂) x ≡ x₂
       isUniq = isUniqL , isUniqR
