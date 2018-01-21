@@ -4,139 +4,119 @@ module Cat.Category where
 
 open import Agda.Primitive
 open import Data.Unit.Base
-open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
+open import Data.Product renaming
+  ( proj₁ to fst
+  ; proj₂ to snd
+  ; ∃! to ∃!≈
+  )
 open import Data.Empty
 open import Function
 open import Cubical
 
-postulate undefined : {ℓ : Level} → {A : Set ℓ} → A
+∃! : ∀ {a b} {A : Set a}
+  → (A → Set b) → Set (a ⊔ b)
+∃! = ∃!≈ _≡_
 
-record Category {ℓ ℓ'} : Set (lsuc (ℓ' ⊔ ℓ)) where
-  constructor category
+∃!-syntax : ∀ {a b} {A : Set a} → (A → Set b) → Set (a ⊔ b)
+∃!-syntax = ∃
+
+syntax ∃!-syntax (λ x → B) = ∃![ x ] B
+
+record IsCategory {ℓ ℓ' : Level}
+  (Object : Set ℓ)
+  (Arrow  : Object → Object → Set ℓ')
+  (𝟙      : {o : Object} → Arrow o o)
+  (_⊕_    : { a b c : Object } → Arrow b c → Arrow a b → Arrow a c)
+  : Set (lsuc (ℓ' ⊔ ℓ)) where
+  field
+    assoc : {A B C D : Object} { f : Arrow A B } { g : Arrow B C } { h : Arrow C D }
+      → h ⊕ (g ⊕ f) ≡ (h ⊕ g) ⊕ f
+    ident : {A B : Object} {f : Arrow A B}
+      → f ⊕ 𝟙 ≡ f × 𝟙 ⊕ f ≡ f
+
+-- open IsCategory public
+
+record Category (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
+  -- adding no-eta-equality can speed up type-checking.
+  no-eta-equality
   field
     Object : Set ℓ
     Arrow  : Object → Object → Set ℓ'
     𝟙      : {o : Object} → Arrow o o
     _⊕_    : { a b c : Object } → Arrow b c → Arrow a b → Arrow a c
-    assoc : { A B C D : Object } { f : Arrow A B } { g : Arrow B C } { h : Arrow C D }
-      → h ⊕ (g ⊕ f) ≡ (h ⊕ g) ⊕ f
-    ident  : { A B : Object } { f : Arrow A B }
-      → f ⊕ 𝟙 ≡ f × 𝟙 ⊕ f ≡ f
+    {{isCategory}} : IsCategory Object Arrow 𝟙 _⊕_
   infixl 45 _⊕_
   domain : { a b : Object } → Arrow a b → Object
   domain {a = a} _ = a
   codomain : { a b : Object } → Arrow a b → Object
   codomain {b = b} _ = b
 
-open Category public
+open Category
 
-module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} { A B : Object ℂ } where
-  private
-    open module ℂ = Category ℂ
-    _+_ = ℂ._⊕_
+module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} where
+  module _ { A B : ℂ .Object } where
+    Isomorphism : (f : ℂ .Arrow A B) → Set ℓ'
+    Isomorphism f = Σ[ g ∈ ℂ .Arrow B A ] ℂ ._⊕_ g f ≡ ℂ .𝟙 × ℂ ._⊕_ f g ≡ ℂ .𝟙
 
-  Isomorphism : (f : ℂ.Arrow A B) → Set ℓ'
-  Isomorphism f = Σ[ g ∈ ℂ.Arrow B A ] g + f ≡ ℂ.𝟙 × f + g ≡ ℂ.𝟙
+    Epimorphism : {X : ℂ .Object } → (f : ℂ .Arrow A B) → Set ℓ'
+    Epimorphism {X} f = ( g₀ g₁ : ℂ .Arrow B X ) → ℂ ._⊕_ g₀ f ≡ ℂ ._⊕_ g₁ f → g₀ ≡ g₁
 
-  Epimorphism : {X : ℂ.Object } → (f : ℂ.Arrow A B) → Set ℓ'
-  Epimorphism {X} f = ( g₀ g₁ : ℂ.Arrow B X ) → g₀ + f ≡ g₁ + f → g₀ ≡ g₁
+    Monomorphism : {X : ℂ .Object} → (f : ℂ .Arrow A B) → Set ℓ'
+    Monomorphism {X} f = ( g₀ g₁ : ℂ .Arrow X A ) → ℂ ._⊕_ f g₀ ≡ ℂ ._⊕_ f g₁ → g₀ ≡ g₁
 
-  Monomorphism : {X : ℂ.Object} → (f : ℂ.Arrow A B) → Set ℓ'
-  Monomorphism {X} f = ( g₀ g₁ : ℂ.Arrow X A ) → f + g₀ ≡ f + g₁ → g₀ ≡ g₁
+  -- Isomorphism of objects
+  _≅_ : (A B : Object ℂ) → Set ℓ'
+  _≅_ A B = Σ[ f ∈ ℂ .Arrow A B ] (Isomorphism f)
 
-  iso-is-epi : ∀ {X} (f : ℂ.Arrow A B) → Isomorphism f → Epimorphism {X = X} f
-  -- Idea: Pre-compose with f- on both sides of the equality of eq to get
-  -- g₀ + f + f- ≡ g₁ + f + f-
-  -- which by left-inv reduces to the goal.
-  iso-is-epi f (f- , left-inv , right-inv) g₀ g₁ eq =
-     trans (sym (fst ℂ.ident))
-       ( trans (cong (_+_ g₀) (sym right-inv))
-         ( trans ℂ.assoc
-           ( trans (cong (λ x → x + f-) eq)
-             ( trans (sym ℂ.assoc)
-               ( trans (cong (_+_ g₁) right-inv) (fst ℂ.ident))
-             )
-           )
-         )
-       )
+module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {A B obj : Object ℂ} where
+  IsProduct : (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) → Set (ℓ ⊔ ℓ')
+  IsProduct π₁ π₂
+    = ∀ {X : ℂ .Object} (x₁ : ℂ .Arrow X A) (x₂ : ℂ .Arrow X B)
+    → ∃![ x ] (ℂ ._⊕_ π₁ x ≡ x₁ × ℂ ._⊕_ π₂ x ≡ x₂)
 
-  iso-is-mono : ∀ {X} (f : ℂ.Arrow A B ) → Isomorphism f → Monomorphism {X = X} f
-  -- For the next goal we do something similar: Post-compose with f- and use
-  -- right-inv to get the goal.
-  iso-is-mono f (f- , (left-inv , right-inv)) g₀ g₁ eq =
-    trans (sym (snd ℂ.ident))
-      ( trans (cong (λ x → x + g₀) (sym left-inv))
-        ( trans (sym ℂ.assoc)
-          ( trans (cong (_+_ f-) eq)
-            ( trans ℂ.assoc
-              ( trans (cong (λ x → x + g₁) left-inv) (snd ℂ.ident)
-              )
-            )
-          )
-        )
-      )
+-- Tip from Andrea; Consider this style for efficiency:
+-- record IsProduct {ℓ ℓ' : Level} (ℂ : Category {ℓ} {ℓ'})
+--   {A B obj : Object ℂ} (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) : Set (ℓ ⊔ ℓ') where
+--   field
+--      isProduct : ∀ {X : ℂ .Object} (x₁ : ℂ .Arrow X A) (x₂ : ℂ .Arrow X B)
+--        → ∃![ x ] (ℂ ._⊕_ π₁ x ≡ x₁ × ℂ. _⊕_ π₂ x ≡ x₂)
 
-  iso-is-epi-mono : ∀ {X} (f : ℂ.Arrow A B ) → Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
-  iso-is-epi-mono f iso = iso-is-epi f iso , iso-is-mono f iso
+record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : ℂ .Object) : Set (ℓ ⊔ ℓ') where
+  no-eta-equality
+  field
+    obj : ℂ .Object
+    proj₁ : ℂ .Arrow obj A
+    proj₂ : ℂ .Arrow obj B
+    {{isProduct}} : IsProduct ℂ proj₁ proj₂
 
-{-
-epi-mono-is-not-iso : ∀ {ℓ ℓ'} → ¬ ((ℂ : Category {ℓ} {ℓ'}) {A B X : Object ℂ} (f : Arrow ℂ A B ) → Epimorphism {ℂ = ℂ} {X = X} f → Monomorphism {ℂ = ℂ} {X = X} f → Isomorphism {ℂ = ℂ} f)
-epi-mono-is-not-iso f =
-  let k = f {!!} {!!} {!!} {!!}
-  in {!!}
--}
+module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
+  Opposite : Category ℓ ℓ'
+  Opposite =
+    record
+      { Object = ℂ .Object
+      ; Arrow = flip (ℂ .Arrow)
+      ; 𝟙 = ℂ .𝟙
+      ; _⊕_ = flip (ℂ ._⊕_)
+      ; isCategory = record { assoc = sym assoc ; ident = swap ident }
+      }
+      where
+        open IsCategory (ℂ .isCategory)
 
--- Isomorphism of objects
-_≅_ : { ℓ ℓ' : Level } → { ℂ : Category {ℓ} {ℓ'} } → ( A B : Object ℂ ) → Set ℓ'
-_≅_ {ℂ = ℂ} A B = Σ[ f ∈ ℂ.Arrow A B ] (Isomorphism {ℂ = ℂ} f)
-  where
-    open module ℂ = Category ℂ
+-- A consequence of no-eta-equality; `Opposite-is-involution` is no longer
+-- definitional - i.e.; you must match on the fields:
+--
+-- Opposite-is-involution : ∀ {ℓ ℓ'} → {C : Category {ℓ} {ℓ'}} → Opposite (Opposite C) ≡ C
+-- Object (Opposite-is-involution {C = C} i) = Object C
+-- Arrow (Opposite-is-involution i) = {!!}
+-- 𝟙 (Opposite-is-involution i) = {!!}
+-- _⊕_ (Opposite-is-involution i) = {!!}
+-- assoc (Opposite-is-involution i) = {!!}
+-- ident (Opposite-is-involution i) = {!!}
 
-Product : {ℓ : Level} → ( C D : Category {ℓ} {ℓ} ) → Category {ℓ} {ℓ}
-Product C D =
-  record
-    { Object = C.Object × D.Object
-    ; Arrow = λ { (c , d) (c' , d') →
-      let carr = C.Arrow c c'
-          darr = D.Arrow d d'
-      in carr × darr}
-    ; 𝟙 = C.𝟙 , D.𝟙
-    ; _⊕_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → bc∈C C.⊕ ab∈C , bc∈D D.⊕ ab∈D}
-    ; assoc = eqpair C.assoc D.assoc
-    ; ident =
-      let (Cl , Cr) = C.ident
-          (Dl , Dr) = D.ident
-      in eqpair Cl Dl , eqpair Cr Dr
-    }
-  where
-    open module C = Category C
-    open module D = Category D
-    -- Two pairs are equal if their components are equal.
-    eqpair : {ℓ : Level} → { A : Set ℓ } → { B : Set ℓ } → { a a' : A } → { b b' : B } → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
-    eqpair {a = a} {b = b} eqa eqb = subst eqa (subst eqb (refl {x = (a , b)}))
-
-Opposite : ∀ {ℓ ℓ'} → Category {ℓ} {ℓ'} → Category {ℓ} {ℓ'}
-Opposite ℂ =
-  record
-    { Object = ℂ.Object
-    ; Arrow = λ A B → ℂ.Arrow B A
-    ; 𝟙 = ℂ.𝟙
-    ; _⊕_ = λ g f → f ℂ.⊕ g
-    ; assoc = sym ℂ.assoc
-    ; ident = swap ℂ.ident
-    }
-  where
-    open module ℂ = Category ℂ
-
-Hom : {ℓ ℓ' : Level} → (ℂ : Category {ℓ} {ℓ'}) → (A B : Object ℂ) → Set ℓ'
+Hom : {ℓ ℓ' : Level} → (ℂ : Category ℓ ℓ') → (A B : Object ℂ) → Set ℓ'
 Hom ℂ A B = Arrow ℂ A B
 
-module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} where
-  private
-    Obj = Object ℂ
-    Arr = Arrow ℂ
-    _+_ = _⊕_ ℂ
-
-  HomFromArrow : (A : Obj) → {B B' : Obj} → (g : Arr B B')
+module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} where
+  HomFromArrow : (A : ℂ .Object) → {B B' : ℂ .Object} → (g : ℂ .Arrow B B')
     → Hom ℂ A B → Hom ℂ A B'
-  HomFromArrow _A g = λ f → g + f
+  HomFromArrow _A = _⊕_ ℂ

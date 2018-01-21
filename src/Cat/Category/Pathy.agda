@@ -1,7 +1,8 @@
 {-# OPTIONS --cubical #-}
 
-module Category.Pathy where
+module Cat.Category.Pathy where
 
+open import Level
 open import Cubical.PathPrelude
 
 {-
