@@ -44,7 +44,7 @@ record Category {ℓ ℓ'} : Set (lsuc (ℓ' ⊔ ℓ)) where
 
 open Category public
 
-module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} { A B : Object ℂ } where
+module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} { A B : ℂ .Object } where
   private
     open module ℂ = Category ℂ
     _+_ = ℂ._⊕_
@@ -59,36 +59,28 @@ module _ {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} { A B : Object ℂ } w
   Monomorphism {X} f = ( g₀ g₁ : ℂ.Arrow X A ) → f + g₀ ≡ f + g₁ → g₀ ≡ g₁
 
   iso-is-epi : ∀ {X} (f : ℂ.Arrow A B) → Isomorphism f → Epimorphism {X = X} f
-  -- Idea: Pre-compose with f- on both sides of the equality of eq to get
-  -- g₀ + f + f- ≡ g₁ + f + f-
-  -- which by left-inv reduces to the goal.
   iso-is-epi f (f- , left-inv , right-inv) g₀ g₁ eq =
-     trans (sym (fst ℂ.ident))
-       ( trans (cong (_+_ g₀) (sym right-inv))
-         ( trans ℂ.assoc
-           ( trans (cong (λ x → x + f-) eq)
-             ( trans (sym ℂ.assoc)
-               ( trans (cong (_+_ g₁) right-inv) (fst ℂ.ident))
-             )
-           )
-         )
-       )
+    begin
+    g₀              ≡⟨ sym (fst ℂ.ident) ⟩
+    g₀ + ℂ.𝟙        ≡⟨ cong (_+_ g₀) (sym right-inv) ⟩
+    g₀ + (f + f-)   ≡⟨ ℂ.assoc ⟩
+    (g₀ + f) + f-   ≡⟨ cong (λ x → x + f-) eq ⟩
+    (g₁ + f) + f-   ≡⟨ sym ℂ.assoc ⟩
+    g₁ + (f + f-)   ≡⟨ cong (_+_ g₁) right-inv ⟩
+    g₁ + ℂ.𝟙        ≡⟨ fst ℂ.ident ⟩
+    g₁              ∎
 
   iso-is-mono : ∀ {X} (f : ℂ.Arrow A B ) → Isomorphism f → Monomorphism {X = X} f
-  -- For the next goal we do something similar: Post-compose with f- and use
-  -- right-inv to get the goal.
   iso-is-mono f (f- , (left-inv , right-inv)) g₀ g₁ eq =
-    trans (sym (snd ℂ.ident))
-      ( trans (cong (λ x → x + g₀) (sym left-inv))
-        ( trans (sym ℂ.assoc)
-          ( trans (cong (_+_ f-) eq)
-            ( trans ℂ.assoc
-              ( trans (cong (λ x → x + g₁) left-inv) (snd ℂ.ident)
-              )
-            )
-          )
-        )
-      )
+    begin
+    g₀            ≡⟨ sym (snd ℂ.ident) ⟩
+    ℂ.𝟙 + g₀      ≡⟨ cong (λ x → x + g₀) (sym left-inv) ⟩
+    (f- + f) + g₀ ≡⟨ sym ℂ.assoc ⟩
+    f- + (f + g₀) ≡⟨ cong (_+_ f-) eq ⟩
+    f- + (f + g₁) ≡⟨ ℂ.assoc ⟩
+    (f- + f) + g₁ ≡⟨ cong (λ x → x + g₁) left-inv ⟩
+    ℂ.𝟙 + g₁      ≡⟨ snd ℂ.ident ⟩
+    g₁            ∎
 
   iso-is-epi-mono : ∀ {X} (f : ℂ.Arrow A B ) → Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
   iso-is-epi-mono f iso = iso-is-epi f iso , iso-is-mono f iso
@@ -102,9 +94,7 @@ epi-mono-is-not-iso f =
 
 -- Isomorphism of objects
 _≅_ : { ℓ ℓ' : Level } → { ℂ : Category {ℓ} {ℓ'} } → ( A B : Object ℂ ) → Set ℓ'
-_≅_ {ℂ = ℂ} A B = Σ[ f ∈ ℂ.Arrow A B ] (Isomorphism {ℂ = ℂ} f)
-  where
-    open module ℂ = Category ℂ
+_≅_ {ℂ = ℂ} A B = Σ[ f ∈ ℂ .Arrow A B ] (Isomorphism {ℂ = ℂ} f)
 
 IsProduct : ∀ {ℓ ℓ'} (ℂ : Category {ℓ} {ℓ'}) {A B obj : Object ℂ} (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) → Set (ℓ ⊔ ℓ')
 IsProduct ℂ {A = A} {B = B} π₁ π₂
@@ -113,21 +103,23 @@ IsProduct ℂ {A = A} {B = B} π₁ π₂
   where
     open module ℂ = Category ℂ
 
--- Consider this style for efficiency:
--- record R : Set where
+-- Tip from Andrea; Consider this style for efficiency:
+-- record IsProduct {ℓ ℓ' : Level} (ℂ : Category {ℓ} {ℓ'})
+--   {A B obj : Object ℂ} (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) : Set (ℓ ⊔ ℓ') where
 --   field
---     isP : IsProduct {!!} {!!} {!!}
+--      isProduct : ∀ {X : ℂ .Object} (x₁ : ℂ .Arrow X A) (x₂ : ℂ .Arrow X B)
+--        → ∃![ x ] (ℂ ._⊕_ π₁ x ≡ x₁ × ℂ. _⊕_ π₂ x ≡ x₂)
 
-record Product {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} (A B : Category.Object ℂ) : Set (ℓ ⊔ ℓ') where
+record Product {ℓ ℓ' : Level} {ℂ : Category {ℓ} {ℓ'}} (A B : ℂ .Object) : Set (ℓ ⊔ ℓ') where
   no-eta-equality
   field
-    obj : Category.Object ℂ
-    proj₁ : Category.Arrow ℂ obj A
-    proj₂ : Category.Arrow ℂ obj B
+    obj : ℂ .Object
+    proj₁ : ℂ .Arrow obj A
+    proj₂ : ℂ .Arrow obj B
     {{isProduct}} : IsProduct ℂ proj₁ proj₂
 
 mutual
-  catProduct : {ℓ : Level} → ( C D : Category {ℓ} {ℓ} ) → Category {ℓ} {ℓ}
+  catProduct : {ℓ : Level} → (C D : Category {ℓ} {ℓ}) → Category {ℓ} {ℓ}
   catProduct C D =
     record
       { Object = C.Object × D.Object
@@ -145,8 +137,9 @@ mutual
       open module C = Category C
       open module D = Category D
       -- Two pairs are equal if their components are equal.
-      eqpair : {ℓ : Level} → { A : Set ℓ } → { B : Set ℓ } → { a a' : A } → { b b' : B } → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
-      eqpair {a = a} {b = b} eqa eqb = subst eqa (subst eqb (refl {x = (a , b)}))
+      eqpair : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} {a a' : A} {b b' : B}
+        → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
+      eqpair eqa eqb i = eqa i , eqb i
 
 
   -- arrowProduct : ∀ {ℓ} {C D : Category {ℓ} {ℓ}} → (Object C) × (Object D) → (Object C) × (Object D) → Set ℓ
