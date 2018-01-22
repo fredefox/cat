@@ -8,18 +8,16 @@ open import Cat.Category
 
 record Functor {ℓc ℓc' ℓd ℓd'} (C : Category ℓc ℓc') (D : Category ℓd ℓd')
   : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
-  private
-    open module C = Category C
-    open module D = Category D
+  open Category
   field
-    func* : C.Object → D.Object
-    func→ : {dom cod : C.Object} → C.Arrow dom cod → D.Arrow (func* dom) (func* cod)
-    ident   : { c : C.Object } → func→ (C.𝟙 {c}) ≡ D.𝟙 {func* c}
+    func* : C .Object → D .Object
+    func→ : {dom cod : C .Object} → C .Arrow dom cod → D .Arrow (func* dom) (func* cod)
+    ident   : { c : C .Object } → func→ (C .𝟙 {c}) ≡ D .𝟙 {func* c}
     -- TODO: Avoid use of ugly explicit arguments somehow.
     -- This guy managed to do it:
     --    https://github.com/copumpkin/categories/blob/master/Categories/Functor/Core.agda
-    distrib : { c c' c'' : C.Object} {a : C.Arrow c c'} {a' : C.Arrow c' c''}
-      → func→ (a' C.⊕ a) ≡ func→ a' D.⊕ func→ a
+    distrib : { c c' c'' : C .Object} {a : C .Arrow c c'} {a' : C .Arrow c' c''}
+      → func→ (C ._⊕_ a' a) ≡ D ._⊕_ (func→ a') (func→ a)
 
 module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : Functor A B) where
   open Functor
