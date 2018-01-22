@@ -1,5 +1,5 @@
 {-# OPTIONS --allow-unsolved-metas #-}
-module Cat.Naturality where
+module Cat.Categories.Fun where
 
 open import Agda.Primitive
 open import Cubical
@@ -93,8 +93,9 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       ; ident = λ {A B} → :ident: {A} {B}
       }
 
-  aCat : Category (ℓc ⊔ (ℓc' ⊔ (ℓd ⊔ ℓd'))) (ℓc ⊔ (ℓc' ⊔ ℓd'))
-  aCat = record
+  -- Functor categories. Objects are functors, arrows are natural transformations.
+  Fun : Category (ℓc ⊔ (ℓc' ⊔ (ℓd ⊔ ℓd'))) (ℓc ⊔ (ℓc' ⊔ ℓd'))
+  Fun = record
     { Object = Functor ℂ 𝔻
     ; Arrow = NaturalTranformation
     ; 𝟙 = λ {F} → identityNat F
