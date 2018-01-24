@@ -11,16 +11,35 @@ open import Cat.Category
 open import Cat.Functor
 open Category
 
-Sets : {ℓ : Level} → Category (lsuc ℓ) ℓ
-Sets {ℓ} = record
-  { Object = Set ℓ
-  ; Arrow = λ T U → T → U
-  ; 𝟙 = id
-  ; _⊕_ = _∘′_
-  ; isCategory = record { assoc = refl ; ident = funExt (λ _ → refl) , funExt (λ _ → refl) }
-  }
-  where
-    open import Function
+module _ {ℓ : Level} where
+  Sets : Category (lsuc ℓ) ℓ
+  Sets = record
+    { Object = Set ℓ
+    ; Arrow = λ T U → T → U
+    ; 𝟙 = id
+    ; _⊕_ = _∘′_
+    ; isCategory = record { assoc = refl ; ident = funExt (λ _ → refl) , funExt (λ _ → refl) }
+    }
+    where
+      open import Function
+
+  private
+    module _ {X A B : Set ℓ} (f : X → A) (g : X → B) where
+      pair : (X → A × B)
+      pair x = f x , g x
+      lem : Sets ._⊕_ proj₁ pair ≡ f × Sets ._⊕_ snd pair ≡ g
+      proj₁ lem = refl
+      snd   lem = refl
+    instance
+      isProduct : {A B : Sets .Object} → IsProduct Sets {A} {B} fst snd
+      isProduct f g = pair f g , lem f g
+
+    product : (A B : Sets .Object) → Product {ℂ = Sets} A B
+    product A B = record { obj = A × B ; proj₁ = fst ; proj₂ = snd ; isProduct = {!!} }
+
+  instance
+    SetsHasProducts : HasProducts Sets
+    SetsHasProducts = record { product = product }
 
 -- Covariant Presheaf
 Representable : {ℓ ℓ' : Level} → (ℂ : Category ℓ ℓ') → Set (ℓ ⊔ lsuc ℓ')

@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --allow-unsolved-metas --cubical #-}
 
 module Cat.Category.Properties where
 
@@ -48,33 +48,25 @@ epi-mono-is-not-iso f =
   in {!!}
 -}
 
+  open import Cat.Categories.Cat
+  open Exponential
+  open HasExponentials CatHasExponentials
 
-module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{hasProducts : HasProducts ℂ}} (B C : ℂ .Category.Object) where
-  open Category
-  open HasProducts hasProducts
-  open Product
-  prod-obj : (A B : ℂ .Object) → ℂ .Object
-  prod-obj A B = Product.obj (product A B)
-  -- The product mentioned in awodey in Def 6.1 is not the regular product of arrows.
-  -- It's a "parallel" product
-  ×A : {A A' B B' : ℂ .Object} → ℂ .Arrow A A' → ℂ .Arrow B B'
-    → ℂ .Arrow (prod-obj A B) (prod-obj A' B')
-  ×A {A = A} {A' = A'} {B = B} {B' = B'} a b = arrowProduct (product A' B')
-    (ℂ ._⊕_ a ((product A B) .proj₁))
-    (ℂ ._⊕_ b ((product A B) .proj₂))
+  Exp : Set {!!}
+  Exp = Exponential (Cat {!!} {!!}) {{ℂHasProducts = {!!}}}
+    Sets (Opposite {!!})
 
-  IsExponential : {Cᴮ : ℂ .Object} → ℂ .Arrow (prod-obj Cᴮ B) C → Set (ℓ ⊔ ℓ')
-  IsExponential eval = ∀ (A : ℂ .Object) (f : ℂ .Arrow (prod-obj A B) C)
-    → ∃![ f~ ] (ℂ ._⊕_ eval (×A f~ (ℂ .𝟙)) ≡ f)
+  -- _⇑_ : (A B : Catℓ .Object) → Catℓ .Object
+  -- A ⇑ B = (exponent A B) .obj
 
-  record Exponential : Set (ℓ ⊔ ℓ') where
-    field
-      -- obj ≡ Cᴮ
-      obj : ℂ .Object
-      eval : ℂ .Arrow ( prod-obj obj B ) C
-      {{isExponential}} : IsExponential eval
+  -- private
+  --   :func*: : ℂ .Object → (Sets ⇑ Opposite ℂ) .Object
+  --   :func*: x = {!!}
 
-_⇑_ = Exponential
-
--- yoneda : ∀ {ℓ ℓ'} → {ℂ : Category ℓ ℓ'} → Functor ℂ (Sets ⇑ (Opposite ℂ))
--- yoneda = {!!}
+  -- yoneda : Functor ℂ (Sets ⇑ (Opposite ℂ))
+  -- yoneda = record
+  --   { func* = :func*:
+  --   ; func→ = {!!}
+  --   ; ident = {!!}
+  --   ; distrib = {!!}
+  --   }

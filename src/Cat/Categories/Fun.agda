@@ -13,7 +13,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
   open Category
   open Functor
 
-  module _ (F : Functor ℂ 𝔻) (G : Functor ℂ 𝔻) where
+  module _ (F G : Functor ℂ 𝔻) where
     -- What do you call a non-natural tranformation?
     Transformation : Set (ℓc ⊔ ℓd')
     Transformation = (C : ℂ .Object) → 𝔻 .Arrow (F .func* C) (G .func* C)
