@@ -74,6 +74,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
     :func*: A = {!!}
 
     -- prsh = presheaf {ℂ = ℂ}
+    -- k = prsh {!!}
     -- :func*:' : ℂ .Object → Presheaf ℂ
     -- :func*:' = prsh
     -- module _ {A B : ℂ .Object} (f : ℂ .Arrow A B) where
@@ -83,7 +84,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
   yoneda : Functor ℂ (Setz ⇑ (Opposite ℂ))
   yoneda = record
     { func* = :func*:
-    ; func→ = {!:func→:'!}
+    ; func→ = {!!}
     ; ident = {!!}
     ; distrib = {!!}
     }
