@@ -56,8 +56,6 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
   open Exponential
   private
     Catℓ = Cat ℓ ℓ
-    CatHasExponentials : HasExponentials Catℓ
-    CatHasExponentials = Cat.hasExponentials ℓ
 
   -- Exp : Set (lsuc (lsuc ℓ))
   -- Exp = Exponential (Cat (lsuc ℓ) ℓ)
@@ -66,7 +64,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
   _⇑_ : (A B : Catℓ .Object) → Catℓ .Object
   A ⇑ B = (exponent A B) .obj
     where
-      open HasExponentials CatHasExponentials
+      open HasExponentials (Cat.hasExponentials ℓ)
 
   private
     -- I need `Sets` to be a `Category ℓ ℓ` but it simlpy isn't.
@@ -75,10 +73,17 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
     :func*: : ℂ .Object → (Setz ⇑ Opposite ℂ) .Object
     :func*: A = {!!}
 
+    -- prsh = presheaf {ℂ = ℂ}
+    -- :func*:' : ℂ .Object → Presheaf ℂ
+    -- :func*:' = prsh
+    -- module _ {A B : ℂ .Object} (f : ℂ .Arrow A B) where
+    --   open import Cat.Categories.Fun
+    --   :func→:' : NaturalTransformation (prsh A) (prsh B)
+
   yoneda : Functor ℂ (Setz ⇑ (Opposite ℂ))
   yoneda = record
     { func* = :func*:
-    ; func→ = {!!}
+    ; func→ = {!:func→:'!}
     ; ident = {!!}
     ; distrib = {!!}
     }
