@@ -34,8 +34,6 @@ module _ (ℓ ℓ' : Level) where
           (λ i → {x y : A .Object} → A .Arrow x y → D .Arrow (eq* i x) (eq* i y))
           (func→ (h ∘f (g ∘f f))) (func→ ((h ∘f g) ∘f f))
         eq→ = refl
-        id-l = (h ∘f (g ∘f f)) .ident -- = func→ (h ∘f (g ∘f f)) (𝟙 A) ≡ 𝟙 D
-        id-r = ((h ∘f g) ∘f f) .ident -- = func→ ((h ∘f g) ∘f f) (𝟙 A) ≡ 𝟙 D
         postulate eqI : PathP
                    (λ i → ∀ {c : A .Object} → eq→ i (A .𝟙 {c}) ≡ D .𝟙 {eq* i c})
                    (ident ((h ∘f (g ∘f f))))

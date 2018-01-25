@@ -6,7 +6,7 @@ consisting of the proposal for the thesis).
 Installation
 ============
 You probably need a very recent version of the Agda compiler. At the time
-of writing the solution has been tested with Agda version 2.6.0-9af3e07.
+of writing the solution has been tested with Agda version 2.6.0-5d84754.
 
 Dependencies
 ------------
