@@ -89,6 +89,26 @@ record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : ℂ .Object) 
     proj₂ : ℂ .Arrow obj B
     {{isProduct}} : IsProduct ℂ proj₁ proj₂
 
+  arrowProduct : ∀ {X} → (π₁ : Arrow ℂ X A) (π₂ : Arrow ℂ X B)
+    → Arrow ℂ X obj
+  arrowProduct π₁ π₂ = fst (isProduct π₁ π₂)
+
+record HasProducts {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ ⊔ ℓ') where
+  field
+    product : ∀ (A B : ℂ .Object) → Product {ℂ = ℂ} A B
+
+  open Product
+
+  objectProduct : (A B : ℂ .Object) → ℂ .Object
+  objectProduct A B = Product.obj (product A B)
+  -- The product mentioned in awodey in Def 6.1 is not the regular product of arrows.
+  -- It's a "parallel" product
+  parallelProduct : {A A' B B' : ℂ .Object} → ℂ .Arrow A A' → ℂ .Arrow B B'
+    → ℂ .Arrow (objectProduct A B) (objectProduct A' B')
+  parallelProduct {A = A} {A' = A'} {B = B} {B' = B'} a b = arrowProduct (product A' B')
+    (ℂ ._⊕_ a ((product A B) .proj₁))
+    (ℂ ._⊕_ b ((product A B) .proj₂))
+
 module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
   Opposite : Category ℓ ℓ'
   Opposite =
@@ -120,3 +140,37 @@ module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} where
   HomFromArrow : (A : ℂ .Object) → {B B' : ℂ .Object} → (g : ℂ .Arrow B B')
     → Hom ℂ A B → Hom ℂ A B'
   HomFromArrow _A = _⊕_ ℂ
+
+module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{hasProducts : HasProducts ℂ}} where
+  open HasProducts hasProducts
+  open Product hiding (obj)
+  private
+    _×p_ : (A B : ℂ .Object) → ℂ .Object
+    _×p_ A B = Product.obj (product A B)
+
+  module _ (B C : ℂ .Category.Object) where
+    IsExponential : (Cᴮ : ℂ .Object) → ℂ .Arrow (Cᴮ ×p B) C → Set (ℓ ⊔ ℓ')
+    IsExponential Cᴮ eval = ∀ (A : ℂ .Object) (f : ℂ .Arrow (A ×p B) C)
+      → ∃![ f~ ] (ℂ ._⊕_ eval (parallelProduct f~ (ℂ .𝟙)) ≡ f)
+
+    record Exponential : Set (ℓ ⊔ ℓ') where
+      field
+        -- obj ≡ Cᴮ
+        obj : ℂ .Object
+        eval : ℂ .Arrow ( obj ×p B ) C
+        {{isExponential}} : IsExponential obj eval
+      -- If I make this an instance-argument then the instance resolution
+      -- algorithm goes into an infinite loop. Why?
+      exponentialsHaveProducts : HasProducts ℂ
+      exponentialsHaveProducts = hasProducts
+      transpose : (A : ℂ .Object) → ℂ .Arrow (A ×p B) C → ℂ .Arrow A obj
+      transpose A f = fst (isExponential A f)
+
+record HasExponentials {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {{_ : HasProducts ℂ}} : Set (ℓ ⊔ ℓ') where
+  field
+    exponent : (A B : ℂ .Object) → Exponential ℂ A B
+
+record CartesianClosed {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ ⊔ ℓ') where
+  field
+    {{hasProducts}}     : HasProducts ℂ
+    {{hasExponentials}} : HasExponentials ℂ

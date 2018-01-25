@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 module Cat.Categories.Sets where
 
 open import Cubical.PathPrelude
@@ -11,16 +9,37 @@ open import Cat.Category
 open import Cat.Functor
 open Category
 
-Sets : {ℓ : Level} → Category (lsuc ℓ) ℓ
-Sets {ℓ} = record
-  { Object = Set ℓ
-  ; Arrow = λ T U → T → U
-  ; 𝟙 = id
-  ; _⊕_ = _∘′_
-  ; isCategory = record { assoc = refl ; ident = funExt (λ _ → refl) , funExt (λ _ → refl) }
-  }
-  where
-    open import Function
+module _ {ℓ : Level} where
+  Sets : Category (lsuc ℓ) ℓ
+  Sets = record
+    { Object = Set ℓ
+    ; Arrow = λ T U → T → U
+    ; 𝟙 = id
+    ; _⊕_ = _∘′_
+    ; isCategory = record { assoc = refl ; ident = funExt (λ _ → refl) , funExt (λ _ → refl) }
+    }
+    where
+      open import Function
+
+  private
+    module _ {X A B : Set ℓ} (f : X → A) (g : X → B) where
+      _&&&_ : (X → A × B)
+      _&&&_ x = f x , g x
+    module _ {X A B : Set ℓ} (f : X → A) (g : X → B) where
+      _S⊕_ = Sets ._⊕_
+      lem : proj₁ S⊕ (f &&& g) ≡ f × snd S⊕ (f &&& g) ≡ g
+      proj₁ lem = refl
+      proj₂ lem = refl
+    instance
+      isProduct : {A B : Sets .Object} → IsProduct Sets {A} {B} fst snd
+      isProduct f g = f &&& g , lem f g
+
+    product : (A B : Sets .Object) → Product {ℂ = Sets} A B
+    product A B = record { obj = A × B ; proj₁ = fst ; proj₂ = snd ; isProduct = isProduct }
+
+  instance
+    SetsHasProducts : HasProducts Sets
+    SetsHasProducts = record { product = product }
 
 -- Covariant Presheaf
 Representable : {ℓ ℓ' : Level} → (ℂ : Category ℓ ℓ') → Set (ℓ ⊔ lsuc ℓ')

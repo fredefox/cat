@@ -8,22 +8,36 @@ open import Cat.Category
 
 record Functor {ℓc ℓc' ℓd ℓd'} (C : Category ℓc ℓc') (D : Category ℓd ℓd')
   : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
-  private
-    open module C = Category C
-    open module D = Category D
+  open Category
   field
-    func* : C.Object → D.Object
-    func→ : {dom cod : C.Object} → C.Arrow dom cod → D.Arrow (func* dom) (func* cod)
-    ident   : { c : C.Object } → func→ (C.𝟙 {c}) ≡ D.𝟙 {func* c}
+    func* : C .Object → D .Object
+    func→ : {dom cod : C .Object} → C .Arrow dom cod → D .Arrow (func* dom) (func* cod)
+    ident   : { c : C .Object } → func→ (C .𝟙 {c}) ≡ D .𝟙 {func* c}
     -- TODO: Avoid use of ugly explicit arguments somehow.
     -- This guy managed to do it:
     --    https://github.com/copumpkin/categories/blob/master/Categories/Functor/Core.agda
-    distrib : { c c' c'' : C.Object} {a : C.Arrow c c'} {a' : C.Arrow c' c''}
-      → func→ (a' C.⊕ a) ≡ func→ a' D.⊕ func→ a
+    distrib : { c c' c'' : C .Object} {a : C .Arrow c c'} {a' : C .Arrow c' c''}
+      → func→ (C ._⊕_ a' a) ≡ D ._⊕_ (func→ a') (func→ a)
+
+open Functor
+open Category
+
+module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
+  private
+    _ℂ⊕_ = ℂ ._⊕_
+  Functor≡ : {F G : Functor ℂ 𝔻}
+    → (eq* : F .func* ≡ G .func*)
+    → (eq→ : PathP (λ i → ∀ {x y} → ℂ .Arrow x y → 𝔻 .Arrow (eq* i x) (eq* i y))
+      (F .func→) (G .func→))
+    → (eqI : PathP (λ i → ∀ {A : ℂ .Object} → eq→ i (ℂ .𝟙 {A}) ≡ 𝔻 .𝟙 {eq* i A})
+      (ident F) (ident G))
+    → (eqD : PathP (λ i → {A B C : ℂ .Object} {f : ℂ .Arrow A B} {g : ℂ .Arrow B C}
+      → eq→ i (ℂ ._⊕_ g f) ≡ 𝔻 ._⊕_ (eq→ i g) (eq→ i f))
+      (distrib F) (distrib G))
+    → F ≡ G
+  Functor≡ eq* eq→ eqI eqD i = record { func* = eq* i ; func→ = eq→ i ; ident = eqI i ; distrib = eqD i }
 
 module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : Functor A B) where
-  open Functor
-  open Category
   private
     F* = F .func*
     F→ = F .func→

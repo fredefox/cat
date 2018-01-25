@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --allow-unsolved-metas --cubical #-}
 
 module Cat.Category.Properties where
 
@@ -48,18 +48,37 @@ epi-mono-is-not-iso f =
   in {!!}
 -}
 
+module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
+  open import Cat.Category
+  open Category
+  open import Cat.Categories.Cat using (Cat)
+  module Cat = Cat.Categories.Cat
+  open Exponential
+  private
+    Catℓ = Cat ℓ ℓ
+    CatHasExponentials : HasExponentials Catℓ
+    CatHasExponentials = Cat.hasExponentials ℓ
 
-module _ {ℓa ℓa' ℓb ℓb'} where
-  Exponential : Category ℓa ℓa' → Category ℓb ℓb' → Category {!!} {!!}
-  Exponential A B = record
-    { Object = {!!}
-    ; Arrow = {!!}
-    ; 𝟙 = {!!}
-    ; _⊕_ = {!!}
-    ; isCategory = {!!}
+  -- Exp : Set (lsuc (lsuc ℓ))
+  -- Exp = Exponential (Cat (lsuc ℓ) ℓ)
+  --   Sets (Opposite ℂ)
+
+  _⇑_ : (A B : Catℓ .Object) → Catℓ .Object
+  A ⇑ B = (exponent A B) .obj
+    where
+      open HasExponentials CatHasExponentials
+
+  private
+    -- I need `Sets` to be a `Category ℓ ℓ` but it simlpy isn't.
+    Setz : Category ℓ ℓ
+    Setz = {!Sets!}
+    :func*: : ℂ .Object → (Setz ⇑ Opposite ℂ) .Object
+    :func*: A = {!!}
+
+  yoneda : Functor ℂ (Setz ⇑ (Opposite ℂ))
+  yoneda = record
+    { func* = :func*:
+    ; func→ = {!!}
+    ; ident = {!!}
+    ; distrib = {!!}
     }
-
-_⇑_ = Exponential
-
-yoneda : ∀ {ℓ ℓ'} → {ℂ : Category ℓ ℓ'} → Functor ℂ (Sets ⇑ (Opposite ℂ))
-yoneda = {!!}
