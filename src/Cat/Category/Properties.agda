@@ -52,6 +52,8 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
   open import Cat.Category
   open Category
   open import Cat.Categories.Cat using (Cat)
+  open import Cat.Categories.Fun
+  open import Cat.Categories.Sets
   module Cat = Cat.Categories.Cat
   open Exponential
   private
@@ -66,12 +68,12 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
     where
       open HasExponentials (Cat.hasExponentials ℓ)
 
-  private
-    -- I need `Sets` to be a `Category ℓ ℓ` but it simlpy isn't.
-    Setz : Category ℓ ℓ
-    Setz = {!Sets!}
-    :func*: : ℂ .Object → (Setz ⇑ Opposite ℂ) .Object
-    :func*: A = {!!}
+  -- private
+  --   -- I need `Sets` to be a `Category ℓ ℓ` but it simlpy isn't.
+  --   Setz : Category ℓ ℓ
+  --   Setz = {!Sets!}
+  --   :func*: : ℂ .Object → (Setz ⇑ Opposite ℂ) .Object
+  --   :func*: A = {!!}
 
     -- prsh = presheaf {ℂ = ℂ}
     -- k = prsh {!!}
@@ -81,9 +83,9 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
     --   open import Cat.Categories.Fun
     --   :func→:' : NaturalTransformation (prsh A) (prsh B)
 
-  yoneda : Functor ℂ (Setz ⇑ (Opposite ℂ))
+  yoneda : Functor ℂ (Fun {ℂ = Opposite ℂ} {𝔻 = Sets {ℓ}})
   yoneda = record
-    { func* = :func*:
+    { func* = presheaf {ℂ = ℂ}
     ; func→ = {!!}
     ; ident = {!!}
     ; distrib = {!!}
