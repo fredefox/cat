@@ -141,8 +141,8 @@ module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} where
     → Hom ℂ A B → Hom ℂ A B'
   HomFromArrow _A = _⊕_ ℂ
 
-module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{ℂHasProducts : HasProducts ℂ}} where
-  open HasProducts ℂHasProducts
+module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{hasProducts : HasProducts ℂ}} where
+  open HasProducts hasProducts
   open Product hiding (obj)
   private
     _×p_ : (A B : ℂ .Object) → ℂ .Object
@@ -161,8 +161,8 @@ module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{ℂHasProducts : HasProducts ℂ
         {{isExponential}} : IsExponential obj eval
       -- If I make this an instance-argument then the instance resolution
       -- algorithm goes into an infinite loop. Why?
-      productsFromExp : HasProducts ℂ
-      productsFromExp = ℂHasProducts
+      exponentialsHaveProducts : HasProducts ℂ
+      exponentialsHaveProducts = hasProducts
       transpose : (A : ℂ .Object) → ℂ .Arrow (A ×p B) C → ℂ .Arrow A obj
       transpose A f = fst (isExponential A f)
 

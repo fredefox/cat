@@ -48,25 +48,37 @@ epi-mono-is-not-iso f =
   in {!!}
 -}
 
-  open import Cat.Categories.Cat
+module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
+  open import Cat.Category
+  open Category
+  open import Cat.Categories.Cat using (Cat)
+  module Cat = Cat.Categories.Cat
   open Exponential
-  open HasExponentials CatHasExponentials
+  private
+    Catℓ = Cat ℓ ℓ
+    CatHasExponentials : HasExponentials Catℓ
+    CatHasExponentials = Cat.hasExponentials ℓ
 
-  Exp : Set {!!}
-  Exp = Exponential (Cat {!!} {!!}) {{ℂHasProducts = {!!}}}
-    Sets (Opposite {!!})
+  -- Exp : Set (lsuc (lsuc ℓ))
+  -- Exp = Exponential (Cat (lsuc ℓ) ℓ)
+  --   Sets (Opposite ℂ)
 
-  -- _⇑_ : (A B : Catℓ .Object) → Catℓ .Object
-  -- A ⇑ B = (exponent A B) .obj
+  _⇑_ : (A B : Catℓ .Object) → Catℓ .Object
+  A ⇑ B = (exponent A B) .obj
+    where
+      open HasExponentials CatHasExponentials
 
-  -- private
-  --   :func*: : ℂ .Object → (Sets ⇑ Opposite ℂ) .Object
-  --   :func*: x = {!!}
+  private
+    -- I need `Sets` to be a `Category ℓ ℓ` but it simlpy isn't.
+    Setz : Category ℓ ℓ
+    Setz = {!Sets!}
+    :func*: : ℂ .Object → (Setz ⇑ Opposite ℂ) .Object
+    :func*: A = {!!}
 
-  -- yoneda : Functor ℂ (Sets ⇑ (Opposite ℂ))
-  -- yoneda = record
-  --   { func* = :func*:
-  --   ; func→ = {!!}
-  --   ; ident = {!!}
-  --   ; distrib = {!!}
-  --   }
+  yoneda : Functor ℂ (Setz ⇑ (Opposite ℂ))
+  yoneda = record
+    { func* = :func*:
+    ; func→ = {!!}
+    ; ident = {!!}
+    ; distrib = {!!}
+    }
