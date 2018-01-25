@@ -23,23 +23,6 @@ eqpair eqa eqb i = eqa i , eqb i
 open Functor
 open Category
 
-module _ {ℓ ℓ' : Level} {A B : Category ℓ ℓ'} where
-  lift-eq-functors : {f g : Functor A B}
-    → (eq* : f .func* ≡ g .func*)
-    → (eq→ : PathP (λ i → ∀ {x y} → A .Arrow x y → B .Arrow (eq* i x) (eq* i y))
-    (f .func→) (g .func→))
-    --        → (eq→ : Functor.func→ f ≡ {!!}) -- Functor.func→ g)
-    -- Use PathP
-    -- directly to show heterogeneous equalities by using previous
-    -- equalities (i.e. continuous paths) to create new continuous paths.
-    → (eqI : PathP (λ i → ∀ {c : A .Object} → eq→ i (A .𝟙 {c}) ≡ B .𝟙 {eq* i c})
-    (ident f) (ident g))
-    → (eqD : PathP (λ i → { c c' c'' : A .Object} {a : A .Arrow c c'} {a' : A .Arrow c' c''}
-      → eq→ i (A ._⊕_ a' a) ≡ B ._⊕_ (eq→ i a') (eq→ i a))
-      (distrib f) (distrib g))
-    → f ≡ g
-  lift-eq-functors eq* eq→ eqI eqD i = record { func* = eq* i ; func→ = eq→ i ; ident = eqI i ; distrib = eqD i }
-
 -- The category of categories
 module _ (ℓ ℓ' : Level) where
   private
@@ -59,10 +42,9 @@ module _ (ℓ ℓ' : Level) where
       postulate eqD : PathP (λ i → { c c' c'' : A .Object} {a : A .Arrow c c'} {a' : A .Arrow c' c''}
                         → eq→ i (A ._⊕_ a' a) ≡ D ._⊕_ (eq→ i a') (eq→ i a))
                         (distrib (h ∘f (g ∘f f))) (distrib ((h ∘f g) ∘f f))
-      -- eqD = {!!}
 
       assc : h ∘f (g ∘f f) ≡ (h ∘f g) ∘f f
-      assc = lift-eq-functors eq* eq→ eqI eqD
+      assc = Functor≡ eq* eq→ eqI eqD
 
     module _ {A B : Category ℓ ℓ'} {f : Functor A B} where
       lem : (func* f) ∘ (func* (identity {C = A})) ≡ func* f
