@@ -27,41 +27,62 @@ open Category
 module _ (ℓ ℓ' : Level) where
   private
     module _ {A B C D : Category ℓ ℓ'} {f : Functor A B} {g : Functor B C} {h : Functor C D} where
-      eq* : func* (h ∘f (g ∘f f)) ≡ func* ((h ∘f g) ∘f f)
-      eq* = refl
-      eq→ : PathP
-        (λ i → {x y : A .Object} → A .Arrow x y → D .Arrow (eq* i x) (eq* i y))
-        (func→ (h ∘f (g ∘f f))) (func→ ((h ∘f g) ∘f f))
-      eq→ = refl
-      id-l = (h ∘f (g ∘f f)) .ident -- = func→ (h ∘f (g ∘f f)) (𝟙 A) ≡ 𝟙 D
-      id-r = ((h ∘f g) ∘f f) .ident -- = func→ ((h ∘f g) ∘f f) (𝟙 A) ≡ 𝟙 D
-      postulate eqI : PathP
-                 (λ i → ∀ {c : A .Object} → eq→ i (A .𝟙 {c}) ≡ D .𝟙 {eq* i c})
-                 (ident ((h ∘f (g ∘f f))))
-                 (ident ((h ∘f g) ∘f f))
-      postulate eqD : PathP (λ i → { c c' c'' : A .Object} {a : A .Arrow c c'} {a' : A .Arrow c' c''}
-                        → eq→ i (A ._⊕_ a' a) ≡ D ._⊕_ (eq→ i a') (eq→ i a))
-                        (distrib (h ∘f (g ∘f f))) (distrib ((h ∘f g) ∘f f))
+      private
+        eq* : func* (h ∘f (g ∘f f)) ≡ func* ((h ∘f g) ∘f f)
+        eq* = refl
+        eq→ : PathP
+          (λ i → {x y : A .Object} → A .Arrow x y → D .Arrow (eq* i x) (eq* i y))
+          (func→ (h ∘f (g ∘f f))) (func→ ((h ∘f g) ∘f f))
+        eq→ = refl
+        id-l = (h ∘f (g ∘f f)) .ident -- = func→ (h ∘f (g ∘f f)) (𝟙 A) ≡ 𝟙 D
+        id-r = ((h ∘f g) ∘f f) .ident -- = func→ ((h ∘f g) ∘f f) (𝟙 A) ≡ 𝟙 D
+        postulate eqI : PathP
+                   (λ i → ∀ {c : A .Object} → eq→ i (A .𝟙 {c}) ≡ D .𝟙 {eq* i c})
+                   (ident ((h ∘f (g ∘f f))))
+                   (ident ((h ∘f g) ∘f f))
+        postulate eqD : PathP (λ i → { c c' c'' : A .Object} {a : A .Arrow c c'} {a' : A .Arrow c' c''}
+                          → eq→ i (A ._⊕_ a' a) ≡ D ._⊕_ (eq→ i a') (eq→ i a))
+                          (distrib (h ∘f (g ∘f f))) (distrib ((h ∘f g) ∘f f))
 
       assc : h ∘f (g ∘f f) ≡ (h ∘f g) ∘f f
       assc = Functor≡ eq* eq→ eqI eqD
 
-    module _ {A B : Category ℓ ℓ'} {f : Functor A B} where
-      lem : (func* f) ∘ (func* (identity {C = A})) ≡ func* f
-      lem = refl
-      -- lemmm : func→ {C = A} {D = B} (f ∘f identity) ≡ func→ f
-      lemmm : PathP
-        (λ i →
-        {x y : Object A} → Arrow A x y → Arrow B (func* f x) (func* f y))
-        (func→ (f ∘f identity)) (func→ f)
-      lemmm = refl
-      postulate lemz : PathP (λ i → {c : A .Object} → PathP (λ _ → Arrow B (func* f c) (func* f c)) (func→ f (A .𝟙)) (B .𝟙))
-                  (ident (f ∘f identity)) (ident f)
-      -- lemz = {!!}
-      postulate ident-r : f ∘f identity ≡ f
-      -- ident-r = lift-eq-functors lem lemmm {!lemz!} {!!}
-      postulate ident-l : identity ∘f f ≡ f
-      -- ident-l = lift-eq-functors lem lemmm {!refl!} {!!}
+    module _ {ℂ 𝔻 : Category ℓ ℓ'} {F : Functor ℂ 𝔻} where
+      module _ where
+        private
+          eq* : (func* F) ∘ (func* (identity {C = ℂ})) ≡ func* F
+          eq* = refl
+          -- lemmm : func→ {C = A} {D = B} (f ∘f identity) ≡ func→ f
+          eq→ : PathP
+            (λ i →
+            {x y : Object ℂ} → Arrow ℂ x y → Arrow 𝔻 (func* F x) (func* F y))
+            (func→ (F ∘f identity)) (func→ F)
+          eq→ = refl
+          postulate
+            eqI-r : PathP (λ i → {c : ℂ .Object}
+                → PathP (λ _ → Arrow 𝔻 (func* F c) (func* F c)) (func→ F (ℂ .𝟙)) (𝔻 .𝟙))
+                        (ident (F ∘f identity)) (ident F)
+            eqD-r : PathP
+                        (λ i →
+                        {A B C : ℂ .Object} {f : ℂ .Arrow A B} {g : ℂ .Arrow B C} →
+                        eq→ i (ℂ ._⊕_ g f) ≡ 𝔻 ._⊕_ (eq→ i g) (eq→ i f))
+                        ((F ∘f identity) .distrib) (distrib F)
+        ident-r : F ∘f identity ≡ F
+        ident-r = Functor≡ eq* eq→ eqI-r eqD-r
+      module _ where
+        private
+          postulate
+            eq* : (identity ∘f F) .func* ≡ F .func*
+            eq→ : PathP
+              (λ i → {x y : Object ℂ} → ℂ .Arrow x y → 𝔻 .Arrow (eq* i x) (eq* i y))
+              ((identity ∘f F) .func→) (F .func→)
+            eqI : PathP (λ i → ∀ {A : ℂ .Object} → eq→ i (ℂ .𝟙 {A}) ≡ 𝔻 .𝟙 {eq* i A})
+                 (ident (identity ∘f F)) (ident F)
+            eqD : PathP (λ i → {A B C : ℂ .Object} {f : ℂ .Arrow A B} {g : ℂ .Arrow B C}
+                 → eq→ i (ℂ ._⊕_ g f) ≡ 𝔻 ._⊕_ (eq→ i g) (eq→ i f))
+                 (distrib (identity ∘f F)) (distrib F)
+        ident-l : identity ∘f F ≡ F
+        ident-l = Functor≡ eq* eq→ eqI eqD
 
   Cat : Category (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
   Cat =
@@ -80,19 +101,19 @@ module _ (ℓ ℓ' : Level) where
 module _ {ℓ ℓ' : Level} where
   Catt = Cat ℓ ℓ'
 
-  module _ (C D : Category ℓ ℓ') where
+  module _ (ℂ 𝔻 : Category ℓ ℓ') where
     private
-      :Object: = C .Object × D .Object
+      :Object: = ℂ .Object × 𝔻 .Object
       :Arrow:  : :Object: → :Object: → Set ℓ'
-      :Arrow: (c , d) (c' , d') = Arrow C c c' × Arrow D d d'
+      :Arrow: (c , d) (c' , d') = Arrow ℂ c c' × Arrow 𝔻 d d'
       :𝟙: : {o : :Object:} → :Arrow: o o
-      :𝟙: = C .𝟙 , D .𝟙
+      :𝟙: = ℂ .𝟙 , 𝔻 .𝟙
       _:⊕:_ :
         {a b c : :Object:} →
         :Arrow: b c →
         :Arrow: a b →
         :Arrow: a c
-      _:⊕:_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → (C ._⊕_) bc∈C ab∈C , D ._⊕_ bc∈D ab∈D}
+      _:⊕:_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → (ℂ ._⊕_) bc∈C ab∈C , 𝔻 ._⊕_ bc∈D ab∈D}
 
       instance
         :isCategory: : IsCategory :Object: :Arrow: :𝟙: _:⊕:_
@@ -103,8 +124,8 @@ module _ {ℓ ℓ' : Level} where
           , eqpair (snd C.ident) (snd D.ident)
           }
           where
-            open module C = IsCategory (C .isCategory)
-            open module D = IsCategory (D .isCategory)
+            open module C = IsCategory (ℂ .isCategory)
+            open module D = IsCategory (𝔻 .isCategory)
 
       :product: : Category ℓ ℓ'
       :product: = record
@@ -114,13 +135,13 @@ module _ {ℓ ℓ' : Level} where
         ; _⊕_ = _:⊕:_
         }
 
-      proj₁ : Arrow Catt :product: C
+      proj₁ : Arrow Catt :product: ℂ
       proj₁ = record { func* = fst ; func→ = fst ; ident = refl ; distrib = refl }
 
-      proj₂ : Arrow Catt :product: D
+      proj₂ : Arrow Catt :product: 𝔻
       proj₂ = record { func* = snd ; func→ = snd ; ident = refl ; distrib = refl }
 
-      module _ {X : Object Catt} (x₁ : Arrow Catt X C) (x₂ : Arrow Catt X D) where
+      module _ {X : Object Catt} (x₁ : Arrow Catt X ℂ) (x₂ : Arrow Catt X 𝔻) where
         open Functor
 
         -- ident' : {c : Object X} → ((func→ x₁) {dom = c} (𝟙 X) , (func→ x₂) {dom = c} (𝟙 X)) ≡ 𝟙 (catProduct C D)
@@ -137,10 +158,10 @@ module _ {ℓ ℓ' : Level} where
         -- Need to "lift equality of functors"
         -- If I want to do this like I do it for pairs it's gonna be a pain.
         postulate isUniqL : (Catt ⊕ proj₁) x ≡ x₁
-        -- isUniqL = lift-eq-functors refl refl {!!} {!!}
+        -- isUniqL = Functor≡ refl refl {!!} {!!}
 
         postulate isUniqR : (Catt ⊕ proj₂) x ≡ x₂
-        -- isUniqR = lift-eq-functors refl refl {!!} {!!}
+        -- isUniqR = Functor≡ refl refl {!!} {!!}
 
         isUniq : (Catt ⊕ proj₁) x ≡ x₁ × (Catt ⊕ proj₂) x ≡ x₂
         isUniq = isUniqL , isUniqR
@@ -148,11 +169,11 @@ module _ {ℓ ℓ' : Level} where
         uniq : ∃![ x ] ((Catt ⊕ proj₁) x ≡ x₁ × (Catt ⊕ proj₂) x ≡ x₂)
         uniq = x , isUniq
 
-      instance
-        isProduct : IsProduct Catt proj₁ proj₂
-        isProduct = uniq
+    instance
+      isProduct : IsProduct (Cat ℓ ℓ') proj₁ proj₂
+      isProduct = uniq
 
-    product : Product {ℂ = Catt} C D
+    product : Product {ℂ = (Cat ℓ ℓ')} ℂ 𝔻
     product = record
       { obj = :product:
       ; proj₁ = proj₁
@@ -160,7 +181,6 @@ module _ {ℓ ℓ' : Level} where
       }
 
 module _ {ℓ ℓ' : Level} where
-  open Category
   instance
     hasProducts : HasProducts (Cat ℓ ℓ')
     hasProducts = record { product = product }
@@ -169,9 +189,7 @@ module _ {ℓ ℓ' : Level} where
 module _ (ℓ : Level) where
   private
     open Data.Product
-    open Category
     open import Cat.Categories.Fun
-    open Functor
 
     Catℓ : Category (lsuc (ℓ ⊔ ℓ)) (ℓ ⊔ ℓ)
     Catℓ = Cat ℓ ℓ
@@ -317,7 +335,6 @@ module _ (ℓ : Level) where
         catTranspose : ∃![ F~ ] (Catℓ ._⊕_ :eval: (parallelProduct F~ (Catℓ .𝟙 {o = ℂ})) ≡ F)
         catTranspose = transpose , eq
 
-      -- :isExponential: : IsExponential Catℓ A B :obj: {!:eval:!}
       :isExponential: : IsExponential Catℓ ℂ 𝔻 :obj: :eval:
       :isExponential: = catTranspose
 

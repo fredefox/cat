@@ -28,16 +28,12 @@ module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
   Functor≡ : {F G : Functor ℂ 𝔻}
     → (eq* : F .func* ≡ G .func*)
     → (eq→ : PathP (λ i → ∀ {x y} → ℂ .Arrow x y → 𝔻 .Arrow (eq* i x) (eq* i y))
-    (F .func→) (G .func→))
-    --        → (eq→ : Functor.func→ f ≡ {!!}) -- Functor.func→ g)
-    -- Use PathP
-    -- directly to show heterogeneous equalities by using previous
-    -- equalities (i.e. continuous paths) to create new continuous paths.
+      (F .func→) (G .func→))
     → (eqI : PathP (λ i → ∀ {A : ℂ .Object} → eq→ i (ℂ .𝟙 {A}) ≡ 𝔻 .𝟙 {eq* i A})
-    (ident F) (ident G))
+      (ident F) (ident G))
     → (eqD : PathP (λ i → {A B C : ℂ .Object} {f : ℂ .Arrow A B} {g : ℂ .Arrow B C}
-    → eq→ i (ℂ ._⊕_ g f) ≡ 𝔻 ._⊕_ (eq→ i g) (eq→ i f))
-    (distrib F) (distrib G))
+      → eq→ i (ℂ ._⊕_ g f) ≡ 𝔻 ._⊕_ (eq→ i g) (eq→ i f))
+      (distrib F) (distrib G))
     → F ≡ G
   Functor≡ eq* eq→ eqI eqD i = record { func* = eq* i ; func→ = eq→ i ; ident = eqI i ; distrib = eqD i }
 
