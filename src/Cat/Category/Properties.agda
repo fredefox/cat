@@ -5,6 +5,8 @@ module Cat.Category.Properties where
 open import Agda.Primitive
 open import Data.Product
 open import Cubical
+import Cubical.WrappedPath
+module WP = Cubical.WrappedPath
 
 open import Cat.Category
 open import Cat.Functor
@@ -81,7 +83,23 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
       eqNat i f = {!!}
 
       :ident: : (:func→: (ℂ .𝟙 {c})) ≡ (Fun .𝟙 {o = prshf c})
-      :ident: i = eqTrans i , eqNat i
+      -- Consider this:
+      --     :ident: = {!λ i → eqTrans i , eqNat i!}
+      -- Goal:
+      --     :func→: (ℂ .𝟙) ≡ Fun .𝟙
+      -- Goal if normalized:
+      --     PathP (λ _ → Σ ((C : ℂ .Object) → ℂ .Arrow C c → ℂ .Arrow ...
+      -- Now consider this:
+      --     :ident: = WP.at {!!}
+      -- Goal:
+      --     WP.PathP
+      --       (λ _ →
+      --         Σ (Transformation (prshf c) (prshf c))
+      --         (Natural (prshf c) (prshf c)))
+      --       (:func→: (ℂ .𝟙)) (Fun .𝟙)
+      -- Goal if normalized:
+      --     WP.PathP (λ _ → Σ ((C : ℂ .Object) → ℂ .Arrow C c → ℂ .Arrow ...
+      :ident: = λ i → eqTrans i , eqNat i
 
   yoneda : Functor ℂ (Fun {ℂ = Opposite ℂ} {𝔻 = Sets {ℓ}})
   yoneda = record
