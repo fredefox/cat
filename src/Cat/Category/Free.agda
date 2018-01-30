@@ -31,6 +31,6 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
     { Object = Obj
     ; Arrow = Path
     ; 𝟙 = λ {o} → emptyPath o
-    ; _⊕_ = λ {a b c} → concatenate {a} {b} {c}
+    ; _∘_ = λ {a b c} → concatenate {a} {b} {c}
     ; isCategory = record { assoc = p-assoc ; ident = ident-r , ident-l }
     }

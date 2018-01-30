@@ -18,7 +18,7 @@ open import Cat.Functor
 -- categorical version of CTT
 
 module CwF {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
-  open Category
+  open Category hiding (_∘_)
   open Functor
   open import Function
   open import Cubical
@@ -53,7 +53,7 @@ module CwF {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
       { Object = Obj
       ; Arrow = Arr
       ; 𝟙 = one
-      ; _⊕_ = λ {a b c} → _:⊕:_ {a} {b} {c}
+      ; _∘_ = λ {a b c} → _:⊕:_ {a} {b} {c}
       }
 
   Contexts = ℂ .Object
@@ -96,6 +96,6 @@ module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
     { Object = Ns → Bool
     ; Arrow = Mor
     ; 𝟙 = {!!}
-    ; _⊕_ = {!!}
+    ; _∘_ = {!!}
     ; isCategory = {!!}
     }

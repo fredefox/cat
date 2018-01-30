@@ -6,7 +6,7 @@ open import Function
 
 open import Cat.Category
 
-open Category
+open Category hiding (_∘_)
 
 module _ {ℓc ℓc' ℓd ℓd'} (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
   record IsFunctor

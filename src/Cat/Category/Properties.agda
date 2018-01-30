@@ -15,27 +15,26 @@ module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : ℂ .Category.Obje
   open IsCategory (isCategory)
 
   iso-is-epi : Isomorphism {ℂ = ℂ} f → Epimorphism {ℂ = ℂ} {X = X} f
-  iso-is-epi (f- , left-inv , right-inv) g₀ g₁ eq =
-    begin
+  iso-is-epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
     g₀              ≡⟨ sym (proj₁ ident) ⟩
-    g₀ ⊕ 𝟙          ≡⟨ cong (_⊕_ g₀) (sym right-inv) ⟩
-    g₀ ⊕ (f ⊕ f-)   ≡⟨ assoc ⟩
-    (g₀ ⊕ f) ⊕ f-   ≡⟨ cong (λ φ → φ ⊕ f-) eq ⟩
-    (g₁ ⊕ f) ⊕ f-   ≡⟨ sym assoc ⟩
-    g₁ ⊕ (f ⊕ f-)   ≡⟨ cong (_⊕_ g₁) right-inv ⟩
-    g₁ ⊕ 𝟙          ≡⟨ proj₁ ident ⟩
+    g₀ ∘ 𝟙          ≡⟨ cong (_∘_ g₀) (sym right-inv) ⟩
+    g₀ ∘ (f ∘ f-)   ≡⟨ assoc ⟩
+    (g₀ ∘ f) ∘ f-   ≡⟨ cong (λ φ → φ ∘ f-) eq ⟩
+    (g₁ ∘ f) ∘ f-   ≡⟨ sym assoc ⟩
+    g₁ ∘ (f ∘ f-)   ≡⟨ cong (_∘_ g₁) right-inv ⟩
+    g₁ ∘ 𝟙          ≡⟨ proj₁ ident ⟩
     g₁              ∎
 
   iso-is-mono : Isomorphism {ℂ = ℂ} f → Monomorphism {ℂ = ℂ} {X = X} f
   iso-is-mono (f- , (left-inv , right-inv)) g₀ g₁ eq =
     begin
     g₀            ≡⟨ sym (proj₂ ident) ⟩
-    𝟙 ⊕ g₀        ≡⟨ cong (λ φ → φ ⊕ g₀) (sym left-inv) ⟩
-    (f- ⊕ f) ⊕ g₀ ≡⟨ sym assoc ⟩
-    f- ⊕ (f ⊕ g₀) ≡⟨ cong (_⊕_ f-) eq ⟩
-    f- ⊕ (f ⊕ g₁) ≡⟨ assoc ⟩
-    (f- ⊕ f) ⊕ g₁ ≡⟨ cong (λ φ → φ ⊕ g₁) left-inv ⟩
-    𝟙 ⊕ g₁        ≡⟨ proj₂ ident ⟩
+    𝟙 ∘ g₀        ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
+    (f- ∘ f) ∘ g₀ ≡⟨ sym assoc ⟩
+    f- ∘ (f ∘ g₀) ≡⟨ cong (_∘_ f-) eq ⟩
+    f- ∘ (f ∘ g₁) ≡⟨ assoc ⟩
+    (f- ∘ f) ∘ g₁ ≡⟨ cong (λ φ → φ ∘ g₁) left-inv ⟩
+    𝟙 ∘ g₁        ≡⟨ proj₂ ident ⟩
     g₁            ∎
 
   iso-is-epi-mono : Isomorphism {ℂ = ℂ} f → Epimorphism {ℂ = ℂ} {X = X} f × Monomorphism {ℂ = ℂ} {X = X} f
@@ -71,17 +70,22 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
 
     module _ {A B : ℂ .Object} (f : ℂ .Arrow A B) where
       :func→: : NaturalTransformation (prshf A) (prshf B)
-      :func→: = (λ C x → (ℂ ._⊕_ f x)) , λ f₁ → funExt λ x → lem
+      :func→: = (λ C x → ℂ [ f ∘ x ]) , λ f₁ → funExt λ x → lem
         where
           lem = (ℂ .isCategory) .IsCategory.assoc
     module _ {c : ℂ .Object} where
       eqTrans : (:func→: (ℂ .𝟙 {c})) .proj₁ ≡ (Fun .𝟙 {o = prshf c}) .proj₁
       eqTrans = funExt λ x → funExt λ x → ℂ .isCategory .IsCategory.ident .proj₂
-      eqNat : (i : I) → Natural (prshf c) (prshf c) (eqTrans i)
-      eqNat i f = {!!}
-
+      eqNat
+                 : PathP (λ i → {A B : ℂ .Object} (f : Opposite ℂ .Arrow A B)
+                   →   Sets [ eqTrans i B ∘ prshf c .Functor.func→ f ]
+                     ≡ Sets [ prshf c .Functor.func→ f ∘ eqTrans i A ])
+                   ((:func→: (ℂ .𝟙 {c})) .proj₂) ((Fun .𝟙 {o = prshf c}) .proj₂)
+      eqNat = λ i f i' x₁ → {!ℂ ._⊕_ ? ?!}
+      -- eqNat i f = {!!}
+      -- Sets ._⊕_ (eq₁ i B) (prshf A .func→ f) ≡ Sets ._⊕_ (prshf B .func→ f) (eq₁ i A)
       :ident: : (:func→: (ℂ .𝟙 {c})) ≡ (Fun .𝟙 {o = prshf c})
-      :ident: i = eqTrans i , eqNat i
+      :ident: = NaturalTransformation≡ eqTrans eqNat
 
   yoneda : Functor ℂ (Fun {ℂ = Opposite ℂ} {𝔻 = Sets {ℓ}})
   yoneda = record
