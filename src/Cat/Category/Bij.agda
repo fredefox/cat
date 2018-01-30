@@ -2,7 +2,7 @@
 
 module Cat.Category.Bij where
 
-open import Cubical.PathPrelude hiding ( Id )
+open import Cubical hiding ( Id )
 open import Cubical.FromStdLib
 
 module _ {A : Set} {a : A} {P : A → Set} where

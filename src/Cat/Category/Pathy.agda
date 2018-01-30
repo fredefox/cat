@@ -3,7 +3,7 @@
 module Cat.Category.Pathy where
 
 open import Level
-open import Cubical.PathPrelude
+open import Cubical
 
 {-
 module _ {ℓ ℓ'} {A : Set ℓ} {x : A}

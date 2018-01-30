@@ -4,7 +4,7 @@ module Cat.Category.Properties where
 
 open import Agda.Primitive
 open import Data.Product
-open import Cubical.PathPrelude
+open import Cubical
 
 open import Cat.Category
 open import Cat.Functor
@@ -58,35 +58,35 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
   open Exponential
   private
     Catℓ = Cat ℓ ℓ
+    prshf = presheaf {ℂ = ℂ}
 
-  -- Exp : Set (lsuc (lsuc ℓ))
-  -- Exp = Exponential (Cat (lsuc ℓ) ℓ)
-  --   Sets (Opposite ℂ)
+    -- Exp : Set (lsuc (lsuc ℓ))
+    -- Exp = Exponential (Cat (lsuc ℓ) ℓ)
+    --   Sets (Opposite ℂ)
 
-  _⇑_ : (A B : Catℓ .Object) → Catℓ .Object
-  A ⇑ B = (exponent A B) .obj
-    where
-      open HasExponentials (Cat.hasExponentials ℓ)
+    _⇑_ : (A B : Catℓ .Object) → Catℓ .Object
+    A ⇑ B = (exponent A B) .obj
+      where
+        open HasExponentials (Cat.hasExponentials ℓ)
 
-  -- private
-  --   -- I need `Sets` to be a `Category ℓ ℓ` but it simlpy isn't.
-  --   Setz : Category ℓ ℓ
-  --   Setz = {!Sets!}
-  --   :func*: : ℂ .Object → (Setz ⇑ Opposite ℂ) .Object
-  --   :func*: A = {!!}
+    module _ {A B : ℂ .Object} (f : ℂ .Arrow A B) where
+      :func→: : NaturalTransformation (prshf A) (prshf B)
+      :func→: = (λ C x → (ℂ ._⊕_ f x)) , λ f₁ → funExt λ x → lem
+        where
+          lem = (ℂ .isCategory) .IsCategory.assoc
+    module _ {c : ℂ .Object} where
+      eqTrans : (:func→: (ℂ .𝟙 {c})) .proj₁ ≡ (Fun .𝟙 {o = prshf c}) .proj₁
+      eqTrans = funExt λ x → funExt λ x → ℂ .isCategory .IsCategory.ident .proj₂
+      eqNat : (i : I) → Natural (prshf c) (prshf c) (eqTrans i)
+      eqNat i f = {!!}
 
-    -- prsh = presheaf {ℂ = ℂ}
-    -- k = prsh {!!}
-    -- :func*:' : ℂ .Object → Presheaf ℂ
-    -- :func*:' = prsh
-    -- module _ {A B : ℂ .Object} (f : ℂ .Arrow A B) where
-    --   open import Cat.Categories.Fun
-    --   :func→:' : NaturalTransformation (prsh A) (prsh B)
+      :ident: : (:func→: (ℂ .𝟙 {c})) ≡ (Fun .𝟙 {o = prshf c})
+      :ident: i = eqTrans i , eqNat i
 
   yoneda : Functor ℂ (Fun {ℂ = Opposite ℂ} {𝔻 = Sets {ℓ}})
   yoneda = record
-    { func* = presheaf {ℂ = ℂ}
-    ; func→ = {!!}
-    ; ident = {!!}
+    { func* = prshf
+    ; func→ = :func→:
+    ; ident = :ident:
     ; distrib = {!!}
     }
