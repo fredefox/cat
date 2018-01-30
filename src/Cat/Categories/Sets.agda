@@ -50,8 +50,10 @@ representable : ∀ {ℓ ℓ'} {ℂ : Category ℓ ℓ'} → Category.Object ℂ
 representable {ℂ = ℂ} A = record
   { func* = λ B → ℂ .Arrow A B
   ; func→ = ℂ ._⊕_
-  ; ident = funExt λ _ → snd ident
-  ; distrib = funExt λ x → sym assoc
+  ; isFunctor = record
+    { ident = funExt λ _ → snd ident
+    ; distrib = funExt λ x → sym assoc
+    }
   }
   where
     open IsCategory (ℂ .isCategory)
@@ -65,8 +67,10 @@ presheaf : {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} → Category.Object (Opp
 presheaf {ℂ = ℂ} B = record
   { func* = λ A → ℂ .Arrow A B
   ; func→ = λ f g → ℂ ._⊕_ g f
-  ; ident = funExt λ x → fst ident
-  ; distrib = funExt λ x → assoc
+  ; isFunctor = record
+    { ident = funExt λ x → fst ident
+    ; distrib = funExt λ x → assoc
+    }
   }
   where
     open IsCategory (ℂ .isCategory)

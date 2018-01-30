@@ -21,6 +21,7 @@ eqpair : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} {a a' : A} {b b' : B}
 eqpair eqa eqb i = eqa i , eqb i
 
 open Functor
+open IsFunctor
 open Category
 
 -- The category of categories
@@ -36,11 +37,11 @@ module _ (ℓ ℓ' : Level) where
         eq→ = refl
         postulate eqI : PathP
                    (λ i → ∀ {c : A .Object} → eq→ i (A .𝟙 {c}) ≡ D .𝟙 {eq* i c})
-                   (ident ((h ∘f (g ∘f f))))
-                   (ident ((h ∘f g) ∘f f))
+                   ((h ∘f (g ∘f f)) .isFunctor .ident)
+                   (((h ∘f g) ∘f f) .isFunctor .ident)
         postulate eqD : PathP (λ i → { c c' c'' : A .Object} {a : A .Arrow c c'} {a' : A .Arrow c' c''}
                           → eq→ i (A ._⊕_ a' a) ≡ D ._⊕_ (eq→ i a') (eq→ i a))
-                          (distrib (h ∘f (g ∘f f))) (distrib ((h ∘f g) ∘f f))
+                            ((h ∘f (g ∘f f)) .isFunctor .distrib) (((h ∘f g) ∘f f) .isFunctor .distrib)
 
       assc : h ∘f (g ∘f f) ≡ (h ∘f g) ∘f f
       assc = Functor≡ eq* eq→ eqI eqD
@@ -59,12 +60,12 @@ module _ (ℓ ℓ' : Level) where
           postulate
             eqI-r : PathP (λ i → {c : ℂ .Object}
                 → PathP (λ _ → Arrow 𝔻 (func* F c) (func* F c)) (func→ F (ℂ .𝟙)) (𝔻 .𝟙))
-                        (ident (F ∘f identity)) (ident F)
+                  ((F ∘f identity) .isFunctor .ident) (F .isFunctor .ident)
             eqD-r : PathP
                         (λ i →
                         {A B C : ℂ .Object} {f : ℂ .Arrow A B} {g : ℂ .Arrow B C} →
                         eq→ i (ℂ ._⊕_ g f) ≡ 𝔻 ._⊕_ (eq→ i g) (eq→ i f))
-                        ((F ∘f identity) .distrib) (distrib F)
+                        ((F ∘f identity) .isFunctor .distrib) (F .isFunctor .distrib)
         ident-r : F ∘f identity ≡ F
         ident-r = Functor≡ eq* eq→ eqI-r eqD-r
       module _ where
@@ -75,10 +76,10 @@ module _ (ℓ ℓ' : Level) where
               (λ i → {x y : Object ℂ} → ℂ .Arrow x y → 𝔻 .Arrow (eq* i x) (eq* i y))
               ((identity ∘f F) .func→) (F .func→)
             eqI : PathP (λ i → ∀ {A : ℂ .Object} → eq→ i (ℂ .𝟙 {A}) ≡ 𝔻 .𝟙 {eq* i A})
-                 (ident (identity ∘f F)) (ident F)
+                  ((identity ∘f F) .isFunctor .ident) (F .isFunctor .ident)
             eqD : PathP (λ i → {A B C : ℂ .Object} {f : ℂ .Arrow A B} {g : ℂ .Arrow B C}
                  → eq→ i (ℂ ._⊕_ g f) ≡ 𝔻 ._⊕_ (eq→ i g) (eq→ i f))
-                 (distrib (identity ∘f F)) (distrib F)
+                 ((identity ∘f F) .isFunctor .distrib) (F .isFunctor .distrib)
         ident-l : identity ∘f F ≡ F
         ident-l = Functor≡ eq* eq→ eqI eqD
 
@@ -134,10 +135,10 @@ module _ {ℓ ℓ' : Level} where
         }
 
       proj₁ : Arrow Catt :product: ℂ
-      proj₁ = record { func* = fst ; func→ = fst ; ident = refl ; distrib = refl }
+      proj₁ = record { func* = fst ; func→ = fst ; isFunctor = record { ident = refl ; distrib = refl } }
 
       proj₂ : Arrow Catt :product: 𝔻
-      proj₂ = record { func* = snd ; func→ = snd ; ident = refl ; distrib = refl }
+      proj₂ = record { func* = snd ; func→ = snd ; isFunctor = record { ident = refl ; distrib = refl } }
 
       module _ {X : Object Catt} (x₁ : Arrow Catt X ℂ) (x₂ : Arrow Catt X 𝔻) where
         open Functor
@@ -149,9 +150,14 @@ module _ {ℓ ℓ' : Level} where
         x = record
           { func* = λ x → (func* x₁) x , (func* x₂) x
           ; func→ = λ x → func→ x₁ x , func→ x₂ x
-          ; ident = lift-eq (ident x₁) (ident x₂)
-          ; distrib = lift-eq (distrib x₁) (distrib x₂)
+          ; isFunctor = record
+            { ident = lift-eq x₁.ident x₂.ident
+            ; distrib = lift-eq x₁.distrib x₂.distrib
+            }
           }
+          where
+            open module x₁ = IsFunctor (x₁ .isFunctor)
+            open module x₂ = IsFunctor (x₂ .isFunctor)
 
         -- Need to "lift equality of functors"
         -- If I want to do this like I do it for pairs it's gonna be a pain.
@@ -260,10 +266,12 @@ module _ (ℓ : Level) where
           :func→: {c} {c} (identityNat F , ℂ .𝟙)             ≡⟨⟩
           (identityTrans F C 𝔻⊕ F .func→ (ℂ .𝟙))             ≡⟨⟩
           𝔻 .𝟙 𝔻⊕ F .func→ (ℂ .𝟙)                            ≡⟨ proj₂ 𝔻.ident ⟩
-          F .func→ (ℂ .𝟙)                                    ≡⟨ F .ident ⟩
+          F .func→ (ℂ .𝟙)                                    ≡⟨ F.ident ⟩
           𝔻 .𝟙 ∎
           where
             open module 𝔻 = IsCategory (𝔻 .isCategory)
+            open module F = IsFunctor (F .isFunctor)
+
       module _ {F×A G×B H×C : Functor ℂ 𝔻 × ℂ .Object} where
         F = F×A .proj₁
         A = F×A .proj₂
@@ -302,7 +310,7 @@ module _ (ℓ : Level) where
             ≡ (η C 𝔻⊕ G .func→ g) 𝔻⊕ (θ B 𝔻⊕ F .func→ f)
           :distrib: = begin
             (ηθ C) 𝔻⊕ F .func→ (g ℂ⊕ f)                ≡⟨ ηθNat (g ℂ⊕ f) ⟩
-            H .func→ (g ℂ⊕ f) 𝔻⊕ (ηθ A)                ≡⟨ cong (λ φ → φ 𝔻⊕ ηθ A) (H .distrib) ⟩
+            H .func→ (g ℂ⊕ f) 𝔻⊕ (ηθ A)                ≡⟨ cong (λ φ → φ 𝔻⊕ ηθ A) (H.distrib) ⟩
             (H .func→ g 𝔻⊕ H .func→ f) 𝔻⊕ (ηθ A)       ≡⟨ sym assoc ⟩
             H .func→ g 𝔻⊕ (H .func→ f 𝔻⊕ (ηθ A))       ≡⟨⟩
             H .func→ g 𝔻⊕ (H .func→ f 𝔻⊕ (ηθ A))       ≡⟨ cong (λ φ → H .func→ g 𝔻⊕ φ) assoc ⟩
@@ -314,13 +322,16 @@ module _ (ℓ : Level) where
             (η C 𝔻⊕ G .func→ g) 𝔻⊕ (θ B 𝔻⊕ F .func→ f) ∎
             where
               open IsCategory (𝔻 .isCategory)
+              open module H = IsFunctor (H .isFunctor)
 
       :eval: : Functor ((:obj: ×p ℂ) .Product.obj) 𝔻
       :eval: = record
         { func* = :func*:
         ; func→ = λ {dom} {cod} → :func→: {dom} {cod}
-        ; ident = λ {o} → :ident: {o}
-        ; distrib = λ {f u n k y} → :distrib: {f} {u} {n} {k} {y}
+        ; isFunctor = record
+          { ident = λ {o} → :ident: {o}
+          ; distrib = λ {f u n k y} → :distrib: {f} {u} {n} {k} {y}
+          }
         }
 
       module _ (𝔸 : Category ℓ ℓ) (F : Functor ((𝔸 ×p ℂ) .Product.obj) 𝔻) where

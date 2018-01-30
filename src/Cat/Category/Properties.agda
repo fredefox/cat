@@ -87,6 +87,8 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
   yoneda = record
     { func* = prshf
     ; func→ = :func→:
-    ; ident = :ident:
-    ; distrib = {!!}
+    ; isFunctor = record
+      { ident = :ident:
+      ; distrib = {!!}
+      }
     }
