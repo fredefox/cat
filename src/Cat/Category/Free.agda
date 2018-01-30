@@ -1,7 +1,7 @@
 module Cat.Category.Free where
 
 open import Agda.Primitive
-open import Cubical.PathPrelude hiding (Path)
+open import Cubical hiding (Path)
 open import Data.Product
 
 open import Cat.Category as C

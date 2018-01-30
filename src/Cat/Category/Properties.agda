@@ -4,7 +4,7 @@ module Cat.Category.Properties where
 
 open import Agda.Primitive
 open import Data.Product
-open import Cubical.PathPrelude
+open import Cubical
 
 open import Cat.Category
 open import Cat.Functor

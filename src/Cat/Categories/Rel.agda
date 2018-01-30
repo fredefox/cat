@@ -1,7 +1,7 @@
 {-# OPTIONS --cubical #-}
 module Cat.Categories.Rel where
 
-open import Cubical.PathPrelude
+open import Cubical
 open import Cubical.GradLemma
 open import Agda.Primitive
 open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
