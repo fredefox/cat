@@ -44,7 +44,7 @@ module _ (ℓ ℓ' : Level) where
                             ((h ∘f (g ∘f f)) .isFunctor .distrib) (((h ∘f g) ∘f f) .isFunctor .distrib)
 
       assc : h ∘f (g ∘f f) ≡ (h ∘f g) ∘f f
-      assc = Functor≡ eq* eq→ eqI eqD
+      assc = Functor≡ eq* eq→ (IsFunctor≡ eqI eqD)
 
     module _ {ℂ 𝔻 : Category ℓ ℓ'} {F : Functor ℂ 𝔻} where
       module _ where
@@ -58,16 +58,17 @@ module _ (ℓ ℓ' : Level) where
             (func→ (F ∘f identity)) (func→ F)
           eq→ = refl
           postulate
-            eqI-r : PathP (λ i → {c : ℂ .Object}
-                → PathP (λ _ → Arrow 𝔻 (func* F c) (func* F c)) (func→ F (ℂ .𝟙)) (𝔻 .𝟙))
-                  ((F ∘f identity) .isFunctor .ident) (F .isFunctor .ident)
+            eqI-r
+              : (λ i → {c : ℂ .Object} → (λ _ → 𝔻 [ func* F c , func* F c ])
+                [ func→ F (ℂ .𝟙) ≡ 𝔻 .𝟙 ])
+              [(F ∘f identity) .isFunctor .ident ≡ F .isFunctor .ident ]
             eqD-r : PathP
                         (λ i →
                         {A B C : ℂ .Object} {f : ℂ .Arrow A B} {g : ℂ .Arrow B C} →
                         eq→ i (ℂ [ g ∘ f ]) ≡ 𝔻 [ eq→ i g ∘ eq→ i f ])
                         ((F ∘f identity) .isFunctor .distrib) (F .isFunctor .distrib)
         ident-r : F ∘f identity ≡ F
-        ident-r = Functor≡ eq* eq→ eqI-r eqD-r
+        ident-r = Functor≡ eq* eq→ (IsFunctor≡ eqI-r eqD-r)
       module _ where
         private
           postulate
@@ -75,13 +76,14 @@ module _ (ℓ ℓ' : Level) where
             eq→ : PathP
               (λ i → {x y : Object ℂ} → ℂ .Arrow x y → 𝔻 .Arrow (eq* i x) (eq* i y))
               ((identity ∘f F) .func→) (F .func→)
-            eqI : PathP (λ i → ∀ {A : ℂ .Object} → eq→ i (ℂ .𝟙 {A}) ≡ 𝔻 .𝟙 {eq* i A})
-                  ((identity ∘f F) .isFunctor .ident) (F .isFunctor .ident)
+            eqI : (λ i → ∀ {A : ℂ .Object} → eq→ i (ℂ .𝟙 {A}) ≡ 𝔻 .𝟙 {eq* i A})
+                  [ ((identity ∘f F) .isFunctor .ident) ≡ (F .isFunctor .ident) ]
             eqD : PathP (λ i → {A B C : ℂ .Object} {f : ℂ .Arrow A B} {g : ℂ .Arrow B C}
                  → eq→ i (ℂ [ g ∘ f ]) ≡ 𝔻 [ eq→ i g ∘ eq→ i f ])
                  ((identity ∘f F) .isFunctor .distrib) (F .isFunctor .distrib)
+                 -- (λ z → eq* i z) (eq→ i)
         ident-l : identity ∘f F ≡ F
-        ident-l = Functor≡ eq* eq→ eqI eqD
+        ident-l = Functor≡ eq* eq→ λ i → record { ident = eqI i ; distrib = eqD i }
 
   Cat : Category (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
   Cat =

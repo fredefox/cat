@@ -9,6 +9,8 @@ open import Cubical
 open import Cat.Category
 open import Cat.Functor
 open import Cat.Categories.Sets
+open import Cat.Equality
+open Equality.Data.Product
 
 module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : ℂ .Category.Object } {X : ℂ .Category.Object} (f : ℂ .Category.Arrow A B) where
   open Category ℂ
@@ -58,6 +60,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
   private
     Catℓ = Cat ℓ ℓ
     prshf = presheaf {ℂ = ℂ}
+    module ℂ = IsCategory (ℂ .isCategory)
 
     -- Exp : Set (lsuc (lsuc ℓ))
     -- Exp = Exponential (Cat (lsuc ℓ) ℓ)
@@ -70,22 +73,24 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
 
     module _ {A B : ℂ .Object} (f : ℂ .Arrow A B) where
       :func→: : NaturalTransformation (prshf A) (prshf B)
-      :func→: = (λ C x → ℂ [ f ∘ x ]) , λ f₁ → funExt λ x → lem
-        where
-          lem = (ℂ .isCategory) .IsCategory.assoc
+      :func→: = (λ C x → ℂ [ f ∘ x ]) , λ f₁ → funExt λ _ → ℂ.assoc
+
     module _ {c : ℂ .Object} where
-      eqTrans : (:func→: (ℂ .𝟙 {c})) .proj₁ ≡ (Fun .𝟙 {o = prshf c}) .proj₁
-      eqTrans = funExt λ x → funExt λ x → ℂ .isCategory .IsCategory.ident .proj₂
-      eqNat
-                 : PathP (λ i → {A B : ℂ .Object} (f : Opposite ℂ .Arrow A B)
-                   →   Sets [ eqTrans i B ∘ prshf c .Functor.func→ f ]
-                     ≡ Sets [ prshf c .Functor.func→ f ∘ eqTrans i A ])
-                   ((:func→: (ℂ .𝟙 {c})) .proj₂) ((Fun .𝟙 {o = prshf c}) .proj₂)
-      eqNat = λ i f i' x₁ → {!ℂ ._⊕_ ? ?!}
-      -- eqNat i f = {!!}
-      -- Sets ._⊕_ (eq₁ i B) (prshf A .func→ f) ≡ Sets ._⊕_ (prshf B .func→ f) (eq₁ i A)
+      eqTrans : (λ _ → Transformation (prshf c) (prshf c))
+        [ (λ _ x → ℂ [ ℂ .𝟙 ∘ x ]) ≡ identityTrans (prshf c) ]
+      eqTrans = funExt λ x → funExt λ x → ℂ.ident .proj₂
+
+      eqNat : (λ i → Natural (prshf c) (prshf c) (eqTrans i))
+        [(λ _ → funExt (λ _ → ℂ.assoc)) ≡ identityNatural (prshf c)]
+      eqNat = {!!}
+      -- eqNat = λ {A} {B} i ℂ[B,A] i' ℂ[A,c] →
+      --   let
+      --     k : ℂ [ {!!} , {!!} ]
+      --     k = ℂ[A,c]
+      --   in {!ℂ [ ? ∘ ? ]!}
+
       :ident: : (:func→: (ℂ .𝟙 {c})) ≡ (Fun .𝟙 {o = prshf c})
-      :ident: = NaturalTransformation≡ eqTrans eqNat
+      :ident: = Σ≡ eqTrans eqNat
 
   yoneda : Functor ℂ (Fun {ℂ = Opposite ℂ} {𝔻 = Sets {ℓ}})
   yoneda = record

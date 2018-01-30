@@ -53,7 +53,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     𝔻 [ F→ f ∘ identityTrans F A ]  ∎
     where
       F→ = F .func→
-      open module 𝔻 = IsCategory (𝔻 .isCategory)
+      module 𝔻 = IsCategory (𝔻 .isCategory)
 
   identityNat : (F : Functor ℂ 𝔻) → NaturalTransformation F F
   identityNat F = identityTrans F , identityNatural F

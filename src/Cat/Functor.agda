@@ -32,27 +32,28 @@ open Functor
 
 module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
 
-  -- IsFunctor≡ : ∀ {A B : ℂ .Object} {func* : ℂ .Object → 𝔻 .Object} {func→ : {A B : ℂ .Object} → ℂ .Arrow A B → 𝔻 .Arrow (func* A) (func* B)} {F G : IsFunctor ℂ 𝔻 func* func→}
-  --   → (eqI : PathP (λ i → ∀ {A : ℂ .Object} → func→ (ℂ .𝟙 {A}) ≡ 𝔻 .𝟙 {func* A})
-  --     (F .ident) (G .ident))
-  --   → (eqD : PathP (λ i → {A B C : ℂ .Object} {f : ℂ .Arrow A B} {g : ℂ .Arrow B C}
-  --     → func→ (ℂ ._⊕_ g f) ≡ 𝔻 ._⊕_ (func→ g) (func→ f))
-  --       (F .distrib) (G .distrib))
-  --   → F ≡ G
-  -- IsFunctor≡ eqI eqD i = record { ident = eqI i ; distrib = eqD i }
+  IsFunctor≡
+    : {func* : ℂ .Object → 𝔻 .Object}
+      {func→ : {A B : ℂ .Object} → ℂ .Arrow A B → 𝔻 .Arrow (func* A) (func* B)}
+      {F G : IsFunctor ℂ 𝔻 func* func→}
+    → (eqI
+      : (λ i → ∀ {A} → func→ (ℂ .𝟙 {A}) ≡ 𝔻 .𝟙 {func* A})
+        [ F .ident ≡ G .ident ])
+    → (eqD :
+        (λ i → ∀ {A B C} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
+          → func→ (ℂ [ g ∘ f ]) ≡ 𝔻 [ func→ g ∘ func→ f ])
+        [ F .distrib ≡ G .distrib ])
+    → (λ _ → IsFunctor ℂ 𝔻 (λ i → func* i) func→) [ F ≡ G ]
+  IsFunctor≡ eqI eqD i = record { ident = eqI i ; distrib = eqD i }
 
   Functor≡ : {F G : Functor ℂ 𝔻}
     → (eq* : F .func* ≡ G .func*)
     → (eq→ : PathP (λ i → ∀ {x y} → ℂ [ x , y ] → 𝔻 [ eq* i x , eq* i y ])
       (F .func→) (G .func→))
     -- → (eqIsF : PathP (λ i → IsFunctor ℂ 𝔻 (eq* i) (eq→ i)) (F .isFunctor) (G .isFunctor))
-    → (eqI : PathP (λ i → ∀ {A : ℂ .Object} → eq→ i (ℂ .𝟙 {A}) ≡ 𝔻 .𝟙 {eq* i A})
-        (F .isFunctor .ident) (G .isFunctor .ident))
-    → (eqD : PathP (λ i → {A B C : ℂ .Object} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
-      → eq→ i (ℂ [ g ∘ f ]) ≡ 𝔻 [ eq→ i g ∘ eq→ i f ])
-        (F .isFunctor .distrib) (G .isFunctor .distrib))
+    → (eqIsFunctor : (λ i → IsFunctor ℂ 𝔻 (eq* i) (eq→ i)) [ F .isFunctor ≡ G .isFunctor ])
     → F ≡ G
-  Functor≡ eq* eq→ eqI eqD i = record { func* = eq* i ; func→ = eq→ i ; isFunctor = record { ident = eqI i ; distrib = eqD i } }
+  Functor≡ eq* eq→ eqIsFunctor i = record { func* = eq* i ; func→ = eq→ i ; isFunctor = eqIsFunctor i }
 
 module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : Functor A B) where
   private
