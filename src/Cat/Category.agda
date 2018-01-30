@@ -53,6 +53,12 @@ record Category (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
 
 open Category
 
+_[_,_] : ∀ {ℓ ℓ'} → (ℂ : Category ℓ ℓ') → (A : ℂ .Object) → (B : ℂ .Object) → Set ℓ'
+_[_,_] = Arrow
+
+_[_∘_] : ∀ {ℓ ℓ'} → (ℂ : Category ℓ ℓ') → {A B C : ℂ .Object} → (g : ℂ [ B , C ]) → (f : ℂ [ A , B ]) → ℂ [ A , C ]
+_[_∘_] = _⊕_
+
 module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} where
   module _ { A B : ℂ .Object } where
     Isomorphism : (f : ℂ .Arrow A B) → Set ℓ'

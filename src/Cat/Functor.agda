@@ -11,28 +11,26 @@ open Category
 module _ {ℓc ℓc' ℓd ℓd'} (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
   record IsFunctor
     (func* : ℂ .Object → 𝔻 .Object)
-    (func→ : {A B : ℂ .Object} → ℂ .Arrow A B → 𝔻 .Arrow (func* A) (func* B))
-    : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
+    (func→ : {A B : ℂ .Object} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ])
+      : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
     field
       ident   : { c : ℂ .Object } → func→ (ℂ .𝟙 {c}) ≡ 𝔻 .𝟙 {func* c}
       -- TODO: Avoid use of ugly explicit arguments somehow.
       -- This guy managed to do it:
       --    https://github.com/copumpkin/categories/blob/master/Categories/Functor/Core.agda
-      distrib : {A B C : ℂ .Object} {f : ℂ .Arrow A B} {g : ℂ .Arrow B C}
-        → func→ (ℂ ._⊕_ g f) ≡ 𝔻 ._⊕_ (func→ g) (func→ f)
+      distrib : {A B C : ℂ .Object} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
+        → func→ (ℂ [ g ∘ f ]) ≡ 𝔻 [ func→ g ∘ func→ f ]
 
   record Functor : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
     field
       func* : ℂ .Object → 𝔻 .Object
-      func→ : {A B : ℂ .Object} → ℂ .Arrow A B → 𝔻 .Arrow (func* A) (func* B)
+      func→ : ∀ {A B} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ]
       {{isFunctor}} : IsFunctor func* func→
 
 open IsFunctor
 open Functor
 
 module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
-  private
-    _ℂ⊕_ = ℂ ._⊕_
 
   -- IsFunctor≡ : ∀ {A B : ℂ .Object} {func* : ℂ .Object → 𝔻 .Object} {func→ : {A B : ℂ .Object} → ℂ .Arrow A B → 𝔻 .Arrow (func* A) (func* B)} {F G : IsFunctor ℂ 𝔻 func* func→}
   --   → (eqI : PathP (λ i → ∀ {A : ℂ .Object} → func→ (ℂ .𝟙 {A}) ≡ 𝔻 .𝟙 {func* A})
@@ -45,13 +43,13 @@ module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
 
   Functor≡ : {F G : Functor ℂ 𝔻}
     → (eq* : F .func* ≡ G .func*)
-    → (eq→ : PathP (λ i → ∀ {x y} → ℂ .Arrow x y → 𝔻 .Arrow (eq* i x) (eq* i y))
+    → (eq→ : PathP (λ i → ∀ {x y} → ℂ [ x , y ] → 𝔻 [ eq* i x , eq* i y ])
       (F .func→) (G .func→))
     -- → (eqIsF : PathP (λ i → IsFunctor ℂ 𝔻 (eq* i) (eq→ i)) (F .isFunctor) (G .isFunctor))
     → (eqI : PathP (λ i → ∀ {A : ℂ .Object} → eq→ i (ℂ .𝟙 {A}) ≡ 𝔻 .𝟙 {eq* i A})
         (F .isFunctor .ident) (G .isFunctor .ident))
-    → (eqD : PathP (λ i → {A B C : ℂ .Object} {f : ℂ .Arrow A B} {g : ℂ .Arrow B C}
-      → eq→ i (ℂ ._⊕_ g f) ≡ 𝔻 ._⊕_ (eq→ i g) (eq→ i f))
+    → (eqD : PathP (λ i → {A B C : ℂ .Object} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
+      → eq→ i (ℂ [ g ∘ f ]) ≡ 𝔻 [ eq→ i g ∘ eq→ i f ])
         (F .isFunctor .distrib) (G .isFunctor .distrib))
     → F ≡ G
   Functor≡ eq* eq→ eqI eqD i = record { func* = eq* i ; func→ = eq→ i ; isFunctor = record { ident = eqI i ; distrib = eqD i } }
@@ -62,17 +60,14 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
     F→ = F .func→
     G* = G .func*
     G→ = G .func→
-    _A⊕_ = A ._⊕_
-    _B⊕_ = B ._⊕_
-    _C⊕_ = C ._⊕_
-    module _ {a0 a1 a2 : A .Object} {α0 : A .Arrow a0 a1} {α1 : A .Arrow a1 a2} where
+    module _ {a0 a1 a2 : A .Object} {α0 : A [ a0 , a1 ]} {α1 : A [ a1 , a2 ]} where
 
-      dist : (F→ ∘ G→) (α1 A⊕ α0) ≡ (F→ ∘ G→) α1 C⊕ (F→ ∘ G→) α0
+      dist : (F→ ∘ G→) (A [ α1 ∘ α0 ]) ≡ C [ (F→ ∘ G→) α1 ∘ (F→ ∘ G→) α0 ]
       dist = begin
-        (F→ ∘ G→) (α1 A⊕ α0)         ≡⟨ refl ⟩
-        F→ (G→ (α1 A⊕ α0))           ≡⟨ cong F→ (G .isFunctor .distrib)⟩
-        F→ ((G→ α1) B⊕ (G→ α0))      ≡⟨ F .isFunctor .distrib ⟩
-        (F→ ∘ G→) α1 C⊕ (F→ ∘ G→) α0 ∎
+        (F→ ∘ G→) (A [ α1 ∘ α0 ])         ≡⟨ refl ⟩
+        F→ (G→ (A [ α1 ∘ α0 ]))           ≡⟨ cong F→ (G .isFunctor .distrib)⟩
+        F→ (B [ G→ α1 ∘ G→ α0 ])          ≡⟨ F .isFunctor .distrib ⟩
+        C [ (F→ ∘ G→) α1 ∘ (F→ ∘ G→) α0 ] ∎
 
   _∘f_ : Functor A C
   _∘f_ =
