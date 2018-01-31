@@ -10,15 +10,8 @@ open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
 open import Cat.Category
 open import Cat.Functor
 
--- Tip from Andrea:
--- Use co-patterns - they help with showing more understandable types in goals.
-lift-eq : ∀ {ℓ} {A B : Set ℓ} {a a' : A} {b b' : B} → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
-fst (lift-eq a b i) = a i
-snd (lift-eq a b i) = b i
-
-eqpair : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} {a a' : A} {b b' : B}
-  → a ≡ a' → b ≡ b' → (a , b) ≡ (a' , b')
-eqpair eqa eqb i = eqa i , eqb i
+open import Cat.Equality
+open Equality.Data.Product
 
 open Functor
 open IsFunctor
@@ -27,23 +20,28 @@ open Category hiding (_∘_)
 -- The category of categories
 module _ (ℓ ℓ' : Level) where
   private
-    module _ {A B C D : Category ℓ ℓ'} {f : Functor A B} {g : Functor B C} {h : Functor C D} where
+    module _ {𝔸 𝔹 ℂ 𝔻 : Category ℓ ℓ'} {F : Functor 𝔸 𝔹} {G : Functor 𝔹 ℂ} {H : Functor ℂ 𝔻} where
       private
-        eq* : func* (h ∘f (g ∘f f)) ≡ func* ((h ∘f g) ∘f f)
+        eq* : func* (H ∘f (G ∘f F)) ≡ func* ((H ∘f G) ∘f F)
         eq* = refl
         eq→ : PathP
-          (λ i → {x y : A .Object} → A .Arrow x y → D .Arrow (eq* i x) (eq* i y))
-          (func→ (h ∘f (g ∘f f))) (func→ ((h ∘f g) ∘f f))
+          (λ i → {A B : 𝔸 .Object} → 𝔸 [ A , B ] → 𝔻 [ eq* i A , eq* i B ])
+          (func→ (H ∘f (G ∘f F))) (func→ ((H ∘f G) ∘f F))
         eq→ = refl
-        postulate eqI : PathP
-                   (λ i → ∀ {c : A .Object} → eq→ i (A .𝟙 {c}) ≡ D .𝟙 {eq* i c})
-                   ((h ∘f (g ∘f f)) .isFunctor .ident)
-                   (((h ∘f g) ∘f f) .isFunctor .ident)
-        postulate eqD : PathP (λ i → { c c' c'' : A .Object} {a : A .Arrow c c'} {a' : A .Arrow c' c''}
-                          → eq→ i (A [ a' ∘ a ]) ≡ D [ eq→ i a' ∘ eq→ i a ])
-                            ((h ∘f (g ∘f f)) .isFunctor .distrib) (((h ∘f g) ∘f f) .isFunctor .distrib)
+        postulate
+          eqI
+            : (λ i → ∀ {A : 𝔸 .Object} → eq→ i (𝔸 .𝟙 {A}) ≡ 𝔻 .𝟙 {eq* i A})
+            [ (H ∘f (G ∘f F)) .isFunctor .ident
+            ≡ ((H ∘f G) ∘f F) .isFunctor .ident
+            ]
+          eqD
+            : (λ i → ∀ {A B C} {f : 𝔸 [ A , B ]} {g : 𝔸 [ B , C ]}
+              → eq→ i (𝔸 [ g ∘ f ]) ≡ 𝔻 [ eq→ i g ∘ eq→ i f ])
+            [ (H ∘f (G ∘f F)) .isFunctor .distrib
+            ≡ ((H ∘f G) ∘f F) .isFunctor .distrib
+            ]
 
-      assc : h ∘f (g ∘f f) ≡ (h ∘f g) ∘f f
+      assc : H ∘f (G ∘f F) ≡ (H ∘f G) ∘f F
       assc = Functor≡ eq* eq→ (IsFunctor≡ eqI eqD)
 
     module _ {ℂ 𝔻 : Category ℓ ℓ'} {F : Functor ℂ 𝔻} where
@@ -94,16 +92,15 @@ module _ (ℓ ℓ' : Level) where
       ; _∘_ = _∘f_
       -- What gives here? Why can I not name the variables directly?
       ; isCategory = record
-        { assoc = λ {_ _ _ _ f g h} → assc {f = f} {g = g} {h = h}
+        { assoc = λ {_ _ _ _ F G H} → assc {F = F} {G = G} {H = H}
         ; ident = ident-r , ident-l
         }
       }
 
 module _ {ℓ ℓ' : Level} where
-  Catt = Cat ℓ ℓ'
-
   module _ (ℂ 𝔻 : Category ℓ ℓ') where
     private
+      Catt = Cat ℓ ℓ'
       :Object: = ℂ .Object × 𝔻 .Object
       :Arrow:  : :Object: → :Object: → Set ℓ'
       :Arrow: (c , d) (c' , d') = Arrow ℂ c c' × Arrow 𝔻 d d'
@@ -119,10 +116,10 @@ module _ {ℓ ℓ' : Level} where
       instance
         :isCategory: : IsCategory :Object: :Arrow: :𝟙: _:⊕:_
         :isCategory: = record
-          { assoc = eqpair C.assoc D.assoc
+          { assoc = Σ≡ C.assoc D.assoc
           ; ident
-          = eqpair (fst C.ident) (fst D.ident)
-          , eqpair (snd C.ident) (snd D.ident)
+          = Σ≡ (fst C.ident) (fst D.ident)
+          , Σ≡ (snd C.ident) (snd D.ident)
           }
           where
             open module C = IsCategory (ℂ .isCategory)
@@ -136,35 +133,38 @@ module _ {ℓ ℓ' : Level} where
         ; _∘_ = _:⊕:_
         }
 
-      proj₁ : Arrow Catt :product: ℂ
+      proj₁ : Catt [ :product: , ℂ ]
       proj₁ = record { func* = fst ; func→ = fst ; isFunctor = record { ident = refl ; distrib = refl } }
 
-      proj₂ : Arrow Catt :product: 𝔻
+      proj₂ : Catt [ :product: , 𝔻 ]
       proj₂ = record { func* = snd ; func→ = snd ; isFunctor = record { ident = refl ; distrib = refl } }
 
-      module _ {X : Object Catt} (x₁ : Arrow Catt X ℂ) (x₂ : Arrow Catt X 𝔻) where
+      module _ {X : Object Catt} (x₁ : Catt [ X , ℂ ]) (x₂ : Catt [ X , 𝔻 ]) where
         open Functor
-
-        -- ident' : {c : Object X} → ((func→ x₁) {dom = c} (𝟙 X) , (func→ x₂) {dom = c} (𝟙 X)) ≡ 𝟙 (catProduct C D)
-        -- ident' {c = c} = lift-eq (ident x₁) (ident x₂)
 
         x : Functor X :product:
         x = record
-          { func* = λ x → (func* x₁) x , (func* x₂) x
+          { func* = λ x → x₁ .func* x , x₂ .func* x
           ; func→ = λ x → func→ x₁ x , func→ x₂ x
           ; isFunctor = record
-            { ident = lift-eq x₁.ident x₂.ident
-            ; distrib = lift-eq x₁.distrib x₂.distrib
+            { ident   = Σ≡ x₁.ident x₂.ident
+            ; distrib = Σ≡ x₁.distrib x₂.distrib
             }
           }
           where
             open module x₁ = IsFunctor (x₁ .isFunctor)
             open module x₂ = IsFunctor (x₂ .isFunctor)
 
-        -- Need to "lift equality of functors"
-        -- If I want to do this like I do it for pairs it's gonna be a pain.
-        postulate isUniqL : Catt [ proj₁ ∘ x ] ≡ x₁
-        -- isUniqL = Functor≡ refl refl {!!} {!!}
+        isUniqL : Catt [ proj₁ ∘ x ] ≡ x₁
+        isUniqL = Functor≡ eq* eq→ eqIsF -- Functor≡ refl refl λ i → record { ident = refl i ; distrib = refl i }
+          where
+            eq* : (Catt [ proj₁ ∘ x ]) .func* ≡ x₁ .func*
+            eq* = refl
+            eq→ : (λ i → {A : X .Object} {B : X .Object} → X [ A , B ] → ℂ [ eq* i A , eq* i B ])
+                    [ (Catt [ proj₁ ∘ x ]) .func→ ≡ x₁ .func→ ]
+            eq→ = refl
+            postulate eqIsF : (Catt [ proj₁ ∘ x ]) .isFunctor ≡ x₁ .isFunctor
+            -- eqIsF = IsFunctor≡ {!refl!} {!!}
 
         postulate isUniqR : Catt [ proj₂ ∘ x ] ≡ x₂
         -- isUniqR = Functor≡ refl refl {!!} {!!}

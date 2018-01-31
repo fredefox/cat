@@ -10,7 +10,7 @@ open import Cubical
 module Equality where
   module Data where
     module Product where
-      open import Data.Product public
+      open import Data.Product
 
       module _ {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb} {a b : Σ A B}
         (proj₁≡ : (λ _ → A)            [ proj₁ a ≡ proj₁ b ])

@@ -48,8 +48,8 @@ module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
 
   Functor≡ : {F G : Functor ℂ 𝔻}
     → (eq* : F .func* ≡ G .func*)
-    → (eq→ : PathP (λ i → ∀ {x y} → ℂ [ x , y ] → 𝔻 [ eq* i x , eq* i y ])
-      (F .func→) (G .func→))
+    → (eq→ : (λ i → ∀ {x y} → ℂ [ x , y ] → 𝔻 [ eq* i x , eq* i y ])
+        [ F .func→ ≡ G .func→ ])
     -- → (eqIsF : PathP (λ i → IsFunctor ℂ 𝔻 (eq* i) (eq→ i)) (F .isFunctor) (G .isFunctor))
     → (eqIsFunctor : (λ i → IsFunctor ℂ 𝔻 (eq* i) (eq→ i)) [ F .isFunctor ≡ G .isFunctor ])
     → F ≡ G
