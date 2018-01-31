@@ -7,3 +7,6 @@ depend:
   cubical
 include:
   src
+-- libraries:
+--   libs/agda-stdlib
+--   libs/cubical
