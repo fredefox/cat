@@ -22,6 +22,11 @@ open import Cubical
 
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
+
+-- According to definitions 9.1.1 and 9.1.6 in the HoTT book the
+-- arrows of a category form a set (arrow-is-set), and there is an
+-- equivalence between the equality of objects and isomorphisms
+-- (univalent).
 record IsCategory {ℓ ℓ' : Level}
   (Object : Set ℓ)
   (Arrow  : Object → Object → Set ℓ')
@@ -33,11 +38,43 @@ record IsCategory {ℓ ℓ' : Level}
       → h ⊕ (g ⊕ f) ≡ (h ⊕ g) ⊕ f
     ident : {A B : Object} {f : Arrow A B}
       → f ⊕ 𝟙 ≡ f × 𝟙 ⊕ f ≡ f
+    arrow-is-set : ∀ {A B : Object} → isSet (Arrow A B)
+
+  Isomorphism : ∀ {A B} → (f : Arrow A B) → Set ℓ'
+  Isomorphism {A} {B} f = Σ[ g ∈ Arrow B A ] g ⊕ f ≡ 𝟙 × f ⊕ g ≡ 𝟙
+
+  _≅_ : (A B : Object) → Set ℓ'
+  _≅_ A B = Σ[ f ∈ Arrow A B ] (Isomorphism f)
+
+  idIso : (A : Object) → A ≅ A
+  idIso A = 𝟙 , (𝟙 , ident)
+
+  id-to-iso : (A B : Object) → A ≡ B → A ≅ B
+  id-to-iso A B eq = transp (\ i → A ≅ eq i) (idIso A)
+
+
+  -- TODO: might want to implement isEquiv differently, there are 3
+  -- equivalent formulations in the book.
+  field
+    univalent : {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
+
+module _  {ℓ} {ℓ'} {Object : Set ℓ}
+   {Arrow  : Object → Object → Set ℓ'}
+   {𝟙      : {o : Object} → Arrow o o}
+   {_⊕_ : { a b c : Object } → Arrow b c → Arrow a b → Arrow a c}
+    where
+
+  -- TODO, provable by using arrow-is-set and that isProp (isEquiv _ _ _)
+  -- This lemma will be useful to prove the equality of two categories.
+  IsCategory-is-prop : isProp (IsCategory Object Arrow 𝟙 _⊕_)
+  IsCategory-is-prop = {!!}
+
 
 -- open IsCategory public
 
 record Category (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
   -- adding no-eta-equality can speed up type-checking.
+  -- ONLY IF you define your categories with copatterns though.
   no-eta-equality
   field
     Object : Set ℓ
@@ -53,20 +90,16 @@ record Category (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
 
 open Category
 
+open IsCategory using (Isomorphism; _≅_)
+
 module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} where
   module _ { A B : ℂ .Object } where
-    Isomorphism : (f : ℂ .Arrow A B) → Set ℓ'
-    Isomorphism f = Σ[ g ∈ ℂ .Arrow B A ] ℂ ._⊕_ g f ≡ ℂ .𝟙 × ℂ ._⊕_ f g ≡ ℂ .𝟙
-
     Epimorphism : {X : ℂ .Object } → (f : ℂ .Arrow A B) → Set ℓ'
     Epimorphism {X} f = ( g₀ g₁ : ℂ .Arrow B X ) → ℂ ._⊕_ g₀ f ≡ ℂ ._⊕_ g₁ f → g₀ ≡ g₁
 
     Monomorphism : {X : ℂ .Object} → (f : ℂ .Arrow A B) → Set ℓ'
     Monomorphism {X} f = ( g₀ g₁ : ℂ .Arrow X A ) → ℂ ._⊕_ f g₀ ≡ ℂ ._⊕_ f g₁ → g₀ ≡ g₁
 
-  -- Isomorphism of objects
-  _≅_ : (A B : Object ℂ) → Set ℓ'
-  _≅_ A B = Σ[ f ∈ ℂ .Arrow A B ] (Isomorphism f)
 
 module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {A B obj : Object ℂ} where
   IsProduct : (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) → Set (ℓ ⊔ ℓ')
@@ -117,7 +150,9 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
       ; Arrow = flip (ℂ .Arrow)
       ; 𝟙 = ℂ .𝟙
       ; _⊕_ = flip (ℂ ._⊕_)
-      ; isCategory = record { assoc = sym assoc ; ident = swap ident }
+      ; isCategory = record { assoc = sym assoc ; ident = swap ident
+                            ; arrow-is-set = {!!}
+                            ; univalent = {!!} }
       }
       where
         open IsCategory (ℂ .isCategory)
