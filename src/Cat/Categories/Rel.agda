@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical #-}
+{-# OPTIONS --cubical --allow-unsolved-metas #-}
 module Cat.Categories.Rel where
 
 open import Cubical
@@ -160,5 +160,10 @@ Rel = record
   ; Arrow = λ S R → Subset (S × R)
   ; 𝟙 = λ {S} → Diag S
   ; _∘_ = λ {A B C} S R → λ {( a , c ) → Σ[ b ∈ B ] ( (a , b) ∈ R × (b , c) ∈ S )}
-  ; isCategory = record { assoc = funExt is-assoc ; ident = funExt ident-l , funExt ident-r }
+  ; isCategory = record
+    { assoc = funExt is-assoc
+    ; ident = funExt ident-l , funExt ident-r
+    ; arrow-is-set = {!!}
+    ; univalent = {!!}
+    }
   }

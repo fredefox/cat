@@ -1,3 +1,4 @@
+-- There is no category of categories in our interpretation
 {-# OPTIONS --cubical --allow-unsolved-metas #-}
 
 module Cat.Categories.Cat where

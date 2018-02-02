@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 module Cat.Category.Free where
 
 open import Agda.Primitive
@@ -32,5 +33,10 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
     ; Arrow = Path
     ; 𝟙 = λ {o} → emptyPath o
     ; _∘_ = λ {a b c} → concatenate {a} {b} {c}
-    ; isCategory = record { assoc = p-assoc ; ident = ident-r , ident-l }
+    ; isCategory = record
+      { assoc = p-assoc
+      ; ident = ident-r , ident-l
+      ; arrow-is-set = {!!}
+      ; univalent = {!!}
+      }
     }

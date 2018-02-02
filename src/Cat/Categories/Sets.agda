@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 module Cat.Categories.Sets where
 
 open import Cubical
