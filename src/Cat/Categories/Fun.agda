@@ -76,6 +76,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       𝔻 [ H .func→ f ∘ (θ ∘nt η) A ]     ∎
       where
         open IsCategory (𝔻 .isCategory)
+
     NatComp = _:⊕:_
 
   private

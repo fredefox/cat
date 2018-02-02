@@ -11,7 +11,7 @@ open import Cat.Equality
 
 open Equality.Data.Product
 
-module _ {ℓa ℓb : Level} where
+module _ (ℓa ℓb : Level) where
   private
     Obj = Σ[ A ∈ Set ℓa ] (A → Set ℓb)
     Arr : Obj → Obj → Set (ℓa ⊔ ℓb)

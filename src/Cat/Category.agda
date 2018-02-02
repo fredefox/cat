@@ -22,6 +22,7 @@ open import Cubical
 
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
+-- All projections must be `isProp`'s
 record IsCategory {ℓ ℓ' : Level}
   (Object : Set ℓ)
   (Arrow  : Object → Object → Set ℓ')
@@ -40,7 +41,11 @@ record Category (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
   -- adding no-eta-equality can speed up type-checking.
   no-eta-equality
   field
+    -- Need something like:
+    -- Object : Σ (Set ℓ) isGroupoid
     Object : Set ℓ
+    -- And:
+    -- Arrow  : Object → Object → Σ (Set ℓ') isSet
     Arrow  : Object → Object → Set ℓ'
     𝟙      : {o : Object} → Arrow o o
     _∘_    : {A B C : Object} → Arrow B C → Arrow A B → Arrow A C
@@ -58,6 +63,8 @@ _[_,_] = Arrow
 
 _[_∘_] : ∀ {ℓ ℓ'} → (ℂ : Category ℓ ℓ') → {A B C : ℂ .Object} → (g : ℂ [ B , C ]) → (f : ℂ [ A , B ]) → ℂ [ A , C ]
 _[_∘_] = _∘_
+
+
 
 module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} where
   module _ { A B : ℂ .Object } where
@@ -180,3 +187,19 @@ record CartesianClosed {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ �
   field
     {{hasProducts}}     : HasProducts ℂ
     {{hasExponentials}} : HasExponentials ℂ
+
+module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+  unique = isContr
+
+  IsInitial : ℂ .Object → Set (ℓa ⊔ ℓb)
+  IsInitial I = {X : ℂ .Object} → unique (ℂ .Arrow I X)
+
+  IsTerminal : ℂ .Object → Set (ℓa ⊔ ℓb)
+  -- ∃![ ? ] ?
+  IsTerminal T = {X : ℂ .Object} → unique (ℂ .Arrow X T)
+
+  Initial : Set (ℓa ⊔ ℓb)
+  Initial = Σ (ℂ .Object) IsInitial
+
+  Terminal : Set (ℓa ⊔ ℓb)
+  Terminal = Σ (ℂ .Object) IsTerminal

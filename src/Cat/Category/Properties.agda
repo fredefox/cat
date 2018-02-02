@@ -49,9 +49,14 @@ epi-mono-is-not-iso f =
   in {!!}
 -}
 
-module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
-  open import Cat.Category
-  open Category
+open import Cat.Category
+open Category
+open import Cat.Functor
+open Functor
+
+module _ {ℓ : Level} {ℂ : Category ℓ ℓ}
+  {isSObj : isSet (ℂ .Object)}
+  {isz2 : ∀ {ℓ} → {A B : Set ℓ} → isSet (Sets [ A , B ])} where
   open import Cat.Categories.Cat using (Cat)
   open import Cat.Categories.Fun
   open import Cat.Categories.Sets
@@ -82,7 +87,23 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
 
       eqNat : (λ i → Natural (prshf c) (prshf c) (eqTrans i))
         [(λ _ → funExt (λ _ → ℂ.assoc)) ≡ identityNatural (prshf c)]
-      eqNat = {!!}
+      eqNat = λ i {A} {B} f →
+        let
+         open IsCategory (Sets .isCategory)
+         lemm : (Sets [ eqTrans i B ∘ prshf c .func→ f ]) ≡
+           (Sets [ prshf c .func→ f ∘ eqTrans i A ])
+         lemm = {!!}
+         lem : (λ _ → Sets [ Functor.func* (prshf c) A , prshf c .func* B ])
+                [ Sets [ eqTrans i B ∘ prshf c .func→ f ]
+                ≡ Sets [ prshf c .func→ f ∘ eqTrans i A ] ]
+         lem
+          = isz2 _ _ lemm _ i
+            -- (Sets [ eqTrans i B ∘ prshf c .func→ f ])
+            -- (Sets [ prshf c .func→ f ∘ eqTrans i A ])
+            -- lemm
+            -- _ i
+        in
+          lem
       -- eqNat = λ {A} {B} i ℂ[B,A] i' ℂ[A,c] →
       --   let
       --     k : ℂ [ {!!} , {!!} ]
