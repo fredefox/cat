@@ -39,10 +39,10 @@ module _ {ℓ : Level} where
       proj₁ lem = refl
       proj₂ lem = refl
     instance
-      isProduct : {A B : Sets .Object} → IsProduct Sets {A} {B} proj₁ proj₂
+      isProduct : {A B : Object Sets} → IsProduct Sets {A} {B} proj₁ proj₂
       isProduct f g = f &&& g , lem f g
 
-    product : (A B : Sets .Object) → Product {ℂ = Sets} A B
+    product : (A B : Object Sets) → Product {ℂ = Sets} A B
     product A B = record { obj = A × B ; proj₁ = proj₁ ; proj₂ = proj₂ ; isProduct = isProduct }
 
   instance
@@ -56,8 +56,8 @@ Representable {ℓ' = ℓ'} ℂ = Functor ℂ (Sets {ℓ'})
 -- The "co-yoneda" embedding.
 representable : ∀ {ℓ ℓ'} {ℂ : Category ℓ ℓ'} → Category.Object ℂ → Representable ℂ
 representable {ℂ = ℂ} A = record
-  { func* = λ B → ℂ .Arrow A B
-  ; func→ = ℂ ._∘_
+  { func* = λ B → ℂ [ A , B ]
+  ; func→ = ℂ [_∘_]
   ; isFunctor = record
     { ident = funExt λ _ → proj₂ ident
     ; distrib = funExt λ x → sym assoc
@@ -73,8 +73,8 @@ Presheaf {ℓ' = ℓ'} ℂ = Functor (Opposite ℂ) (Sets {ℓ'})
 -- Alternate name: `yoneda`
 presheaf : {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} → Category.Object (Opposite ℂ) → Presheaf ℂ
 presheaf {ℂ = ℂ} B = record
-  { func* = λ A → ℂ .Arrow A B
-  ; func→ = λ f g → ℂ ._∘_ g f
+  { func* = λ A → ℂ [ A , B ]
+  ; func→ = λ f g → ℂ [ g ∘ f ]
   ; isFunctor = record
     { ident = funExt λ x → proj₁ ident
     ; distrib = funExt λ x → assoc

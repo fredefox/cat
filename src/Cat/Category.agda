@@ -114,27 +114,34 @@ Category ℓa ℓb = Σ (RawCategory ℓa ℓb) IsCategory
 
 module Category {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   raw = fst ℂ
-  open RawCategory raw public
   isCategory = snd ℂ
 
-open RawCategory
+  private
+    module ℂ = RawCategory raw
 
--- _∈_ : ∀ {ℓa ℓb} (ℂ : Category ℓa ℓb) → (ℂ .fst .Object → Set ℓb) → Set (ℓa ⊔ ℓb)
--- A ∈ ℂ =
+  Object : Set ℓa
+  Object = ℂ.Object
 
-Obj : ∀ {ℓa ℓb} → Category ℓa ℓb → Set ℓa
-Obj ℂ = ℂ .fst .Object
+  Arrow = ℂ.Arrow
 
-_[_,_] : ∀ {ℓ ℓ'} → (ℂ : Category ℓ ℓ') → (A : Obj ℂ) → (B : Obj ℂ) → Set ℓ'
-ℂ [ A , B ] = ℂ .fst .Arrow A B
+  𝟙 = ℂ.𝟙
 
-_[_∘_] : ∀ {ℓ ℓ'} → (ℂ : Category ℓ ℓ') → {A B C : Obj ℂ} → (g : ℂ [ B , C ]) → (f : ℂ [ A , B ]) → ℂ [ A , C ]
-ℂ [ g ∘ f ] = ℂ .fst ._∘_ g f
+  _∘_ = ℂ._∘_
 
-module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {A B obj : Obj ℂ} where
+  _[_,_] : (A : Object) → (B : Object) → Set ℓb
+  _[_,_] = ℂ.Arrow
+
+  _[_∘_] : {A B C : Object} → (g : ℂ.Arrow B C) → (f : ℂ.Arrow A B) → ℂ.Arrow A C
+  _[_∘_] = ℂ._∘_
+
+open Category using ( Object ; _[_,_] ; _[_∘_])
+
+-- open RawCategory
+
+module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {A B obj : Object ℂ} where
   IsProduct : (π₁ : ℂ [ obj , A ]) (π₂ : ℂ [ obj , B ]) → Set (ℓ ⊔ ℓ')
   IsProduct π₁ π₂
-    = ∀ {X : Obj ℂ} (x₁ : ℂ [ X , A ]) (x₂ : ℂ [ X , B ])
+    = ∀ {X : Object ℂ} (x₁ : ℂ [ X , A ]) (x₂ : ℂ [ X , B ])
     → ∃![ x ] (ℂ [ π₁ ∘ x ] ≡ x₁ × ℂ [ π₂ ∘ x ] ≡ x₂)
 
 -- Tip from Andrea; Consider this style for efficiency:
@@ -144,10 +151,10 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {A B obj : Obj ℂ} where
 --      isProduct : ∀ {X : ℂ .Object} (x₁ : ℂ .Arrow X A) (x₂ : ℂ .Arrow X B)
 --        → ∃![ x ] (ℂ ._⊕_ π₁ x ≡ x₁ × ℂ. _⊕_ π₂ x ≡ x₂)
 
-record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : Obj ℂ) : Set (ℓ ⊔ ℓ') where
+record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : Object ℂ) : Set (ℓ ⊔ ℓ') where
   no-eta-equality
   field
-    obj : Obj ℂ
+    obj : Object ℂ
     proj₁ : ℂ [ obj , A ]
     proj₂ : ℂ [ obj , B ]
     {{isProduct}} : IsProduct ℂ proj₁ proj₂
@@ -158,15 +165,15 @@ record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : Obj ℂ) : Se
 
 record HasProducts {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ ⊔ ℓ') where
   field
-    product : ∀ (A B : Obj ℂ) → Product {ℂ = ℂ} A B
+    product : ∀ (A B : Object ℂ) → Product {ℂ = ℂ} A B
 
   open Product
 
-  objectProduct : (A B : Obj ℂ) → Obj ℂ
+  objectProduct : (A B : Object ℂ) → Object ℂ
   objectProduct A B = Product.obj (product A B)
   -- The product mentioned in awodey in Def 6.1 is not the regular product of arrows.
   -- It's a "parallel" product
-  parallelProduct : {A A' B B' : Obj ℂ} → ℂ [ A , A' ] → ℂ [ B , B' ]
+  parallelProduct : {A A' B B' : Object ℂ} → ℂ [ A , A' ] → ℂ [ B , B' ]
     → ℂ [ objectProduct A B , objectProduct A' B' ]
   parallelProduct {A = A} {A' = A'} {B = B} {B' = B'} a b = arrowProduct (product A' B')
     (ℂ [ a ∘ (product A B) .proj₁ ])
@@ -209,30 +216,30 @@ module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{hasProducts : HasProducts ℂ}} 
   open HasProducts hasProducts
   open Product hiding (obj)
   private
-    _×p_ : (A B : Obj ℂ) → Obj ℂ
+    _×p_ : (A B : Object ℂ) → Object ℂ
     _×p_ A B = Product.obj (product A B)
 
-  module _ (B C : Obj ℂ) where
-    IsExponential : (Cᴮ : Obj ℂ) → ℂ [ Cᴮ ×p B , C ] → Set (ℓ ⊔ ℓ')
-    IsExponential Cᴮ eval = ∀ (A : Obj ℂ) (f : ℂ [ A ×p B , C ])
-      → ∃![ f~ ] (ℂ [ eval ∘ parallelProduct f~ (Category.raw ℂ .𝟙)] ≡ f)
+  module _ (B C : Object ℂ) where
+    IsExponential : (Cᴮ : Object ℂ) → ℂ [ Cᴮ ×p B , C ] → Set (ℓ ⊔ ℓ')
+    IsExponential Cᴮ eval = ∀ (A : Object ℂ) (f : ℂ [ A ×p B , C ])
+      → ∃![ f~ ] (ℂ [ eval ∘ parallelProduct f~ (Category.𝟙 ℂ)] ≡ f)
 
     record Exponential : Set (ℓ ⊔ ℓ') where
       field
         -- obj ≡ Cᴮ
-        obj : Obj ℂ
+        obj : Object ℂ
         eval : ℂ [ obj ×p B , C ]
         {{isExponential}} : IsExponential obj eval
       -- If I make this an instance-argument then the instance resolution
       -- algorithm goes into an infinite loop. Why?
       exponentialsHaveProducts : HasProducts ℂ
       exponentialsHaveProducts = hasProducts
-      transpose : (A : Obj ℂ) → ℂ [ A ×p B , C ] → ℂ [ A , obj ]
+      transpose : (A : Object ℂ) → ℂ [ A ×p B , C ] → ℂ [ A , obj ]
       transpose A f = fst (isExponential A f)
 
 record HasExponentials {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {{_ : HasProducts ℂ}} : Set (ℓ ⊔ ℓ') where
   field
-    exponent : (A B : Obj ℂ) → Exponential ℂ A B
+    exponent : (A B : Object ℂ) → Exponential ℂ A B
 
 record CartesianClosed {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ ⊔ ℓ') where
   field
@@ -242,15 +249,15 @@ record CartesianClosed {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ �
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   unique = isContr
 
-  IsInitial : Obj ℂ → Set (ℓa ⊔ ℓb)
-  IsInitial I = {X : Obj ℂ} → unique (ℂ [ I , X ])
+  IsInitial : Object ℂ → Set (ℓa ⊔ ℓb)
+  IsInitial I = {X : Object ℂ} → unique (ℂ [ I , X ])
 
-  IsTerminal : Obj ℂ → Set (ℓa ⊔ ℓb)
+  IsTerminal : Object ℂ → Set (ℓa ⊔ ℓb)
   -- ∃![ ? ] ?
-  IsTerminal T = {X : Obj ℂ} → unique (ℂ [ X , T ])
+  IsTerminal T = {X : Object ℂ} → unique (ℂ [ X , T ])
 
   Initial : Set (ℓa ⊔ ℓb)
-  Initial = Σ (Obj ℂ) IsInitial
+  Initial = Σ (Object ℂ) IsInitial
 
   Terminal : Set (ℓa ⊔ ℓb)
-  Terminal = Σ (Obj ℂ) IsTerminal
+  Terminal = Σ (Object ℂ) IsTerminal

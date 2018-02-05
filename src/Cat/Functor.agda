@@ -10,20 +10,20 @@ open Category hiding (_∘_)
 
 module _ {ℓc ℓc' ℓd ℓd'} (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
   record IsFunctor
-    (func* : Obj ℂ → Obj 𝔻)
-    (func→ : {A B : Obj ℂ} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ])
+    (func* : Object ℂ → Object 𝔻)
+    (func→ : {A B : Object ℂ} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ])
       : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
     field
-      ident   : {c : Obj ℂ} → func→ (ℂ .𝟙 {c}) ≡ 𝔻 .𝟙 {func* c}
+      ident   : {c : Object ℂ} → func→ (𝟙 ℂ {c}) ≡ 𝟙 𝔻 {func* c}
       -- TODO: Avoid use of ugly explicit arguments somehow.
       -- This guy managed to do it:
       --    https://github.com/copumpkin/categories/blob/master/Categories/Functor/Core.agda
-      distrib : {A B C : ℂ .Object} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
+      distrib : {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
         → func→ (ℂ [ g ∘ f ]) ≡ 𝔻 [ func→ g ∘ func→ f ]
 
   record Functor : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
     field
-      func* : ℂ .Object → 𝔻 .Object
+      func* : Object ℂ → Object 𝔻
       func→ : ∀ {A B} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ]
       {{isFunctor}} : IsFunctor func* func→
 
@@ -33,11 +33,11 @@ open Functor
 module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
 
   IsFunctor≡
-    : {func* : ℂ .Object → 𝔻 .Object}
-      {func→ : {A B : ℂ .Object} → ℂ .Arrow A B → 𝔻 .Arrow (func* A) (func* B)}
+    : {func* : Object ℂ → Object 𝔻}
+      {func→ : {A B : Object ℂ} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ]}
       {F G : IsFunctor ℂ 𝔻 func* func→}
     → (eqI
-      : (λ i → ∀ {A} → func→ (ℂ .𝟙 {A}) ≡ 𝔻 .𝟙 {func* A})
+      : (λ i → ∀ {A} → func→ (𝟙 ℂ {A}) ≡ 𝟙 𝔻 {func* A})
         [ F .ident ≡ G .ident ])
     → (eqD :
         (λ i → ∀ {A B C} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
@@ -61,7 +61,7 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
     F→ = F .func→
     G* = G .func*
     G→ = G .func→
-    module _ {a0 a1 a2 : A .Object} {α0 : A [ a0 , a1 ]} {α1 : A [ a1 , a2 ]} where
+    module _ {a0 a1 a2 : Object A} {α0 : A [ a0 , a1 ]} {α1 : A [ a1 , a2 ]} where
 
       dist : (F→ ∘ G→) (A [ α1 ∘ α0 ]) ≡ C [ (F→ ∘ G→) α1 ∘ (F→ ∘ G→) α0 ]
       dist = begin
@@ -77,10 +77,10 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
       ; func→ = F→ ∘ G→
       ; isFunctor = record
         { ident = begin
-          (F→ ∘ G→) (A .𝟙) ≡⟨ refl ⟩
-          F→ (G→ (A .𝟙))   ≡⟨ cong F→ (G .isFunctor .ident)⟩
-          F→ (B .𝟙)        ≡⟨ F .isFunctor .ident ⟩
-          C .𝟙             ∎
+          (F→ ∘ G→) (𝟙 A) ≡⟨ refl ⟩
+          F→ (G→ (𝟙 A))   ≡⟨ cong F→ (G .isFunctor .ident)⟩
+          F→ (𝟙 B)        ≡⟨ F .isFunctor .ident ⟩
+          𝟙 C             ∎
         ; distrib = dist
         }
       }

@@ -12,7 +12,7 @@ open import Cat.Categories.Sets
 open import Cat.Equality
 open Equality.Data.Product
 
-module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : ℂ .Category.Object } {X : ℂ .Category.Object} (f : ℂ .Category.Arrow A B) where
+module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : Category.Object ℂ } {X : Category.Object ℂ} (f : Category.Arrow ℂ A B) where
   open Category ℂ
   open IsCategory (isCategory)
 

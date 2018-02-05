@@ -16,11 +16,11 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
   module _ (F G : Functor ℂ 𝔻) where
     -- What do you call a non-natural tranformation?
     Transformation : Set (ℓc ⊔ ℓd')
-    Transformation = (C : ℂ .Object) → 𝔻 [ F .func* C , G .func* C ]
+    Transformation = (C : Object ℂ) → 𝔻 [ F .func* C , G .func* C ]
 
     Natural : Transformation → Set (ℓc ⊔ (ℓc' ⊔ ℓd'))
     Natural θ
-      = {A B : ℂ .Object}
+      = {A B : Object ℂ}
       → (f : ℂ [ A , B ])
       → 𝔻 [ θ B ∘ F .func→ f ] ≡ 𝔻 [ G .func→ f ∘ θ A ]
 
@@ -34,7 +34,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     NaturalTransformation≡ : {α β : NaturalTransformation F G}
       → (eq₁ : α .proj₁ ≡ β .proj₁)
       → (eq₂ : PathP
-          (λ i → {A B : ℂ .Object} (f : ℂ [ A , B ])
+          (λ i → {A B : Object ℂ} (f : ℂ [ A , B ])
             → 𝔻 [ eq₁ i B ∘ F .func→ f ]
             ≡ 𝔻 [ G .func→ f ∘ eq₁ i A ])
         (α .proj₂) (β .proj₂))
@@ -42,14 +42,14 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     NaturalTransformation≡ eq₁ eq₂ i = eq₁ i , eq₂ i
 
   identityTrans : (F : Functor ℂ 𝔻) → Transformation F F
-  identityTrans F C = 𝔻 .𝟙
+  identityTrans F C = 𝟙 𝔻
 
   identityNatural : (F : Functor ℂ 𝔻) → Natural F F (identityTrans F)
   identityNatural F {A = A} {B = B} f = begin
     𝔻 [ identityTrans F B ∘ F→ f ]  ≡⟨⟩
-    𝔻 [ 𝔻 .𝟙 ∘  F→ f ]              ≡⟨ proj₂ 𝔻.ident ⟩
+    𝔻 [ 𝟙 𝔻 ∘  F→ f ]              ≡⟨ proj₂ 𝔻.ident ⟩
     F→ f                            ≡⟨ sym (proj₁ 𝔻.ident) ⟩
-    𝔻 [ F→ f ∘ 𝔻 .𝟙 ]               ≡⟨⟩
+    𝔻 [ F→ f ∘ 𝟙 𝔻 ]               ≡⟨⟩
     𝔻 [ F→ f ∘ identityTrans F A ]  ∎
     where
       F→ = F .func→

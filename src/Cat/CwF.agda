@@ -17,20 +17,20 @@ module _ {ℓa ℓb : Level} where
       -- "A base category"
       ℂ : Category ℓa ℓb
     -- It's objects are called contexts
-    Contexts = ℂ .Object
+    Contexts = Object ℂ
     -- It's arrows are called substitutions
-    Substitutions = ℂ .Arrow
+    Substitutions = Arrow ℂ
     field
       -- A functor T
       T : Functor (Opposite ℂ) (Fam ℓa ℓb)
       -- Empty context
       [] : Terminal ℂ
-    Type : (Γ : ℂ .Object) → Set ℓa
+    Type : (Γ : Object ℂ) → Set ℓa
     Type Γ = proj₁ (T .func* Γ)
 
-    module _ {Γ : ℂ .Object} {A : Type Γ} where
+    module _ {Γ : Object ℂ} {A : Type Γ} where
 
-      module _ {A B : ℂ .Object} {γ : ℂ [ A , B ]} where
+      module _ {A B : Object ℂ} {γ : ℂ [ A , B ]} where
         k : Σ (proj₁ (func* T B) → proj₁ (func* T A))
           (λ f →
           {x : proj₁ (func* T B)} →
@@ -44,8 +44,8 @@ module _ {ℓa ℓb : Level} where
 
       record ContextComprehension : Set (ℓa ⊔ ℓb) where
         field
-          Γ&A : ℂ .Object
-          proj1 : ℂ .Arrow Γ&A Γ
+          Γ&A : Object ℂ
+          proj1 : ℂ [ Γ&A , Γ ]
           -- proj2 : ????
 
         -- if γ : ℂ [ A , B ]
