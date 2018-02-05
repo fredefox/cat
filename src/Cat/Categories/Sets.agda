@@ -8,6 +8,7 @@ import Function
 
 open import Cat.Category
 open import Cat.Functor
+open import Cat.Product
 open Category
 
 module _ {ℓ : Level} where

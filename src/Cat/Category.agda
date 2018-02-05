@@ -136,49 +136,6 @@ module Category {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
 open Category using ( Object ; _[_,_] ; _[_∘_])
 
--- open RawCategory
-
-module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {A B obj : Object ℂ} where
-  IsProduct : (π₁ : ℂ [ obj , A ]) (π₂ : ℂ [ obj , B ]) → Set (ℓ ⊔ ℓ')
-  IsProduct π₁ π₂
-    = ∀ {X : Object ℂ} (x₁ : ℂ [ X , A ]) (x₂ : ℂ [ X , B ])
-    → ∃![ x ] (ℂ [ π₁ ∘ x ] ≡ x₁ × ℂ [ π₂ ∘ x ] ≡ x₂)
-
--- Tip from Andrea; Consider this style for efficiency:
--- record IsProduct {ℓ ℓ' : Level} (ℂ : Category {ℓ} {ℓ'})
---   {A B obj : Object ℂ} (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) : Set (ℓ ⊔ ℓ') where
---   field
---      isProduct : ∀ {X : ℂ .Object} (x₁ : ℂ .Arrow X A) (x₂ : ℂ .Arrow X B)
---        → ∃![ x ] (ℂ ._⊕_ π₁ x ≡ x₁ × ℂ. _⊕_ π₂ x ≡ x₂)
-
-record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : Object ℂ) : Set (ℓ ⊔ ℓ') where
-  no-eta-equality
-  field
-    obj : Object ℂ
-    proj₁ : ℂ [ obj , A ]
-    proj₂ : ℂ [ obj , B ]
-    {{isProduct}} : IsProduct ℂ proj₁ proj₂
-
-  arrowProduct : ∀ {X} → (π₁ : ℂ [ X , A ]) (π₂ : ℂ [ X , B ])
-    → ℂ [ X , obj ]
-  arrowProduct π₁ π₂ = fst (isProduct π₁ π₂)
-
-record HasProducts {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ ⊔ ℓ') where
-  field
-    product : ∀ (A B : Object ℂ) → Product {ℂ = ℂ} A B
-
-  open Product
-
-  objectProduct : (A B : Object ℂ) → Object ℂ
-  objectProduct A B = Product.obj (product A B)
-  -- The product mentioned in awodey in Def 6.1 is not the regular product of arrows.
-  -- It's a "parallel" product
-  parallelProduct : {A A' B B' : Object ℂ} → ℂ [ A , A' ] → ℂ [ B , B' ]
-    → ℂ [ objectProduct A B , objectProduct A' B' ]
-  parallelProduct {A = A} {A' = A'} {B = B} {B' = B'} a b = arrowProduct (product A' B')
-    (ℂ [ a ∘ (product A B) .proj₁ ])
-    (ℂ [ b ∘ (product A B) .proj₂ ])
-
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     open Category ℂ
@@ -211,40 +168,6 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 -- _⊕_ (Opposite-is-involution i) = {!!}
 -- assoc (Opposite-is-involution i) = {!!}
 -- ident (Opposite-is-involution i) = {!!}
-
-module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{hasProducts : HasProducts ℂ}} where
-  open HasProducts hasProducts
-  open Product hiding (obj)
-  private
-    _×p_ : (A B : Object ℂ) → Object ℂ
-    _×p_ A B = Product.obj (product A B)
-
-  module _ (B C : Object ℂ) where
-    IsExponential : (Cᴮ : Object ℂ) → ℂ [ Cᴮ ×p B , C ] → Set (ℓ ⊔ ℓ')
-    IsExponential Cᴮ eval = ∀ (A : Object ℂ) (f : ℂ [ A ×p B , C ])
-      → ∃![ f~ ] (ℂ [ eval ∘ parallelProduct f~ (Category.𝟙 ℂ)] ≡ f)
-
-    record Exponential : Set (ℓ ⊔ ℓ') where
-      field
-        -- obj ≡ Cᴮ
-        obj : Object ℂ
-        eval : ℂ [ obj ×p B , C ]
-        {{isExponential}} : IsExponential obj eval
-      -- If I make this an instance-argument then the instance resolution
-      -- algorithm goes into an infinite loop. Why?
-      exponentialsHaveProducts : HasProducts ℂ
-      exponentialsHaveProducts = hasProducts
-      transpose : (A : Object ℂ) → ℂ [ A ×p B , C ] → ℂ [ A , obj ]
-      transpose A f = fst (isExponential A f)
-
-record HasExponentials {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {{_ : HasProducts ℂ}} : Set (ℓ ⊔ ℓ') where
-  field
-    exponent : (A B : Object ℂ) → Exponential ℂ A B
-
-record CartesianClosed {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ ⊔ ℓ') where
-  field
-    {{hasProducts}}     : HasProducts ℂ
-    {{hasExponentials}} : HasExponentials ℂ
 
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   unique = isContr
