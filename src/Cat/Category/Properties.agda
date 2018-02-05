@@ -60,7 +60,7 @@ open Functor
 --   open import Cat.Categories.Fun
 --   open import Cat.Categories.Sets
 --   -- module Cat = Cat.Categories.Cat
---   open Exponential
+--   open import Cat.Category.Exponential
 --   private
 --     Catℓ = Cat ℓ ℓ
 --     prshf = presheaf {ℂ = ℂ}

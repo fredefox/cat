@@ -19,7 +19,7 @@ module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{hasProducts : HasProducts ℂ}} 
   module _ (B C : Object ℂ) where
     IsExponential : (Cᴮ : Object ℂ) → ℂ [ Cᴮ ×p B , C ] → Set (ℓ ⊔ ℓ')
     IsExponential Cᴮ eval = ∀ (A : Object ℂ) (f : ℂ [ A ×p B , C ])
-      → ∃![ f~ ] (ℂ [ eval ∘ parallelProduct f~ (Category.𝟙 ℂ)] ≡ f)
+      → ∃![ f~ ] (ℂ [ eval ∘ f~ |×| Category.𝟙 ℂ ] ≡ f)
 
     record Exponential : Set (ℓ ⊔ ℓ') where
       field

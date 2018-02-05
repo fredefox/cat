@@ -76,8 +76,10 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
 
   -- TODO: might want to implement isEquiv differently, there are 3
   -- equivalent formulations in the book.
+  Univalent : Set (ℓa ⊔ ℓb)
+  Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
   field
-    univalent : {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
+    univalent : Univalent
 
   module _ {A B : Object} where
     Epimorphism : {X : Object } → (f : Arrow A B) → Set ℓb

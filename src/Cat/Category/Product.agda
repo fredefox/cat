@@ -1,8 +1,8 @@
 module Cat.Category.Product where
 
 open import Agda.Primitive
-open import Data.Product
 open import Cubical
+open import Data.Product as P hiding (_×_)
 
 open import Cat.Category
 
@@ -12,14 +12,16 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {A B obj : Object ℂ} whe
   IsProduct : (π₁ : ℂ [ obj , A ]) (π₂ : ℂ [ obj , B ]) → Set (ℓ ⊔ ℓ')
   IsProduct π₁ π₂
     = ∀ {X : Object ℂ} (x₁ : ℂ [ X , A ]) (x₂ : ℂ [ X , B ])
-    → ∃![ x ] (ℂ [ π₁ ∘ x ] ≡ x₁ × ℂ [ π₂ ∘ x ] ≡ x₂)
+    → ∃![ x ] (ℂ [ π₁ ∘ x ] ≡ x₁ P.× ℂ [ π₂ ∘ x ] ≡ x₂)
 
 -- Tip from Andrea; Consider this style for efficiency:
--- record IsProduct {ℓ ℓ' : Level} (ℂ : Category {ℓ} {ℓ'})
---   {A B obj : Object ℂ} (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) : Set (ℓ ⊔ ℓ') where
+-- record IsProduct {ℓa ℓb : Level} (ℂ : Category ℓa ℓb)
+--   {A B obj : Object ℂ} (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) : Set (ℓa ⊔ ℓb) where
 --   field
---      isProduct : ∀ {X : ℂ .Object} (x₁ : ℂ .Arrow X A) (x₂ : ℂ .Arrow X B)
---        → ∃![ x ] (ℂ ._⊕_ π₁ x ≡ x₁ × ℂ. _⊕_ π₂ x ≡ x₂)
+--      issProduct : ∀ {X : Object ℂ} (x₁ : ℂ [ X , A ]) (x₂ : ℂ [ X , B ])
+--        → ∃![ x ] (ℂ [ π₁ ∘ x ] ≡ x₁ P.× ℂ [ π₂ ∘ x ] ≡ x₂)
+
+-- open IsProduct
 
 record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : Object ℂ) : Set (ℓ ⊔ ℓ') where
   no-eta-equality
@@ -29,9 +31,9 @@ record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : Object ℂ) :
     proj₂ : ℂ [ obj , B ]
     {{isProduct}} : IsProduct ℂ proj₁ proj₂
 
-  arrowProduct : ∀ {X} → (π₁ : ℂ [ X , A ]) (π₂ : ℂ [ X , B ])
+  _P[_×_] : ∀ {X} → (π₁ : ℂ [ X , A ]) (π₂ : ℂ [ X , B ])
     → ℂ [ X , obj ]
-  arrowProduct π₁ π₂ = proj₁ (isProduct π₁ π₂)
+  _P[_×_] π₁ π₂ = proj₁ (isProduct π₁ π₂)
 
 record HasProducts {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ ⊔ ℓ') where
   field
@@ -39,12 +41,14 @@ record HasProducts {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ ⊔ �
 
   open Product
 
-  objectProduct : (A B : Object ℂ) → Object ℂ
-  objectProduct A B = Product.obj (product A B)
+  _×_ : (A B : Object ℂ) → Object ℂ
+  A × B = Product.obj (product A B)
   -- The product mentioned in awodey in Def 6.1 is not the regular product of arrows.
   -- It's a "parallel" product
-  parallelProduct : {A A' B B' : Object ℂ} → ℂ [ A , A' ] → ℂ [ B , B' ]
-    → ℂ [ objectProduct A B , objectProduct A' B' ]
-  parallelProduct {A = A} {A' = A'} {B = B} {B' = B'} a b = arrowProduct (product A' B')
-    (ℂ [ a ∘ (product A B) .proj₁ ])
-    (ℂ [ b ∘ (product A B) .proj₂ ])
+  _|×|_ : {A A' B B' : Object ℂ} → ℂ [ A , A' ] → ℂ [ B , B' ]
+    → ℂ [ A × B , A' × B' ]
+  _|×|_ {A = A} {A' = A'} {B = B} {B' = B'} a b
+    = product A' B'
+      P[ ℂ [ a ∘ (product A B) .proj₁ ]
+      ×  ℂ [ b ∘ (product A B) .proj₂ ]
+      ]
