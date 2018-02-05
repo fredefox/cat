@@ -154,16 +154,18 @@ module _ {A B C D : Set} {S : Subset (A × B)} {R : Subset (B × C)} {Q : Subset
          ≡ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
   is-assoc = equivToPath equi
 
-Rel : Category (lsuc lzero) (lsuc lzero)
-Rel = record
+RawRel : RawCategory (lsuc lzero) (lsuc lzero)
+RawRel = record
   { Object = Set
   ; Arrow = λ S R → Subset (S × R)
   ; 𝟙 = λ {S} → Diag S
   ; _∘_ = λ {A B C} S R → λ {( a , c ) → Σ[ b ∈ B ] ( (a , b) ∈ R × (b , c) ∈ S )}
-  ; isCategory = record
-    { assoc = funExt is-assoc
-    ; ident = funExt ident-l , funExt ident-r
-    ; arrow-is-set = {!!}
-    ; univalent = {!!}
-    }
+  }
+
+RawIsCategoryRel : IsCategory RawRel
+RawIsCategoryRel = record
+  { assoc = funExt is-assoc
+  ; ident = funExt ident-l , funExt ident-r
+  ; arrow-is-set = {!!}
+  ; univalent = {!!}
   }

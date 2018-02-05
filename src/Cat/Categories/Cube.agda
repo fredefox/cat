@@ -12,7 +12,7 @@ open import Function
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
 
-open import Cat.Category hiding (Hom)
+open import Cat.Category
 open import Cat.Functor
 open import Cat.Equality
 open Equality.Data.Product
@@ -66,12 +66,14 @@ module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
     Hom = Σ Hom' rules
 
   -- The category of names and substitutions
-  ℂ : Category ℓ ℓ -- ℓo (lsuc lzero ⊔ ℓo)
-  ℂ = record
+  Rawℂ : RawCategory ℓ ℓ -- ℓo (lsuc lzero ⊔ ℓo)
+  Rawℂ = record
     { Object = FiniteDecidableSubset
     -- { Object = Ns → Bool
     ; Arrow = Hom
     ; 𝟙 = λ { {o} → inj₁ , λ { (i , ii) (j , jj) eq → Σ≡ eq {!refl!} } }
     ; _∘_ = {!!}
-    ; isCategory = {!!}
     }
+  postulate RawIsCategoryℂ : IsCategory Rawℂ
+  ℂ : Category ℓ ℓ
+  ℂ = Rawℂ , RawIsCategoryℂ

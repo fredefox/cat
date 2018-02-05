@@ -4,22 +4,31 @@ module Cat.Categories.Sets where
 open import Cubical
 open import Agda.Primitive
 open import Data.Product
+import Function
 
 open import Cat.Category
 open import Cat.Functor
 open Category
 
 module _ {ℓ : Level} where
-  Sets : Category (lsuc ℓ) ℓ
-  Sets = record
-    { Object = Set ℓ
-    ; Arrow = λ T U → T → U
-    ; 𝟙 = id
-    ; _∘_ = _∘′_
-    ; isCategory = record { assoc = refl ; ident = funExt (λ _ → refl) , funExt (λ _ → refl) }
+  SetsRaw : RawCategory (lsuc ℓ) ℓ
+  SetsRaw = record
+       { Object = Set ℓ
+       ; Arrow = λ T U → T → U
+       ; 𝟙 = Function.id
+       ; _∘_ = Function._∘′_
+       }
+
+  SetsIsCategory : IsCategory SetsRaw
+  SetsIsCategory = record
+    { assoc = refl
+    ; ident = funExt (λ _ → refl) , funExt (λ _ → refl)
+    ; arrow-is-set = {!!}
+    ; univalent = {!!}
     }
-    where
-      open import Function
+
+  Sets : Category (lsuc ℓ) ℓ
+  Sets = SetsRaw , SetsIsCategory
 
   private
     module _ {X A B : Set ℓ} (f : X → A) (g : X → B) where
@@ -55,7 +64,7 @@ representable {ℂ = ℂ} A = record
     }
   }
   where
-    open IsCategory (ℂ .isCategory)
+    open IsCategory (isCategory ℂ)
 
 -- Contravariant Presheaf
 Presheaf : ∀ {ℓ ℓ'} (ℂ : Category ℓ ℓ') → Set (ℓ ⊔ lsuc ℓ')
@@ -72,4 +81,4 @@ presheaf {ℂ = ℂ} B = record
     }
   }
   where
-    open IsCategory (ℂ .isCategory)
+    open IsCategory (isCategory ℂ)

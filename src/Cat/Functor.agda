@@ -10,11 +10,11 @@ open Category hiding (_∘_)
 
 module _ {ℓc ℓc' ℓd ℓd'} (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
   record IsFunctor
-    (func* : ℂ .Object → 𝔻 .Object)
-    (func→ : {A B : ℂ .Object} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ])
+    (func* : Obj ℂ → Obj 𝔻)
+    (func→ : {A B : Obj ℂ} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ])
       : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
     field
-      ident   : { c : ℂ .Object } → func→ (ℂ .𝟙 {c}) ≡ 𝔻 .𝟙 {func* c}
+      ident   : {c : Obj ℂ} → func→ (ℂ .𝟙 {c}) ≡ 𝔻 .𝟙 {func* c}
       -- TODO: Avoid use of ugly explicit arguments somehow.
       -- This guy managed to do it:
       --    https://github.com/copumpkin/categories/blob/master/Categories/Functor/Core.agda

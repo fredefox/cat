@@ -53,7 +53,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     𝔻 [ F→ f ∘ identityTrans F A ]  ∎
     where
       F→ = F .func→
-      module 𝔻 = IsCategory (𝔻 .isCategory)
+      module 𝔻 = IsCategory (isCategory 𝔻)
 
   identityNat : (F : Functor ℂ 𝔻) → NaturalTransformation F F
   identityNat F = identityTrans F , identityNatural F
@@ -75,7 +75,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       𝔻 [ H .func→ f ∘ 𝔻 [ θ A ∘ η A ] ] ≡⟨⟩
       𝔻 [ H .func→ f ∘ (θ ∘nt η) A ]     ∎
       where
-        open IsCategory (𝔻 .isCategory)
+        open IsCategory (isCategory 𝔻)
 
     NatComp = _:⊕:_
 
@@ -96,29 +96,33 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
         × (_:⊕:_ {A} {B} {B} (identityNat B) f) ≡ f
       :ident: = ident-r , ident-l
 
-  instance
-    :isCategory: : IsCategory (Functor ℂ 𝔻) NaturalTransformation
-      (λ {F} → identityNat F) (λ {a} {b} {c} → _:⊕:_ {a} {b} {c})
-    :isCategory: = record
-      { assoc = λ {A B C D} → :assoc: {A} {B} {C} {D}
-      ; ident = λ {A B} → :ident: {A} {B}
-      }
-
   -- Functor categories. Objects are functors, arrows are natural transformations.
-  Fun : Category (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') (ℓc ⊔ ℓc' ⊔ ℓd')
-  Fun = record
+  RawFun : RawCategory (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') (ℓc ⊔ ℓc' ⊔ ℓd')
+  RawFun = record
     { Object = Functor ℂ 𝔻
     ; Arrow = NaturalTransformation
     ; 𝟙 = λ {F} → identityNat F
     ; _∘_ = λ {F G H} → _:⊕:_ {F} {G} {H}
     }
 
+  instance
+    :isCategory: : IsCategory RawFun
+    :isCategory: = record
+      { assoc = λ {A B C D} → :assoc: {A} {B} {C} {D}
+      ; ident = λ {A B} → :ident: {A} {B}
+      ; arrow-is-set = ?
+      ; univalent = ?
+      }
+
+  Fun : Category (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') (ℓc ⊔ ℓc' ⊔ ℓd')
+  Fun = RawFun , :isCategory:
+
 module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
   open import Cat.Categories.Sets
 
   -- Restrict the functors to Presheafs.
-  Presh : Category (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')
-  Presh = record
+  RawPresh : RawCategory (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')
+  RawPresh = record
     { Object = Presheaf ℂ
     ; Arrow = NaturalTransformation
     ; 𝟙 = λ {F} → identityNat F
