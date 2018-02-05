@@ -110,12 +110,12 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     :isCategory: = record
       { assoc = λ {A B C D} → :assoc: {A} {B} {C} {D}
       ; ident = λ {A B} → :ident: {A} {B}
-      ; arrow-is-set = ?
-      ; univalent = ?
+      ; arrow-is-set = {!!}
+      ; univalent = {!!}
       }
 
   Fun : Category (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') (ℓc ⊔ ℓc' ⊔ ℓd')
-  Fun = RawFun , :isCategory:
+  raw Fun = RawFun
 
 module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
   open import Cat.Categories.Sets

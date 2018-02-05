@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Categories.Sets where
 
 open import Cubical
@@ -13,23 +13,22 @@ open Category
 
 module _ {ℓ : Level} where
   SetsRaw : RawCategory (lsuc ℓ) ℓ
-  SetsRaw = record
-       { Object = Set ℓ
-       ; Arrow = λ T U → T → U
-       ; 𝟙 = Function.id
-       ; _∘_ = Function._∘′_
-       }
+  RawCategory.Object SetsRaw = Set ℓ
+  RawCategory.Arrow SetsRaw = λ T U → T → U
+  RawCategory.𝟙 SetsRaw = Function.id
+  RawCategory._∘_ SetsRaw = Function._∘′_
 
+  open IsCategory
   SetsIsCategory : IsCategory SetsRaw
-  SetsIsCategory = record
-    { assoc = refl
-    ; ident = funExt (λ _ → refl) , funExt (λ _ → refl)
-    ; arrow-is-set = {!!}
-    ; univalent = {!!}
-    }
+  assoc SetsIsCategory = refl
+  proj₁ (ident SetsIsCategory) = funExt λ _ → refl
+  proj₂ (ident SetsIsCategory) = funExt λ _ → refl
+  arrow-is-set SetsIsCategory = {!!}
+  univalent SetsIsCategory = {!!}
 
   Sets : Category (lsuc ℓ) ℓ
-  Sets = SetsRaw , SetsIsCategory
+  raw Sets = SetsRaw
+  isCategory Sets = SetsIsCategory
 
   private
     module _ {X A B : Set ℓ} (f : X → A) (g : X → B) where

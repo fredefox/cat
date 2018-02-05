@@ -109,12 +109,10 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
       module x = IsCategory x
       module y = IsCategory y
 
-Category : (ℓa ℓb : Level) → Set (lsuc (ℓa ⊔ ℓb))
-Category ℓa ℓb = Σ (RawCategory ℓa ℓb) IsCategory
-
-module Category {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
-  raw = fst ℂ
-  isCategory = snd ℂ
+record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
+  field
+    raw : RawCategory ℓa ℓb
+    {{isCategory}} : IsCategory raw
 
   private
     module ℂ = RawCategory raw
@@ -134,42 +132,57 @@ module Category {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   _[_∘_] : {A B C : Object} → (g : ℂ.Arrow B C) → (f : ℂ.Arrow A B) → ℂ.Arrow A C
   _[_∘_] = ℂ._∘_
 
-open Category using ( Object ; _[_,_] ; _[_∘_])
 
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     open Category ℂ
-    module ℂ = RawCategory (ℂ .fst)
-    OpRaw : RawCategory ℓa ℓb
-    OpRaw = record
-      { Object = ℂ.Object
-      ; Arrow = Function.flip ℂ.Arrow
-      ; 𝟙 = ℂ.𝟙
-      ; _∘_ = Function.flip (ℂ._∘_)
-      }
-    open IsCategory isCategory
-    OpIsCategory : IsCategory OpRaw
-    OpIsCategory = record
-      { assoc = sym assoc
-      ; ident = swap ident
-      ; arrow-is-set = {!!}
-      ; univalent = {!!}
-      }
-  Opposite : Category ℓa ℓb
-  Opposite = OpRaw , OpIsCategory
 
--- A consequence of no-eta-equality; `Opposite-is-involution` is no longer
--- definitional - i.e.; you must match on the fields:
---
--- Opposite-is-involution : ∀ {ℓ ℓ'} → {C : Category {ℓ} {ℓ'}} → Opposite (Opposite C) ≡ C
--- Object (Opposite-is-involution {C = C} i) = Object C
--- Arrow (Opposite-is-involution i) = {!!}
--- 𝟙 (Opposite-is-involution i) = {!!}
--- _⊕_ (Opposite-is-involution i) = {!!}
--- assoc (Opposite-is-involution i) = {!!}
--- ident (Opposite-is-involution i) = {!!}
+    OpRaw : RawCategory ℓa ℓb
+    RawCategory.Object OpRaw = Object
+    RawCategory.Arrow OpRaw = Function.flip Arrow
+    RawCategory.𝟙 OpRaw = 𝟙
+    RawCategory._∘_ OpRaw = Function.flip _∘_
+
+    open IsCategory isCategory
+
+    OpIsCategory : IsCategory OpRaw
+    IsCategory.assoc OpIsCategory = sym assoc
+    IsCategory.ident OpIsCategory = swap ident
+    IsCategory.arrow-is-set OpIsCategory = {!!}
+    IsCategory.univalent OpIsCategory = {!!}
+
+  Opposite : Category ℓa ℓb
+  raw Opposite = OpRaw
+  Category.isCategory Opposite = OpIsCategory
+
+-- As demonstrated here a side-effect of having no-eta-equality on constructors
+-- means that we need to pick things apart to show that things are indeed
+-- definitionally equal. I.e; a thing that would normally be provable in one
+-- line now takes more than 20!!
+module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
+  private
+    open RawCategory
+    module C = Category ℂ
+    rawOp : Category.raw (Opposite (Opposite ℂ)) ≡ Category.raw ℂ
+    Object (rawOp _) = C.Object
+    Arrow (rawOp _) = C.Arrow
+    𝟙 (rawOp _) = C.𝟙
+    _∘_ (rawOp _) = C._∘_
+    open Category
+    open IsCategory
+    module IsCat = IsCategory (ℂ .isCategory)
+    rawIsCat : (i : I) → IsCategory (rawOp i)
+    assoc (rawIsCat i) = IsCat.assoc
+    ident (rawIsCat i) = IsCat.ident
+    arrow-is-set (rawIsCat i) = IsCat.arrow-is-set
+    univalent (rawIsCat i) = IsCat.univalent
+
+  Opposite-is-involution : Opposite (Opposite ℂ) ≡ ℂ
+  raw (Opposite-is-involution i) = rawOp i
+  isCategory (Opposite-is-involution i) = rawIsCat i
 
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+  open Category
   unique = isContr
 
   IsInitial : Object ℂ → Set (ℓa ⊔ ℓb)
