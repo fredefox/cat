@@ -13,7 +13,7 @@ open import Relation.Nullary
 open import Relation.Nullary.Decidable
 
 open import Cat.Category
-open import Cat.Functor
+open import Cat.Category.Functor
 open import Cat.Equality
 open Equality.Data.Product
 

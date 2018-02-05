@@ -1,12 +1,12 @@
 module Cat where
 
 import Cat.Category
-import Cat.Functor
 import Cat.CwF
-import Cat.CartesianClosed
-import Cat.Exponential
-import Cat.Product
 
+import Cat.Category.Functor
+import Cat.Category.Product
+import Cat.Category.Exponential
+import Cat.Category.CartesianClosed
 import Cat.Category.Pathy
 import Cat.Category.Bij
 import Cat.Category.Free

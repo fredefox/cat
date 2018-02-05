@@ -7,7 +7,7 @@ open import Data.Product
 open import Cubical
 
 open import Cat.Category
-open import Cat.Functor
+open import Cat.Category.Functor
 open import Cat.Categories.Sets
 open import Cat.Equality
 open Equality.Data.Product
@@ -51,7 +51,6 @@ epi-mono-is-not-iso f =
 
 open import Cat.Category
 open Category
-open import Cat.Functor
 open Functor
 
 -- module _ {ℓ : Level} {ℂ : Category ℓ ℓ}

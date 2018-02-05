@@ -1,10 +1,10 @@
-module Cat.CartesianClosed where
+module Cat.Category.CartesianClosed where
 
 open import Agda.Primitive
 
 open import Cat.Category
-open import Cat.Product
-open import Cat.Exponential
+open import Cat.Category.Product
+open import Cat.Category.Exponential
 
 record CartesianClosed {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ ⊔ ℓ') where
   field

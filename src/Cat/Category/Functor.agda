@@ -1,4 +1,4 @@
-module Cat.Functor where
+module Cat.Category.Functor where
 
 open import Agda.Primitive
 open import Cubical

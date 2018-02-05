@@ -1,11 +1,11 @@
-module Cat.Exponential where
+module Cat.Category.Exponential where
 
 open import Agda.Primitive
 open import Data.Product
 open import Cubical
 
 open import Cat.Category
-open import Cat.Product
+open import Cat.Category.Product
 
 open Category
 

@@ -4,7 +4,7 @@ open import Agda.Primitive
 open import Data.Product
 
 open import Cat.Category
-open import Cat.Functor
+open import Cat.Category.Functor
 open import Cat.Categories.Fam
 
 open Category

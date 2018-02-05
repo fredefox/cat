@@ -7,7 +7,7 @@ open import Function
 open import Data.Product
 
 open import Cat.Category
-open import Cat.Functor
+open import Cat.Category.Functor
 
 module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Category ℓd ℓd'} where
   open Category hiding ( _∘_ ; Arrow )
