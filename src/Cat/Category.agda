@@ -12,6 +12,7 @@ open import Data.Product renaming
 open import Data.Empty
 import Function
 open import Cubical
+open import Cubical.GradLemma using ( propIsEquiv )
 
 ∃! : ∀ {a b} {A : Set a}
   → (A → Set b) → Set (a ⊔ b)
@@ -66,17 +67,32 @@ record IsCategory {ℓ ℓ' : Level}
     Monomorphism : {X : Object} → (f : Arrow A B) → Set ℓ'
     Monomorphism {X} f = ( g₀ g₁ : Arrow X A ) → f ∘ g₀ ≡ f ∘ g₁ → g₀ ≡ g₁
 
-module _  {ℓ} {ℓ'} {Object : Set ℓ}
+module _ {ℓ} {ℓ'} {Object : Set ℓ}
    {Arrow  : Object → Object → Set ℓ'}
    {𝟙      : {o : Object} → Arrow o o}
    {_⊕_ : { a b c : Object } → Arrow b c → Arrow a b → Arrow a c}
     where
-
-  -- TODO, provable by using arrow-is-set and that isProp (isEquiv _ _ _)
+  -- TODO, provable by using  arrow-is-set and that isProp (isEquiv _ _ _)
   -- This lemma will be useful to prove the equality of two categories.
   IsCategory-is-prop : isProp (IsCategory Object Arrow 𝟙 _⊕_)
-  IsCategory-is-prop = {!!}
-
+  IsCategory-is-prop x y i = record
+    { assoc = x.arrow-is-set _ _ x.assoc y.assoc i
+    ; ident =
+      ( x.arrow-is-set _ _ (fst x.ident) (fst y.ident) i
+      , x.arrow-is-set _ _ (snd x.ident) (snd y.ident) i
+      )
+    -- ; arrow-is-set = {!λ x₁ y₁ p q → x.arrow-is-set _ _ p q!}
+    ; arrow-is-set = λ _ _ p q →
+      let
+        golden : x.arrow-is-set _ _ p q ≡ y.arrow-is-set _ _ p q
+        golden = λ j k l → {!!}
+      in
+        golden i
+      ; univalent = λ y₁ → {!!}
+    }
+    where
+      module x = IsCategory x
+      module y = IsCategory y
 
 record Category (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
   -- adding no-eta-equality can speed up type-checking.
