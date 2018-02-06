@@ -46,9 +46,9 @@ module _ (ℓa ℓb : Level) where
       isCategory = record
         { assoc = λ {A} {B} {C} {D} {f} {g} {h} → assoc {D = D} {f} {g} {h}
         ; ident = λ {A} {B} {f} → ident {A} {B} {f = f}
-        ; arrow-is-set = ?
-        ; univalent = ?
+        ; arrowIsSet = {!!}
+        ; univalent = {!!}
         }
 
   Fam : Category (lsuc (ℓa ⊔ ℓb)) (ℓa ⊔ ℓb)
-  Fam = RawFam , isCategory
+  Category.raw Fam = RawFam

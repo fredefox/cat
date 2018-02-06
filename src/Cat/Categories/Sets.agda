@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Categories.Sets where
 
 open import Cubical
@@ -7,28 +7,28 @@ open import Data.Product
 import Function
 
 open import Cat.Category
-open import Cat.Functor
+open import Cat.Category.Functor
+open import Cat.Category.Product
 open Category
 
 module _ {ℓ : Level} where
   SetsRaw : RawCategory (lsuc ℓ) ℓ
-  SetsRaw = record
-       { Object = Set ℓ
-       ; Arrow = λ T U → T → U
-       ; 𝟙 = Function.id
-       ; _∘_ = Function._∘′_
-       }
+  RawCategory.Object SetsRaw = Set ℓ
+  RawCategory.Arrow SetsRaw = λ T U → T → U
+  RawCategory.𝟙 SetsRaw = Function.id
+  RawCategory._∘_ SetsRaw = Function._∘′_
 
+  open IsCategory
   SetsIsCategory : IsCategory SetsRaw
-  SetsIsCategory = record
-    { assoc = refl
-    ; ident = funExt (λ _ → refl) , funExt (λ _ → refl)
-    ; arrow-is-set = {!!}
-    ; univalent = {!!}
-    }
+  assoc SetsIsCategory = refl
+  proj₁ (ident SetsIsCategory) = funExt λ _ → refl
+  proj₂ (ident SetsIsCategory) = funExt λ _ → refl
+  arrowIsSet SetsIsCategory = {!!}
+  univalent SetsIsCategory = {!!}
 
   Sets : Category (lsuc ℓ) ℓ
-  Sets = SetsRaw , SetsIsCategory
+  raw Sets = SetsRaw
+  isCategory Sets = SetsIsCategory
 
   private
     module _ {X A B : Set ℓ} (f : X → A) (g : X → B) where
@@ -39,10 +39,10 @@ module _ {ℓ : Level} where
       proj₁ lem = refl
       proj₂ lem = refl
     instance
-      isProduct : {A B : Sets .Object} → IsProduct Sets {A} {B} proj₁ proj₂
+      isProduct : {A B : Object Sets} → IsProduct Sets {A} {B} proj₁ proj₂
       isProduct f g = f &&& g , lem f g
 
-    product : (A B : Sets .Object) → Product {ℂ = Sets} A B
+    product : (A B : Object Sets) → Product {ℂ = Sets} A B
     product A B = record { obj = A × B ; proj₁ = proj₁ ; proj₂ = proj₂ ; isProduct = isProduct }
 
   instance
@@ -56,8 +56,10 @@ Representable {ℓ' = ℓ'} ℂ = Functor ℂ (Sets {ℓ'})
 -- The "co-yoneda" embedding.
 representable : ∀ {ℓ ℓ'} {ℂ : Category ℓ ℓ'} → Category.Object ℂ → Representable ℂ
 representable {ℂ = ℂ} A = record
-  { func* = λ B → ℂ .Arrow A B
-  ; func→ = ℂ ._∘_
+  { raw = record
+    { func* = λ B → ℂ [ A , B ]
+    ; func→ = ℂ [_∘_]
+    }
   ; isFunctor = record
     { ident = funExt λ _ → proj₂ ident
     ; distrib = funExt λ x → sym assoc
@@ -73,8 +75,10 @@ Presheaf {ℓ' = ℓ'} ℂ = Functor (Opposite ℂ) (Sets {ℓ'})
 -- Alternate name: `yoneda`
 presheaf : {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} → Category.Object (Opposite ℂ) → Presheaf ℂ
 presheaf {ℂ = ℂ} B = record
-  { func* = λ A → ℂ .Arrow A B
-  ; func→ = λ f g → ℂ ._∘_ g f
+  { raw = record
+    { func* = λ A → ℂ [ A , B ]
+    ; func→ = λ f g → ℂ [ g ∘ f ]
+  }
   ; isFunctor = record
     { ident = funExt λ x → proj₁ ident
     ; distrib = funExt λ x → assoc

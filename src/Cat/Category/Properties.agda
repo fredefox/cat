@@ -7,12 +7,12 @@ open import Data.Product
 open import Cubical
 
 open import Cat.Category
-open import Cat.Functor
+open import Cat.Category.Functor
 open import Cat.Categories.Sets
 open import Cat.Equality
 open Equality.Data.Product
 
-module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : ℂ .Category.Object } {X : ℂ .Category.Object} (f : ℂ .Category.Arrow A B) where
+module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : Category.Object ℂ } {X : Category.Object ℂ} (f : Category.Arrow ℂ A B) where
   open Category ℂ
   open IsCategory (isCategory)
 
@@ -51,7 +51,6 @@ epi-mono-is-not-iso f =
 
 open import Cat.Category
 open Category
-open import Cat.Functor
 open Functor
 
 -- module _ {ℓ : Level} {ℂ : Category ℓ ℓ}
@@ -61,7 +60,7 @@ open Functor
 --   open import Cat.Categories.Fun
 --   open import Cat.Categories.Sets
 --   -- module Cat = Cat.Categories.Cat
---   open Exponential
+--   open import Cat.Category.Exponential
 --   private
 --     Catℓ = Cat ℓ ℓ
 --     prshf = presheaf {ℂ = ℂ}

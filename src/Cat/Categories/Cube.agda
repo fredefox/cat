@@ -13,7 +13,7 @@ open import Relation.Nullary
 open import Relation.Nullary.Decidable
 
 open import Cat.Category
-open import Cat.Functor
+open import Cat.Category.Functor
 open import Cat.Equality
 open Equality.Data.Product
 
@@ -65,15 +65,16 @@ module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
 
     Hom = Σ Hom' rules
 
+  module Raw = RawCategory
   -- The category of names and substitutions
   Rawℂ : RawCategory ℓ ℓ -- ℓo (lsuc lzero ⊔ ℓo)
-  Rawℂ = record
-    { Object = FiniteDecidableSubset
-    -- { Object = Ns → Bool
-    ; Arrow = Hom
-    ; 𝟙 = λ { {o} → inj₁ , λ { (i , ii) (j , jj) eq → Σ≡ eq {!refl!} } }
-    ; _∘_ = {!!}
-    }
-  postulate RawIsCategoryℂ : IsCategory Rawℂ
+  Raw.Object Rawℂ = FiniteDecidableSubset
+  Raw.Arrow Rawℂ = Hom
+  Raw.𝟙 Rawℂ {o} = inj₁ , λ { (i , ii) (j , jj) eq → Σ≡ eq {!refl!} }
+  Raw._∘_ Rawℂ = {!!}
+
+  postulate IsCategoryℂ : IsCategory Rawℂ
+
   ℂ : Category ℓ ℓ
-  ℂ = Rawℂ , RawIsCategoryℂ
+  raw ℂ = Rawℂ
+  isCategory ℂ = IsCategoryℂ
