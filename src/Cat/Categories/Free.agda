@@ -1,5 +1,5 @@
 {-# OPTIONS --allow-unsolved-metas #-}
-module Cat.Category.Free where
+module Cat.Categories.Free where
 
 open import Agda.Primitive
 open import Cubical hiding (Path)
