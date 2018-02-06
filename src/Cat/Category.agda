@@ -53,10 +53,6 @@ record RawCategory (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
 -- (univalent).
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   open RawCategory ℂ
-  -- (Object : Set ℓ)
-  -- (Arrow  : Object → Object → Set ℓ')
-  -- (𝟙      : {o : Object} → Arrow o o)
-  -- (_∘_    : { a b c : Object } → Arrow b c → Arrow a b → Arrow a c)
   field
     assoc : {A B C D : Object} { f : Arrow A B } { g : Arrow B C } { h : Arrow C D }
       → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
@@ -100,9 +96,9 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
       ( x.arrowIsSet (fst x.ident) (fst y.ident) i
       , x.arrowIsSet (snd x.ident) (snd y.ident) i
       )
-      ; arrowIsSet = λ p q →
+    ; arrowIsSet = λ p q →
       let
-        golden : x.arrowIsSet p q  ≡ y.arrowIsSet p q
+        golden : x.arrowIsSet p q ≡ y.arrowIsSet p q
         golden = {!!}
       in
         golden i

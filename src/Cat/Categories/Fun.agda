@@ -14,15 +14,18 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
   open Functor
 
   module _ (F G : Functor ℂ 𝔻) where
+    private
+      module F = Functor F
+      module G = Functor G
     -- What do you call a non-natural tranformation?
     Transformation : Set (ℓc ⊔ ℓd')
-    Transformation = (C : Object ℂ) → 𝔻 [ F .func* C , G .func* C ]
+    Transformation = (C : Object ℂ) → 𝔻 [ F.func* C , G.func* C ]
 
     Natural : Transformation → Set (ℓc ⊔ (ℓc' ⊔ ℓd'))
     Natural θ
       = {A B : Object ℂ}
       → (f : ℂ [ A , B ])
-      → 𝔻 [ θ B ∘ F .func→ f ] ≡ 𝔻 [ G .func→ f ∘ θ A ]
+      → 𝔻 [ θ B ∘ F.func→ f ] ≡ 𝔻 [ G.func→ f ∘ θ A ]
 
     NaturalTransformation : Set (ℓc ⊔ ℓc' ⊔ ℓd')
     NaturalTransformation = Σ Transformation Natural
@@ -30,13 +33,12 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     -- NaturalTranformation : Set (ℓc ⊔ (ℓc' ⊔ ℓd'))
     -- NaturalTranformation = ∀ (θ : Transformation) {A B : ℂ .Object} → (f : ℂ .Arrow A B) → 𝔻 ._⊕_ (θ B) (F .func→ f) ≡ 𝔻 ._⊕_ (G .func→ f) (θ A)
 
-  module _ {F G : Functor ℂ 𝔻} where
-    NaturalTransformation≡ : {α β : NaturalTransformation F G}
+    NaturalTransformation≡ : {α β : NaturalTransformation}
       → (eq₁ : α .proj₁ ≡ β .proj₁)
       → (eq₂ : PathP
           (λ i → {A B : Object ℂ} (f : ℂ [ A , B ])
-            → 𝔻 [ eq₁ i B ∘ F .func→ f ]
-            ≡ 𝔻 [ G .func→ f ∘ eq₁ i A ])
+            → 𝔻 [ eq₁ i B ∘ F.func→ f ]
+            ≡ 𝔻 [ G.func→ f ∘ eq₁ i A ])
         (α .proj₂) (β .proj₂))
       → α ≡ β
     NaturalTransformation≡ eq₁ eq₂ i = eq₁ i , eq₂ i
@@ -52,7 +54,8 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     𝔻 [ F→ f ∘ 𝟙 𝔻 ]               ≡⟨⟩
     𝔻 [ F→ f ∘ identityTrans F A ]  ∎
     where
-      F→ = F .func→
+      module F = Functor F
+      F→ = F.func→
       module 𝔻 = IsCategory (isCategory 𝔻)
 
   identityNat : (F : Functor ℂ 𝔻) → NaturalTransformation F F
@@ -60,20 +63,23 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
 
   module _ {F G H : Functor ℂ 𝔻} where
     private
+      module F = Functor F
+      module G = Functor G
+      module H = Functor H
       _∘nt_ : Transformation G H → Transformation F G → Transformation F H
       (θ ∘nt η) C = 𝔻 [ θ C ∘ η C ]
 
     NatComp _:⊕:_ : NaturalTransformation G H → NaturalTransformation F G → NaturalTransformation F H
     proj₁ ((θ , _) :⊕: (η , _)) = θ ∘nt η
     proj₂ ((θ , θNat) :⊕: (η , ηNat)) {A} {B} f = begin
-      𝔻 [ (θ ∘nt η) B ∘ F .func→ f ]     ≡⟨⟩
-      𝔻 [ 𝔻 [ θ B ∘ η B ] ∘ F .func→ f ] ≡⟨ sym assoc ⟩
-      𝔻 [ θ B ∘ 𝔻 [ η B ∘ F .func→ f ] ] ≡⟨ cong (λ φ → 𝔻 [ θ B ∘ φ ]) (ηNat f) ⟩
-      𝔻 [ θ B ∘ 𝔻 [ G .func→ f ∘ η A ] ] ≡⟨ assoc ⟩
-      𝔻 [ 𝔻 [ θ B ∘ G .func→ f ] ∘ η A ] ≡⟨ cong (λ φ → 𝔻 [ φ ∘ η A ]) (θNat f) ⟩
-      𝔻 [ 𝔻 [ H .func→ f ∘ θ A ] ∘ η A ] ≡⟨ sym assoc ⟩
-      𝔻 [ H .func→ f ∘ 𝔻 [ θ A ∘ η A ] ] ≡⟨⟩
-      𝔻 [ H .func→ f ∘ (θ ∘nt η) A ]     ∎
+      𝔻 [ (θ ∘nt η) B ∘ F.func→ f ]     ≡⟨⟩
+      𝔻 [ 𝔻 [ θ B ∘ η B ] ∘ F.func→ f ] ≡⟨ sym assoc ⟩
+      𝔻 [ θ B ∘ 𝔻 [ η B ∘ F.func→ f ] ] ≡⟨ cong (λ φ → 𝔻 [ θ B ∘ φ ]) (ηNat f) ⟩
+      𝔻 [ θ B ∘ 𝔻 [ G.func→ f ∘ η A ] ] ≡⟨ assoc ⟩
+      𝔻 [ 𝔻 [ θ B ∘ G.func→ f ] ∘ η A ] ≡⟨ cong (λ φ → 𝔻 [ φ ∘ η A ]) (θNat f) ⟩
+      𝔻 [ 𝔻 [ H.func→ f ∘ θ A ] ∘ η A ] ≡⟨ sym assoc ⟩
+      𝔻 [ H.func→ f ∘ 𝔻 [ θ A ∘ η A ] ] ≡⟨⟩
+      𝔻 [ H.func→ f ∘ (θ ∘nt η) A ]     ∎
       where
         open IsCategory (isCategory 𝔻)
 

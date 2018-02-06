@@ -56,8 +56,10 @@ Representable {ℓ' = ℓ'} ℂ = Functor ℂ (Sets {ℓ'})
 -- The "co-yoneda" embedding.
 representable : ∀ {ℓ ℓ'} {ℂ : Category ℓ ℓ'} → Category.Object ℂ → Representable ℂ
 representable {ℂ = ℂ} A = record
-  { func* = λ B → ℂ [ A , B ]
-  ; func→ = ℂ [_∘_]
+  { raw = record
+    { func* = λ B → ℂ [ A , B ]
+    ; func→ = ℂ [_∘_]
+    }
   ; isFunctor = record
     { ident = funExt λ _ → proj₂ ident
     ; distrib = funExt λ x → sym assoc
@@ -73,8 +75,10 @@ Presheaf {ℓ' = ℓ'} ℂ = Functor (Opposite ℂ) (Sets {ℓ'})
 -- Alternate name: `yoneda`
 presheaf : {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} → Category.Object (Opposite ℂ) → Presheaf ℂ
 presheaf {ℂ = ℂ} B = record
-  { func* = λ A → ℂ [ A , B ]
-  ; func→ = λ f g → ℂ [ g ∘ f ]
+  { raw = record
+    { func* = λ A → ℂ [ A , B ]
+    ; func→ = λ f g → ℂ [ g ∘ f ]
+  }
   ; isFunctor = record
     { ident = funExt λ x → proj₁ ident
     ; distrib = funExt λ x → assoc
