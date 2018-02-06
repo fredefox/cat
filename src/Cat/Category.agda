@@ -11,7 +11,7 @@ open import Data.Product renaming
   )
 open import Data.Empty
 import Function
-open import Cubical
+open import Cubical hiding (isSet)
 open import Cubical.GradLemma using ( propIsEquiv )
 
 ∃! : ∀ {a b} {A : Set a}
@@ -22,6 +22,9 @@ open import Cubical.GradLemma using ( propIsEquiv )
 ∃!-syntax = ∃
 
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
+
+IsSet   : {ℓ : Level} (A : Set ℓ) → Set ℓ
+IsSet A = {x y : A} → (p q : x ≡ y) → p ≡ q
 
 record RawCategory (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
   -- adding no-eta-equality can speed up type-checking.
@@ -59,7 +62,7 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
       → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
     ident : {A B : Object} {f : Arrow A B}
       → f ∘ 𝟙 ≡ f × 𝟙 ∘ f ≡ f
-    arrow-is-set : ∀ {A B : Object} → isSet (Arrow A B)
+    arrowIsSet : ∀ {A B : Object} → IsSet (Arrow A B)
 
   Isomorphism : ∀ {A B} → (f : Arrow A B) → Set ℓb
   Isomorphism {A} {B} f = Σ[ g ∈ Arrow B A ] g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙
@@ -72,7 +75,6 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
 
   id-to-iso : (A B : Object) → A ≡ B → A ≅ B
   id-to-iso A B eq = transp (\ i → A ≅ eq i) (idIso A)
-
 
   -- TODO: might want to implement isEquiv differently, there are 3
   -- equivalent formulations in the book.
@@ -93,16 +95,15 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
   -- This lemma will be useful to prove the equality of two categories.
   IsCategory-is-prop : isProp (IsCategory ℂ)
   IsCategory-is-prop x y i = record
-    { assoc = x.arrow-is-set _ _ x.assoc y.assoc i
+    { assoc = x.arrowIsSet x.assoc y.assoc i
     ; ident =
-      ( x.arrow-is-set _ _ (fst x.ident) (fst y.ident) i
-      , x.arrow-is-set _ _ (snd x.ident) (snd y.ident) i
+      ( x.arrowIsSet (fst x.ident) (fst y.ident) i
+      , x.arrowIsSet (snd x.ident) (snd y.ident) i
       )
-    -- ; arrow-is-set = {!λ x₁ y₁ p q → x.arrow-is-set _ _ p q!}
-    ; arrow-is-set = λ _ _ p q →
+      ; arrowIsSet = λ p q →
       let
-        golden : x.arrow-is-set _ _ p q ≡ y.arrow-is-set _ _ p q
-        golden = λ j k l → {!!}
+        golden : x.arrowIsSet p q  ≡ y.arrowIsSet p q
+        golden = {!!}
       in
         golden i
       ; univalent = λ y₁ → {!!}
@@ -150,7 +151,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     OpIsCategory : IsCategory OpRaw
     IsCategory.assoc OpIsCategory = sym assoc
     IsCategory.ident OpIsCategory = swap ident
-    IsCategory.arrow-is-set OpIsCategory = {!!}
+    IsCategory.arrowIsSet OpIsCategory = arrowIsSet
     IsCategory.univalent OpIsCategory = {!!}
 
   Opposite : Category ℓa ℓb
@@ -176,7 +177,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     rawIsCat : (i : I) → IsCategory (rawOp i)
     assoc (rawIsCat i) = IsCat.assoc
     ident (rawIsCat i) = IsCat.ident
-    arrow-is-set (rawIsCat i) = IsCat.arrow-is-set
+    arrowIsSet (rawIsCat i) = IsCat.arrowIsSet
     univalent (rawIsCat i) = IsCat.univalent
 
   Opposite-is-involution : Opposite (Opposite ℂ) ≡ ℂ

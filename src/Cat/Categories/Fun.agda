@@ -110,7 +110,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     :isCategory: = record
       { assoc = λ {A B C D} → :assoc: {A} {B} {C} {D}
       ; ident = λ {A B} → :ident: {A} {B}
-      ; arrow-is-set = {!!}
+      ; arrowIsSet = {!!}
       ; univalent = {!!}
       }
 

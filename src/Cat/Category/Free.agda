@@ -37,6 +37,6 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
   RawIsCategoryFree = record
     { assoc = p-assoc
     ; ident = ident-r , ident-l
-    ; arrow-is-set = {!!}
+    ; arrowIsSet = {!!}
     ; univalent = {!!}
     }

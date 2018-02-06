@@ -23,7 +23,7 @@ module _ {ℓ : Level} where
   assoc SetsIsCategory = refl
   proj₁ (ident SetsIsCategory) = funExt λ _ → refl
   proj₂ (ident SetsIsCategory) = funExt λ _ → refl
-  arrow-is-set SetsIsCategory = {!!}
+  arrowIsSet SetsIsCategory = {!!}
   univalent SetsIsCategory = {!!}
 
   Sets : Category (lsuc ℓ) ℓ

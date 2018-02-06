@@ -166,6 +166,6 @@ RawIsCategoryRel : IsCategory RawRel
 RawIsCategoryRel = record
   { assoc = funExt is-assoc
   ; ident = funExt ident-l , funExt ident-r
-  ; arrow-is-set = {!!}
+  ; arrowIsSet = {!!}
   ; univalent = {!!}
   }
