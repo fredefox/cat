@@ -26,6 +26,10 @@ syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 IsSet   : {ℓ : Level} (A : Set ℓ) → Set ℓ
 IsSet A = {x y : A} → (p q : x ≡ y) → p ≡ q
 
+-- This follows from [HoTT-book: §7.1.10]
+-- Andrea says the proof is in `cubical` but I can't find it.
+postulate isSetIsProp : {ℓ : Level} → {A : Set ℓ} → isProp (IsSet A)
+
 record RawCategory (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
   -- adding no-eta-equality can speed up type-checking.
   -- ONLY IF you define your categories with copatterns though.
@@ -53,6 +57,7 @@ record RawCategory (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
 -- (univalent).
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   open RawCategory ℂ
+  module Raw = RawCategory ℂ
   field
     assoc : {A B C D : Object} { f : Arrow A B } { g : Arrow B C } { h : Arrow C D }
       → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
@@ -91,22 +96,40 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
   -- This lemma will be useful to prove the equality of two categories.
   IsCategory-is-prop : isProp (IsCategory ℂ)
   IsCategory-is-prop x y i = record
+    -- Why choose `x`'s `arrowIsSet`?
     { assoc = x.arrowIsSet x.assoc y.assoc i
     ; ident =
       ( x.arrowIsSet (fst x.ident) (fst y.ident) i
       , x.arrowIsSet (snd x.ident) (snd y.ident) i
       )
-    ; arrowIsSet = λ p q →
-      let
-        golden : x.arrowIsSet p q ≡ y.arrowIsSet p q
-        golden = {!!}
-      in
-        golden i
-      ; univalent = λ y₁ → {!!}
+    ; arrowIsSet = isSetIsProp x.arrowIsSet y.arrowIsSet i
+    ; univalent = {!!}
     }
     where
       module x = IsCategory x
       module y = IsCategory y
+      xuni : x.Univalent
+      xuni = x.univalent
+      yuni : y.Univalent
+      yuni = y.univalent
+      open RawCategory ℂ
+      T :  I → Set (ℓa ⊔ ℓb)
+      T i = {A B : Object} →
+        isEquiv (A ≡ B) (A x.≅ B)
+          (λ A≡B →
+            transp
+            (λ j →
+            Σ-syntax (Arrow A (A≡B j))
+            (λ f → Σ-syntax (Arrow (A≡B j) A) (λ g → g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙)))
+            ( 𝟙
+            , 𝟙
+            , x.arrowIsSet (fst x.ident) (fst y.ident) i
+            , x.arrowIsSet (snd x.ident) (snd y.ident) i
+            )
+          )
+      eqUni : T [ xuni ≡ yuni ]
+      eqUni = {!!}
+
 
 record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   field

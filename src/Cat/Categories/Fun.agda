@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Categories.Fun where
 
 open import Agda.Primitive
@@ -8,6 +8,9 @@ open import Data.Product
 
 open import Cat.Category
 open import Cat.Category.Functor
+
+open import Cat.Equality
+open Equality.Data.Product
 
 module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Category ℓd ℓd'} where
   open Category hiding ( _∘_ ; Arrow )
@@ -86,12 +89,20 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     NatComp = _:⊕:_
 
   private
+    module _ {F G : Functor ℂ 𝔻} where
+      naturalTransformationIsSets : IsSet (NaturalTransformation F G)
+      naturalTransformationIsSets {θ , θNat} {η , ηNat} p q i j
+        = (λ C →  𝔻.arrowIsSet (λ l → proj₁ (p l) C) (λ l → proj₁ (q l) C) i j)
+        , λ f k → 𝔻.arrowIsSet (λ l → proj₂ (p l) f {!!}) (λ l → proj₂ (p l) f {!!}) {!!} {!!}
+        where
+          module 𝔻 = IsCategory (isCategory 𝔻)
+
     module _ {A B C D : Functor ℂ 𝔻} {f : NaturalTransformation A B}
       {g : NaturalTransformation B C} {h : NaturalTransformation C D} where
       _g⊕f_ = _:⊕:_ {A} {B} {C}
       _h⊕g_ = _:⊕:_ {B} {C} {D}
       :assoc: : (_:⊕:_ {A} {C} {D} h (_:⊕:_ {A} {B} {C} g f)) ≡ (_:⊕:_ {A} {B} {D} (_:⊕:_ {B} {C} {D} h g) f)
-      :assoc: = {!!}
+      :assoc: = Σ≡ (funExt λ x → {!Fun.arrowIsSet!}) {!!}
     module _ {A B : Functor ℂ 𝔻} {f : NaturalTransformation A B} where
       ident-r : (_:⊕:_ {A} {A} {B} f (identityNat A)) ≡ f
       ident-r = {!!}
@@ -116,7 +127,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     :isCategory: = record
       { assoc = λ {A B C D} → :assoc: {A} {B} {C} {D}
       ; ident = λ {A B} → :ident: {A} {B}
-      ; arrowIsSet = {!!}
+      ; arrowIsSet = λ {F} {G} → naturalTransformationIsSets {F} {G}
       ; univalent = {!!}
       }
 

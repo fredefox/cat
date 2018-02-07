@@ -1,3 +1,4 @@
+{-# OPTIONS --cubical #-}
 module Cat.Category.Functor where
 
 open import Agda.Primitive
@@ -78,14 +79,11 @@ module _
   IsProp' : {ℓ : Level} (A : I → Set ℓ) → Set ℓ
   IsProp' A = (a0 : A i0) (a1 : A i1) → A [ a0 ≡ a1 ]
 
-  postulate IsFunctorIsProp' : IsProp' λ i → IsFunctor _ _ (F i)
-  -- IsFunctorIsProp' isF0 isF1 i = record
-  --   { ident = {!𝔻.arrowIsSet {!isF0.ident!} {!isF1.ident!} i!}
-  --   ; distrib = {!𝔻.arrowIsSet {!isF0.distrib!} {!isF1.distrib!} i!}
-  --   }
-  --   where
-  --     module isF0 = IsFunctor isF0
-  --     module isF1 = IsFunctor isF1
+  IsFunctorIsProp' : IsProp' λ i → IsFunctor _ _ (F i)
+  IsFunctorIsProp' isF0 isF1 = lemPropF {B = IsFunctor ℂ 𝔻}
+    (\ F → IsFunctorIsProp {F = F}) (\ i → F i)
+    where
+      open import Cubical.GradLemma using (lemPropF)
 
 module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
   Functor≡ : {F G : Functor ℂ 𝔻}
@@ -95,14 +93,13 @@ module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
     → F ≡ G
   Functor≡ {F} {G} eq* eq→ i = record
     { raw = eqR i
-    ; isFunctor = f i
+    ; isFunctor = eqIsF i
     }
     where
       eqR : raw F ≡ raw G
       eqR i = record { func* = eq* i ; func→ = eq→ i }
-      postulate T : isSet (IsFunctor _ _ (raw F))
-      f : (λ i →  IsFunctor ℂ 𝔻 (eqR i)) [ isFunctor F ≡ isFunctor G ]
-      f = IsFunctorIsProp' (isFunctor F) (isFunctor G)
+      eqIsF : (λ i →  IsFunctor ℂ 𝔻 (eqR i)) [ isFunctor F ≡ isFunctor G ]
+      eqIsF = IsFunctorIsProp' (isFunctor F) (isFunctor G)
 
 module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : Functor A B) where
   private
