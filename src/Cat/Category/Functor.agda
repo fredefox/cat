@@ -61,14 +61,14 @@ module _
 
   IsFunctorIsProp : isProp (IsFunctor _ _ F)
   IsFunctorIsProp isF0 isF1 i = record
-    { ident = 𝔻.arrowIsSet isF0.ident isF1.ident i
-    ; distrib = 𝔻.arrowIsSet isF0.distrib isF1.distrib i
+    { ident = 𝔻.arrowIsSet _ _ isF0.ident isF1.ident i
+    ; distrib = 𝔻.arrowIsSet _ _ isF0.distrib isF1.distrib i
     }
     where
       module isF0 = IsFunctor isF0
       module isF1 = IsFunctor isF1
 
--- Alternate version of above where `F` is a path in 
+-- Alternate version of above where `F` is indexed by an interval
 module _
     {ℓa ℓb : Level}
     {ℂ 𝔻 : Category ℓa ℓb}

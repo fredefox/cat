@@ -5,6 +5,7 @@ open import Agda.Primitive
 open import Cubical
 open import Function
 open import Data.Product
+import Cubical.GradLemma
 
 open import Cat.Category
 open import Cat.Category.Functor
@@ -29,6 +30,9 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       = {A B : Object ℂ}
       → (f : ℂ [ A , B ])
       → 𝔻 [ θ B ∘ F.func→ f ] ≡ 𝔻 [ G.func→ f ∘ θ A ]
+
+    -- naturalIsProp : ∀ θ → isProp (Natural θ)
+    -- naturalIsProp θ x y = {!funExt!}
 
     NaturalTransformation : Set (ℓc ⊔ ℓc' ⊔ ℓd')
     NaturalTransformation = Σ Transformation Natural
@@ -90,19 +94,67 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
 
   private
     module _ {F G : Functor ℂ 𝔻} where
-      naturalTransformationIsSets : IsSet (NaturalTransformation F G)
-      naturalTransformationIsSets {θ , θNat} {η , ηNat} p q i j
-        = (λ C →  𝔻.arrowIsSet (λ l → proj₁ (p l) C) (λ l → proj₁ (q l) C) i j)
-        , λ f k → 𝔻.arrowIsSet (λ l → proj₂ (p l) f {!!}) (λ l → proj₂ (p l) f {!!}) {!!} {!!}
-        where
-          module 𝔻 = IsCategory (isCategory 𝔻)
+      module 𝔻 = IsCategory (isCategory 𝔻)
 
-    module _ {A B C D : Functor ℂ 𝔻} {f : NaturalTransformation A B}
-      {g : NaturalTransformation B C} {h : NaturalTransformation C D} where
+      transformationIsSet : isSet (Transformation F G)
+      transformationIsSet _ _ p q i j C = 𝔻.arrowIsSet _ _ (λ l → p l C)   (λ l → q l C) i j
+      IsSet'   : {ℓ : Level} (A : Set ℓ) → Set ℓ
+      IsSet' A = {x y : A} → (p q : (λ _ → A) [ x ≡ y ]) → p ≡ q
+
+      -- Example 3.1.6. in HoTT states that
+      -- If `B a` is a set for all `a : A` then `(a : A) → B a` is a set.
+      -- In the case below `B = Natural F G`.
+
+      -- naturalIsSet : (θ : Transformation F G) → IsSet' (Natural F G θ)
+      -- naturalIsSet = {!!}
+
+      -- isS : IsSet' ((θ : Transformation F G) → Natural F G θ)
+      -- isS = {!!}
+
+      naturalIsProp : (θ : Transformation F G) → isProp (Natural F G θ)
+      naturalIsProp θ θNat θNat' = lem
+        where
+          lem : (λ _ → Natural F G θ) [ (λ f → θNat f) ≡ (λ f → θNat' f) ]
+          lem = λ i f → 𝔻.arrowIsSet _ _ (θNat f) (θNat' f) i
+
+      naturalTransformationIsSets : isSet (NaturalTransformation F G)
+      naturalTransformationIsSets (θ , θNat) (η , ηNat) p q i j
+        = θ-η
+        -- `i or `j - `p'` or `q'`?
+        , refl {x = t} i
+        -- naturalIsSet i (λ i → {!!} i) {!!} {!!} i j
+        -- naturalIsSet {!p''!} {!p''!} {!!} i j
+        -- λ f k → 𝔻.arrowIsSet (λ l → proj₂ (p l) f k) (λ l → proj₂ (p l) f k) {!!} {!!}
+        where
+          θ≡η θ≡η' : θ ≡ η
+          θ≡η  i = proj₁ (p i)
+          θ≡η' i = proj₁ (q i)
+          θ-η : Transformation F G
+          θ-η = transformationIsSet _ _ θ≡η θ≡η' i j
+          θNat≡ηNat  : (λ i → Natural F G (θ≡η  i)) [ θNat ≡ ηNat ]
+          θNat≡ηNat  i = proj₂ (p i)
+          θNat≡ηNat' : (λ i → Natural F G (θ≡η' i)) [ θNat ≡ ηNat ]
+          θNat≡ηNat' i = proj₂ (q i)
+          k  : Natural F G (θ≡η  i)
+          k  = θNat≡ηNat  i
+          k' : Natural F G (θ≡η' i)
+          k' = θNat≡ηNat' i
+          t : Natural F G θ-η
+          t = naturalIsProp {!θ!} {!!} {!!} {!!}
+
+    module _ {A B C D : Functor ℂ 𝔻} {θ' : NaturalTransformation A B}
+      {η' : NaturalTransformation B C} {ζ' : NaturalTransformation C D} where
+      private
+        θ = proj₁ θ'
+        η = proj₁ η'
+        ζ = proj₁ ζ'
       _g⊕f_ = _:⊕:_ {A} {B} {C}
       _h⊕g_ = _:⊕:_ {B} {C} {D}
-      :assoc: : (_:⊕:_ {A} {C} {D} h (_:⊕:_ {A} {B} {C} g f)) ≡ (_:⊕:_ {A} {B} {D} (_:⊕:_ {B} {C} {D} h g) f)
-      :assoc: = Σ≡ (funExt λ x → {!Fun.arrowIsSet!}) {!!}
+      :assoc: : (_:⊕:_ {A} {C} {D} ζ' (_:⊕:_ {A} {B} {C} η' θ')) ≡ (_:⊕:_ {A} {B} {D} (_:⊕:_ {B} {C} {D} ζ' η') θ')
+      :assoc: = Σ≡ (funExt (λ _ → assoc)) {!!}
+        where
+          open IsCategory (isCategory 𝔻)
+
     module _ {A B : Functor ℂ 𝔻} {f : NaturalTransformation A B} where
       ident-r : (_:⊕:_ {A} {A} {B} f (identityNat A)) ≡ f
       ident-r = {!!}

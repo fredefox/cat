@@ -11,7 +11,7 @@ open import Data.Product renaming
   )
 open import Data.Empty
 import Function
-open import Cubical hiding (isSet)
+open import Cubical
 open import Cubical.GradLemma using ( propIsEquiv )
 
 ∃! : ∀ {a b} {A : Set a}
@@ -23,12 +23,9 @@ open import Cubical.GradLemma using ( propIsEquiv )
 
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
-IsSet   : {ℓ : Level} (A : Set ℓ) → Set ℓ
-IsSet A = {x y : A} → (p q : x ≡ y) → p ≡ q
-
 -- This follows from [HoTT-book: §7.1.10]
 -- Andrea says the proof is in `cubical` but I can't find it.
-postulate isSetIsProp : {ℓ : Level} → {A : Set ℓ} → isProp (IsSet A)
+postulate isSetIsProp : {ℓ : Level} → {A : Set ℓ} → isProp (isSet A)
 
 record RawCategory (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
   -- adding no-eta-equality can speed up type-checking.
@@ -63,7 +60,7 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
       → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
     ident : {A B : Object} {f : Arrow A B}
       → f ∘ 𝟙 ≡ f × 𝟙 ∘ f ≡ f
-    arrowIsSet : ∀ {A B : Object} → IsSet (Arrow A B)
+    arrowIsSet : ∀ {A B : Object} → isSet (Arrow A B)
 
   Isomorphism : ∀ {A B} → (f : Arrow A B) → Set ℓb
   Isomorphism {A} {B} f = Σ[ g ∈ Arrow B A ] g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙
@@ -97,10 +94,10 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
   IsCategory-is-prop : isProp (IsCategory ℂ)
   IsCategory-is-prop x y i = record
     -- Why choose `x`'s `arrowIsSet`?
-    { assoc = x.arrowIsSet x.assoc y.assoc i
+    { assoc = x.arrowIsSet _ _ x.assoc y.assoc i
     ; ident =
-      ( x.arrowIsSet (fst x.ident) (fst y.ident) i
-      , x.arrowIsSet (snd x.ident) (snd y.ident) i
+      ( x.arrowIsSet _ _ (fst x.ident) (fst y.ident) i
+      , x.arrowIsSet _ _ (snd x.ident) (snd y.ident) i
       )
     ; arrowIsSet = isSetIsProp x.arrowIsSet y.arrowIsSet i
     ; univalent = {!!}
@@ -123,8 +120,8 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
             (λ f → Σ-syntax (Arrow (A≡B j) A) (λ g → g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙)))
             ( 𝟙
             , 𝟙
-            , x.arrowIsSet (fst x.ident) (fst y.ident) i
-            , x.arrowIsSet (snd x.ident) (snd y.ident) i
+            , x.arrowIsSet _ _ (fst x.ident) (fst y.ident) i
+            , x.arrowIsSet _ _ (snd x.ident) (snd y.ident) i
             )
           )
       eqUni : T [ xuni ≡ yuni ]
