@@ -1,13 +1,23 @@
-{-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Categories.Fun where
 
 open import Agda.Primitive
 open import Cubical
 open import Function
 open import Data.Product
+import Cubical.GradLemma
+module UIP = Cubical.GradLemma
+open import Cubical.Sigma
+open import Cubical.NType
+open import Data.Nat using (_≤_ ; z≤n ; s≤s)
+module Nat = Data.Nat
 
 open import Cat.Category
 open import Cat.Category.Functor
+open import Cat.Wishlist
+
+open import Cat.Equality
+open Equality.Data.Product
 
 module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Category ℓd ℓd'} where
   open Category hiding ( _∘_ ; Arrow )
@@ -26,6 +36,9 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       = {A B : Object ℂ}
       → (f : ℂ [ A , B ])
       → 𝔻 [ θ B ∘ F.func→ f ] ≡ 𝔻 [ G.func→ f ∘ θ A ]
+
+    -- naturalIsProp : ∀ θ → isProp (Natural θ)
+    -- naturalIsProp θ x y = {!funExt!}
 
     NaturalTransformation : Set (ℓc ⊔ ℓc' ⊔ ℓd')
     NaturalTransformation = Σ Transformation Natural
@@ -86,12 +99,39 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     NatComp = _:⊕:_
 
   private
-    module _ {A B C D : Functor ℂ 𝔻} {f : NaturalTransformation A B}
-      {g : NaturalTransformation B C} {h : NaturalTransformation C D} where
+    module _ {F G : Functor ℂ 𝔻} where
+      module 𝔻 = IsCategory (isCategory 𝔻)
+
+      transformationIsSet : isSet (Transformation F G)
+      transformationIsSet _ _ p q i j C = 𝔻.arrowIsSet _ _ (λ l → p l C)   (λ l → q l C) i j
+      IsSet'   : {ℓ : Level} (A : Set ℓ) → Set ℓ
+      IsSet' A = {x y : A} → (p q : (λ _ → A) [ x ≡ y ]) → p ≡ q
+
+      naturalIsProp : (θ : Transformation F G) → isProp (Natural F G θ)
+      naturalIsProp θ θNat θNat' = lem
+        where
+          lem : (λ _ → Natural F G θ) [ (λ f → θNat f) ≡ (λ f → θNat' f) ]
+          lem = λ i f → 𝔻.arrowIsSet _ _ (θNat f) (θNat' f) i
+
+      naturalTransformationIsSets : isSet (NaturalTransformation F G)
+      naturalTransformationIsSets = sigPresSet transformationIsSet
+        λ θ → ntypeCommulative
+          (s≤s {n = Nat.suc Nat.zero} z≤n)
+          (naturalIsProp θ)
+
+    module _ {A B C D : Functor ℂ 𝔻} {θ' : NaturalTransformation A B}
+      {η' : NaturalTransformation B C} {ζ' : NaturalTransformation C D} where
+      private
+        θ = proj₁ θ'
+        η = proj₁ η'
+        ζ = proj₁ ζ'
       _g⊕f_ = _:⊕:_ {A} {B} {C}
       _h⊕g_ = _:⊕:_ {B} {C} {D}
-      :assoc: : (_:⊕:_ {A} {C} {D} h (_:⊕:_ {A} {B} {C} g f)) ≡ (_:⊕:_ {A} {B} {D} (_:⊕:_ {B} {C} {D} h g) f)
-      :assoc: = {!!}
+      :assoc: : (_:⊕:_ {A} {C} {D} ζ' (_:⊕:_ {A} {B} {C} η' θ')) ≡ (_:⊕:_ {A} {B} {D} (_:⊕:_ {B} {C} {D} ζ' η') θ')
+      :assoc: = Σ≡ (funExt (λ _ → assoc)) {!!}
+        where
+          open IsCategory (isCategory 𝔻)
+
     module _ {A B : Functor ℂ 𝔻} {f : NaturalTransformation A B} where
       ident-r : (_:⊕:_ {A} {A} {B} f (identityNat A)) ≡ f
       ident-r = {!!}
@@ -116,7 +156,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     :isCategory: = record
       { assoc = λ {A B C D} → :assoc: {A} {B} {C} {D}
       ; ident = λ {A B} → :ident: {A} {B}
-      ; arrowIsSet = {!!}
+      ; arrowIsSet = λ {F} {G} → naturalTransformationIsSets {F} {G}
       ; univalent = {!!}
       }
 

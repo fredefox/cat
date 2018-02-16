@@ -44,7 +44,7 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
       --   ident-r : concatenate {A} {A} {B} p (lift 𝟙) ≡ p
       --   ident-l : concatenate {A} {B} {B} (lift 𝟙) p ≡ p
     module _ {A B : Object ℂ} where
-      isSet : IsSet (Path A B)
+      isSet : Cubical.isSet (Path A B)
       isSet = {!!}
   RawFree : RawCategory ℓ (ℓ ⊔ ℓ')
   RawFree = record
