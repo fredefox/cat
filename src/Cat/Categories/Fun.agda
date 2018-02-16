@@ -8,9 +8,13 @@ open import Data.Product
 import Cubical.GradLemma
 module UIP = Cubical.GradLemma
 open import Cubical.Sigma
+open import Cubical.NType
+open import Data.Nat using (_≤_ ; z≤n ; s≤s)
+module Nat = Data.Nat
 
 open import Cat.Category
 open import Cat.Category.Functor
+open import Cat.Wishlist
 
 open import Cat.Equality
 open Equality.Data.Product
@@ -103,16 +107,6 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       IsSet'   : {ℓ : Level} (A : Set ℓ) → Set ℓ
       IsSet' A = {x y : A} → (p q : (λ _ → A) [ x ≡ y ]) → p ≡ q
 
-      -- Example 3.1.6. in HoTT states that
-      -- If `B a` is a set for all `a : A` then `(a : A) → B a` is a set.
-      -- In the case below `B = Natural F G`.
-
-      -- naturalIsSet : (θ : Transformation F G) → IsSet' (Natural F G θ)
-      -- naturalIsSet = {!!}
-
-      -- isS : IsSet' ((θ : Transformation F G) → Natural F G θ)
-      -- isS = {!!}
-
       naturalIsProp : (θ : Transformation F G) → isProp (Natural F G θ)
       naturalIsProp θ θNat θNat' = lem
         where
@@ -120,48 +114,10 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
           lem = λ i f → 𝔻.arrowIsSet _ _ (θNat f) (θNat' f) i
 
       naturalTransformationIsSets : isSet (NaturalTransformation F G)
-      naturalTransformationIsSets = {!sigPresSet!}
-      -- f a b p q i = res
-      --   where
-      --     k : (θ : Transformation F G) → (xx yy : Natural F G θ) → xx ≡ yy
-      --     k θ x y = let kk = naturalIsProp θ x y in {!!}
-      --     res : a ≡ b
-      --     res j = {!!} , {!!}
-      -- -- naturalTransformationIsSets σa σb p q
-      --   -- where
-      --     -- -- In Andrea's proof `lemSig` he proves something very similiar to
-      --     -- -- what I'm doing here, just for `Cubical.FromPathPrelude.Σ` rather
-      --     -- -- than `Σ`. In that proof, he just needs *one* proof that the first
-      --     -- -- components are equal - hence the arbitrary usage of `p` here.
-      --     -- secretSauce : proj₁ σa ≡ proj₁ σb
-      --     -- secretSauce i = proj₁ (p i)
-      --     -- lemSig : σa ≡ σb
-      --     -- lemSig i = (secretSauce i) , (UIP.lemPropF naturalIsProp secretSauce) {proj₂ σa} {proj₂ σb} i
-      --     -- res : p ≡ q
-      --     -- res = {!!}
-      -- naturalTransformationIsSets (θ , θNat) (η , ηNat) p q i j
-      --   = θ-η
-      --   -- `i or `j - `p'` or `q'`?
-      --   , {!!} -- UIP.lemPropF {B = Natural F G} (λ x → {!!}) {(θ , θNat)} {(η , ηNat)} {!!} i
-      --   -- naturalIsSet i (λ i → {!!} i) {!!} {!!} i j
-      --   -- naturalIsSet {!p''!} {!p''!} {!!} i j
-      --   -- λ f k → 𝔻.arrowIsSet (λ l → proj₂ (p l) f k) (λ l → proj₂ (p l) f k) {!!} {!!}
-      --   where
-      --     θ≡η θ≡η' : θ ≡ η
-      --     θ≡η  i = proj₁ (p i)
-      --     θ≡η' i = proj₁ (q i)
-      --     θ-η : Transformation F G
-      --     θ-η = transformationIsSet _ _ θ≡η θ≡η' i j
-      --     θNat≡ηNat  : (λ i → Natural F G (θ≡η  i)) [ θNat ≡ ηNat ]
-      --     θNat≡ηNat  i = proj₂ (p i)
-      --     θNat≡ηNat' : (λ i → Natural F G (θ≡η' i)) [ θNat ≡ ηNat ]
-      --     θNat≡ηNat' i = proj₂ (q i)
-      --     k  : Natural F G (θ≡η  i)
-      --     k  = θNat≡ηNat  i
-      --     k' : Natural F G (θ≡η' i)
-      --     k' = θNat≡ηNat' i
-      --     t : Natural F G θ-η
-      --     t = naturalIsProp {!θ!} {!!} {!!} {!!}
+      naturalTransformationIsSets = sigPresSet transformationIsSet
+        λ θ → ntypeCommulative
+          (s≤s {n = Nat.suc Nat.zero} z≤n)
+          (naturalIsProp θ)
 
     module _ {A B C D : Functor ℂ 𝔻} {θ' : NaturalTransformation A B}
       {η' : NaturalTransformation B C} {ζ' : NaturalTransformation C D} where
