@@ -2,13 +2,11 @@ name: cat
 -- version: 0.0.1
 -- description:
 --   A formalization of category theory in Agda using cubical type theory.
--- depend:
---   standard-library
---   cubical
+depend:
+  standard-library
+  cubical
 include:
   src
-  libs/agda-stdlib/src
-  libs/cubical/src
 -- libraries:
 --   libs/agda-stdlib
 --   libs/cubical

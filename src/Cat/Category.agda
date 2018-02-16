@@ -12,7 +12,7 @@ open import Data.Product renaming
 open import Data.Empty
 import Function
 open import Cubical
-open import Cubical.GradLemma using ( propIsEquiv )
+open import Cubical.NType.Properties using ( propIsEquiv )
 
 ∃! : ∀ {a b} {A : Set a}
   → (A → Set b) → Set (a ⊔ b)

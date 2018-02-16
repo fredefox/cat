@@ -83,7 +83,7 @@ module _
   IsFunctorIsProp' isF0 isF1 = lemPropF {B = IsFunctor ℂ 𝔻}
     (\ F → IsFunctorIsProp {F = F}) (\ i → F i)
     where
-      open import Cubical.GradLemma using (lemPropF)
+      open import Cubical.NType.Properties using (lemPropF)
 
 module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
   Functor≡ : {F G : Functor ℂ 𝔻}
