@@ -9,6 +9,7 @@ import Cubical.GradLemma
 module UIP = Cubical.GradLemma
 open import Cubical.Sigma
 open import Cubical.NType
+open import Cubical.NType.Properties
 open import Data.Nat using (_≤_ ; z≤n ; s≤s)
 module Nat = Data.Nat
 
@@ -125,10 +126,18 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
         θ = proj₁ θ'
         η = proj₁ η'
         ζ = proj₁ ζ'
+        θNat = proj₂ θ'
+        ηNat = proj₂ η'
+        ζNat = proj₂ ζ'
+        L : NaturalTransformation A D
+        L = (_:⊕:_ {A} {C} {D} ζ' (_:⊕:_ {A} {B} {C} η' θ'))
+        R : NaturalTransformation A D
+        R = (_:⊕:_ {A} {B} {D} (_:⊕:_ {B} {C} {D} ζ' η') θ')
       _g⊕f_ = _:⊕:_ {A} {B} {C}
       _h⊕g_ = _:⊕:_ {B} {C} {D}
-      :assoc: : (_:⊕:_ {A} {C} {D} ζ' (_:⊕:_ {A} {B} {C} η' θ')) ≡ (_:⊕:_ {A} {B} {D} (_:⊕:_ {B} {C} {D} ζ' η') θ')
-      :assoc: = Σ≡ (funExt (λ _ → assoc)) {!!}
+      :assoc: : L ≡ R
+      :assoc: = lemSig (naturalIsProp {F = A} {D})
+        L R (funExt (λ x → assoc))
         where
           open IsCategory (isCategory 𝔻)
 
