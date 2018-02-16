@@ -142,10 +142,21 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
           open IsCategory (isCategory 𝔻)
 
     module _ {A B : Functor ℂ 𝔻} {f : NaturalTransformation A B} where
+      private
+        allNatural = naturalIsProp {F = A} {B}
+        f' = proj₁ f
+        module 𝔻Data = Category 𝔻
+        eq-r : ∀ C → (𝔻 [ f' C ∘ identityTrans A C ]) ≡ f' C
+        eq-r C = begin
+          𝔻 [ f' C ∘ identityTrans A C ] ≡⟨⟩
+          𝔻 [ f' C ∘ 𝔻Data.𝟙 ]  ≡⟨ proj₁ (𝔻.ident {A} {B}) ⟩
+          f' C ∎
+        eq-l : ∀ C → (𝔻 [ identityTrans B C ∘ f' C ]) ≡ f' C
+        eq-l C = proj₂ (𝔻.ident {A} {B})
       ident-r : (_:⊕:_ {A} {A} {B} f (identityNat A)) ≡ f
-      ident-r = {!!}
+      ident-r = lemSig allNatural _ _ (funExt eq-r)
       ident-l : (_:⊕:_ {A} {B} {B} (identityNat B) f) ≡ f
-      ident-l = {!!}
+      ident-l = lemSig allNatural _ _ (funExt eq-l)
       :ident:
         : (_:⊕:_ {A} {A} {B} f (identityNat A)) ≡ f
         × (_:⊕:_ {A} {B} {B} (identityNat B) f) ≡ f
