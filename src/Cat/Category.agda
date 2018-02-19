@@ -26,15 +26,9 @@ open import Cat.Wishlist
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
 record RawCategory (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
-  -- adding no-eta-equality can speed up type-checking.
-  -- ONLY IF you define your categories with copatterns though.
   no-eta-equality
   field
-    -- Need something like:
-    -- Object : Σ (Set ℓ) isGroupoid
     Object : Set ℓ
-    -- And:
-    -- Arrow  : Object → Object → Σ (Set ℓ') isSet
     Arrow  : Object → Object → Set ℓ'
     𝟙      : {o : Object} → Arrow o o
     _∘_    : {A B C : Object} → Arrow B C → Arrow A B → Arrow A C
@@ -53,15 +47,48 @@ record RawCategory (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   open RawCategory ℂ
   module Raw = RawCategory ℂ
+
+  IsAssociative : Set (ℓa ⊔ ℓb)
+  IsAssociative = ∀ {A B C D} {f : Arrow A B} {g : Arrow B C} {h : Arrow C D}
+    → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
+
+  IsIdentity : ({A : Object} → Arrow A A) → Set (ℓa ⊔ ℓb)
+  IsIdentity id = {A B : Object} {f : Arrow A B}
+    → f ∘ id ≡ f × id ∘ f ≡ f
+
   field
-    assoc : {A B C D : Object} { f : Arrow A B } { g : Arrow B C } { h : Arrow C D }
-      → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
-    ident : {A B : Object} {f : Arrow A B}
-      → f ∘ 𝟙 ≡ f × 𝟙 ∘ f ≡ f
+    assoc : IsAssociative
+    ident : IsIdentity 𝟙
     arrowIsSet : ∀ {A B : Object} → isSet (Arrow A B)
 
+  propIsAssociative : isProp IsAssociative
+  propIsAssociative x y i = arrowIsSet _ _ x y i
+
+  propIsIdentity : ∀ {f : ∀ {A} → Arrow A A} → isProp (IsIdentity f)
+  propIsIdentity a b i
+    = arrowIsSet _ _ (fst a) (fst b) i
+    , arrowIsSet _ _ (snd a) (snd b) i
+
+  propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
+  propArrowIsSet a b i = isSetIsProp a b i
+
+  IsInverseOf : ∀ {A B} → (Arrow A B) → (Arrow B A) → Set ℓb
+  IsInverseOf = λ f g → g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙
+
+  propIsInverseOf : ∀ {A B f g} → isProp (IsInverseOf {A} {B} f g)
+  propIsInverseOf x y = λ i →
+    let
+      h : fst x ≡ fst y
+      h = arrowIsSet _ _ (fst x) (fst y)
+      hh : snd x ≡ snd y
+      hh = arrowIsSet _ _ (snd x) (snd y)
+    in h i , hh i
+
   Isomorphism : ∀ {A B} → (f : Arrow A B) → Set ℓb
-  Isomorphism {A} {B} f = Σ[ g ∈ Arrow B A ] g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙
+  Isomorphism {A} {B} f = Σ[ g ∈ Arrow B A ] IsInverseOf f g
+
+  inverse : ∀ {A B} {f : Arrow A B} → Isomorphism f → Arrow B A
+  inverse iso = fst iso
 
   _≅_ : (A B : Object) → Set ℓb
   _≅_ A B = Σ[ f ∈ Arrow A B ] (Isomorphism f)
@@ -86,19 +113,40 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
     Monomorphism : {X : Object} → (f : Arrow A B) → Set ℓb
     Monomorphism {X} f = ( g₀ g₁ : Arrow X A ) → f ∘ g₀ ≡ f ∘ g₁ → g₀ ≡ g₁
 
+  module _ {A B : Object} {f : Arrow A B} where
+    isoIsProp : isProp (Isomorphism f)
+    isoIsProp a@(g , η , ε) a'@(g' , η' , ε') =
+      lemSig (λ g → propIsInverseOf) a a' geq
+      where
+        open Cubical.NType.Properties
+        geq : g ≡ g'
+        geq = begin
+          g            ≡⟨ sym (fst ident) ⟩
+          g ∘ 𝟙        ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
+          g ∘ (f ∘ g') ≡⟨ assoc ⟩
+          (g ∘ f) ∘ g' ≡⟨ cong (λ φ → φ ∘ g') η ⟩
+          𝟙 ∘ g'       ≡⟨ snd ident ⟩
+          g'           ∎
+
+module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} {ℂ : IsCategory C} where
+  open IsCategory ℂ
+  open import Cubical.NType
+  open import Cubical.NType.Properties
+
+  propUnivalent : isProp Univalent
+  propUnivalent a b i = propPi (λ iso → propHasLevel ⟨-2⟩) a b i
+
 module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
   -- TODO, provable by using  arrow-is-set and that isProp (isEquiv _ _ _)
   -- This lemma will be useful to prove the equality of two categories.
   IsCategory-is-prop : isProp (IsCategory ℂ)
   IsCategory-is-prop x y i = record
-    -- Why choose `x`'s `arrowIsSet`?
-    { assoc = x.arrowIsSet _ _ x.assoc y.assoc i
-    ; ident =
-      ( x.arrowIsSet _ _ (fst x.ident) (fst y.ident) i
-      , x.arrowIsSet _ _ (snd x.ident) (snd y.ident) i
-      )
-    ; arrowIsSet = isSetIsProp x.arrowIsSet y.arrowIsSet i
-    ; univalent = {!!}
+    -- Why choose `x`'s `propIsAssociative`?
+    -- Well, probably it could be pulled out of the record.
+    { assoc = x.propIsAssociative x.assoc y.assoc i
+    ; ident = x.propIsIdentity x.ident y.ident i
+    ; arrowIsSet = x.propArrowIsSet x.arrowIsSet y.arrowIsSet i
+    ; univalent = eqUni i
     }
     where
       module x = IsCategory x
@@ -118,12 +166,17 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
             (λ f → Σ-syntax (Arrow (A≡B j) A) (λ g → g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙)))
             ( 𝟙
             , 𝟙
-            , x.arrowIsSet _ _ (fst x.ident) (fst y.ident) i
-            , x.arrowIsSet _ _ (snd x.ident) (snd y.ident) i
+            , x.propIsIdentity x.ident y.ident i
             )
           )
+      open Cubical.NType.Properties
+      test : (λ _ → x.Univalent) [ xuni ≡ xuni ]
+      test = refl
+      t = {!!}
+      P : (uni : x.Univalent) → xuni ≡ uni → Set (ℓa ⊔ ℓb)
+      P = {!!}
       eqUni : T [ xuni ≡ yuni ]
-      eqUni = {!!}
+      eqUni = pathJprop {x = x.Univalent} P {!!} i
 
 
 record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
