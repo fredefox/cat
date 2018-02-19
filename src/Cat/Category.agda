@@ -14,6 +14,8 @@ import Function
 open import Cubical
 open import Cubical.NType.Properties using ( propIsEquiv )
 
+open import Cat.Wishlist
+
 ∃! : ∀ {a b} {A : Set a}
   → (A → Set b) → Set (a ⊔ b)
 ∃! = ∃!≈ _≡_
@@ -22,10 +24,6 @@ open import Cubical.NType.Properties using ( propIsEquiv )
 ∃!-syntax = ∃
 
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
-
--- This follows from [HoTT-book: §7.1.10]
--- Andrea says the proof is in `cubical` but I can't find it.
-postulate isSetIsProp : {ℓ : Level} → {A : Set ℓ} → isProp (isSet A)
 
 record RawCategory (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
   -- adding no-eta-equality can speed up type-checking.
