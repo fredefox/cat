@@ -79,26 +79,6 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
     ident : IsIdentity 𝟙
     arrowIsSet : ∀ {A B : Object} → isSet (Arrow A B)
 
-  propIsAssociative : isProp IsAssociative
-  propIsAssociative x y i = arrowIsSet _ _ x y i
-
-  propIsIdentity : ∀ {f : ∀ {A} → Arrow A A} → isProp (IsIdentity f)
-  propIsIdentity a b i
-    = arrowIsSet _ _ (fst a) (fst b) i
-    , arrowIsSet _ _ (snd a) (snd b) i
-
-  propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
-  propArrowIsSet a b i = isSetIsProp a b i
-
-  propIsInverseOf : ∀ {A B f g} → isProp (IsInverseOf {A} {B} f g)
-  propIsInverseOf x y = λ i →
-    let
-      h : fst x ≡ fst y
-      h = arrowIsSet _ _ (fst x) (fst y)
-      hh : snd x ≡ snd y
-      hh = arrowIsSet _ _ (snd x) (snd y)
-    in h i , hh i
-
   idIso : (A : Object) → A ≅ A
   idIso A = 𝟙 , (𝟙 , ident)
 
@@ -113,39 +93,63 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   field
     univalent : Univalent
 
-  module _ {A B : Object} {f : Arrow A B} where
-    isoIsProp : isProp (Isomorphism f)
-    isoIsProp a@(g , η , ε) a'@(g' , η' , ε') =
-      lemSig (λ g → propIsInverseOf) a a' geq
-      where
-        open Cubical.NType.Properties
-        geq : g ≡ g'
-        geq = begin
-          g            ≡⟨ sym (fst ident) ⟩
-          g ∘ 𝟙        ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
-          g ∘ (f ∘ g') ≡⟨ assoc ⟩
-          (g ∘ f) ∘ g' ≡⟨ cong (λ φ → φ ∘ g') η ⟩
-          𝟙 ∘ g'       ≡⟨ snd ident ⟩
-          g'           ∎
+-- `IsCategory` is a mere proposition.
+module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
+  open RawCategory C
+  module _ (ℂ : IsCategory C) where
+    open IsCategory ℂ
+    open import Cubical.NType
+    open import Cubical.NType.Properties
 
-module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} {ℂ : IsCategory C} where
-  open IsCategory ℂ
-  open import Cubical.NType
-  open import Cubical.NType.Properties
+    propIsAssociative : isProp IsAssociative
+    propIsAssociative x y i = arrowIsSet _ _ x y i
 
-  propUnivalent : isProp Univalent
-  propUnivalent a b i = propPi (λ iso → propHasLevel ⟨-2⟩) a b i
+    propIsIdentity : ∀ {f : ∀ {A} → Arrow A A} → isProp (IsIdentity f)
+    propIsIdentity a b i
+      = arrowIsSet _ _ (fst a) (fst b) i
+      , arrowIsSet _ _ (snd a) (snd b) i
 
-module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
-  open RawCategory ℂ
+    propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
+    propArrowIsSet a b i = isSetIsProp a b i
+
+    propIsInverseOf : ∀ {A B f g} → isProp (IsInverseOf {A} {B} f g)
+    propIsInverseOf x y = λ i →
+      let
+        h : fst x ≡ fst y
+        h = arrowIsSet _ _ (fst x) (fst y)
+        hh : snd x ≡ snd y
+        hh = arrowIsSet _ _ (snd x) (snd y)
+      in h i , hh i
+
+    module _ {A B : Object} {f : Arrow A B} where
+      isoIsProp : isProp (Isomorphism f)
+      isoIsProp a@(g , η , ε) a'@(g' , η' , ε') =
+        lemSig (λ g → propIsInverseOf) a a' geq
+          where
+            open Cubical.NType.Properties
+            geq : g ≡ g'
+            geq = begin
+              g            ≡⟨ sym (fst ident) ⟩
+              g ∘ 𝟙        ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
+              g ∘ (f ∘ g') ≡⟨ assoc ⟩
+              (g ∘ f) ∘ g' ≡⟨ cong (λ φ → φ ∘ g') η ⟩
+              𝟙 ∘ g'       ≡⟨ snd ident ⟩
+              g'           ∎
+
+    propUnivalent : isProp Univalent
+    propUnivalent a b i = propPi (λ iso → propHasLevel ⟨-2⟩) a b i
+
   private
-    module _ (x y : IsCategory ℂ) where
+    module _ (x y : IsCategory C) where
       module IC = IsCategory
       module X = IsCategory x
       module Y = IsCategory y
-      -- ident : X.ident {?} ≡ Y.ident
+      -- In a few places I use the result of propositionality of the various
+      -- projections of `IsCategory` - I've arbitrarily chosed to use this
+      -- result from `x : IsCategory C`. I don't know which (if any) possibly
+      -- adverse effects this may have.
       ident : (λ _ → IsIdentity 𝟙) [ X.ident ≡ Y.ident ]
-      ident = X.propIsIdentity X.ident Y.ident
+      ident = propIsIdentity x X.ident Y.ident
       -- A version of univalence indexed by the identity proof.
       -- Note of course that since it's defined where `RawCategory ℂ` has been opened
       -- this is specialized to that category.
@@ -165,12 +169,12 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
       foo = pathJ P helper Y.ident ident
       eqUni : U ident Y.univalent
       eqUni = foo Y.univalent
-      IC.assoc      (done i) = X.propIsAssociative X.assoc Y.assoc i
+      IC.assoc      (done i) = propIsAssociative x X.assoc Y.assoc i
       IC.ident      (done i) = ident i
-      IC.arrowIsSet (done i) = X.propArrowIsSet X.arrowIsSet Y.arrowIsSet i
+      IC.arrowIsSet (done i) = propArrowIsSet x X.arrowIsSet Y.arrowIsSet i
       IC.univalent  (done i) = eqUni i
 
-  propIsCategory : isProp (IsCategory ℂ)
+  propIsCategory : isProp (IsCategory C)
   propIsCategory = done
 
 record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
