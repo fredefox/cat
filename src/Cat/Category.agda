@@ -99,7 +99,8 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   id-to-iso : (A B : Object) → A ≡ B → A ≅ B
   id-to-iso A B eq = transp (\ i → A ≅ eq i) (idIso A)
 
-  -- TODO: might want to implement isEquiv differently, there are 3
+  -- TODO: might want to implement isEquiv
+  -- differently, there are 3
   -- equivalent formulations in the book.
   Univalent : Set (ℓa ⊔ ℓb)
   Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
@@ -144,20 +145,22 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
     -- Why choose `x`'s `propIsAssociative`?
     -- Well, probably it could be pulled out of the record.
     { assoc = x.propIsAssociative x.assoc y.assoc i
-    ; ident = x.propIsIdentity x.ident y.ident i
+    ; ident = ident' i
     ; arrowIsSet = x.propArrowIsSet x.arrowIsSet y.arrowIsSet i
     ; univalent = eqUni i
     }
     where
       module x = IsCategory x
       module y = IsCategory y
+      ident' = x.propIsIdentity x.ident y.ident
+      ident'' = ident' i
       xuni : x.Univalent
       xuni = x.univalent
       yuni : y.Univalent
       yuni = y.univalent
       open RawCategory ℂ
-      T :  I → Set (ℓa ⊔ ℓb)
-      T i = {A B : Object} →
+      Pp : (x.ident ≡ y.ident) → I → Set (ℓa ⊔ ℓb)
+      Pp eqIdent i = {A B : Object} →
         isEquiv (A ≡ B) (A x.≅ B)
           (λ A≡B →
             transp
@@ -166,17 +169,21 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
             (λ f → Σ-syntax (Arrow (A≡B j) A) (λ g → g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙)))
             ( 𝟙
             , 𝟙
-            , x.propIsIdentity x.ident y.ident i
+            , ident' i
             )
           )
+      T : I → Set (ℓa ⊔ ℓb)
+      T = Pp {!ident'!}
       open Cubical.NType.Properties
       test : (λ _ → x.Univalent) [ xuni ≡ xuni ]
       test = refl
       t = {!!}
       P : (uni : x.Univalent) → xuni ≡ uni → Set (ℓa ⊔ ℓb)
       P = {!!}
+      -- T i0 ≡ x.Univalent
+      -- T i1 ≡ y.Univalent
       eqUni : T [ xuni ≡ yuni ]
-      eqUni = pathJprop {x = x.Univalent} P {!!} i
+      eqUni = {!!}
 
 
 record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where

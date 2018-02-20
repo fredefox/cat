@@ -5,11 +5,14 @@ consisting of the proposal for the thesis).
 
 Installation
 ============
-You probably need a very recent version of the Agda compiler. At the time
-of writing the solution has been tested with Agda version 2.6.0-5d84754.
 
 Dependencies
 ------------
+To succesfully compile the following is needed:
+
+* Agda version >= `707ce6042b6a3bdb26521f3fe8dfe5d8a8470a43`.
+* Agda Standard Library >= `87d28d7d753f73abd20665d7bbb88f9d72ed88aa`.
+
 I've used git submodules to manage dependencies. Unfortunately Agda does not
 allow specifying libraries to be used only as local dependencies.
 
