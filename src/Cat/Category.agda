@@ -65,6 +65,22 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     Monomorphism : {X : Object} → (f : Arrow A B) → Set ℓb
     Monomorphism {X} f = ( g₀ g₁ : Arrow X A ) → f ∘ g₀ ≡ f ∘ g₁ → g₀ ≡ g₁
 
+-- Univalence is indexed by a raw category as well as an identity proof.
+module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
+  open RawCategory ℂ
+  module _ (ident : IsIdentity 𝟙) where
+    idIso : (A : Object) → A ≅ A
+    idIso A = 𝟙 , (𝟙 , ident)
+
+    id-to-iso : (A B : Object) → A ≡ B → A ≅ B
+    id-to-iso A B eq = transp (\ i → A ≅ eq i) (idIso A)
+
+    -- TODO: might want to implement isEquiv
+    -- differently, there are 3
+    -- equivalent formulations in the book.
+    Univalent : Set (ℓa ⊔ ℓb)
+    Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
+
 -- Thierry: All projections must be `isProp`'s
 
 -- According to definitions 9.1.1 and 9.1.6 in the HoTT book the
@@ -73,25 +89,12 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 -- (univalent).
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   open RawCategory ℂ
-  module Raw = RawCategory ℂ
+  open Univalence ℂ public
   field
     assoc : IsAssociative
     ident : IsIdentity 𝟙
     arrowIsSet : ∀ {A B : Object} → isSet (Arrow A B)
-
-  idIso : (A : Object) → A ≅ A
-  idIso A = 𝟙 , (𝟙 , ident)
-
-  id-to-iso : (A B : Object) → A ≡ B → A ≅ B
-  id-to-iso A B eq = transp (\ i → A ≅ eq i) (idIso A)
-
-  -- TODO: might want to implement isEquiv
-  -- differently, there are 3
-  -- equivalent formulations in the book.
-  Univalent : Set (ℓa ⊔ ℓb)
-  Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
-  field
-    univalent : Univalent
+    univalent : Univalent ident
 
 -- `IsCategory` is a mere proposition.
 module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
@@ -136,7 +139,7 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
               𝟙 ∘ g'       ≡⟨ snd ident ⟩
               g'           ∎
 
-    propUnivalent : isProp Univalent
+    propUnivalent : isProp (Univalent ident)
     propUnivalent a b i = propPi (λ iso → propHasLevel ⟨-2⟩) a b i
 
   private
@@ -144,27 +147,21 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
       module IC = IsCategory
       module X = IsCategory x
       module Y = IsCategory y
+      open Univalence C
       -- In a few places I use the result of propositionality of the various
       -- projections of `IsCategory` - I've arbitrarily chosed to use this
       -- result from `x : IsCategory C`. I don't know which (if any) possibly
       -- adverse effects this may have.
       ident : (λ _ → IsIdentity 𝟙) [ X.ident ≡ Y.ident ]
       ident = propIsIdentity x X.ident Y.ident
-      -- A version of univalence indexed by the identity proof.
-      -- Note of course that since it's defined where `RawCategory ℂ` has been opened
-      -- this is specialized to that category.
-      Univ : IsIdentity 𝟙 → Set _
-      Univ idnt = {A B : Y.Raw.Object} →
-        isEquiv (A ≡ B) (A ≅ B)
-        (λ eq → transp (λ j → A ≅ eq j) (𝟙 , 𝟙 , idnt))
       done : x ≡ y
-      U : ∀ {a : IsIdentity 𝟙} → (λ _ → IsIdentity 𝟙) [ X.ident ≡ a ] → (b : Univ a) → Set _
-      U eqwal bbb = (λ i → Univ (eqwal i)) [ X.univalent ≡ bbb ]
+      U : ∀ {a : IsIdentity 𝟙} → (λ _ → IsIdentity 𝟙) [ X.ident ≡ a ] → (b : Univalent a) → Set _
+      U eqwal bbb = (λ i → Univalent (eqwal i)) [ X.univalent ≡ bbb ]
       P : (y : IsIdentity 𝟙)
         → (λ _ → IsIdentity 𝟙) [ X.ident ≡ y ] → Set _
-      P y eq = ∀ (b' : Univ y) → U eq b'
-      helper : ∀ (b' : Univ X.ident)
-        → (λ _ → Univ X.ident) [ X.univalent ≡ b' ]
+      P y eq = ∀ (b' : Univalent y) → U eq b'
+      helper : ∀ (b' : Univalent X.ident)
+        → (λ _ → Univalent X.ident) [ X.univalent ≡ b' ]
       helper univ = propUnivalent x X.univalent univ
       foo = pathJ P helper Y.ident ident
       eqUni : U ident Y.univalent
