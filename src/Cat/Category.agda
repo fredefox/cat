@@ -143,13 +143,20 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
       module IC = IsCategory
       module X = IsCategory x
       module Y = IsCategory y
+      -- ident : X.ident {?} ≡ Y.ident
+      ident : (λ _ → IsIdentity 𝟙) [ X.ident ≡ Y.ident ]
       ident = X.propIsIdentity X.ident Y.ident
-      done : x ≡ y
-      T : I → Set (ℓa ⊔ ℓb)
-      T i = {A B : Object} →
+      -- A version of univalence indexed by the identity proof.
+      -- Not of course that since it's defined where `RawCategory ℂ` has been opened
+      -- this is specialized to that category.
+      Univ : IsIdentity 𝟙 → Set _
+      Univ idnt = {A B : Y.Raw.Object} →
         isEquiv (A ≡ B) (A ≅ B)
-        (λ eq → transp (λ i₁ → A ≅ eq i₁) (𝟙 , 𝟙 , ident i))
-      eqUni : T [ X.univalent ≡ Y.univalent ]
+        (λ eq → transp (λ j → A ≅ eq j) (𝟙 , 𝟙 , idnt))
+      done : x ≡ y
+      U : ∀ {a : IsIdentity 𝟙} → (λ _ → IsIdentity 𝟙) [ X.ident ≡ a ] → (b : Univ a) → Set _
+      U eqwal bbb = (λ i → Univ (eqwal i)) [ X.univalent ≡ bbb ]
+      eqUni : U ident Y.univalent
       eqUni = {!!}
       IC.assoc      (done i) = X.propIsAssociative X.assoc Y.assoc i
       IC.ident      (done i) = ident i
