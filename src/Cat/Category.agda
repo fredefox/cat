@@ -190,26 +190,13 @@ record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     raw : RawCategory ℓa ℓb
     {{isCategory}} : IsCategory raw
 
-  -- What happens if we just open this up to the public?
-  private
-    module ℂ = RawCategory raw
-
-  open RawCategory raw public using ( Isomorphism ; Epimorphism ; Monomorphism )
-
-  Object : Set ℓa
-  Object = ℂ.Object
-
-  Arrow = ℂ.Arrow
-
-  𝟙 = ℂ.𝟙
-
-  _∘_ = ℂ._∘_
+  open RawCategory raw public
 
   _[_,_] : (A : Object) → (B : Object) → Set ℓb
-  _[_,_] = ℂ.Arrow
+  _[_,_] = Arrow
 
-  _[_∘_] : {A B C : Object} → (g : ℂ.Arrow B C) → (f : ℂ.Arrow A B) → ℂ.Arrow A C
-  _[_∘_] = ℂ._∘_
+  _[_∘_] : {A B C : Object} → (g : Arrow B C) → (f : Arrow A B) → Arrow A C
+  _[_∘_] = _∘_
 
 
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
