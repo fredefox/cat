@@ -137,53 +137,27 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} {ℂ : IsCategory C} wh
   propUnivalent a b i = propPi (λ iso → propHasLevel ⟨-2⟩) a b i
 
 module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
-  -- TODO, provable by using  arrow-is-set and that isProp (isEquiv _ _ _)
-  -- This lemma will be useful to prove the equality of two categories.
-  IsCategory-is-prop : isProp (IsCategory ℂ)
-  IsCategory-is-prop x y i = record
-    -- Why choose `x`'s `propIsAssociative`?
-    -- Well, probably it could be pulled out of the record.
-    { assoc = x.propIsAssociative x.assoc y.assoc i
-    ; ident = ident' i
-    ; arrowIsSet = x.propArrowIsSet x.arrowIsSet y.arrowIsSet i
-    ; univalent = eqUni i
-    }
-    where
-      module x = IsCategory x
-      module y = IsCategory y
-      ident' = x.propIsIdentity x.ident y.ident
-      ident'' = ident' i
-      xuni : x.Univalent
-      xuni = x.univalent
-      yuni : y.Univalent
-      yuni = y.univalent
-      open RawCategory ℂ
-      Pp : (x.ident ≡ y.ident) → I → Set (ℓa ⊔ ℓb)
-      Pp eqIdent i = {A B : Object} →
-        isEquiv (A ≡ B) (A ≅ B)
-          (λ A≡B →
-            transp
-            (λ j →
-            Σ-syntax (Arrow A (A≡B j))
-            (λ f → Σ-syntax (Arrow (A≡B j) A) (λ g → g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙)))
-            ( 𝟙
-            , 𝟙
-            , ident' i
-            )
-          )
+  open RawCategory ℂ
+  private
+    module _ (x y : IsCategory ℂ) where
+      module IC = IsCategory
+      module X = IsCategory x
+      module Y = IsCategory y
+      ident = X.propIsIdentity X.ident Y.ident
+      done : x ≡ y
       T : I → Set (ℓa ⊔ ℓb)
-      T = Pp {!ident'!}
-      open Cubical.NType.Properties
-      test : (λ _ → x.Univalent) [ xuni ≡ xuni ]
-      test = refl
-      t = {!!}
-      P : (uni : x.Univalent) → xuni ≡ uni → Set (ℓa ⊔ ℓb)
-      P = {!!}
-      -- T i0 ≡ x.Univalent
-      -- T i1 ≡ y.Univalent
-      eqUni : T [ xuni ≡ yuni ]
+      T i = {A B : Object} →
+        isEquiv (A ≡ B) (A ≅ B)
+        (λ eq → transp (λ i₁ → A ≅ eq i₁) (𝟙 , 𝟙 , ident i))
+      eqUni : T [ X.univalent ≡ Y.univalent ]
       eqUni = {!!}
+      IC.assoc      (done i) = X.propIsAssociative X.assoc Y.assoc i
+      IC.ident      (done i) = ident i
+      IC.arrowIsSet (done i) = X.propArrowIsSet X.arrowIsSet Y.arrowIsSet i
+      IC.univalent  (done i) = eqUni i
 
+  propIsCategory : isProp (IsCategory ℂ)
+  propIsCategory = done
 
 record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   field
