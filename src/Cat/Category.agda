@@ -165,7 +165,7 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
       P y eq = ∀ (b' : Univ y) → U eq b'
       helper : ∀ (b' : Univ X.ident)
         → (λ _ → Univ X.ident) [ X.univalent ≡ b' ]
-      helper univ = {!!}
+      helper univ = propUnivalent x X.univalent univ
       foo = pathJ P helper Y.ident ident
       eqUni : U ident Y.univalent
       eqUni = foo Y.univalent
