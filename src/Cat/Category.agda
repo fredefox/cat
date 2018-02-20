@@ -65,6 +65,22 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     Monomorphism : {X : Object} → (f : Arrow A B) → Set ℓb
     Monomorphism {X} f = ( g₀ g₁ : Arrow X A ) → f ∘ g₀ ≡ f ∘ g₁ → g₀ ≡ g₁
 
+  unique = isContr
+
+  IsInitial : Object → Set (ℓa ⊔ ℓb)
+  IsInitial I = {X : Object} → unique (Arrow I X)
+
+  IsTerminal : Object → Set (ℓa ⊔ ℓb)
+  -- ∃![ ? ] ?
+  IsTerminal T = {X : Object} → unique (Arrow X T)
+
+  Initial : Set (ℓa ⊔ ℓb)
+  Initial = Σ (Object) IsInitial
+
+  Terminal : Set (ℓa ⊔ ℓb)
+  Terminal = Σ (Object) IsTerminal
+
+
 -- Univalence is indexed by a raw category as well as an identity proof.
 module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   open RawCategory ℂ
@@ -235,20 +251,3 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
   Opposite-is-involution : Opposite (Opposite ℂ) ≡ ℂ
   raw (Opposite-is-involution i) = rawOp i
   isCategory (Opposite-is-involution i) = rawIsCat i
-
-module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
-  open Category
-  unique = isContr
-
-  IsInitial : Object ℂ → Set (ℓa ⊔ ℓb)
-  IsInitial I = {X : Object ℂ} → unique (ℂ [ I , X ])
-
-  IsTerminal : Object ℂ → Set (ℓa ⊔ ℓb)
-  -- ∃![ ? ] ?
-  IsTerminal T = {X : Object ℂ} → unique (ℂ [ X , T ])
-
-  Initial : Set (ℓa ⊔ ℓb)
-  Initial = Σ (Object ℂ) IsInitial
-
-  Terminal : Set (ℓa ⊔ ℓb)
-  Terminal = Σ (Object ℂ) IsTerminal
