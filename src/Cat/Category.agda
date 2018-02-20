@@ -147,7 +147,7 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
       ident : (λ _ → IsIdentity 𝟙) [ X.ident ≡ Y.ident ]
       ident = X.propIsIdentity X.ident Y.ident
       -- A version of univalence indexed by the identity proof.
-      -- Not of course that since it's defined where `RawCategory ℂ` has been opened
+      -- Note of course that since it's defined where `RawCategory ℂ` has been opened
       -- this is specialized to that category.
       Univ : IsIdentity 𝟙 → Set _
       Univ idnt = {A B : Y.Raw.Object} →
@@ -156,8 +156,15 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
       done : x ≡ y
       U : ∀ {a : IsIdentity 𝟙} → (λ _ → IsIdentity 𝟙) [ X.ident ≡ a ] → (b : Univ a) → Set _
       U eqwal bbb = (λ i → Univ (eqwal i)) [ X.univalent ≡ bbb ]
+      P : (y : IsIdentity 𝟙)
+        → (λ _ → IsIdentity 𝟙) [ X.ident ≡ y ] → Set _
+      P y eq = ∀ (b' : Univ y) → U eq b'
+      helper : ∀ (b' : Univ X.ident)
+        → (λ _ → Univ X.ident) [ X.univalent ≡ b' ]
+      helper univ = {!!}
+      foo = pathJ P helper Y.ident ident
       eqUni : U ident Y.univalent
-      eqUni = {!!}
+      eqUni = foo Y.univalent
       IC.assoc      (done i) = X.propIsAssociative X.assoc Y.assoc i
       IC.ident      (done i) = ident i
       IC.arrowIsSet (done i) = X.propArrowIsSet X.arrowIsSet Y.arrowIsSet i
