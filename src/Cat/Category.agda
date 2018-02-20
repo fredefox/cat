@@ -25,18 +25,45 @@ open import Cat.Wishlist
 
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
-record RawCategory (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
+record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   no-eta-equality
   field
-    Object : Set ℓ
-    Arrow  : Object → Object → Set ℓ'
-    𝟙      : {o : Object} → Arrow o o
+    Object : Set ℓa
+    Arrow  : Object → Object → Set ℓb
+    𝟙      : {A : Object} → Arrow A A
     _∘_    : {A B C : Object} → Arrow B C → Arrow A B → Arrow A C
+
   infixl 10 _∘_
+
   domain : { a b : Object } → Arrow a b → Object
   domain {a = a} _ = a
+
   codomain : { a b : Object } → Arrow a b → Object
   codomain {b = b} _ = b
+
+  IsAssociative : Set (ℓa ⊔ ℓb)
+  IsAssociative = ∀ {A B C D} {f : Arrow A B} {g : Arrow B C} {h : Arrow C D}
+    → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
+
+  IsIdentity : ({A : Object} → Arrow A A) → Set (ℓa ⊔ ℓb)
+  IsIdentity id = {A B : Object} {f : Arrow A B}
+    → f ∘ id ≡ f × id ∘ f ≡ f
+
+  IsInverseOf : ∀ {A B} → (Arrow A B) → (Arrow B A) → Set ℓb
+  IsInverseOf = λ f g → g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙
+
+  Isomorphism : ∀ {A B} → (f : Arrow A B) → Set ℓb
+  Isomorphism {A} {B} f = Σ[ g ∈ Arrow B A ] IsInverseOf f g
+
+  _≅_ : (A B : Object) → Set ℓb
+  _≅_ A B = Σ[ f ∈ Arrow A B ] (Isomorphism f)
+
+  module _ {A B : Object} where
+    Epimorphism : {X : Object } → (f : Arrow A B) → Set ℓb
+    Epimorphism {X} f = ( g₀ g₁ : Arrow B X ) → g₀ ∘ f ≡ g₁ ∘ f → g₀ ≡ g₁
+
+    Monomorphism : {X : Object} → (f : Arrow A B) → Set ℓb
+    Monomorphism {X} f = ( g₀ g₁ : Arrow X A ) → f ∘ g₀ ≡ f ∘ g₁ → g₀ ≡ g₁
 
 -- Thierry: All projections must be `isProp`'s
 
@@ -47,15 +74,6 @@ record RawCategory (ℓ ℓ' : Level) : Set (lsuc (ℓ' ⊔ ℓ)) where
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   open RawCategory ℂ
   module Raw = RawCategory ℂ
-
-  IsAssociative : Set (ℓa ⊔ ℓb)
-  IsAssociative = ∀ {A B C D} {f : Arrow A B} {g : Arrow B C} {h : Arrow C D}
-    → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
-
-  IsIdentity : ({A : Object} → Arrow A A) → Set (ℓa ⊔ ℓb)
-  IsIdentity id = {A B : Object} {f : Arrow A B}
-    → f ∘ id ≡ f × id ∘ f ≡ f
-
   field
     assoc : IsAssociative
     ident : IsIdentity 𝟙
@@ -72,9 +90,6 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
   propArrowIsSet a b i = isSetIsProp a b i
 
-  IsInverseOf : ∀ {A B} → (Arrow A B) → (Arrow B A) → Set ℓb
-  IsInverseOf = λ f g → g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙
-
   propIsInverseOf : ∀ {A B f g} → isProp (IsInverseOf {A} {B} f g)
   propIsInverseOf x y = λ i →
     let
@@ -83,15 +98,6 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
       hh : snd x ≡ snd y
       hh = arrowIsSet _ _ (snd x) (snd y)
     in h i , hh i
-
-  Isomorphism : ∀ {A B} → (f : Arrow A B) → Set ℓb
-  Isomorphism {A} {B} f = Σ[ g ∈ Arrow B A ] IsInverseOf f g
-
-  inverse : ∀ {A B} {f : Arrow A B} → Isomorphism f → Arrow B A
-  inverse iso = fst iso
-
-  _≅_ : (A B : Object) → Set ℓb
-  _≅_ A B = Σ[ f ∈ Arrow A B ] (Isomorphism f)
 
   idIso : (A : Object) → A ≅ A
   idIso A = 𝟙 , (𝟙 , ident)
@@ -106,13 +112,6 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
   field
     univalent : Univalent
-
-  module _ {A B : Object} where
-    Epimorphism : {X : Object } → (f : Arrow A B) → Set ℓb
-    Epimorphism {X} f = ( g₀ g₁ : Arrow B X ) → g₀ ∘ f ≡ g₁ ∘ f → g₀ ≡ g₁
-
-    Monomorphism : {X : Object} → (f : Arrow A B) → Set ℓb
-    Monomorphism {X} f = ( g₀ g₁ : Arrow X A ) → f ∘ g₀ ≡ f ∘ g₁ → g₀ ≡ g₁
 
   module _ {A B : Object} {f : Arrow A B} where
     isoIsProp : isProp (Isomorphism f)
@@ -161,7 +160,7 @@ module _ {ℓa} {ℓb} {ℂ : RawCategory ℓa ℓb} where
       open RawCategory ℂ
       Pp : (x.ident ≡ y.ident) → I → Set (ℓa ⊔ ℓb)
       Pp eqIdent i = {A B : Object} →
-        isEquiv (A ≡ B) (A x.≅ B)
+        isEquiv (A ≡ B) (A ≅ B)
           (λ A≡B →
             transp
             (λ j →
@@ -191,8 +190,11 @@ record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     raw : RawCategory ℓa ℓb
     {{isCategory}} : IsCategory raw
 
+  -- What happens if we just open this up to the public?
   private
     module ℂ = RawCategory raw
+
+  open RawCategory raw public using ( Isomorphism ; Epimorphism ; Monomorphism )
 
   Object : Set ℓa
   Object = ℂ.Object
