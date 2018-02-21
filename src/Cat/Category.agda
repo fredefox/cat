@@ -65,17 +65,17 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     Monomorphism : {X : Object} → (f : Arrow A B) → Set ℓb
     Monomorphism {X} f = ( g₀ g₁ : Arrow X A ) → f ∘ g₀ ≡ f ∘ g₁ → g₀ ≡ g₁
 
-  IsInitial : Object → Set (ℓa ⊔ ℓb)
-  IsInitial I = {X : Object} → isContr (Arrow I X)
+  IsInitial  : Object → Set (ℓa ⊔ ℓb)
+  IsInitial  I = {X : Object} → isContr (Arrow I X)
 
   IsTerminal : Object → Set (ℓa ⊔ ℓb)
   IsTerminal T = {X : Object} → isContr (Arrow X T)
 
-  Initial : Set (ℓa ⊔ ℓb)
-  Initial = Σ (Object) IsInitial
+  Initial  : Set (ℓa ⊔ ℓb)
+  Initial  = Σ Object IsInitial
 
   Terminal : Set (ℓa ⊔ ℓb)
-  Terminal = Σ (Object) IsTerminal
+  Terminal = Σ Object IsTerminal
 
 -- Univalence is indexed by a raw category as well as an identity proof.
 module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
