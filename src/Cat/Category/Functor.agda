@@ -47,7 +47,6 @@ module _ {ℓc ℓc' ℓd ℓd'}
 open IsFunctor
 open Functor
 
--- TODO: Is `IsFunctor` a proposition?
 module _
     {ℓa ℓb : Level}
     {ℂ 𝔻 : Category ℓa ℓb}
@@ -56,11 +55,8 @@ module _
   private
     module 𝔻 = IsCategory (isCategory 𝔻)
 
-  -- isProp  : Set ℓ
-  -- isProp  = (x y : A) → x ≡ y
-
-  IsFunctorIsProp : isProp (IsFunctor _ _ F)
-  IsFunctorIsProp isF0 isF1 i = record
+  propIsFunctor : isProp (IsFunctor _ _ F)
+  propIsFunctor isF0 isF1 i = record
     { ident = 𝔻.arrowIsSet _ _ isF0.ident isF1.ident i
     ; distrib = 𝔻.arrowIsSet _ _ isF0.distrib isF1.distrib i
     }
@@ -81,7 +77,7 @@ module _
 
   IsFunctorIsProp' : IsProp' λ i → IsFunctor _ _ (F i)
   IsFunctorIsProp' isF0 isF1 = lemPropF {B = IsFunctor ℂ 𝔻}
-    (\ F → IsFunctorIsProp {F = F}) (\ i → F i)
+    (\ F → propIsFunctor {F = F}) (\ i → F i)
     where
       open import Cubical.NType.Properties using (lemPropF)
 

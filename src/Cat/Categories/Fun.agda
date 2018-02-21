@@ -9,6 +9,7 @@ import Cubical.GradLemma
 module UIP = Cubical.GradLemma
 open import Cubical.Sigma
 open import Cubical.NType
+open import Cubical.NType.Properties
 open import Data.Nat using (_≤_ ; z≤n ; s≤s)
 module Nat = Data.Nat
 
@@ -20,7 +21,7 @@ open import Cat.Equality
 open Equality.Data.Product
 
 module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Category ℓd ℓd'} where
-  open Category hiding ( _∘_ ; Arrow )
+  open Category using (Object ; 𝟙)
   open Functor
 
   module _ (F G : Functor ℂ 𝔻) where
@@ -69,7 +70,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     where
       module F = Functor F
       F→ = F.func→
-      module 𝔻 = IsCategory (isCategory 𝔻)
+      module 𝔻 = Category 𝔻
 
   identityNat : (F : Functor ℂ 𝔻) → NaturalTransformation F F
   identityNat F = identityTrans F , identityNatural F
@@ -94,13 +95,13 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       𝔻 [ H.func→ f ∘ 𝔻 [ θ A ∘ η A ] ] ≡⟨⟩
       𝔻 [ H.func→ f ∘ (θ ∘nt η) A ]     ∎
       where
-        open IsCategory (isCategory 𝔻)
+        open Category 𝔻
 
     NatComp = _:⊕:_
 
   private
     module _ {F G : Functor ℂ 𝔻} where
-      module 𝔻 = IsCategory (isCategory 𝔻)
+      module 𝔻 = Category 𝔻
 
       transformationIsSet : isSet (Transformation F G)
       transformationIsSet _ _ p q i j C = 𝔻.arrowIsSet _ _ (λ l → p l C)   (λ l → q l C) i j
@@ -125,18 +126,37 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
         θ = proj₁ θ'
         η = proj₁ η'
         ζ = proj₁ ζ'
+        θNat = proj₂ θ'
+        ηNat = proj₂ η'
+        ζNat = proj₂ ζ'
+        L : NaturalTransformation A D
+        L = (_:⊕:_ {A} {C} {D} ζ' (_:⊕:_ {A} {B} {C} η' θ'))
+        R : NaturalTransformation A D
+        R = (_:⊕:_ {A} {B} {D} (_:⊕:_ {B} {C} {D} ζ' η') θ')
       _g⊕f_ = _:⊕:_ {A} {B} {C}
       _h⊕g_ = _:⊕:_ {B} {C} {D}
-      :assoc: : (_:⊕:_ {A} {C} {D} ζ' (_:⊕:_ {A} {B} {C} η' θ')) ≡ (_:⊕:_ {A} {B} {D} (_:⊕:_ {B} {C} {D} ζ' η') θ')
-      :assoc: = Σ≡ (funExt (λ _ → assoc)) {!!}
+      :assoc: : L ≡ R
+      :assoc: = lemSig (naturalIsProp {F = A} {D})
+        L R (funExt (λ x → assoc))
         where
-          open IsCategory (isCategory 𝔻)
+          open Category 𝔻
 
     module _ {A B : Functor ℂ 𝔻} {f : NaturalTransformation A B} where
+      private
+        allNatural = naturalIsProp {F = A} {B}
+        f' = proj₁ f
+        module 𝔻Data = Category 𝔻
+        eq-r : ∀ C → (𝔻 [ f' C ∘ identityTrans A C ]) ≡ f' C
+        eq-r C = begin
+          𝔻 [ f' C ∘ identityTrans A C ] ≡⟨⟩
+          𝔻 [ f' C ∘ 𝔻Data.𝟙 ]  ≡⟨ proj₁ (𝔻.ident {A} {B}) ⟩
+          f' C ∎
+        eq-l : ∀ C → (𝔻 [ identityTrans B C ∘ f' C ]) ≡ f' C
+        eq-l C = proj₂ (𝔻.ident {A} {B})
       ident-r : (_:⊕:_ {A} {A} {B} f (identityNat A)) ≡ f
-      ident-r = {!!}
+      ident-r = lemSig allNatural _ _ (funExt eq-r)
       ident-l : (_:⊕:_ {A} {B} {B} (identityNat B) f) ≡ f
-      ident-l = {!!}
+      ident-l = lemSig allNatural _ _ (funExt eq-l)
       :ident:
         : (_:⊕:_ {A} {A} {B} f (identityNat A)) ≡ f
         × (_:⊕:_ {A} {B} {B} (identityNat B) f) ≡ f
@@ -161,7 +181,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       }
 
   Fun : Category (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') (ℓc ⊔ ℓc' ⊔ ℓd')
-  raw Fun = RawFun
+  Category.raw Fun = RawFun
 
 module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
   open import Cat.Categories.Sets
