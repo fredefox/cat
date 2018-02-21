@@ -21,7 +21,7 @@ open import Cat.Equality
 open Equality.Data.Product
 
 module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Category ℓd ℓd'} where
-  open Category hiding ( _∘_ ; Arrow )
+  open Category using (Object ; 𝟙)
   open Functor
 
   module _ (F G : Functor ℂ 𝔻) where
@@ -70,7 +70,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     where
       module F = Functor F
       F→ = F.func→
-      module 𝔻 = IsCategory (isCategory 𝔻)
+      module 𝔻 = Category 𝔻
 
   identityNat : (F : Functor ℂ 𝔻) → NaturalTransformation F F
   identityNat F = identityTrans F , identityNatural F
@@ -95,13 +95,13 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       𝔻 [ H.func→ f ∘ 𝔻 [ θ A ∘ η A ] ] ≡⟨⟩
       𝔻 [ H.func→ f ∘ (θ ∘nt η) A ]     ∎
       where
-        open IsCategory (isCategory 𝔻)
+        open Category 𝔻
 
     NatComp = _:⊕:_
 
   private
     module _ {F G : Functor ℂ 𝔻} where
-      module 𝔻 = IsCategory (isCategory 𝔻)
+      module 𝔻 = Category 𝔻
 
       transformationIsSet : isSet (Transformation F G)
       transformationIsSet _ _ p q i j C = 𝔻.arrowIsSet _ _ (λ l → p l C)   (λ l → q l C) i j
@@ -139,7 +139,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       :assoc: = lemSig (naturalIsProp {F = A} {D})
         L R (funExt (λ x → assoc))
         where
-          open IsCategory (isCategory 𝔻)
+          open Category 𝔻
 
     module _ {A B : Functor ℂ 𝔻} {f : NaturalTransformation A B} where
       private
@@ -181,7 +181,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       }
 
   Fun : Category (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') (ℓc ⊔ ℓc' ⊔ ℓd')
-  raw Fun = RawFun
+  Category.raw Fun = RawFun
 
 module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
   open import Cat.Categories.Sets

@@ -14,7 +14,6 @@ open Equality.Data.Product
 
 module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : Category.Object ℂ } {X : Category.Object ℂ} (f : Category.Arrow ℂ A B) where
   open Category ℂ
-  open IsCategory (isCategory)
 
   iso-is-epi : Isomorphism f → Epimorphism {X = X} f
   iso-is-epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
