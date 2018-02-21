@@ -84,6 +84,7 @@ module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
     idIso : (A : Object) → A ≅ A
     idIso A = 𝟙 , (𝟙 , ident)
 
+    -- Lemma 9.1.4 in [HoTT]
     id-to-iso : (A B : Object) → A ≡ B → A ≅ B
     id-to-iso A B eq = transp (\ i → A ≅ eq i) (idIso A)
 
@@ -93,12 +94,6 @@ module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
     Univalent : Set (ℓa ⊔ ℓb)
     Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
 
--- Thierry: All projections must be `isProp`'s
-
--- According to definitions 9.1.1 and 9.1.6 in the HoTT book the
--- arrows of a category form a set (arrow-is-set), and there is an
--- equivalence between the equality of objects and isomorphisms
--- (univalent).
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   open RawCategory ℂ
   open Univalence ℂ public
@@ -192,13 +187,15 @@ record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     {{isCategory}} : IsCategory raw
 
   open RawCategory raw public
+  open IsCategory isCategory public
 
+module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+  open Category ℂ
   _[_,_] : (A : Object) → (B : Object) → Set ℓb
   _[_,_] = Arrow
 
   _[_∘_] : {A B C : Object} → (g : Arrow B C) → (f : Arrow A B) → Arrow A C
   _[_∘_] = _∘_
-
 
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
@@ -209,8 +206,6 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     RawCategory.Arrow OpRaw = Function.flip Arrow
     RawCategory.𝟙 OpRaw = 𝟙
     RawCategory._∘_ OpRaw = Function.flip _∘_
-
-    open IsCategory isCategory
 
     OpIsCategory : IsCategory OpRaw
     IsCategory.assoc OpIsCategory = sym assoc
