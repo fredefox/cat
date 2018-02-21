@@ -24,9 +24,6 @@ module _ (ℓ : Level) where
     𝟙 SetsRaw = Function.id
     _∘_ SetsRaw = Function._∘′_
 
-    setIsSet : (A : Set ℓ) → isSet A
-    setIsSet A x y p q = {!ua!}
-
     SetsIsCategory : IsCategory SetsRaw
     assoc SetsIsCategory = refl
     proj₁ (ident SetsIsCategory) = funExt λ _ → refl
