@@ -18,7 +18,7 @@ open Equality.Data.Product
 
 open Functor
 open IsFunctor
-open Category hiding (_∘_)
+open Category using (Object ; 𝟙)
 
 -- The category of categories
 module _ (ℓ ℓ' : Level) where
@@ -45,7 +45,7 @@ module _ (ℓ ℓ' : Level) where
             ]
 
       assc : H ∘f (G ∘f F) ≡ (H ∘f G) ∘f F
-      assc = Functor≡ eq* eq→ (IsFunctor≡ eqI eqD)
+      assc = Functor≡ eq* eq→
 
     module _ {ℂ 𝔻 : Category ℓ ℓ'} {F : Functor ℂ 𝔻} where
       module _ where
@@ -55,7 +55,7 @@ module _ (ℓ ℓ' : Level) where
           -- lemmm : func→ {C = A} {D = B} (f ∘f identity) ≡ func→ f
           eq→ : PathP
             (λ i →
-            {x y : Object ℂ} → Arrow ℂ x y → Arrow 𝔻 (func* F x) (func* F y))
+            {x y : Object ℂ} → ℂ [ x , y ] → 𝔻 [ func* F x , func* F y ])
             (func→ (F ∘f identity)) (func→ F)
           eq→ = refl
           postulate
@@ -69,14 +69,14 @@ module _ (ℓ ℓ' : Level) where
                         eq→ i (ℂ [ g ∘ f ]) ≡ 𝔻 [ eq→ i g ∘ eq→ i f ])
                         ((F ∘f identity) .isFunctor .distrib) (F .isFunctor .distrib)
         ident-r : F ∘f identity ≡ F
-        ident-r = Functor≡ eq* eq→ (IsFunctor≡ eqI-r eqD-r)
+        ident-r = Functor≡ eq* eq→
       module _ where
         private
           postulate
-            eq* : (identity ∘f F) .func* ≡ F .func*
+            eq* : func* (identity ∘f F) ≡ func* F
             eq→ : PathP
               (λ i → {x y : Object ℂ} → ℂ [ x , y ] → 𝔻 [ eq* i x , eq* i y ])
-              ((identity ∘f F) .func→) (F .func→)
+              (func→ (identity ∘f F)) (func→ F)
             eqI : (λ i → ∀ {A : Object ℂ} → eq→ i (𝟙 ℂ {A}) ≡ 𝟙 𝔻 {eq* i A})
                   [ ((identity ∘f F) .isFunctor .ident) ≡ (F .isFunctor .ident) ]
             eqD : PathP (λ i → {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
@@ -84,7 +84,7 @@ module _ (ℓ ℓ' : Level) where
                  ((identity ∘f F) .isFunctor .distrib) (F .isFunctor .distrib)
                  -- (λ z → eq* i z) (eq→ i)
         ident-l : identity ∘f F ≡ F
-        ident-l = Functor≡ eq* eq→ λ i → record { ident = eqI i ; distrib = eqD i }
+        ident-l = Functor≡ eq* eq→
 
     RawCat : RawCategory (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
     RawCat =
@@ -104,11 +104,11 @@ module _ (ℓ ℓ' : Level) where
       :isCategory: : IsCategory RawCat
       assoc :isCategory: {f = F} {G} {H} = assc {F = F} {G = G} {H = H}
       ident :isCategory: = ident-r , ident-l
-      arrow-is-set :isCategory: = {!!}
+      arrowIsSet :isCategory: = {!!}
       univalent :isCategory: = {!!}
 
   Cat : Category (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
-  raw Cat = RawCat
+  Category.raw Cat = RawCat
 
 module _ {ℓ ℓ' : Level} where
   module _ (ℂ 𝔻 : Category ℓ ℓ') where
@@ -116,7 +116,7 @@ module _ {ℓ ℓ' : Level} where
       Catt = Cat ℓ ℓ'
       :Object: = Object ℂ × Object 𝔻
       :Arrow:  : :Object: → :Object: → Set ℓ'
-      :Arrow: (c , d) (c' , d') = Arrow ℂ c c' × Arrow 𝔻 d d'
+      :Arrow: (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
       :𝟙: : {o : :Object:} → :Arrow: o o
       :𝟙: = 𝟙 ℂ , 𝟙 𝔻
       _:⊕:_ :
@@ -132,8 +132,8 @@ module _ {ℓ ℓ' : Level} where
       RawCategory.𝟙 :rawProduct: = :𝟙:
       RawCategory._∘_ :rawProduct: = _:⊕:_
 
-      module C = IsCategory (ℂ .isCategory)
-      module D = IsCategory (𝔻 .isCategory)
+      module C = Category ℂ
+      module D = Category 𝔻
       postulate
         issSet : {A B : RawCategory.Object :rawProduct:} → isSet (RawCategory.Arrow :rawProduct: A B)
       instance
@@ -150,17 +150,23 @@ module _ {ℓ ℓ' : Level} where
         IsCategory.ident :isCategory:
           = Σ≡ (fst C.ident) (fst D.ident)
           , Σ≡ (snd C.ident) (snd D.ident)
-        IsCategory.arrow-is-set :isCategory: = issSet
+        IsCategory.arrowIsSet :isCategory: = issSet
         IsCategory.univalent :isCategory: = {!!}
 
       :product: : Category ℓ ℓ'
-      raw :product: = :rawProduct:
+      Category.raw :product: = :rawProduct:
 
       proj₁ : Catt [ :product: , ℂ ]
-      proj₁ = record { func* = fst ; func→ = fst ; isFunctor = record { ident = refl ; distrib = refl } }
+      proj₁ = record
+        { raw = record { func* = fst ; func→ = fst }
+        ; isFunctor = record { ident = refl ; distrib = refl }
+        }
 
       proj₂ : Catt [ :product: , 𝔻 ]
-      proj₂ = record { func* = snd ; func→ = snd ; isFunctor = record { ident = refl ; distrib = refl } }
+      proj₂ = record
+        { raw = record { func* = snd ; func→ = snd }
+        ; isFunctor = record { ident = refl ; distrib = refl }
+        }
 
       module _ {X : Object Catt} (x₁ : Catt [ X , ℂ ]) (x₂ : Catt [ X , 𝔻 ]) where
         open Functor
@@ -232,7 +238,7 @@ module _ (ℓ : Level) where
         :obj: = Fun {ℂ = ℂ} {𝔻 = 𝔻}
 
         :func*: : Functor ℂ 𝔻 × Object ℂ → Object 𝔻
-        :func*: (F , A) = F .func* A
+        :func*: (F , A) = func* F A
 
       module _ {dom cod : Functor ℂ 𝔻 × Object ℂ} where
         private
@@ -247,27 +253,27 @@ module _ (ℓ : Level) where
           B = proj₂ cod
 
         :func→: : (pobj : NaturalTransformation F G × ℂ [ A , B ])
-          → 𝔻 [ F .func* A , G .func* B ]
+          → 𝔻 [ func* F A , func* G B ]
         :func→: ((θ , θNat) , f) = result
           where
-            θA : 𝔻 [ F .func* A , G .func* A ]
+            θA : 𝔻 [ func* F A , func* G A ]
             θA = θ A
-            θB : 𝔻 [ F .func* B , G .func* B ]
+            θB : 𝔻 [ func* F B , func* G B ]
             θB = θ B
-            F→f : 𝔻 [ F .func* A , F .func* B ]
-            F→f = F .func→ f
-            G→f : 𝔻 [ G .func* A , G .func* B ]
-            G→f = G .func→ f
-            l : 𝔻 [ F .func* A , G .func* B ]
+            F→f : 𝔻 [ func* F A , func* F B ]
+            F→f = func→ F f
+            G→f : 𝔻 [ func* G A , func* G B ]
+            G→f = func→ G f
+            l : 𝔻 [ func* F A , func* G B ]
             l = 𝔻 [ θB ∘ F→f ]
-            r : 𝔻 [ F .func* A , G .func* B ]
+            r : 𝔻 [ func* F A , func* G B ]
             r = 𝔻 [ G→f ∘ θA ]
             -- There are two choices at this point,
             -- but I suppose the whole point is that
             -- by `θNat f` we have `l ≡ r`
             --     lem : 𝔻 [ θ B ∘ F .func→ f ] ≡ 𝔻 [ G .func→ f ∘ θ A ]
             --     lem = θNat f
-            result : 𝔻 [ F .func* A , G .func* B ]
+            result : 𝔻 [ func* F A , func* G B ]
             result = l
 
       _×p_ = product
@@ -285,16 +291,16 @@ module _ (ℓ : Level) where
         --   where
         --     open module 𝔻 = IsCategory (𝔻 .isCategory)
         -- Unfortunately the equational version has some ambigous arguments.
-        :ident: : :func→: {c} {c} (identityNat F , 𝟙 ℂ {o = proj₂ c}) ≡ 𝟙 𝔻
+        :ident: : :func→: {c} {c} (identityNat F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
         :ident: = begin
           :func→: {c} {c} (𝟙 (Product.obj (:obj: ×p ℂ)) {c}) ≡⟨⟩
           :func→: {c} {c} (identityNat F , 𝟙 ℂ)             ≡⟨⟩
-          𝔻 [ identityTrans F C ∘ F .func→ (𝟙 ℂ)]           ≡⟨⟩
-          𝔻 [ 𝟙 𝔻 ∘ F .func→ (𝟙 ℂ)]                        ≡⟨ proj₂ 𝔻.ident ⟩
-          F .func→ (𝟙 ℂ)                                    ≡⟨ F.ident ⟩
+          𝔻 [ identityTrans F C ∘ func→ F (𝟙 ℂ)]           ≡⟨⟩
+          𝔻 [ 𝟙 𝔻 ∘ func→ F (𝟙 ℂ)]                        ≡⟨ proj₂ 𝔻.ident ⟩
+          func→ F (𝟙 ℂ)                                    ≡⟨ F.ident ⟩
           𝟙 𝔻                                               ∎
           where
-            open module 𝔻 = IsCategory (𝔻 .isCategory)
+            open module 𝔻 = Category 𝔻
             open module F = IsFunctor (F .isFunctor)
 
       module _ {F×A G×B H×C : Functor ℂ 𝔻 × Object ℂ} where
@@ -331,35 +337,38 @@ module _ (ℓ : Level) where
             ηθNat = proj₂ ηθNT
 
           :distrib: :
-              𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ F .func→ ( ℂ [ g ∘ f ] ) ]
-            ≡ 𝔻 [ 𝔻 [ η C ∘ G .func→ g ] ∘ 𝔻 [ θ B ∘ F .func→ f ] ]
+              𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ func→ F ( ℂ [ g ∘ f ] ) ]
+            ≡ 𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ θ B ∘ func→ F f ] ]
           :distrib: = begin
-            𝔻 [ (ηθ C) ∘ F .func→ (ℂ [ g ∘ f ]) ]
+            𝔻 [ (ηθ C) ∘ func→ F (ℂ [ g ∘ f ]) ]
               ≡⟨ ηθNat (ℂ [ g ∘ f ]) ⟩
-            𝔻 [ H .func→ (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
+            𝔻 [ func→ H (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
               ≡⟨ cong (λ φ → 𝔻 [ φ ∘ ηθ A ]) (H.distrib) ⟩
-            𝔻 [ 𝔻 [ H .func→ g ∘ H .func→ f ] ∘ (ηθ A) ]
+            𝔻 [ 𝔻 [ func→ H g ∘ func→ H f ] ∘ (ηθ A) ]
               ≡⟨ sym assoc ⟩
-            𝔻 [ H .func→ g ∘ 𝔻 [ H .func→ f ∘ ηθ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ H .func→ g ∘ φ ]) assoc ⟩
-            𝔻 [ H .func→ g ∘ 𝔻 [ 𝔻 [ H .func→ f ∘ η A ] ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ H .func→ g ∘ φ ]) (cong (λ φ → 𝔻 [ φ ∘ θ A ]) (sym (ηNat f))) ⟩
-            𝔻 [ H .func→ g ∘ 𝔻 [ 𝔻 [ η B ∘ G .func→ f ] ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ H .func→ g ∘ φ ]) (sym assoc) ⟩
-            𝔻 [ H .func→ g ∘ 𝔻 [ η B ∘ 𝔻 [ G .func→ f ∘ θ A ] ] ] ≡⟨ assoc ⟩
-            𝔻 [ 𝔻 [ H .func→ g ∘ η B ] ∘ 𝔻 [ G .func→ f ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ φ ∘ 𝔻 [ G .func→ f ∘ θ A ] ]) (sym (ηNat g)) ⟩
-            𝔻 [ 𝔻 [ η C ∘ G .func→ g ] ∘ 𝔻 [ G .func→ f ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ 𝔻 [ η C ∘ G .func→ g ] ∘ φ ]) (sym (θNat f)) ⟩
-            𝔻 [ 𝔻 [ η C ∘ G .func→ g ] ∘ 𝔻 [ θ B ∘ F .func→ f ] ] ∎
+            𝔻 [ func→ H g ∘ 𝔻 [ func→ H f ∘ ηθ A ] ]
+              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) assoc ⟩
+            𝔻 [ func→ H g ∘ 𝔻 [ 𝔻 [ func→ H f ∘ η A ] ∘ θ A ] ]
+              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (cong (λ φ → 𝔻 [ φ ∘ θ A ]) (sym (ηNat f))) ⟩
+            𝔻 [ func→ H g ∘ 𝔻 [ 𝔻 [ η B ∘ func→ G f ] ∘ θ A ] ]
+              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (sym assoc) ⟩
+            𝔻 [ func→ H g ∘ 𝔻 [ η B ∘ 𝔻 [ func→ G f ∘ θ A ] ] ]
+              ≡⟨ assoc ⟩
+            𝔻 [ 𝔻 [ func→ H g ∘ η B ] ∘ 𝔻 [ func→ G f ∘ θ A ] ]
+              ≡⟨ cong (λ φ → 𝔻 [ φ ∘ 𝔻 [ func→ G f ∘ θ A ] ]) (sym (ηNat g)) ⟩
+            𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ func→ G f ∘ θ A ] ]
+              ≡⟨ cong (λ φ → 𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ φ ]) (sym (θNat f)) ⟩
+            𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ θ B ∘ func→ F f ] ] ∎
             where
-              open IsCategory (𝔻 .isCategory)
-              open module H = IsFunctor (H .isFunctor)
+              open Category 𝔻
+              module H = IsFunctor (H .isFunctor)
 
       :eval: : Functor ((:obj: ×p ℂ) .Product.obj) 𝔻
       :eval: = record
-        { func* = :func*:
-        ; func→ = λ {dom} {cod} → :func→: {dom} {cod}
+        { raw = record
+          { func* = :func*:
+          ; func→ = λ {dom} {cod} → :func→: {dom} {cod}
+          }
         ; isFunctor = record
           { ident = λ {o} → :ident: {o}
           ; distrib = λ {f u n k y} → :distrib: {f} {u} {n} {k} {y}
@@ -371,7 +380,7 @@ module _ (ℓ : Level) where
 
         postulate
           transpose : Functor 𝔸 :obj:
-          eq : Catℓ [ :eval: ∘ (parallelProduct transpose (𝟙 Catℓ {o = ℂ})) ] ≡ F
+          eq : Catℓ [ :eval: ∘ (parallelProduct transpose (𝟙 Catℓ {A = ℂ})) ] ≡ F
           -- eq : Catℓ [ :eval: ∘ (HasProducts._|×|_ hasProducts transpose (𝟙 Catℓ {o = ℂ})) ] ≡ F
           -- eq' : (Catℓ [ :eval: ∘
           --   (record { product = product } HasProducts.|×| transpose)
