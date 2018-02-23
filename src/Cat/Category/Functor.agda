@@ -24,7 +24,7 @@ module _ {ℓc ℓc' ℓd ℓd'}
       func→ : ∀ {A B} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ]
 
   record IsFunctor (F : RawFunctor) : 𝓤 where
-    open RawFunctor F
+    open RawFunctor F public
     field
       ident   : {c : Object ℂ} → func→ (𝟙 ℂ {c}) ≡ 𝟙 𝔻 {func* c}
       distrib : {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
@@ -35,16 +35,8 @@ module _ {ℓc ℓc' ℓd ℓd'}
       raw : RawFunctor
       {{isFunctor}} : IsFunctor raw
 
-    private
-      module R = RawFunctor raw
+    open IsFunctor isFunctor public
 
-    func* : Object ℂ → Object 𝔻
-    func* = R.func*
-
-    func→ : ∀ {A B} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ]
-    func→ = R.func→
-
-open IsFunctor
 open Functor
 
 module _
@@ -108,8 +100,8 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
       dist : (F→ ∘ G→) (A [ α1 ∘ α0 ]) ≡ C [ (F→ ∘ G→) α1 ∘ (F→ ∘ G→) α0 ]
       dist = begin
         (F→ ∘ G→) (A [ α1 ∘ α0 ])         ≡⟨ refl ⟩
-        F→ (G→ (A [ α1 ∘ α0 ]))           ≡⟨ cong F→ (G .isFunctor .distrib)⟩
-        F→ (B [ G→ α1 ∘ G→ α0 ])          ≡⟨ F .isFunctor .distrib ⟩
+        F→ (G→ (A [ α1 ∘ α0 ]))           ≡⟨ cong F→ (distrib G) ⟩
+        F→ (B [ G→ α1 ∘ G→ α0 ])          ≡⟨ distrib F ⟩
         C [ (F→ ∘ G→) α1 ∘ (F→ ∘ G→) α0 ] ∎
 
     _∘fr_ : RawFunctor A C
@@ -120,8 +112,8 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
       isFunctor' = record
         { ident = begin
           (F→ ∘ G→) (𝟙 A) ≡⟨ refl ⟩
-          F→ (G→ (𝟙 A))   ≡⟨ cong F→ (G .isFunctor .ident)⟩
-          F→ (𝟙 B)        ≡⟨ F .isFunctor .ident ⟩
+          F→ (G→ (𝟙 A))   ≡⟨ cong F→ (ident G)⟩
+          F→ (𝟙 B)        ≡⟨ ident F ⟩
           𝟙 C             ∎
         ; distrib = dist
         }
