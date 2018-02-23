@@ -102,9 +102,9 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   open Univalence ℂ public
   field
     isAssociative : IsAssociative
-    isIdentity : IsIdentity 𝟙
+    isIdentity    : IsIdentity 𝟙
     arrowsAreSets : ArrowsAreSets
-    univalent : Univalent isIdentity
+    univalent     : Univalent isIdentity
 
 -- `IsCategory` is a mere proposition.
 module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
