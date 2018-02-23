@@ -52,6 +52,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat
   open import Cat.Category.Exponential
   open Functor
   𝓢 = Sets ℓ
+  open Fun (Opposite ℂ) 𝓢
   private
     Catℓ : Category _ _
     Catℓ = record { raw = RawCat ℓ ℓ ; isCategory = unprovable}
@@ -80,7 +81,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat
           eq : (λ C x → ℂ [ ℂ.𝟙 ∘ x ]) ≡ identityTrans (prshf c)
           eq = funExt λ A → funExt λ B → proj₂ ℂ.isIdentity
 
-  yoneda : Functor ℂ (Fun {ℂ = Opposite ℂ} {𝔻 = 𝓢})
+  yoneda : Functor ℂ Fun
   yoneda = record
     { raw = record
       { func* = prshf
