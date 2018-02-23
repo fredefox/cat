@@ -41,82 +41,73 @@ module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : Category.Object �
   iso-is-epi-mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
   iso-is-epi-mono iso = iso-is-epi iso , iso-is-mono iso
 
-{-
-epi-mono-is-not-iso : ∀ {ℓ ℓ'} → ¬ ((ℂ : Category {ℓ} {ℓ'}) {A B X : Object ℂ} (f : Arrow ℂ A B ) → Epimorphism {ℂ = ℂ} {X = X} f → Monomorphism {ℂ = ℂ} {X = X} f → Isomorphism {ℂ = ℂ} f)
-epi-mono-is-not-iso f =
-  let k = f {!!} {!!} {!!} {!!}
-  in {!!}
--}
+-- TODO: We want to avoid defining the yoneda embedding going through the
+-- category of categories (since it doesn't exist).
+open import Cat.Categories.Cat using (RawCat)
 
-open import Cat.Category
-open Category
-open Functor
+module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat ℓ ℓ)) where
+  open import Cat.Categories.Fun
+  open import Cat.Categories.Sets
+  module Cat = Cat.Categories.Cat
+  open import Cat.Category.Exponential
+  open Functor
+  𝓢 = Sets ℓ
+  private
+    Catℓ : Category _ _
+    Catℓ = record { raw = RawCat ℓ ℓ ; isCategory = unprovable}
+    prshf = presheaf {ℂ = ℂ}
+    module ℂ = Category ℂ
 
--- module _ {ℓ : Level} {ℂ : Category ℓ ℓ}
---   {isSObj : isSet (ℂ .Object)}
---   {isz2 : ∀ {ℓ} → {A B : Set ℓ} → isSet (Sets [ A , B ])} where
---   -- open import Cat.Categories.Cat using (Cat)
---   open import Cat.Categories.Fun
---   open import Cat.Categories.Sets
---   -- module Cat = Cat.Categories.Cat
---   open import Cat.Category.Exponential
---   private
---     Catℓ = Cat ℓ ℓ
---     prshf = presheaf {ℂ = ℂ}
---     module ℂ = IsCategory (ℂ .isCategory)
+    _⇑_ : (A B : Category.Object Catℓ) → Category.Object Catℓ
+    A ⇑ B = (exponent A B) .obj
+      where
+        open HasExponentials (Cat.hasExponentials ℓ unprovable)
 
---     -- Exp : Set (lsuc (lsuc ℓ))
---     -- Exp = Exponential (Cat (lsuc ℓ) ℓ)
---     --   Sets (Opposite ℂ)
+    module _ {A B : ℂ.Object} (f : ℂ [ A , B ]) where
+      :func→: : NaturalTransformation (prshf A) (prshf B)
+      :func→: = (λ C x → ℂ [ f ∘ x ]) , λ f₁ → funExt λ _ → ℂ.assoc
 
---     _⇑_ : (A B : Catℓ .Object) → Catℓ .Object
---     A ⇑ B = (exponent A B) .obj
---       where
---         open HasExponentials (Cat.hasExponentials ℓ)
+    module _ {c : Category.Object ℂ} where
+      eqTrans : (λ _ → Transformation (prshf c) (prshf c))
+        [ (λ _ x → ℂ [ ℂ.𝟙 ∘ x ]) ≡ identityTrans (prshf c) ]
+      eqTrans = funExt λ x → funExt λ x → ℂ.ident .proj₂
 
---     module _ {A B : ℂ .Object} (f : ℂ .Arrow A B) where
---       :func→: : NaturalTransformation (prshf A) (prshf B)
---       :func→: = (λ C x → ℂ [ f ∘ x ]) , λ f₁ → funExt λ _ → ℂ.assoc
+      eqNat : (λ i → Natural (prshf c) (prshf c) (eqTrans i))
+        [(λ _ → funExt (λ _ → ℂ.assoc)) ≡ identityNatural (prshf c)]
+      eqNat = λ i {A} {B} f →
+        let
+         open Category 𝓢
+         lemm : (𝓢 [ eqTrans i B ∘ func→ (prshf c) f ]) ≡
+           (𝓢 [ func→ (prshf c) f ∘ eqTrans i A ])
+         lemm = {!!}
+         lem : (λ _ → 𝓢 [ Functor.func* (prshf c) A , func* (prshf c) B ])
+                [ 𝓢 [ eqTrans i B ∘ func→ (prshf c) f ]
+                ≡ 𝓢 [ func→ (prshf c) f ∘ eqTrans i A ] ]
+         lem
+           = arrowIsSet _ _ lemm _ i
+            -- (Sets [ eqTrans i B ∘ prshf c .func→ f ])
+            -- (Sets [ prshf c .func→ f ∘ eqTrans i A ])
+            -- lemm
+            -- _ i
+        in
+          lem
+      -- eqNat = λ {A} {B} i ℂ[B,A] i' ℂ[A,c] →
+      --   let
+      --     k : ℂ [ {!!} , {!!} ]
+      --     k = ℂ[A,c]
+      --   in {!ℂ [ ? ∘ ? ]!}
 
---     module _ {c : ℂ .Object} where
---       eqTrans : (λ _ → Transformation (prshf c) (prshf c))
---         [ (λ _ x → ℂ [ ℂ .𝟙 ∘ x ]) ≡ identityTrans (prshf c) ]
---       eqTrans = funExt λ x → funExt λ x → ℂ.ident .proj₂
+      :ident: : (:func→: (ℂ.𝟙 {c})) ≡ (Category.𝟙 Fun {A = prshf c})
+      :ident: = Σ≡ eqTrans eqNat
 
---       eqNat : (λ i → Natural (prshf c) (prshf c) (eqTrans i))
---         [(λ _ → funExt (λ _ → ℂ.assoc)) ≡ identityNatural (prshf c)]
---       eqNat = λ i {A} {B} f →
---         let
---          open IsCategory (Sets .isCategory)
---          lemm : (Sets [ eqTrans i B ∘ prshf c .func→ f ]) ≡
---            (Sets [ prshf c .func→ f ∘ eqTrans i A ])
---          lemm = {!!}
---          lem : (λ _ → Sets [ Functor.func* (prshf c) A , prshf c .func* B ])
---                 [ Sets [ eqTrans i B ∘ prshf c .func→ f ]
---                 ≡ Sets [ prshf c .func→ f ∘ eqTrans i A ] ]
---          lem
---           = isz2 _ _ lemm _ i
---             -- (Sets [ eqTrans i B ∘ prshf c .func→ f ])
---             -- (Sets [ prshf c .func→ f ∘ eqTrans i A ])
---             -- lemm
---             -- _ i
---         in
---           lem
---       -- eqNat = λ {A} {B} i ℂ[B,A] i' ℂ[A,c] →
---       --   let
---       --     k : ℂ [ {!!} , {!!} ]
---       --     k = ℂ[A,c]
---       --   in {!ℂ [ ? ∘ ? ]!}
-
---       :ident: : (:func→: (ℂ .𝟙 {c})) ≡ (Fun .𝟙 {o = prshf c})
---       :ident: = Σ≡ eqTrans eqNat
-
---   yoneda : Functor ℂ (Fun {ℂ = Opposite ℂ} {𝔻 = Sets {ℓ}})
---   yoneda = record
---     { func* = prshf
---     ; func→ = :func→:
---     ; isFunctor = record
---       { ident = :ident:
---       ; distrib = {!!}
---       }
---     }
+  yoneda : Functor ℂ (Fun {ℂ = Opposite ℂ} {𝔻 = 𝓢})
+  yoneda = record
+    { raw = record
+      { func* = prshf
+      ; func→ = :func→:
+      }
+    ; isFunctor = record
+      { ident = :ident:
+      ; distrib = {!!}
+      }
+    }
