@@ -40,12 +40,29 @@ module _ (ℓa ℓb : Level) where
     isIdentity : IsIdentity λ { {A} → 𝟙 {A} }
     isIdentity = (Σ≡ refl refl) , Σ≡ refl refl
 
+    open import Cubical.NType.Properties
+    open import Cubical.Sigma
     instance
       isCategory : IsCategory RawFam
       isCategory = record
         { isAssociative = λ {A} {B} {C} {D} {f} {g} {h} → isAssociative {A} {B} {C} {D} {f} {g} {h}
         ; isIdentity = λ {A} {B} {f} → isIdentity {A} {B} {f = f}
-        ; arrowsAreSets = {!!}
+        ; arrowsAreSets = λ {
+          {((A , hA) , famA)}
+          {((B , hB) , famB)}
+            → setSig
+              {sA = setPi λ _ → hB}
+              {sB = λ f →
+                let
+                  helpr : isSet ((a : A) → proj₁ (famA a) → proj₁ (famB (f a)))
+                  helpr = setPi λ a → setPi λ _ → proj₂ (famB (f a))
+                  -- It's almost like above, but where the first argument is
+                  -- implicit.
+                  res : isSet ({a : A} → proj₁ (famA a) → proj₁ (famB (f a)))
+                  res = {!!}
+                in res
+              }
+          }
         ; univalent = {!!}
         }
 
