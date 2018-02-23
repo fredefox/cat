@@ -19,7 +19,7 @@ module _ (ℓ : Level) where
     open import Cubical.Universe
 
     SetsRaw : RawCategory (lsuc ℓ) ℓ
-    Object SetsRaw = Cubical.Universe.0-Set
+    Object SetsRaw = hSet
     Arrow SetsRaw (T , _) (U , _) = T → U
     𝟙 SetsRaw = Function.id
     _∘_ SetsRaw = Function._∘′_
