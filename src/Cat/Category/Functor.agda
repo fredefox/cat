@@ -7,7 +7,7 @@ open import Function
 
 open import Cat.Category
 
-open Category hiding (_∘_ ; raw)
+open Category hiding (_∘_ ; raw ; IsIdentity)
 
 module _ {ℓc ℓc' ℓd ℓd'}
     (ℂ : Category ℓc ℓc')
@@ -23,12 +23,18 @@ module _ {ℓc ℓc' ℓd ℓd'}
       func* : Object ℂ → Object 𝔻
       func→ : ∀ {A B} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ]
 
+    IsIdentity : Set _
+    IsIdentity = {A : Object ℂ} → func→ (𝟙 ℂ {A}) ≡ 𝟙 𝔻 {func* A}
+
+    IsDistributive : Set _
+    IsDistributive = {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
+      → func→ (ℂ [ g ∘ f ]) ≡ 𝔻 [ func→ g ∘ func→ f ]
+
   record IsFunctor (F : RawFunctor) : 𝓤 where
     open RawFunctor F public
     field
-      ident   : {c : Object ℂ} → func→ (𝟙 ℂ {c}) ≡ 𝟙 𝔻 {func* c}
-      distrib : {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
-        → func→ (ℂ [ g ∘ f ]) ≡ 𝔻 [ func→ g ∘ func→ f ]
+      ident   : IsIdentity
+      distrib : IsDistributive
 
   record Functor : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
     field

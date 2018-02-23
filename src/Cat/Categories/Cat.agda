@@ -16,7 +16,7 @@ open import Cat.Category.Exponential
 open import Cat.Equality
 open Equality.Data.Product
 
-open Functor
+open Functor using (func→ ; func*)
 open Category using (Object ; 𝟙)
 
 -- The category of categories
