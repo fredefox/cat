@@ -50,7 +50,7 @@ open Functor
 module _
     {ℓa ℓb : Level}
     {ℂ 𝔻 : Category ℓa ℓb}
-    {F : RawFunctor ℂ 𝔻}
+    (F : RawFunctor ℂ 𝔻)
     where
   private
     module 𝔻 = IsCategory (isCategory 𝔻)
@@ -77,7 +77,7 @@ module _
 
   IsFunctorIsProp' : IsProp' λ i → IsFunctor _ _ (F i)
   IsFunctorIsProp' isF0 isF1 = lemPropF {B = IsFunctor ℂ 𝔻}
-    (\ F → propIsFunctor {F = F}) (\ i → F i)
+    (\ F → propIsFunctor F) (\ i → F i)
     where
       open import Cubical.NType.Properties using (lemPropF)
 
