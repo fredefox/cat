@@ -24,67 +24,15 @@ open Category using (Object ; 𝟙)
 module _ (ℓ ℓ' : Level) where
   private
     module _ {𝔸 𝔹 ℂ 𝔻 : Category ℓ ℓ'} {F : Functor 𝔸 𝔹} {G : Functor 𝔹 ℂ} {H : Functor ℂ 𝔻} where
-      private
-        eq* : func* (H ∘f (G ∘f F)) ≡ func* ((H ∘f G) ∘f F)
-        eq* = refl
-        eq→ : PathP
-          (λ i → {A B : Object 𝔸} → 𝔸 [ A , B ] → 𝔻 [ eq* i A , eq* i B ])
-          (func→ (H ∘f (G ∘f F))) (func→ ((H ∘f G) ∘f F))
-        eq→ = refl
-        postulate
-          eqI
-            : (λ i → ∀ {A : Object 𝔸} → eq→ i (𝟙 𝔸 {A}) ≡ 𝟙 𝔻 {eq* i A})
-            [ (H ∘f (G ∘f F)) .isFunctor .ident
-            ≡ ((H ∘f G) ∘f F) .isFunctor .ident
-            ]
-          eqD
-            : (λ i → ∀ {A B C} {f : 𝔸 [ A , B ]} {g : 𝔸 [ B , C ]}
-              → eq→ i (𝔸 [ g ∘ f ]) ≡ 𝔻 [ eq→ i g ∘ eq→ i f ])
-            [ (H ∘f (G ∘f F)) .isFunctor .distrib
-            ≡ ((H ∘f G) ∘f F) .isFunctor .distrib
-            ]
-
       assc : H ∘f (G ∘f F) ≡ (H ∘f G) ∘f F
-      assc = Functor≡ eq* eq→
+      assc = Functor≡ refl refl
 
     module _ {ℂ 𝔻 : Category ℓ ℓ'} {F : Functor ℂ 𝔻} where
-      module _ where
-        private
-          eq* : (func* F) ∘ (func* (identity {C = ℂ})) ≡ func* F
-          eq* = refl
-          -- lemmm : func→ {C = A} {D = B} (f ∘f identity) ≡ func→ f
-          eq→ : PathP
-            (λ i →
-            {x y : Object ℂ} → ℂ [ x , y ] → 𝔻 [ func* F x , func* F y ])
-            (func→ (F ∘f identity)) (func→ F)
-          eq→ = refl
-          postulate
-            eqI-r
-              : (λ i → {c : Object ℂ} → (λ _ → 𝔻 [ func* F c , func* F c ])
-                [ func→ F (𝟙 ℂ) ≡ 𝟙 𝔻 ])
-              [(F ∘f identity) .isFunctor .ident ≡ F .isFunctor .ident ]
-            eqD-r : PathP
-                        (λ i →
-                        {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]} →
-                        eq→ i (ℂ [ g ∘ f ]) ≡ 𝔻 [ eq→ i g ∘ eq→ i f ])
-                        ((F ∘f identity) .isFunctor .distrib) (F .isFunctor .distrib)
-        ident-r : F ∘f identity ≡ F
-        ident-r = Functor≡ eq* eq→
-      module _ where
-        private
-          postulate
-            eq* : func* (identity ∘f F) ≡ func* F
-            eq→ : PathP
-              (λ i → {x y : Object ℂ} → ℂ [ x , y ] → 𝔻 [ eq* i x , eq* i y ])
-              (func→ (identity ∘f F)) (func→ F)
-            eqI : (λ i → ∀ {A : Object ℂ} → eq→ i (𝟙 ℂ {A}) ≡ 𝟙 𝔻 {eq* i A})
-                  [ ((identity ∘f F) .isFunctor .ident) ≡ (F .isFunctor .ident) ]
-            eqD : PathP (λ i → {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
-                 → eq→ i (ℂ [ g ∘ f ]) ≡ 𝔻 [ eq→ i g ∘ eq→ i f ])
-                 ((identity ∘f F) .isFunctor .distrib) (F .isFunctor .distrib)
-                 -- (λ z → eq* i z) (eq→ i)
-        ident-l : identity ∘f F ≡ F
-        ident-l = Functor≡ eq* eq→
+      ident-r : F ∘f identity ≡ F
+      ident-r = Functor≡ refl refl
+
+      ident-l : identity ∘f F ≡ F
+      ident-l = Functor≡ refl refl
 
   RawCat : RawCategory (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
   RawCat =
@@ -93,18 +41,13 @@ module _ (ℓ ℓ' : Level) where
       ; Arrow = Functor
       ; 𝟙 = identity
       ; _∘_ = _∘f_
-      -- What gives here? Why can I not name the variables directly?
-      -- ; isCategory = record
-      --   { assoc = λ {_ _ _ _ F G H} → assc {F = F} {G = G} {H = H}
-      --   ; ident = ident-r , ident-l
-      --   }
       }
   private
-    open RawCategory
-    assoc : IsAssociative RawCat
+    open RawCategory RawCat
+    assoc : IsAssociative
     assoc {f = F} {G} {H} = assc {F = F} {G = G} {H = H}
     -- TODO: Rename `ident'` to `ident` after changing how names are exposed in Functor.
-    ident' : IsIdentity RawCat identity
+    ident' : IsIdentity identity
     ident' = ident-r , ident-l
     -- NB! `ArrowsAreSets RawCat` is *not* provable. The type of functors,
     -- however, form a groupoid! Therefore there is no (1-)category of
