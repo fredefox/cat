@@ -25,10 +25,10 @@ module _ (ℓ : Level) where
     _∘_ SetsRaw = Function._∘′_
 
     SetsIsCategory : IsCategory SetsRaw
-    assoc SetsIsCategory = refl
-    proj₁ (ident SetsIsCategory) = funExt λ _ → refl
-    proj₂ (ident SetsIsCategory) = funExt λ _ → refl
-    arrowIsSet SetsIsCategory {B = (_ , s)} = setPi λ _ → s
+    isAssociative SetsIsCategory = refl
+    proj₁ (isIdentity SetsIsCategory) = funExt λ _ → refl
+    proj₂ (isIdentity SetsIsCategory) = funExt λ _ → refl
+    arrowsAreSets SetsIsCategory {B = (_ , s)} = setPi λ _ → s
     univalent SetsIsCategory = {!!}
 
   𝓢𝓮𝓽 Sets : Category (lsuc ℓ) ℓ
@@ -94,12 +94,12 @@ module _ {ℓa ℓb : Level} where
   representable : {ℂ : Category ℓa ℓb} → Category.Object ℂ → Representable ℂ
   representable {ℂ = ℂ} A = record
     { raw = record
-      { func* = λ B → ℂ [ A , B ] , arrowIsSet
+      { func* = λ B → ℂ [ A , B ] , arrowsAreSets
       ; func→ = ℂ [_∘_]
       }
     ; isFunctor = record
-      { ident = funExt λ _ → proj₂ ident
-      ; distrib = funExt λ x → sym assoc
+      { isIdentity = funExt λ _ → proj₂ isIdentity
+      ; isDistributive = funExt λ x → sym isAssociative
       }
     }
     where
@@ -109,12 +109,12 @@ module _ {ℓa ℓb : Level} where
   presheaf : {ℂ : Category ℓa ℓb} → Category.Object (Opposite ℂ) → Presheaf ℂ
   presheaf {ℂ = ℂ} B = record
     { raw = record
-      { func* = λ A → ℂ [ A , B ] , arrowIsSet
+      { func* = λ A → ℂ [ A , B ] , arrowsAreSets
       ; func→ = λ f g → ℂ [ g ∘ f ]
     }
     ; isFunctor = record
-      { ident = funExt λ x → proj₁ ident
-      ; distrib = funExt λ x → assoc
+      { isIdentity = funExt λ x → proj₁ isIdentity
+      ; isDistributive = funExt λ x → isAssociative
       }
     }
     where

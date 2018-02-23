@@ -149,10 +149,10 @@ module _ {A B C D : Set} {S : Subset (A × B)} {R : Subset (B × C)} {Q : Subset
       ≃ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
     equi = fwd Cubical.FromStdLib., isequiv
 
-    -- assocc : Q + (R + S) ≡ (Q + R) + S
-  is-assoc : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
+    -- isAssociativec : Q + (R + S) ≡ (Q + R) + S
+  is-isAssociative : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
          ≡ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
-  is-assoc = equivToPath equi
+  is-isAssociative = equivToPath equi
 
 RawRel : RawCategory (lsuc lzero) (lsuc lzero)
 RawRel = record
@@ -164,8 +164,8 @@ RawRel = record
 
 RawIsCategoryRel : IsCategory RawRel
 RawIsCategoryRel = record
-  { assoc = funExt is-assoc
-  ; ident = funExt ident-l , funExt ident-r
-  ; arrowIsSet = {!!}
+  { isAssociative = funExt is-isAssociative
+  ; isIdentity = funExt ident-l , funExt ident-r
+  ; arrowsAreSets = {!!}
   ; univalent = {!!}
   }

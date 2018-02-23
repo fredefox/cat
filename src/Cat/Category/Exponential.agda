@@ -35,5 +35,6 @@ module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{hasProducts : HasProducts ℂ}} 
       transpose A f = proj₁ (isExponential A f)
 
 record HasExponentials {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {{_ : HasProducts ℂ}} : Set (ℓ ⊔ ℓ') where
+  open Exponential public
   field
     exponent : (A B : Object ℂ) → Exponential ℂ A B

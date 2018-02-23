@@ -49,6 +49,9 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   IsIdentity id = {A B : Object} {f : Arrow A B}
     → f ∘ id ≡ f × id ∘ f ≡ f
 
+  ArrowsAreSets : Set (ℓa ⊔ ℓb)
+  ArrowsAreSets = ∀ {A B : Object} → isSet (Arrow A B)
+
   IsInverseOf : ∀ {A B} → (Arrow A B) → (Arrow B A) → Set ℓb
   IsInverseOf = λ f g → g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙
 
@@ -80,9 +83,9 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 -- Univalence is indexed by a raw category as well as an identity proof.
 module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   open RawCategory ℂ
-  module _ (ident : IsIdentity 𝟙) where
+  module _ (isIdentity : IsIdentity 𝟙) where
     idIso : (A : Object) → A ≅ A
-    idIso A = 𝟙 , (𝟙 , ident)
+    idIso A = 𝟙 , (𝟙 , isIdentity)
 
     -- Lemma 9.1.4 in [HoTT]
     id-to-iso : (A B : Object) → A ≡ B → A ≅ B
@@ -98,10 +101,10 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   open RawCategory ℂ
   open Univalence ℂ public
   field
-    assoc : IsAssociative
-    ident : IsIdentity 𝟙
-    arrowIsSet : ∀ {A B : Object} → isSet (Arrow A B)
-    univalent : Univalent ident
+    isAssociative : IsAssociative
+    isIdentity    : IsIdentity 𝟙
+    arrowsAreSets : ArrowsAreSets
+    univalent     : Univalent isIdentity
 
 -- `IsCategory` is a mere proposition.
 module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
@@ -112,12 +115,12 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
     open import Cubical.NType.Properties
 
     propIsAssociative : isProp IsAssociative
-    propIsAssociative x y i = arrowIsSet _ _ x y i
+    propIsAssociative x y i = arrowsAreSets _ _ x y i
 
     propIsIdentity : ∀ {f : ∀ {A} → Arrow A A} → isProp (IsIdentity f)
     propIsIdentity a b i
-      = arrowIsSet _ _ (fst a) (fst b) i
-      , arrowIsSet _ _ (snd a) (snd b) i
+      = arrowsAreSets _ _ (fst a) (fst b) i
+      , arrowsAreSets _ _ (snd a) (snd b) i
 
     propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
     propArrowIsSet a b i = isSetIsProp a b i
@@ -126,9 +129,9 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
     propIsInverseOf x y = λ i →
       let
         h : fst x ≡ fst y
-        h = arrowIsSet _ _ (fst x) (fst y)
+        h = arrowsAreSets _ _ (fst x) (fst y)
         hh : snd x ≡ snd y
-        hh = arrowIsSet _ _ (snd x) (snd y)
+        hh = arrowsAreSets _ _ (snd x) (snd y)
       in h i , hh i
 
     module _ {A B : Object} {f : Arrow A B} where
@@ -139,14 +142,14 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
             open Cubical.NType.Properties
             geq : g ≡ g'
             geq = begin
-              g            ≡⟨ sym (fst ident) ⟩
+              g            ≡⟨ sym (fst isIdentity) ⟩
               g ∘ 𝟙        ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
-              g ∘ (f ∘ g') ≡⟨ assoc ⟩
+              g ∘ (f ∘ g') ≡⟨ isAssociative ⟩
               (g ∘ f) ∘ g' ≡⟨ cong (λ φ → φ ∘ g') η ⟩
-              𝟙 ∘ g'       ≡⟨ snd ident ⟩
+              𝟙 ∘ g'       ≡⟨ snd isIdentity ⟩
               g'           ∎
 
-    propUnivalent : isProp (Univalent ident)
+    propUnivalent : isProp (Univalent isIdentity)
     propUnivalent a b i = propPi (λ iso → propHasLevel ⟨-2⟩) a b i
 
   private
@@ -159,23 +162,28 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
       -- projections of `IsCategory` - I've arbitrarily chosed to use this
       -- result from `x : IsCategory C`. I don't know which (if any) possibly
       -- adverse effects this may have.
-      ident : (λ _ → IsIdentity 𝟙) [ X.ident ≡ Y.ident ]
-      ident = propIsIdentity x X.ident Y.ident
+      isIdentity : (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ Y.isIdentity ]
+      isIdentity = propIsIdentity x X.isIdentity Y.isIdentity
       done : x ≡ y
-      U : ∀ {a : IsIdentity 𝟙} → (λ _ → IsIdentity 𝟙) [ X.ident ≡ a ] → (b : Univalent a) → Set _
-      U eqwal bbb = (λ i → Univalent (eqwal i)) [ X.univalent ≡ bbb ]
+      U : ∀ {a : IsIdentity 𝟙}
+        → (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ a ]
+        → (b : Univalent a)
+        → Set _
+      U eqwal bbb =
+        (λ i → Univalent (eqwal i))
+        [ X.univalent ≡ bbb ]
       P : (y : IsIdentity 𝟙)
-        → (λ _ → IsIdentity 𝟙) [ X.ident ≡ y ] → Set _
+        → (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ y ] → Set _
       P y eq = ∀ (b' : Univalent y) → U eq b'
-      helper : ∀ (b' : Univalent X.ident)
-        → (λ _ → Univalent X.ident) [ X.univalent ≡ b' ]
+      helper : ∀ (b' : Univalent X.isIdentity)
+        → (λ _ → Univalent X.isIdentity) [ X.univalent ≡ b' ]
       helper univ = propUnivalent x X.univalent univ
-      foo = pathJ P helper Y.ident ident
-      eqUni : U ident Y.univalent
+      foo = pathJ P helper Y.isIdentity isIdentity
+      eqUni : U isIdentity Y.univalent
       eqUni = foo Y.univalent
-      IC.assoc      (done i) = propIsAssociative x X.assoc Y.assoc i
-      IC.ident      (done i) = ident i
-      IC.arrowIsSet (done i) = propArrowIsSet x X.arrowIsSet Y.arrowIsSet i
+      IC.isAssociative      (done i) = propIsAssociative x X.isAssociative Y.isAssociative i
+      IC.isIdentity      (done i) = isIdentity i
+      IC.arrowsAreSets (done i) = propArrowIsSet x X.arrowsAreSets Y.arrowsAreSets i
       IC.univalent  (done i) = eqUni i
 
   propIsCategory : isProp (IsCategory C)
@@ -208,9 +216,9 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     RawCategory._∘_ OpRaw = Function.flip _∘_
 
     OpIsCategory : IsCategory OpRaw
-    IsCategory.assoc OpIsCategory = sym assoc
-    IsCategory.ident OpIsCategory = swap ident
-    IsCategory.arrowIsSet OpIsCategory = arrowIsSet
+    IsCategory.isAssociative OpIsCategory = sym isAssociative
+    IsCategory.isIdentity OpIsCategory = swap isIdentity
+    IsCategory.arrowsAreSets OpIsCategory = arrowsAreSets
     IsCategory.univalent OpIsCategory = {!!}
 
   Opposite : Category ℓa ℓb
@@ -234,9 +242,9 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     open IsCategory
     module IsCat = IsCategory (ℂ .isCategory)
     rawIsCat : (i : I) → IsCategory (rawOp i)
-    assoc (rawIsCat i) = IsCat.assoc
-    ident (rawIsCat i) = IsCat.ident
-    arrowIsSet (rawIsCat i) = IsCat.arrowIsSet
+    isAssociative (rawIsCat i) = IsCat.isAssociative
+    isIdentity (rawIsCat i) = IsCat.isIdentity
+    arrowsAreSets (rawIsCat i) = IsCat.arrowsAreSets
     univalent (rawIsCat i) = IsCat.univalent
 
   Opposite-is-involution : Opposite (Opposite ℂ) ≡ ℂ

@@ -7,7 +7,7 @@ open import Function
 
 open import Cat.Category
 
-open Category hiding (_∘_ ; raw)
+open Category hiding (_∘_ ; raw ; IsIdentity)
 
 module _ {ℓc ℓc' ℓd ℓd'}
     (ℂ : Category ℓc ℓc')
@@ -23,42 +23,40 @@ module _ {ℓc ℓc' ℓd ℓd'}
       func* : Object ℂ → Object 𝔻
       func→ : ∀ {A B} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ]
 
+    IsIdentity : Set _
+    IsIdentity = {A : Object ℂ} → func→ (𝟙 ℂ {A}) ≡ 𝟙 𝔻 {func* A}
+
+    IsDistributive : Set _
+    IsDistributive = {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
+      → func→ (ℂ [ g ∘ f ]) ≡ 𝔻 [ func→ g ∘ func→ f ]
+
   record IsFunctor (F : RawFunctor) : 𝓤 where
-    open RawFunctor F
+    open RawFunctor F public
     field
-      ident   : {c : Object ℂ} → func→ (𝟙 ℂ {c}) ≡ 𝟙 𝔻 {func* c}
-      distrib : {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
-        → func→ (ℂ [ g ∘ f ]) ≡ 𝔻 [ func→ g ∘ func→ f ]
+      isIdentity : IsIdentity
+      isDistributive : IsDistributive
 
   record Functor : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
     field
       raw : RawFunctor
       {{isFunctor}} : IsFunctor raw
 
-    private
-      module R = RawFunctor raw
+    open IsFunctor isFunctor public
 
-    func* : Object ℂ → Object 𝔻
-    func* = R.func*
-
-    func→ : ∀ {A B} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ]
-    func→ = R.func→
-
-open IsFunctor
 open Functor
 
 module _
     {ℓa ℓb : Level}
     {ℂ 𝔻 : Category ℓa ℓb}
-    {F : RawFunctor ℂ 𝔻}
+    (F : RawFunctor ℂ 𝔻)
     where
   private
     module 𝔻 = IsCategory (isCategory 𝔻)
 
   propIsFunctor : isProp (IsFunctor _ _ F)
   propIsFunctor isF0 isF1 i = record
-    { ident = 𝔻.arrowIsSet _ _ isF0.ident isF1.ident i
-    ; distrib = 𝔻.arrowIsSet _ _ isF0.distrib isF1.distrib i
+    { isIdentity = 𝔻.arrowsAreSets _ _ isF0.isIdentity isF1.isIdentity i
+    ; isDistributive = 𝔻.arrowsAreSets _ _ isF0.isDistributive isF1.isDistributive i
     }
     where
       module isF0 = IsFunctor isF0
@@ -77,7 +75,7 @@ module _
 
   IsFunctorIsProp' : IsProp' λ i → IsFunctor _ _ (F i)
   IsFunctorIsProp' isF0 isF1 = lemPropF {B = IsFunctor ℂ 𝔻}
-    (\ F → propIsFunctor {F = F}) (\ i → F i)
+    (\ F → propIsFunctor F) (\ i → F i)
     where
       open import Cubical.NType.Properties using (lemPropF)
 
@@ -108,8 +106,8 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
       dist : (F→ ∘ G→) (A [ α1 ∘ α0 ]) ≡ C [ (F→ ∘ G→) α1 ∘ (F→ ∘ G→) α0 ]
       dist = begin
         (F→ ∘ G→) (A [ α1 ∘ α0 ])         ≡⟨ refl ⟩
-        F→ (G→ (A [ α1 ∘ α0 ]))           ≡⟨ cong F→ (G .isFunctor .distrib)⟩
-        F→ (B [ G→ α1 ∘ G→ α0 ])          ≡⟨ F .isFunctor .distrib ⟩
+        F→ (G→ (A [ α1 ∘ α0 ]))           ≡⟨ cong F→ (isDistributive G) ⟩
+        F→ (B [ G→ α1 ∘ G→ α0 ])          ≡⟨ isDistributive F ⟩
         C [ (F→ ∘ G→) α1 ∘ (F→ ∘ G→) α0 ] ∎
 
     _∘fr_ : RawFunctor A C
@@ -118,12 +116,12 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
     instance
       isFunctor' : IsFunctor A C _∘fr_
       isFunctor' = record
-        { ident = begin
+        { isIdentity = begin
           (F→ ∘ G→) (𝟙 A) ≡⟨ refl ⟩
-          F→ (G→ (𝟙 A))   ≡⟨ cong F→ (G .isFunctor .ident)⟩
-          F→ (𝟙 B)        ≡⟨ F .isFunctor .ident ⟩
+          F→ (G→ (𝟙 A))   ≡⟨ cong F→ (isIdentity G)⟩
+          F→ (𝟙 B)        ≡⟨ isIdentity F ⟩
           𝟙 C             ∎
-        ; distrib = dist
+        ; isDistributive = dist
         }
 
   _∘f_ : Functor A C
@@ -137,7 +135,7 @@ identity = record
     ; func→ = λ x → x
     }
   ; isFunctor = record
-    { ident = refl
-    ; distrib = refl
+    { isIdentity = refl
+    ; isDistributive = refl
     }
   }

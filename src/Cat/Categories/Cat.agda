@@ -16,107 +16,58 @@ open import Cat.Category.Exponential
 open import Cat.Equality
 open Equality.Data.Product
 
-open Functor
-open IsFunctor
-open Category hiding (_∘_)
+open Functor using (func→ ; func*)
+open Category using (Object ; 𝟙)
 
 -- The category of categories
 module _ (ℓ ℓ' : Level) where
   private
     module _ {𝔸 𝔹 ℂ 𝔻 : Category ℓ ℓ'} {F : Functor 𝔸 𝔹} {G : Functor 𝔹 ℂ} {H : Functor ℂ 𝔻} where
-      private
-        eq* : func* (H ∘f (G ∘f F)) ≡ func* ((H ∘f G) ∘f F)
-        eq* = refl
-        eq→ : PathP
-          (λ i → {A B : Object 𝔸} → 𝔸 [ A , B ] → 𝔻 [ eq* i A , eq* i B ])
-          (func→ (H ∘f (G ∘f F))) (func→ ((H ∘f G) ∘f F))
-        eq→ = refl
-        postulate
-          eqI
-            : (λ i → ∀ {A : Object 𝔸} → eq→ i (𝟙 𝔸 {A}) ≡ 𝟙 𝔻 {eq* i A})
-            [ (H ∘f (G ∘f F)) .isFunctor .ident
-            ≡ ((H ∘f G) ∘f F) .isFunctor .ident
-            ]
-          eqD
-            : (λ i → ∀ {A B C} {f : 𝔸 [ A , B ]} {g : 𝔸 [ B , C ]}
-              → eq→ i (𝔸 [ g ∘ f ]) ≡ 𝔻 [ eq→ i g ∘ eq→ i f ])
-            [ (H ∘f (G ∘f F)) .isFunctor .distrib
-            ≡ ((H ∘f G) ∘f F) .isFunctor .distrib
-            ]
-
       assc : H ∘f (G ∘f F) ≡ (H ∘f G) ∘f F
-      assc = Functor≡ eq* eq→ (IsFunctor≡ eqI eqD)
+      assc = Functor≡ refl refl
 
     module _ {ℂ 𝔻 : Category ℓ ℓ'} {F : Functor ℂ 𝔻} where
-      module _ where
-        private
-          eq* : (func* F) ∘ (func* (identity {C = ℂ})) ≡ func* F
-          eq* = refl
-          -- lemmm : func→ {C = A} {D = B} (f ∘f identity) ≡ func→ f
-          eq→ : PathP
-            (λ i →
-            {x y : Object ℂ} → Arrow ℂ x y → Arrow 𝔻 (func* F x) (func* F y))
-            (func→ (F ∘f identity)) (func→ F)
-          eq→ = refl
-          postulate
-            eqI-r
-              : (λ i → {c : Object ℂ} → (λ _ → 𝔻 [ func* F c , func* F c ])
-                [ func→ F (𝟙 ℂ) ≡ 𝟙 𝔻 ])
-              [(F ∘f identity) .isFunctor .ident ≡ F .isFunctor .ident ]
-            eqD-r : PathP
-                        (λ i →
-                        {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]} →
-                        eq→ i (ℂ [ g ∘ f ]) ≡ 𝔻 [ eq→ i g ∘ eq→ i f ])
-                        ((F ∘f identity) .isFunctor .distrib) (F .isFunctor .distrib)
-        ident-r : F ∘f identity ≡ F
-        ident-r = Functor≡ eq* eq→ (IsFunctor≡ eqI-r eqD-r)
-      module _ where
-        private
-          postulate
-            eq* : (identity ∘f F) .func* ≡ F .func*
-            eq→ : PathP
-              (λ i → {x y : Object ℂ} → ℂ [ x , y ] → 𝔻 [ eq* i x , eq* i y ])
-              ((identity ∘f F) .func→) (F .func→)
-            eqI : (λ i → ∀ {A : Object ℂ} → eq→ i (𝟙 ℂ {A}) ≡ 𝟙 𝔻 {eq* i A})
-                  [ ((identity ∘f F) .isFunctor .ident) ≡ (F .isFunctor .ident) ]
-            eqD : PathP (λ i → {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
-                 → eq→ i (ℂ [ g ∘ f ]) ≡ 𝔻 [ eq→ i g ∘ eq→ i f ])
-                 ((identity ∘f F) .isFunctor .distrib) (F .isFunctor .distrib)
-                 -- (λ z → eq* i z) (eq→ i)
-        ident-l : identity ∘f F ≡ F
-        ident-l = Functor≡ eq* eq→ λ i → record { ident = eqI i ; distrib = eqD i }
+      ident-r : F ∘f identity ≡ F
+      ident-r = Functor≡ refl refl
 
-    RawCat : RawCategory (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
-    RawCat =
-      record
-        { Object = Category ℓ ℓ'
-        ; Arrow = Functor
-        ; 𝟙 = identity
-        ; _∘_ = _∘f_
-        -- What gives here? Why can I not name the variables directly?
-        -- ; isCategory = record
-        --   { assoc = λ {_ _ _ _ F G H} → assc {F = F} {G = G} {H = H}
-        --   ; ident = ident-r , ident-l
-        --   }
-        }
-    open IsCategory
-    instance
-      :isCategory: : IsCategory RawCat
-      assoc :isCategory: {f = F} {G} {H} = assc {F = F} {G = G} {H = H}
-      ident :isCategory: = ident-r , ident-l
-      arrow-is-set :isCategory: = {!!}
-      univalent :isCategory: = {!!}
+      ident-l : identity ∘f F ≡ F
+      ident-l = Functor≡ refl refl
 
-  Cat : Category (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
-  raw Cat = RawCat
+  RawCat : RawCategory (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
+  RawCat =
+    record
+      { Object = Category ℓ ℓ'
+      ; Arrow = Functor
+      ; 𝟙 = identity
+      ; _∘_ = _∘f_
+      }
+  private
+    open RawCategory RawCat
+    isAssociative : IsAssociative
+    isAssociative {f = F} {G} {H} = assc {F = F} {G = G} {H = H}
+    -- TODO: Rename `ident'` to `ident` after changing how names are exposed in Functor.
+    ident' : IsIdentity identity
+    ident' = ident-r , ident-l
+    -- NB! `ArrowsAreSets RawCat` is *not* provable. The type of functors,
+    -- however, form a groupoid! Therefore there is no (1-)category of
+    -- categories. There does, however, exist a 2-category of 1-categories.
 
-module _ {ℓ ℓ' : Level} where
+  -- Because of the note above there is not category of categories.
+  Cat : (unprovable : IsCategory RawCat) → Category (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
+  Category.raw        (Cat _) = RawCat
+  Category.isCategory (Cat unprovable) = unprovable
+  -- Category.raw Cat _ = RawCat
+  -- Category.isCategory Cat unprovable = unprovable
+
+-- The following to some extend depends on the category of categories being a
+-- category. In some places it may not actually be needed, however.
+module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
   module _ (ℂ 𝔻 : Category ℓ ℓ') where
     private
-      Catt = Cat ℓ ℓ'
+      Catt = Cat ℓ ℓ' unprovable
       :Object: = Object ℂ × Object 𝔻
       :Arrow:  : :Object: → :Object: → Set ℓ'
-      :Arrow: (c , d) (c' , d') = Arrow ℂ c c' × Arrow 𝔻 d d'
+      :Arrow: (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
       :𝟙: : {o : :Object:} → :Arrow: o o
       :𝟙: = 𝟙 ℂ , 𝟙 𝔻
       _:⊕:_ :
@@ -131,70 +82,67 @@ module _ {ℓ ℓ' : Level} where
       RawCategory.Arrow :rawProduct: = :Arrow:
       RawCategory.𝟙 :rawProduct: = :𝟙:
       RawCategory._∘_ :rawProduct: = _:⊕:_
+      open RawCategory :rawProduct:
 
-      module C = IsCategory (ℂ .isCategory)
-      module D = IsCategory (𝔻 .isCategory)
-      postulate
-        issSet : {A B : RawCategory.Object :rawProduct:} → isSet (RawCategory.Arrow :rawProduct: A B)
+      module C = Category ℂ
+      module D = Category 𝔻
+      open import Cubical.Sigma
+      issSet : {A B : RawCategory.Object :rawProduct:} → isSet (Arrow A B)
+      issSet = setSig {sA = C.arrowsAreSets} {sB = λ x → D.arrowsAreSets}
+      ident' : IsIdentity :𝟙:
+      ident'
+        = Σ≡ (fst C.isIdentity) (fst D.isIdentity)
+        , Σ≡ (snd C.isIdentity) (snd D.isIdentity)
+      postulate univalent : Univalence.Univalent :rawProduct: ident'
       instance
         :isCategory: : IsCategory :rawProduct:
-        -- :isCategory: = record
-        --   { assoc = Σ≡ C.assoc D.assoc
-        --   ; ident
-        --     = Σ≡ (fst C.ident) (fst D.ident)
-        --     , Σ≡ (snd C.ident) (snd D.ident)
-        --   ; arrow-is-set = issSet
-        --   ; univalent = {!!}
-        --   }
-        IsCategory.assoc :isCategory: = Σ≡ C.assoc D.assoc
-        IsCategory.ident :isCategory:
-          = Σ≡ (fst C.ident) (fst D.ident)
-          , Σ≡ (snd C.ident) (snd D.ident)
-        IsCategory.arrow-is-set :isCategory: = issSet
-        IsCategory.univalent :isCategory: = {!!}
+        IsCategory.isAssociative :isCategory: = Σ≡ C.isAssociative D.isAssociative
+        IsCategory.isIdentity :isCategory: = ident'
+        IsCategory.arrowsAreSets :isCategory: = issSet
+        IsCategory.univalent :isCategory: = univalent
 
       :product: : Category ℓ ℓ'
-      raw :product: = :rawProduct:
+      Category.raw :product: = :rawProduct:
 
       proj₁ : Catt [ :product: , ℂ ]
-      proj₁ = record { func* = fst ; func→ = fst ; isFunctor = record { ident = refl ; distrib = refl } }
+      proj₁ = record
+        { raw = record { func* = fst ; func→ = fst }
+        ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
+        }
 
       proj₂ : Catt [ :product: , 𝔻 ]
-      proj₂ = record { func* = snd ; func→ = snd ; isFunctor = record { ident = refl ; distrib = refl } }
+      proj₂ = record
+        { raw = record { func* = snd ; func→ = snd }
+        ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
+        }
 
       module _ {X : Object Catt} (x₁ : Catt [ X , ℂ ]) (x₂ : Catt [ X , 𝔻 ]) where
-        open Functor
+        x : Functor X :product:
+        x = record
+          { raw = record
+            { func* = λ x → x₁ .func* x , x₂ .func* x
+            ; func→ = λ x → func→ x₁ x , func→ x₂ x
+            }
+          ; isFunctor = record
+            { isIdentity   = Σ≡ x₁.isIdentity x₂.isIdentity
+            ; isDistributive = Σ≡ x₁.isDistributive x₂.isDistributive
+            }
+          }
+          where
+            open module x₁ = Functor x₁
+            open module x₂ = Functor x₂
 
-        postulate x : Functor X :product:
-        -- x = record
-        --   { func* = λ x → x₁ .func* x , x₂ .func* x
-        --   ; func→ = λ x → func→ x₁ x , func→ x₂ x
-        --   ; isFunctor = record
-        --     { ident   = Σ≡ x₁.ident x₂.ident
-        --     ; distrib = Σ≡ x₁.distrib x₂.distrib
-        --     }
-        --   }
-        --   where
-        --     open module x₁ = IsFunctor (x₁ .isFunctor)
-        --     open module x₂ = IsFunctor (x₂ .isFunctor)
+        isUniqL : Catt [ proj₁ ∘ x ] ≡ x₁
+        isUniqL = Functor≡ eq* eq→
+          where
+            eq* : (Catt [ proj₁ ∘ x ]) .func* ≡ x₁ .func*
+            eq* = refl
+            eq→ : (λ i → {A : Object X} {B : Object X} → X [ A , B ] → ℂ [ eq* i A , eq* i B ])
+                    [ (Catt [ proj₁ ∘ x ]) .func→ ≡ x₁ .func→ ]
+            eq→ = refl
 
-        -- Turned into postulate after:
-        -- > commit e8215b2c051062c6301abc9b3f6ec67106259758 (HEAD -> dev, github/dev)
-        -- > Author: Frederik Hanghøj Iversen <fhi.1990@gmail.com>
-        -- > Date:   Mon Feb 5 14:59:53 2018 +0100
-        postulate isUniqL : Catt [ proj₁ ∘ x ] ≡ x₁
-        -- isUniqL = Functor≡ eq* eq→ {!!}
-        --   where
-        --     eq* : (Catt [ proj₁ ∘ x ]) .func* ≡ x₁ .func*
-        --     eq* = {!refl!}
-        --     eq→ : (λ i → {A : Object X} {B : Object X} → X [ A , B ] → ℂ [ eq* i A , eq* i B ])
-        --             [ (Catt [ proj₁ ∘ x ]) .func→ ≡ x₁ .func→ ]
-        --     eq→ = refl
-            -- postulate eqIsF : (Catt [ proj₁ ∘ x ]) .isFunctor ≡ x₁ .isFunctor
-            -- eqIsF = IsFunctor≡ {!refl!} {!!}
-
-        postulate isUniqR : Catt [ proj₂ ∘ x ] ≡ x₂
-        -- isUniqR = Functor≡ refl refl {!!} {!!}
+        isUniqR : Catt [ proj₂ ∘ x ] ≡ x₂
+        isUniqR = Functor≡ refl refl
 
         isUniq : Catt [ proj₁ ∘ x ] ≡ x₁ × Catt [ proj₂ ∘ x ] ≡ x₂
         isUniq = isUniqL , isUniqR
@@ -203,36 +151,37 @@ module _ {ℓ ℓ' : Level} where
         uniq = x , isUniq
 
     instance
-      isProduct : IsProduct (Cat ℓ ℓ') proj₁ proj₂
+      isProduct : IsProduct Catt proj₁ proj₂
       isProduct = uniq
 
-    product : Product {ℂ = (Cat ℓ ℓ')} ℂ 𝔻
+    product : Product {ℂ = Catt} ℂ 𝔻
     product = record
       { obj = :product:
       ; proj₁ = proj₁
       ; proj₂ = proj₂
       }
 
-module _ {ℓ ℓ' : Level} where
+module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
+  Catt = Cat ℓ ℓ' unprovable
   instance
-    hasProducts : HasProducts (Cat ℓ ℓ')
-    hasProducts = record { product = product }
+    hasProducts : HasProducts Catt
+    hasProducts = record { product = product unprovable }
 
 -- Basically proves that `Cat ℓ ℓ` is cartesian closed.
-module _ (ℓ : Level) where
+module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
   private
     open Data.Product
     open import Cat.Categories.Fun
 
     Catℓ : Category (lsuc (ℓ ⊔ ℓ)) (ℓ ⊔ ℓ)
-    Catℓ = Cat ℓ ℓ
+    Catℓ = Cat ℓ ℓ unprovable
     module _ (ℂ 𝔻 : Category ℓ ℓ) where
       private
-        :obj: : Object (Cat ℓ ℓ)
+        :obj: : Object Catℓ
         :obj: = Fun {ℂ = ℂ} {𝔻 = 𝔻}
 
         :func*: : Functor ℂ 𝔻 × Object ℂ → Object 𝔻
-        :func*: (F , A) = F .func* A
+        :func*: (F , A) = func* F A
 
       module _ {dom cod : Functor ℂ 𝔻 × Object ℂ} where
         private
@@ -247,30 +196,30 @@ module _ (ℓ : Level) where
           B = proj₂ cod
 
         :func→: : (pobj : NaturalTransformation F G × ℂ [ A , B ])
-          → 𝔻 [ F .func* A , G .func* B ]
+          → 𝔻 [ func* F A , func* G B ]
         :func→: ((θ , θNat) , f) = result
           where
-            θA : 𝔻 [ F .func* A , G .func* A ]
+            θA : 𝔻 [ func* F A , func* G A ]
             θA = θ A
-            θB : 𝔻 [ F .func* B , G .func* B ]
+            θB : 𝔻 [ func* F B , func* G B ]
             θB = θ B
-            F→f : 𝔻 [ F .func* A , F .func* B ]
-            F→f = F .func→ f
-            G→f : 𝔻 [ G .func* A , G .func* B ]
-            G→f = G .func→ f
-            l : 𝔻 [ F .func* A , G .func* B ]
+            F→f : 𝔻 [ func* F A , func* F B ]
+            F→f = func→ F f
+            G→f : 𝔻 [ func* G A , func* G B ]
+            G→f = func→ G f
+            l : 𝔻 [ func* F A , func* G B ]
             l = 𝔻 [ θB ∘ F→f ]
-            r : 𝔻 [ F .func* A , G .func* B ]
+            r : 𝔻 [ func* F A , func* G B ]
             r = 𝔻 [ G→f ∘ θA ]
             -- There are two choices at this point,
             -- but I suppose the whole point is that
             -- by `θNat f` we have `l ≡ r`
             --     lem : 𝔻 [ θ B ∘ F .func→ f ] ≡ 𝔻 [ G .func→ f ∘ θ A ]
             --     lem = θNat f
-            result : 𝔻 [ F .func* A , G .func* B ]
+            result : 𝔻 [ func* F A , func* G B ]
             result = l
 
-      _×p_ = product
+      _×p_ = product unprovable
 
       module _ {c : Functor ℂ 𝔻 × Object ℂ} where
         private
@@ -281,21 +230,21 @@ module _ (ℓ : Level) where
 
         -- NaturalTransformation F G × ℂ .Arrow A B
         -- :ident: : :func→: {c} {c} (identityNat F , ℂ .𝟙) ≡ 𝔻 .𝟙
-        -- :ident: = trans (proj₂ 𝔻.ident) (F .ident)
+        -- :ident: = trans (proj₂ 𝔻.isIdentity) (F .isIdentity)
         --   where
         --     open module 𝔻 = IsCategory (𝔻 .isCategory)
         -- Unfortunately the equational version has some ambigous arguments.
-        :ident: : :func→: {c} {c} (identityNat F , 𝟙 ℂ {o = proj₂ c}) ≡ 𝟙 𝔻
+        :ident: : :func→: {c} {c} (identityNat F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
         :ident: = begin
           :func→: {c} {c} (𝟙 (Product.obj (:obj: ×p ℂ)) {c}) ≡⟨⟩
           :func→: {c} {c} (identityNat F , 𝟙 ℂ)             ≡⟨⟩
-          𝔻 [ identityTrans F C ∘ F .func→ (𝟙 ℂ)]           ≡⟨⟩
-          𝔻 [ 𝟙 𝔻 ∘ F .func→ (𝟙 ℂ)]                        ≡⟨ proj₂ 𝔻.ident ⟩
-          F .func→ (𝟙 ℂ)                                    ≡⟨ F.ident ⟩
+          𝔻 [ identityTrans F C ∘ func→ F (𝟙 ℂ)]           ≡⟨⟩
+          𝔻 [ 𝟙 𝔻 ∘ func→ F (𝟙 ℂ)]                        ≡⟨ proj₂ 𝔻.isIdentity ⟩
+          func→ F (𝟙 ℂ)                                    ≡⟨ F.isIdentity ⟩
           𝟙 𝔻                                               ∎
           where
-            open module 𝔻 = IsCategory (𝔻 .isCategory)
-            open module F = IsFunctor (F .isFunctor)
+            open module 𝔻 = Category 𝔻
+            open module F = Functor F
 
       module _ {F×A G×B H×C : Functor ℂ 𝔻 × Object ℂ} where
         F = F×A .proj₁
@@ -330,48 +279,51 @@ module _ (ℓ : Level) where
             ηθ = proj₁ ηθNT
             ηθNat = proj₂ ηθNT
 
-          :distrib: :
-              𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ F .func→ ( ℂ [ g ∘ f ] ) ]
-            ≡ 𝔻 [ 𝔻 [ η C ∘ G .func→ g ] ∘ 𝔻 [ θ B ∘ F .func→ f ] ]
-          :distrib: = begin
-            𝔻 [ (ηθ C) ∘ F .func→ (ℂ [ g ∘ f ]) ]
+          :isDistributive: :
+              𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ func→ F ( ℂ [ g ∘ f ] ) ]
+            ≡ 𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ θ B ∘ func→ F f ] ]
+          :isDistributive: = begin
+            𝔻 [ (ηθ C) ∘ func→ F (ℂ [ g ∘ f ]) ]
               ≡⟨ ηθNat (ℂ [ g ∘ f ]) ⟩
-            𝔻 [ H .func→ (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
-              ≡⟨ cong (λ φ → 𝔻 [ φ ∘ ηθ A ]) (H.distrib) ⟩
-            𝔻 [ 𝔻 [ H .func→ g ∘ H .func→ f ] ∘ (ηθ A) ]
-              ≡⟨ sym assoc ⟩
-            𝔻 [ H .func→ g ∘ 𝔻 [ H .func→ f ∘ ηθ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ H .func→ g ∘ φ ]) assoc ⟩
-            𝔻 [ H .func→ g ∘ 𝔻 [ 𝔻 [ H .func→ f ∘ η A ] ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ H .func→ g ∘ φ ]) (cong (λ φ → 𝔻 [ φ ∘ θ A ]) (sym (ηNat f))) ⟩
-            𝔻 [ H .func→ g ∘ 𝔻 [ 𝔻 [ η B ∘ G .func→ f ] ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ H .func→ g ∘ φ ]) (sym assoc) ⟩
-            𝔻 [ H .func→ g ∘ 𝔻 [ η B ∘ 𝔻 [ G .func→ f ∘ θ A ] ] ] ≡⟨ assoc ⟩
-            𝔻 [ 𝔻 [ H .func→ g ∘ η B ] ∘ 𝔻 [ G .func→ f ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ φ ∘ 𝔻 [ G .func→ f ∘ θ A ] ]) (sym (ηNat g)) ⟩
-            𝔻 [ 𝔻 [ η C ∘ G .func→ g ] ∘ 𝔻 [ G .func→ f ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ 𝔻 [ η C ∘ G .func→ g ] ∘ φ ]) (sym (θNat f)) ⟩
-            𝔻 [ 𝔻 [ η C ∘ G .func→ g ] ∘ 𝔻 [ θ B ∘ F .func→ f ] ] ∎
+            𝔻 [ func→ H (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
+              ≡⟨ cong (λ φ → 𝔻 [ φ ∘ ηθ A ]) (H.isDistributive) ⟩
+            𝔻 [ 𝔻 [ func→ H g ∘ func→ H f ] ∘ (ηθ A) ]
+              ≡⟨ sym isAssociative ⟩
+            𝔻 [ func→ H g ∘ 𝔻 [ func→ H f ∘ ηθ A ] ]
+              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) isAssociative ⟩
+            𝔻 [ func→ H g ∘ 𝔻 [ 𝔻 [ func→ H f ∘ η A ] ∘ θ A ] ]
+              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (cong (λ φ → 𝔻 [ φ ∘ θ A ]) (sym (ηNat f))) ⟩
+            𝔻 [ func→ H g ∘ 𝔻 [ 𝔻 [ η B ∘ func→ G f ] ∘ θ A ] ]
+              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (sym isAssociative) ⟩
+            𝔻 [ func→ H g ∘ 𝔻 [ η B ∘ 𝔻 [ func→ G f ∘ θ A ] ] ]
+              ≡⟨ isAssociative ⟩
+            𝔻 [ 𝔻 [ func→ H g ∘ η B ] ∘ 𝔻 [ func→ G f ∘ θ A ] ]
+              ≡⟨ cong (λ φ → 𝔻 [ φ ∘ 𝔻 [ func→ G f ∘ θ A ] ]) (sym (ηNat g)) ⟩
+            𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ func→ G f ∘ θ A ] ]
+              ≡⟨ cong (λ φ → 𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ φ ]) (sym (θNat f)) ⟩
+            𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ θ B ∘ func→ F f ] ] ∎
             where
-              open IsCategory (𝔻 .isCategory)
-              open module H = IsFunctor (H .isFunctor)
+              open Category 𝔻
+              module H = Functor H
 
       :eval: : Functor ((:obj: ×p ℂ) .Product.obj) 𝔻
       :eval: = record
-        { func* = :func*:
-        ; func→ = λ {dom} {cod} → :func→: {dom} {cod}
+        { raw = record
+          { func* = :func*:
+          ; func→ = λ {dom} {cod} → :func→: {dom} {cod}
+          }
         ; isFunctor = record
-          { ident = λ {o} → :ident: {o}
-          ; distrib = λ {f u n k y} → :distrib: {f} {u} {n} {k} {y}
+          { isIdentity = λ {o} → :ident: {o}
+          ; isDistributive = λ {f u n k y} → :isDistributive: {f} {u} {n} {k} {y}
           }
         }
 
       module _ (𝔸 : Category ℓ ℓ) (F : Functor ((𝔸 ×p ℂ) .Product.obj) 𝔻) where
-        open HasProducts (hasProducts {ℓ} {ℓ}) renaming (_|×|_ to parallelProduct)
+        open HasProducts (hasProducts {ℓ} {ℓ} unprovable) renaming (_|×|_ to parallelProduct)
 
         postulate
           transpose : Functor 𝔸 :obj:
-          eq : Catℓ [ :eval: ∘ (parallelProduct transpose (𝟙 Catℓ {o = ℂ})) ] ≡ F
+          eq : Catℓ [ :eval: ∘ (parallelProduct transpose (𝟙 Catℓ {A = ℂ})) ] ≡ F
           -- eq : Catℓ [ :eval: ∘ (HasProducts._|×|_ hasProducts transpose (𝟙 Catℓ {o = ℂ})) ] ≡ F
           -- eq' : (Catℓ [ :eval: ∘
           --   (record { product = product } HasProducts.|×| transpose)
@@ -384,10 +336,11 @@ module _ (ℓ : Level) where
         -- :eval: ∘ (parallelProduct F~ (𝟙 Catℓ {o = ℂ}))] ≡ F) catTranspose =
         -- transpose , eq
 
-      :isExponential: : IsExponential Catℓ ℂ 𝔻 :obj: :eval:
-      :isExponential: = {!catTranspose!}
-        where
-          open HasProducts (hasProducts {ℓ} {ℓ}) using (_|×|_)
+      postulate :isExponential: : IsExponential Catℓ ℂ 𝔻 :obj: :eval:
+      -- :isExponential: : IsExponential Catℓ ℂ 𝔻 :obj: :eval:
+      -- :isExponential: = {!catTranspose!}
+      --   where
+      --     open HasProducts (hasProducts {ℓ} {ℓ} unprovable) using (_|×|_)
       -- :isExponential: = λ 𝔸 F → transpose 𝔸 F , eq' 𝔸 F
 
       -- :exponent: : Exponential (Cat ℓ ℓ) A B
@@ -398,5 +351,5 @@ module _ (ℓ : Level) where
         ; isExponential = :isExponential:
         }
 
-  hasExponentials : HasExponentials (Cat ℓ ℓ)
+  hasExponentials : HasExponentials Catℓ
   hasExponentials = record { exponent = :exponent: }
