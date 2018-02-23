@@ -14,7 +14,7 @@ Dependencies
 ------------
 To succesfully compile the following is needed:
 
-* Agda version >= `707ce6042b6a3bdb26521f3fe8dfe5d8a8470a43`.
+* Agda version >= [`707ce6042b6a3bdb26521f3fe8dfe5d8a8470a43`](https://github.com/agda/agda/commit/707ce6042b6a3bdb26521f3fe8dfe5d8a8470a43)
 * [Agda Standard Library](https://github.com/agda/agda-stdlib)
 * [Cubical](https://github.com/Saizan/cubical-demo/)
 
