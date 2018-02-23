@@ -1,6 +1,23 @@
 Changelog
 =========
 
+Version 1.2.0
+-------------
+This version is mainly a huge refactor.
+
+I've renamed
+
+* `distrib` to `isDistributive`
+* `arrowIsSet` to `arrowsAreSets`
+* `ident` to `isIdentity`
+* `assoc` to `isAssociative`
+
+And added "type-synonyms" for all of these. Their names should now match their
+type. So e.g. `isDistributive` has type `IsDistributive`.
+
+I've also changed how names are exported in `Functor` to be in line with
+`Category`.
+
 Version 1.1.0
 -------------
 In this version categories have been refactored - there's now a notion of a raw
