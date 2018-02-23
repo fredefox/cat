@@ -49,6 +49,9 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   IsIdentity id = {A B : Object} {f : Arrow A B}
     → f ∘ id ≡ f × id ∘ f ≡ f
 
+  ArrowsAreSets : Set (ℓa ⊔ ℓb)
+  ArrowsAreSets = ∀ {A B : Object} → isSet (Arrow A B)
+
   IsInverseOf : ∀ {A B} → (Arrow A B) → (Arrow B A) → Set ℓb
   IsInverseOf = λ f g → g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙
 
@@ -100,7 +103,7 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   field
     assoc : IsAssociative
     ident : IsIdentity 𝟙
-    arrowIsSet : ∀ {A B : Object} → isSet (Arrow A B)
+    arrowIsSet : ArrowsAreSets
     univalent : Univalent ident
 
 -- `IsCategory` is a mere proposition.
@@ -162,8 +165,13 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
       ident : (λ _ → IsIdentity 𝟙) [ X.ident ≡ Y.ident ]
       ident = propIsIdentity x X.ident Y.ident
       done : x ≡ y
-      U : ∀ {a : IsIdentity 𝟙} → (λ _ → IsIdentity 𝟙) [ X.ident ≡ a ] → (b : Univalent a) → Set _
-      U eqwal bbb = (λ i → Univalent (eqwal i)) [ X.univalent ≡ bbb ]
+      U : ∀ {a : IsIdentity 𝟙}
+        → (λ _ → IsIdentity 𝟙) [ X.ident ≡ a ]
+        → (b : Univalent a)
+        → Set _
+      U eqwal bbb =
+        (λ i → Univalent (eqwal i))
+        [ X.univalent ≡ bbb ]
       P : (y : IsIdentity 𝟙)
         → (λ _ → IsIdentity 𝟙) [ X.ident ≡ y ] → Set _
       P y eq = ∀ (b' : Univalent y) → U eq b'
