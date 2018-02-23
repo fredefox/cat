@@ -86,8 +86,9 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
 
       module C = Category ℂ
       module D = Category 𝔻
-      postulate
-        issSet : {A B : RawCategory.Object :rawProduct:} → isSet (Arrow A B)
+      open import Cubical.Sigma
+      issSet : {A B : RawCategory.Object :rawProduct:} → isSet (Arrow A B)
+      issSet = setSig {sA = C.arrowIsSet} {sB = λ x → D.arrowIsSet}
       ident' : IsIdentity :𝟙:
       ident'
         = Σ≡ (fst C.ident) (fst D.ident)
