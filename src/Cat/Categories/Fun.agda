@@ -55,11 +55,11 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
       ηNat = proj₂ η'
       ζNat = proj₂ ζ'
       L : NaturalTransformation A D
-      L = (_:⊕:_ {A} {C} {D} ζ' (_:⊕:_ {A} {B} {C} η' θ'))
+      L = (NT[_∘_] {A} {C} {D} ζ' (NT[_∘_] {A} {B} {C} η' θ'))
       R : NaturalTransformation A D
-      R = (_:⊕:_ {A} {B} {D} (_:⊕:_ {B} {C} {D} ζ' η') θ')
-    _g⊕f_ = _:⊕:_ {A} {B} {C}
-    _h⊕g_ = _:⊕:_ {B} {C} {D}
+      R = (NT[_∘_] {A} {B} {D} (NT[_∘_] {B} {C} {D} ζ' η') θ')
+    _g⊕f_ = NT[_∘_] {A} {B} {C}
+    _h⊕g_ = NT[_∘_] {B} {C} {D}
     :isAssociative: : L ≡ R
     :isAssociative: = lemSig (naturalIsProp {F = A} {D})
       L R (funExt (λ x → isAssociative))
@@ -77,13 +77,13 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
         f' C ∎
       eq-l : ∀ C → (𝔻 [ identityTrans B C ∘ f' C ]) ≡ f' C
       eq-l C = proj₂ 𝔻.isIdentity
-      ident-r : (_:⊕:_ {A} {A} {B} f (NT.identity A)) ≡ f
+      ident-r : (NT[_∘_] {A} {A} {B} f (NT.identity A)) ≡ f
       ident-r = lemSig allNatural _ _ (funExt eq-r)
-      ident-l : (_:⊕:_ {A} {B} {B} (NT.identity B) f) ≡ f
+      ident-l : (NT[_∘_] {A} {B} {B} (NT.identity B) f) ≡ f
       ident-l = lemSig allNatural _ _ (funExt eq-l)
       isIdentity
-        : (_:⊕:_ {A} {A} {B} f (NT.identity A)) ≡ f
-        × (_:⊕:_ {A} {B} {B} (NT.identity B) f) ≡ f
+        : (NT[_∘_] {A} {A} {B} f (NT.identity A)) ≡ f
+        × (NT[_∘_] {A} {B} {B} (NT.identity B) f) ≡ f
       isIdentity = ident-r , ident-l
   -- Functor categories. Objects are functors, arrows are natural transformations.
   RawFun : RawCategory (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') (ℓc ⊔ ℓc' ⊔ ℓd')
@@ -91,7 +91,7 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
     { Object = Functor ℂ 𝔻
     ; Arrow = NaturalTransformation
     ; 𝟙 = λ {F} → NT.identity F
-    ; _∘_ = λ {F G H} → _:⊕:_ {F} {G} {H}
+    ; _∘_ = λ {F G H} → NT[_∘_] {F} {G} {H}
     }
 
   instance
@@ -116,5 +116,5 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
     { Object = Presheaf ℂ
     ; Arrow = NaturalTransformation
     ; 𝟙 = λ {F} → identity F
-    ; _∘_ = λ {F G H} → NatComp {F = F} {G = G} {H = H}
+    ; _∘_ = λ {F G H} → NT[_∘_] {F = F} {G = G} {H = H}
     }

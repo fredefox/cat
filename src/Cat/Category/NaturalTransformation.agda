@@ -83,21 +83,19 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
       module F = Functor F
       module G = Functor G
       module H = Functor H
-      _∘nt_ : Transformation G H → Transformation F G → Transformation F H
-      (θ ∘nt η) C = 𝔻 [ θ C ∘ η C ]
+    T[_∘_] : Transformation G H → Transformation F G → Transformation F H
+    T[ θ ∘ η ] C = 𝔻 [ θ C ∘ η C ]
 
-    NatComp _:⊕:_ : NaturalTransformation G H → NaturalTransformation F G → NaturalTransformation F H
-    proj₁ ((θ , _) :⊕: (η , _)) = θ ∘nt η
-    proj₂ ((θ , θNat) :⊕: (η , ηNat)) {A} {B} f = begin
-      𝔻 [ (θ ∘nt η) B ∘ F.func→ f ]     ≡⟨⟩
+    NT[_∘_] : NaturalTransformation G H → NaturalTransformation F G → NaturalTransformation F H
+    proj₁ NT[ (θ , _) ∘ (η , _) ] = T[ θ ∘ η ]
+    proj₂ NT[ (θ , θNat) ∘ (η , ηNat) ] {A} {B} f = begin
+      𝔻 [ T[ θ ∘ η ] B ∘ F.func→ f ]     ≡⟨⟩
       𝔻 [ 𝔻 [ θ B ∘ η B ] ∘ F.func→ f ] ≡⟨ sym isAssociative ⟩
       𝔻 [ θ B ∘ 𝔻 [ η B ∘ F.func→ f ] ] ≡⟨ cong (λ φ → 𝔻 [ θ B ∘ φ ]) (ηNat f) ⟩
       𝔻 [ θ B ∘ 𝔻 [ G.func→ f ∘ η A ] ] ≡⟨ isAssociative ⟩
       𝔻 [ 𝔻 [ θ B ∘ G.func→ f ] ∘ η A ] ≡⟨ cong (λ φ → 𝔻 [ φ ∘ η A ]) (θNat f) ⟩
       𝔻 [ 𝔻 [ H.func→ f ∘ θ A ] ∘ η A ] ≡⟨ sym isAssociative ⟩
       𝔻 [ H.func→ f ∘ 𝔻 [ θ A ∘ η A ] ] ≡⟨⟩
-      𝔻 [ H.func→ f ∘ (θ ∘nt η) A ]     ∎
+      𝔻 [ H.func→ f ∘ T[ θ ∘ η ] A ]     ∎
       where
         open Category 𝔻
-
-    NatComp = _:⊕:_
