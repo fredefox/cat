@@ -9,14 +9,6 @@ open import Cat.Category
 
 open IsCategory
 
--- data Path {ℓ : Level} {A : Set ℓ} : (a b : A) → Set ℓ where
---   emptyPath : {a : A} → Path a a
---   concatenate : {a b c : A} → Path a b → Path b c → Path a b
-
--- import Data.List
--- P : (a b : Object ℂ) → Set (ℓ ⊔ ℓ')
--- P = {!Data.List.List ?!}
--- Generalized paths:
 data Path {ℓ ℓ' : Level} {A : Set ℓ} (R : A → A → Set ℓ') : (a b : A) → Set (ℓ ⊔ ℓ') where
   empty : {a : A} → Path R a a
   cons : {a b c : A} → R b c → Path R a b → Path R a c
