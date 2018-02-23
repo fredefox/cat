@@ -1,3 +1,22 @@
+-- This module Essentially just provides the data for natural transformations
+--
+-- This includes:
+--
+-- The types:
+--
+-- * Transformation        - a family of functors
+-- * Natural               - naturality condition for transformations
+-- * NaturalTransformation - both of the above
+--
+-- Elements of the above:
+--
+-- * identityTrans   - the identity transformation
+-- * identityNatural - naturality for the above
+-- * identity        - both of the above
+--
+-- Functions for manipulating the above:
+--
+-- * A composition operator.
 {-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Category.NaturalTransformation where
 open import Agda.Primitive
@@ -29,6 +48,8 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
     NaturalTransformation : Set (ℓc ⊔ ℓc' ⊔ ℓd')
     NaturalTransformation = Σ Transformation Natural
 
+    -- TODO: Since naturality is a mere proposition this principle can be
+    -- simplified.
     NaturalTransformation≡ : {α β : NaturalTransformation}
       → (eq₁ : α .proj₁ ≡ β .proj₁)
       → (eq₂ : PathP
