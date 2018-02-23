@@ -26,16 +26,16 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
   open Category ℂ
 
   private
-    p-assoc : {A B C D : Object} {r : Path Arrow A B} {q : Path Arrow B C} {p : Path Arrow C D}
+    p-isAssociative : {A B C D : Object} {r : Path Arrow A B} {q : Path Arrow B C} {p : Path Arrow C D}
       → p ++ (q ++ r) ≡ (p ++ q) ++ r
-    p-assoc {r = r} {q} {empty} = refl
-    p-assoc {A} {B} {C} {D} {r = r} {q} {cons x p} = begin
+    p-isAssociative {r = r} {q} {empty} = refl
+    p-isAssociative {A} {B} {C} {D} {r = r} {q} {cons x p} = begin
       cons x p ++ (q ++ r)   ≡⟨ cong (cons x) lem ⟩
       cons x ((p ++ q) ++ r) ≡⟨⟩
       (cons x p ++ q) ++ r ∎
       where
         lem : p ++ (q ++ r) ≡ ((p ++ q) ++ r)
-        lem = p-assoc {r = r} {q} {p}
+        lem = p-isAssociative {r = r} {q} {p}
 
     ident-r : ∀ {A} {B} {p : Path Arrow A B} → concatenate p empty ≡ p
     ident-r {p = empty} = refl
@@ -57,7 +57,7 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
     }
   RawIsCategoryFree : IsCategory RawFree
   RawIsCategoryFree = record
-    { assoc = λ { {f = f} {g} {h} → p-assoc {r = f} {g} {h}}
+    { isAssociative = λ { {f = f} {g} {h} → p-isAssociative {r = f} {g} {h}}
     ; ident = ident-r , ident-l
     ; arrowIsSet = {!!}
     ; univalent = {!!}

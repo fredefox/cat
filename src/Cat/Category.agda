@@ -101,7 +101,7 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   open RawCategory ℂ
   open Univalence ℂ public
   field
-    assoc : IsAssociative
+    isAssociative : IsAssociative
     ident : IsIdentity 𝟙
     arrowIsSet : ArrowsAreSets
     univalent : Univalent ident
@@ -144,7 +144,7 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
             geq = begin
               g            ≡⟨ sym (fst ident) ⟩
               g ∘ 𝟙        ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
-              g ∘ (f ∘ g') ≡⟨ assoc ⟩
+              g ∘ (f ∘ g') ≡⟨ isAssociative ⟩
               (g ∘ f) ∘ g' ≡⟨ cong (λ φ → φ ∘ g') η ⟩
               𝟙 ∘ g'       ≡⟨ snd ident ⟩
               g'           ∎
@@ -181,7 +181,7 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
       foo = pathJ P helper Y.ident ident
       eqUni : U ident Y.univalent
       eqUni = foo Y.univalent
-      IC.assoc      (done i) = propIsAssociative x X.assoc Y.assoc i
+      IC.isAssociative      (done i) = propIsAssociative x X.isAssociative Y.isAssociative i
       IC.ident      (done i) = ident i
       IC.arrowIsSet (done i) = propArrowIsSet x X.arrowIsSet Y.arrowIsSet i
       IC.univalent  (done i) = eqUni i
@@ -216,7 +216,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     RawCategory._∘_ OpRaw = Function.flip _∘_
 
     OpIsCategory : IsCategory OpRaw
-    IsCategory.assoc OpIsCategory = sym assoc
+    IsCategory.isAssociative OpIsCategory = sym isAssociative
     IsCategory.ident OpIsCategory = swap ident
     IsCategory.arrowIsSet OpIsCategory = arrowIsSet
     IsCategory.univalent OpIsCategory = {!!}
@@ -242,7 +242,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     open IsCategory
     module IsCat = IsCategory (ℂ .isCategory)
     rawIsCat : (i : I) → IsCategory (rawOp i)
-    assoc (rawIsCat i) = IsCat.assoc
+    isAssociative (rawIsCat i) = IsCat.isAssociative
     ident (rawIsCat i) = IsCat.ident
     arrowIsSet (rawIsCat i) = IsCat.arrowIsSet
     univalent (rawIsCat i) = IsCat.univalent

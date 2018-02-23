@@ -43,8 +43,8 @@ module _ (ℓ ℓ' : Level) where
       }
   private
     open RawCategory RawCat
-    assoc : IsAssociative
-    assoc {f = F} {G} {H} = assc {F = F} {G = G} {H = H}
+    isAssociative : IsAssociative
+    isAssociative {f = F} {G} {H} = assc {F = F} {G = G} {H = H}
     -- TODO: Rename `ident'` to `ident` after changing how names are exposed in Functor.
     ident' : IsIdentity identity
     ident' = ident-r , ident-l
@@ -96,7 +96,7 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
       postulate univalent : Univalence.Univalent :rawProduct: ident'
       instance
         :isCategory: : IsCategory :rawProduct:
-        IsCategory.assoc :isCategory: = Σ≡ C.assoc D.assoc
+        IsCategory.isAssociative :isCategory: = Σ≡ C.isAssociative D.isAssociative
         IsCategory.ident :isCategory: = ident'
         IsCategory.arrowIsSet :isCategory: = issSet
         IsCategory.univalent :isCategory: = univalent
@@ -288,15 +288,15 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
             𝔻 [ func→ H (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
               ≡⟨ cong (λ φ → 𝔻 [ φ ∘ ηθ A ]) (H.distrib) ⟩
             𝔻 [ 𝔻 [ func→ H g ∘ func→ H f ] ∘ (ηθ A) ]
-              ≡⟨ sym assoc ⟩
+              ≡⟨ sym isAssociative ⟩
             𝔻 [ func→ H g ∘ 𝔻 [ func→ H f ∘ ηθ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) assoc ⟩
+              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) isAssociative ⟩
             𝔻 [ func→ H g ∘ 𝔻 [ 𝔻 [ func→ H f ∘ η A ] ∘ θ A ] ]
               ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (cong (λ φ → 𝔻 [ φ ∘ θ A ]) (sym (ηNat f))) ⟩
             𝔻 [ func→ H g ∘ 𝔻 [ 𝔻 [ η B ∘ func→ G f ] ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (sym assoc) ⟩
+              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (sym isAssociative) ⟩
             𝔻 [ func→ H g ∘ 𝔻 [ η B ∘ 𝔻 [ func→ G f ∘ θ A ] ] ]
-              ≡⟨ assoc ⟩
+              ≡⟨ isAssociative ⟩
             𝔻 [ 𝔻 [ func→ H g ∘ η B ] ∘ 𝔻 [ func→ G f ∘ θ A ] ]
               ≡⟨ cong (λ φ → 𝔻 [ φ ∘ 𝔻 [ func→ G f ∘ θ A ] ]) (sym (ηNat g)) ⟩
             𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ func→ G f ∘ θ A ] ]

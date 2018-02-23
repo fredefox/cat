@@ -84,11 +84,11 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     proj₁ ((θ , _) :⊕: (η , _)) = θ ∘nt η
     proj₂ ((θ , θNat) :⊕: (η , ηNat)) {A} {B} f = begin
       𝔻 [ (θ ∘nt η) B ∘ F.func→ f ]     ≡⟨⟩
-      𝔻 [ 𝔻 [ θ B ∘ η B ] ∘ F.func→ f ] ≡⟨ sym assoc ⟩
+      𝔻 [ 𝔻 [ θ B ∘ η B ] ∘ F.func→ f ] ≡⟨ sym isAssociative ⟩
       𝔻 [ θ B ∘ 𝔻 [ η B ∘ F.func→ f ] ] ≡⟨ cong (λ φ → 𝔻 [ θ B ∘ φ ]) (ηNat f) ⟩
-      𝔻 [ θ B ∘ 𝔻 [ G.func→ f ∘ η A ] ] ≡⟨ assoc ⟩
+      𝔻 [ θ B ∘ 𝔻 [ G.func→ f ∘ η A ] ] ≡⟨ isAssociative ⟩
       𝔻 [ 𝔻 [ θ B ∘ G.func→ f ] ∘ η A ] ≡⟨ cong (λ φ → 𝔻 [ φ ∘ η A ]) (θNat f) ⟩
-      𝔻 [ 𝔻 [ H.func→ f ∘ θ A ] ∘ η A ] ≡⟨ sym assoc ⟩
+      𝔻 [ 𝔻 [ H.func→ f ∘ θ A ] ∘ η A ] ≡⟨ sym isAssociative ⟩
       𝔻 [ H.func→ f ∘ 𝔻 [ θ A ∘ η A ] ] ≡⟨⟩
       𝔻 [ H.func→ f ∘ (θ ∘nt η) A ]     ∎
       where
@@ -130,9 +130,9 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       R = (_:⊕:_ {A} {B} {D} (_:⊕:_ {B} {C} {D} ζ' η') θ')
     _g⊕f_ = _:⊕:_ {A} {B} {C}
     _h⊕g_ = _:⊕:_ {B} {C} {D}
-    :assoc: : L ≡ R
-    :assoc: = lemSig (naturalIsProp {F = A} {D})
-      L R (funExt (λ x → assoc))
+    :isAssociative: : L ≡ R
+    :isAssociative: = lemSig (naturalIsProp {F = A} {D})
+      L R (funExt (λ x → isAssociative))
       where
         open Category 𝔻
 
@@ -168,7 +168,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
   instance
     :isCategory: : IsCategory RawFun
     :isCategory: = record
-      { assoc = λ {A B C D} → :assoc: {A} {B} {C} {D}
+      { isAssociative = λ {A B C D} → :isAssociative: {A} {B} {C} {D}
       ; ident = λ {A B} → :ident: {A} {B}
       ; arrowIsSet = λ {F} {G} → naturalTransformationIsSets {F} {G}
       ; univalent = {!!}

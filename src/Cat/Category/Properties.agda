@@ -19,9 +19,9 @@ module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : Category.Object �
   iso-is-epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
     g₀              ≡⟨ sym (proj₁ ident) ⟩
     g₀ ∘ 𝟙          ≡⟨ cong (_∘_ g₀) (sym right-inv) ⟩
-    g₀ ∘ (f ∘ f-)   ≡⟨ assoc ⟩
+    g₀ ∘ (f ∘ f-)   ≡⟨ isAssociative ⟩
     (g₀ ∘ f) ∘ f-   ≡⟨ cong (λ φ → φ ∘ f-) eq ⟩
-    (g₁ ∘ f) ∘ f-   ≡⟨ sym assoc ⟩
+    (g₁ ∘ f) ∘ f-   ≡⟨ sym isAssociative ⟩
     g₁ ∘ (f ∘ f-)   ≡⟨ cong (_∘_ g₁) right-inv ⟩
     g₁ ∘ 𝟙          ≡⟨ proj₁ ident ⟩
     g₁              ∎
@@ -31,9 +31,9 @@ module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : Category.Object �
     begin
     g₀            ≡⟨ sym (proj₂ ident) ⟩
     𝟙 ∘ g₀        ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
-    (f- ∘ f) ∘ g₀ ≡⟨ sym assoc ⟩
+    (f- ∘ f) ∘ g₀ ≡⟨ sym isAssociative ⟩
     f- ∘ (f ∘ g₀) ≡⟨ cong (_∘_ f-) eq ⟩
-    f- ∘ (f ∘ g₁) ≡⟨ assoc ⟩
+    f- ∘ (f ∘ g₁) ≡⟨ isAssociative ⟩
     (f- ∘ f) ∘ g₁ ≡⟨ cong (λ φ → φ ∘ g₁) left-inv ⟩
     𝟙 ∘ g₁        ≡⟨ proj₂ ident ⟩
     g₁            ∎
@@ -65,7 +65,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat
 
     module _ {A B : ℂ.Object} (f : ℂ [ A , B ]) where
       :func→: : NaturalTransformation (prshf A) (prshf B)
-      :func→: = (λ C x → ℂ [ f ∘ x ]) , λ f₁ → funExt λ _ → ℂ.assoc
+      :func→: = (λ C x → ℂ [ f ∘ x ]) , λ f₁ → funExt λ _ → ℂ.isAssociative
 
     module _ {c : Category.Object ℂ} where
       eqTrans : (λ _ → Transformation (prshf c) (prshf c))
