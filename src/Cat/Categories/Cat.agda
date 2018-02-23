@@ -17,7 +17,6 @@ open import Cat.Equality
 open Equality.Data.Product
 
 open Functor
-open IsFunctor
 open Category using (Object ; 𝟙)
 
 -- The category of categories
@@ -117,38 +116,32 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
         }
 
       module _ {X : Object Catt} (x₁ : Catt [ X , ℂ ]) (x₂ : Catt [ X , 𝔻 ]) where
-        open Functor
+        x : Functor X :product:
+        x = record
+          { raw = record
+            { func* = λ x → x₁ .func* x , x₂ .func* x
+            ; func→ = λ x → func→ x₁ x , func→ x₂ x
+            }
+          ; isFunctor = record
+            { ident   = Σ≡ x₁.ident x₂.ident
+            ; distrib = Σ≡ x₁.distrib x₂.distrib
+            }
+          }
+          where
+            open module x₁ = Functor x₁
+            open module x₂ = Functor x₂
 
-        postulate x : Functor X :product:
-        -- x = record
-        --   { func* = λ x → x₁ .func* x , x₂ .func* x
-        --   ; func→ = λ x → func→ x₁ x , func→ x₂ x
-        --   ; isFunctor = record
-        --     { ident   = Σ≡ x₁.ident x₂.ident
-        --     ; distrib = Σ≡ x₁.distrib x₂.distrib
-        --     }
-        --   }
-        --   where
-        --     open module x₁ = IsFunctor (x₁ .isFunctor)
-        --     open module x₂ = IsFunctor (x₂ .isFunctor)
+        isUniqL : Catt [ proj₁ ∘ x ] ≡ x₁
+        isUniqL = Functor≡ eq* eq→
+          where
+            eq* : (Catt [ proj₁ ∘ x ]) .func* ≡ x₁ .func*
+            eq* = refl
+            eq→ : (λ i → {A : Object X} {B : Object X} → X [ A , B ] → ℂ [ eq* i A , eq* i B ])
+                    [ (Catt [ proj₁ ∘ x ]) .func→ ≡ x₁ .func→ ]
+            eq→ = refl
 
-        -- Turned into postulate after:
-        -- > commit e8215b2c051062c6301abc9b3f6ec67106259758 (HEAD -> dev, github/dev)
-        -- > Author: Frederik Hanghøj Iversen <fhi.1990@gmail.com>
-        -- > Date:   Mon Feb 5 14:59:53 2018 +0100
-        postulate isUniqL : Catt [ proj₁ ∘ x ] ≡ x₁
-        -- isUniqL = Functor≡ eq* eq→ {!!}
-        --   where
-        --     eq* : (Catt [ proj₁ ∘ x ]) .func* ≡ x₁ .func*
-        --     eq* = {!refl!}
-        --     eq→ : (λ i → {A : Object X} {B : Object X} → X [ A , B ] → ℂ [ eq* i A , eq* i B ])
-        --             [ (Catt [ proj₁ ∘ x ]) .func→ ≡ x₁ .func→ ]
-        --     eq→ = refl
-            -- postulate eqIsF : (Catt [ proj₁ ∘ x ]) .isFunctor ≡ x₁ .isFunctor
-            -- eqIsF = IsFunctor≡ {!refl!} {!!}
-
-        postulate isUniqR : Catt [ proj₂ ∘ x ] ≡ x₂
-        -- isUniqR = Functor≡ refl refl {!!} {!!}
+        isUniqR : Catt [ proj₂ ∘ x ] ≡ x₂
+        isUniqR = Functor≡ refl refl
 
         isUniq : Catt [ proj₁ ∘ x ] ≡ x₁ × Catt [ proj₂ ∘ x ] ≡ x₂
         isUniq = isUniqL , isUniqR
@@ -250,7 +243,7 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
           𝟙 𝔻                                               ∎
           where
             open module 𝔻 = Category 𝔻
-            open module F = IsFunctor (F .isFunctor)
+            open module F = Functor F
 
       module _ {F×A G×B H×C : Functor ℂ 𝔻 × Object ℂ} where
         F = F×A .proj₁
@@ -310,7 +303,7 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
             𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ θ B ∘ func→ F f ] ] ∎
             where
               open Category 𝔻
-              module H = IsFunctor (H .isFunctor)
+              module H = Functor H
 
       :eval: : Functor ((:obj: ×p ℂ) .Product.obj) 𝔻
       :eval: = record
