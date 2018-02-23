@@ -59,6 +59,6 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
   RawIsCategoryFree = record
     { isAssociative = λ { {f = f} {g} {h} → p-isAssociative {r = f} {g} {h}}
     ; isIdentity = ident-r , ident-l
-    ; arrowIsSet = {!!}
+    ; arrowsAreSets = {!!}
     ; univalent = {!!}
     }

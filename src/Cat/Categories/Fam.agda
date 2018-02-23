@@ -46,7 +46,7 @@ module _ (ℓa ℓb : Level) where
       isCategory = record
         { isAssociative = λ {A} {B} {C} {D} {f} {g} {h} → isAssociative {D = D} {f} {g} {h}
         ; isIdentity = λ {A} {B} {f} → isIdentity {A} {B} {f = f}
-        ; arrowIsSet = {!!}
+        ; arrowsAreSets = {!!}
         ; univalent = {!!}
         }
 

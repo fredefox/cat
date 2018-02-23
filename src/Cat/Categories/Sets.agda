@@ -28,7 +28,7 @@ module _ (ℓ : Level) where
     isAssociative SetsIsCategory = refl
     proj₁ (isIdentity SetsIsCategory) = funExt λ _ → refl
     proj₂ (isIdentity SetsIsCategory) = funExt λ _ → refl
-    arrowIsSet SetsIsCategory {B = (_ , s)} = setPi λ _ → s
+    arrowsAreSets SetsIsCategory {B = (_ , s)} = setPi λ _ → s
     univalent SetsIsCategory = {!!}
 
   𝓢𝓮𝓽 Sets : Category (lsuc ℓ) ℓ
@@ -94,7 +94,7 @@ module _ {ℓa ℓb : Level} where
   representable : {ℂ : Category ℓa ℓb} → Category.Object ℂ → Representable ℂ
   representable {ℂ = ℂ} A = record
     { raw = record
-      { func* = λ B → ℂ [ A , B ] , arrowIsSet
+      { func* = λ B → ℂ [ A , B ] , arrowsAreSets
       ; func→ = ℂ [_∘_]
       }
     ; isFunctor = record
@@ -109,7 +109,7 @@ module _ {ℓa ℓb : Level} where
   presheaf : {ℂ : Category ℓa ℓb} → Category.Object (Opposite ℂ) → Presheaf ℂ
   presheaf {ℂ = ℂ} B = record
     { raw = record
-      { func* = λ A → ℂ [ A , B ] , arrowIsSet
+      { func* = λ A → ℂ [ A , B ] , arrowsAreSets
       ; func→ = λ f g → ℂ [ g ∘ f ]
     }
     ; isFunctor = record

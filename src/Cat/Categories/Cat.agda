@@ -88,7 +88,7 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
       module D = Category 𝔻
       open import Cubical.Sigma
       issSet : {A B : RawCategory.Object :rawProduct:} → isSet (Arrow A B)
-      issSet = setSig {sA = C.arrowIsSet} {sB = λ x → D.arrowIsSet}
+      issSet = setSig {sA = C.arrowsAreSets} {sB = λ x → D.arrowsAreSets}
       ident' : IsIdentity :𝟙:
       ident'
         = Σ≡ (fst C.isIdentity) (fst D.isIdentity)
@@ -98,7 +98,7 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
         :isCategory: : IsCategory :rawProduct:
         IsCategory.isAssociative :isCategory: = Σ≡ C.isAssociative D.isAssociative
         IsCategory.isIdentity :isCategory: = ident'
-        IsCategory.arrowIsSet :isCategory: = issSet
+        IsCategory.arrowsAreSets :isCategory: = issSet
         IsCategory.univalent :isCategory: = univalent
 
       :product: : Category ℓ ℓ'

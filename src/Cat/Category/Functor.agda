@@ -55,8 +55,8 @@ module _
 
   propIsFunctor : isProp (IsFunctor _ _ F)
   propIsFunctor isF0 isF1 i = record
-    { isIdentity = 𝔻.arrowIsSet _ _ isF0.isIdentity isF1.isIdentity i
-    ; distrib = 𝔻.arrowIsSet _ _ isF0.distrib isF1.distrib i
+    { isIdentity = 𝔻.arrowsAreSets _ _ isF0.isIdentity isF1.isIdentity i
+    ; distrib = 𝔻.arrowsAreSets _ _ isF0.distrib isF1.distrib i
     }
     where
       module isF0 = IsFunctor isF0

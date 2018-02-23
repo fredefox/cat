@@ -101,13 +101,13 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
 
   module _ {F G : Functor ℂ 𝔻} where
     transformationIsSet : isSet (Transformation F G)
-    transformationIsSet _ _ p q i j C = 𝔻.arrowIsSet _ _ (λ l → p l C)   (λ l → q l C) i j
+    transformationIsSet _ _ p q i j C = 𝔻.arrowsAreSets _ _ (λ l → p l C)   (λ l → q l C) i j
 
     naturalIsProp : (θ : Transformation F G) → isProp (Natural F G θ)
     naturalIsProp θ θNat θNat' = lem
       where
         lem : (λ _ → Natural F G θ) [ (λ f → θNat f) ≡ (λ f → θNat' f) ]
-        lem = λ i f → 𝔻.arrowIsSet _ _ (θNat f) (θNat' f) i
+        lem = λ i f → 𝔻.arrowsAreSets _ _ (θNat f) (θNat' f) i
 
     naturalTransformationIsSets : isSet (NaturalTransformation F G)
     naturalTransformationIsSets = sigPresSet transformationIsSet
@@ -170,7 +170,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     :isCategory: = record
       { isAssociative = λ {A B C D} → :isAssociative: {A} {B} {C} {D}
       ; isIdentity = λ {A B} → :ident: {A} {B}
-      ; arrowIsSet = λ {F} {G} → naturalTransformationIsSets {F} {G}
+      ; arrowsAreSets = λ {F} {G} → naturalTransformationIsSets {F} {G}
       ; univalent = {!!}
       }
 

@@ -103,7 +103,7 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   field
     isAssociative : IsAssociative
     isIdentity : IsIdentity 𝟙
-    arrowIsSet : ArrowsAreSets
+    arrowsAreSets : ArrowsAreSets
     univalent : Univalent isIdentity
 
 -- `IsCategory` is a mere proposition.
@@ -115,12 +115,12 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
     open import Cubical.NType.Properties
 
     propIsAssociative : isProp IsAssociative
-    propIsAssociative x y i = arrowIsSet _ _ x y i
+    propIsAssociative x y i = arrowsAreSets _ _ x y i
 
     propIsIdentity : ∀ {f : ∀ {A} → Arrow A A} → isProp (IsIdentity f)
     propIsIdentity a b i
-      = arrowIsSet _ _ (fst a) (fst b) i
-      , arrowIsSet _ _ (snd a) (snd b) i
+      = arrowsAreSets _ _ (fst a) (fst b) i
+      , arrowsAreSets _ _ (snd a) (snd b) i
 
     propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
     propArrowIsSet a b i = isSetIsProp a b i
@@ -129,9 +129,9 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
     propIsInverseOf x y = λ i →
       let
         h : fst x ≡ fst y
-        h = arrowIsSet _ _ (fst x) (fst y)
+        h = arrowsAreSets _ _ (fst x) (fst y)
         hh : snd x ≡ snd y
-        hh = arrowIsSet _ _ (snd x) (snd y)
+        hh = arrowsAreSets _ _ (snd x) (snd y)
       in h i , hh i
 
     module _ {A B : Object} {f : Arrow A B} where
@@ -183,7 +183,7 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
       eqUni = foo Y.univalent
       IC.isAssociative      (done i) = propIsAssociative x X.isAssociative Y.isAssociative i
       IC.isIdentity      (done i) = isIdentity i
-      IC.arrowIsSet (done i) = propArrowIsSet x X.arrowIsSet Y.arrowIsSet i
+      IC.arrowsAreSets (done i) = propArrowIsSet x X.arrowsAreSets Y.arrowsAreSets i
       IC.univalent  (done i) = eqUni i
 
   propIsCategory : isProp (IsCategory C)
@@ -218,7 +218,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     OpIsCategory : IsCategory OpRaw
     IsCategory.isAssociative OpIsCategory = sym isAssociative
     IsCategory.isIdentity OpIsCategory = swap isIdentity
-    IsCategory.arrowIsSet OpIsCategory = arrowIsSet
+    IsCategory.arrowsAreSets OpIsCategory = arrowsAreSets
     IsCategory.univalent OpIsCategory = {!!}
 
   Opposite : Category ℓa ℓb
@@ -244,7 +244,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     rawIsCat : (i : I) → IsCategory (rawOp i)
     isAssociative (rawIsCat i) = IsCat.isAssociative
     isIdentity (rawIsCat i) = IsCat.isIdentity
-    arrowIsSet (rawIsCat i) = IsCat.arrowIsSet
+    arrowsAreSets (rawIsCat i) = IsCat.arrowsAreSets
     univalent (rawIsCat i) = IsCat.univalent
 
   Opposite-is-involution : Opposite (Opposite ℂ) ≡ ℂ
