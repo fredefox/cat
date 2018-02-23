@@ -33,7 +33,7 @@ module _ {ℓc ℓc' ℓd ℓd'}
   record IsFunctor (F : RawFunctor) : 𝓤 where
     open RawFunctor F public
     field
-      ident   : IsIdentity
+      isIdentity   : IsIdentity
       distrib : IsDistributive
 
   record Functor : Set (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') where
@@ -55,7 +55,7 @@ module _
 
   propIsFunctor : isProp (IsFunctor _ _ F)
   propIsFunctor isF0 isF1 i = record
-    { ident = 𝔻.arrowIsSet _ _ isF0.ident isF1.ident i
+    { isIdentity = 𝔻.arrowIsSet _ _ isF0.isIdentity isF1.isIdentity i
     ; distrib = 𝔻.arrowIsSet _ _ isF0.distrib isF1.distrib i
     }
     where
@@ -116,10 +116,10 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
     instance
       isFunctor' : IsFunctor A C _∘fr_
       isFunctor' = record
-        { ident = begin
+        { isIdentity = begin
           (F→ ∘ G→) (𝟙 A) ≡⟨ refl ⟩
-          F→ (G→ (𝟙 A))   ≡⟨ cong F→ (ident G)⟩
-          F→ (𝟙 B)        ≡⟨ ident F ⟩
+          F→ (G→ (𝟙 A))   ≡⟨ cong F→ (isIdentity G)⟩
+          F→ (𝟙 B)        ≡⟨ isIdentity F ⟩
           𝟙 C             ∎
         ; distrib = dist
         }
@@ -135,7 +135,7 @@ identity = record
     ; func→ = λ x → x
     }
   ; isFunctor = record
-    { ident = refl
+    { isIdentity = refl
     ; distrib = refl
     }
   }

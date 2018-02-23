@@ -29,8 +29,8 @@ module _ (ℓa ℓb : Level) where
       isAssociative = Σ≡ refl refl
 
     module _ {A B : Obj'} {f : Arr A B} where
-      ident : B ⟨ f ∘ one ⟩ ≡ f × B ⟨ one {B} ∘ f ⟩ ≡ f
-      ident = (Σ≡ refl refl) , Σ≡ refl refl
+      isIdentity : B ⟨ f ∘ one ⟩ ≡ f × B ⟨ one {B} ∘ f ⟩ ≡ f
+      isIdentity = (Σ≡ refl refl) , Σ≡ refl refl
 
 
     RawFam : RawCategory (lsuc (ℓa ⊔ ℓb)) (ℓa ⊔ ℓb)
@@ -45,7 +45,7 @@ module _ (ℓa ℓb : Level) where
       isCategory : IsCategory RawFam
       isCategory = record
         { isAssociative = λ {A} {B} {C} {D} {f} {g} {h} → isAssociative {D = D} {f} {g} {h}
-        ; ident = λ {A} {B} {f} → ident {A} {B} {f = f}
+        ; isIdentity = λ {A} {B} {f} → isIdentity {A} {B} {f = f}
         ; arrowIsSet = {!!}
         ; univalent = {!!}
         }

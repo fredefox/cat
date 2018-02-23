@@ -60,8 +60,8 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
   identityNatural : (F : Functor ℂ 𝔻) → Natural F F (identityTrans F)
   identityNatural F {A = A} {B = B} f = begin
     𝔻 [ identityTrans F B ∘ F→ f ]  ≡⟨⟩
-    𝔻 [ 𝟙 𝔻 ∘  F→ f ]              ≡⟨ proj₂ 𝔻.ident ⟩
-    F→ f                            ≡⟨ sym (proj₁ 𝔻.ident) ⟩
+    𝔻 [ 𝟙 𝔻 ∘  F→ f ]              ≡⟨ proj₂ 𝔻.isIdentity ⟩
+    F→ f                            ≡⟨ sym (proj₁ 𝔻.isIdentity) ⟩
     𝔻 [ F→ f ∘ 𝟙 𝔻 ]               ≡⟨⟩
     𝔻 [ F→ f ∘ identityTrans F A ]  ∎
     where
@@ -143,10 +143,10 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
       eq-r : ∀ C → (𝔻 [ f' C ∘ identityTrans A C ]) ≡ f' C
       eq-r C = begin
         𝔻 [ f' C ∘ identityTrans A C ] ≡⟨⟩
-        𝔻 [ f' C ∘ 𝔻.𝟙 ]  ≡⟨ proj₁ 𝔻.ident ⟩
+        𝔻 [ f' C ∘ 𝔻.𝟙 ]  ≡⟨ proj₁ 𝔻.isIdentity ⟩
         f' C ∎
       eq-l : ∀ C → (𝔻 [ identityTrans B C ∘ f' C ]) ≡ f' C
-      eq-l C = proj₂ 𝔻.ident
+      eq-l C = proj₂ 𝔻.isIdentity
       ident-r : (_:⊕:_ {A} {A} {B} f (identityNat A)) ≡ f
       ident-r = lemSig allNatural _ _ (funExt eq-r)
       ident-l : (_:⊕:_ {A} {B} {B} (identityNat B) f) ≡ f
@@ -169,7 +169,7 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     :isCategory: : IsCategory RawFun
     :isCategory: = record
       { isAssociative = λ {A B C D} → :isAssociative: {A} {B} {C} {D}
-      ; ident = λ {A B} → :ident: {A} {B}
+      ; isIdentity = λ {A B} → :ident: {A} {B}
       ; arrowIsSet = λ {F} {G} → naturalTransformationIsSets {F} {G}
       ; univalent = {!!}
       }

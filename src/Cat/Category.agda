@@ -83,9 +83,9 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 -- Univalence is indexed by a raw category as well as an identity proof.
 module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   open RawCategory ℂ
-  module _ (ident : IsIdentity 𝟙) where
+  module _ (isIdentity : IsIdentity 𝟙) where
     idIso : (A : Object) → A ≅ A
-    idIso A = 𝟙 , (𝟙 , ident)
+    idIso A = 𝟙 , (𝟙 , isIdentity)
 
     -- Lemma 9.1.4 in [HoTT]
     id-to-iso : (A B : Object) → A ≡ B → A ≅ B
@@ -102,9 +102,9 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   open Univalence ℂ public
   field
     isAssociative : IsAssociative
-    ident : IsIdentity 𝟙
+    isIdentity : IsIdentity 𝟙
     arrowIsSet : ArrowsAreSets
-    univalent : Univalent ident
+    univalent : Univalent isIdentity
 
 -- `IsCategory` is a mere proposition.
 module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
@@ -142,14 +142,14 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
             open Cubical.NType.Properties
             geq : g ≡ g'
             geq = begin
-              g            ≡⟨ sym (fst ident) ⟩
+              g            ≡⟨ sym (fst isIdentity) ⟩
               g ∘ 𝟙        ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
               g ∘ (f ∘ g') ≡⟨ isAssociative ⟩
               (g ∘ f) ∘ g' ≡⟨ cong (λ φ → φ ∘ g') η ⟩
-              𝟙 ∘ g'       ≡⟨ snd ident ⟩
+              𝟙 ∘ g'       ≡⟨ snd isIdentity ⟩
               g'           ∎
 
-    propUnivalent : isProp (Univalent ident)
+    propUnivalent : isProp (Univalent isIdentity)
     propUnivalent a b i = propPi (λ iso → propHasLevel ⟨-2⟩) a b i
 
   private
@@ -162,27 +162,27 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
       -- projections of `IsCategory` - I've arbitrarily chosed to use this
       -- result from `x : IsCategory C`. I don't know which (if any) possibly
       -- adverse effects this may have.
-      ident : (λ _ → IsIdentity 𝟙) [ X.ident ≡ Y.ident ]
-      ident = propIsIdentity x X.ident Y.ident
+      isIdentity : (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ Y.isIdentity ]
+      isIdentity = propIsIdentity x X.isIdentity Y.isIdentity
       done : x ≡ y
       U : ∀ {a : IsIdentity 𝟙}
-        → (λ _ → IsIdentity 𝟙) [ X.ident ≡ a ]
+        → (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ a ]
         → (b : Univalent a)
         → Set _
       U eqwal bbb =
         (λ i → Univalent (eqwal i))
         [ X.univalent ≡ bbb ]
       P : (y : IsIdentity 𝟙)
-        → (λ _ → IsIdentity 𝟙) [ X.ident ≡ y ] → Set _
+        → (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ y ] → Set _
       P y eq = ∀ (b' : Univalent y) → U eq b'
-      helper : ∀ (b' : Univalent X.ident)
-        → (λ _ → Univalent X.ident) [ X.univalent ≡ b' ]
+      helper : ∀ (b' : Univalent X.isIdentity)
+        → (λ _ → Univalent X.isIdentity) [ X.univalent ≡ b' ]
       helper univ = propUnivalent x X.univalent univ
-      foo = pathJ P helper Y.ident ident
-      eqUni : U ident Y.univalent
+      foo = pathJ P helper Y.isIdentity isIdentity
+      eqUni : U isIdentity Y.univalent
       eqUni = foo Y.univalent
       IC.isAssociative      (done i) = propIsAssociative x X.isAssociative Y.isAssociative i
-      IC.ident      (done i) = ident i
+      IC.isIdentity      (done i) = isIdentity i
       IC.arrowIsSet (done i) = propArrowIsSet x X.arrowIsSet Y.arrowIsSet i
       IC.univalent  (done i) = eqUni i
 
@@ -217,7 +217,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
     OpIsCategory : IsCategory OpRaw
     IsCategory.isAssociative OpIsCategory = sym isAssociative
-    IsCategory.ident OpIsCategory = swap ident
+    IsCategory.isIdentity OpIsCategory = swap isIdentity
     IsCategory.arrowIsSet OpIsCategory = arrowIsSet
     IsCategory.univalent OpIsCategory = {!!}
 
@@ -243,7 +243,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     module IsCat = IsCategory (ℂ .isCategory)
     rawIsCat : (i : I) → IsCategory (rawOp i)
     isAssociative (rawIsCat i) = IsCat.isAssociative
-    ident (rawIsCat i) = IsCat.ident
+    isIdentity (rawIsCat i) = IsCat.isIdentity
     arrowIsSet (rawIsCat i) = IsCat.arrowIsSet
     univalent (rawIsCat i) = IsCat.univalent
 

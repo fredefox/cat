@@ -91,13 +91,13 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
       issSet = setSig {sA = C.arrowIsSet} {sB = λ x → D.arrowIsSet}
       ident' : IsIdentity :𝟙:
       ident'
-        = Σ≡ (fst C.ident) (fst D.ident)
-        , Σ≡ (snd C.ident) (snd D.ident)
+        = Σ≡ (fst C.isIdentity) (fst D.isIdentity)
+        , Σ≡ (snd C.isIdentity) (snd D.isIdentity)
       postulate univalent : Univalence.Univalent :rawProduct: ident'
       instance
         :isCategory: : IsCategory :rawProduct:
         IsCategory.isAssociative :isCategory: = Σ≡ C.isAssociative D.isAssociative
-        IsCategory.ident :isCategory: = ident'
+        IsCategory.isIdentity :isCategory: = ident'
         IsCategory.arrowIsSet :isCategory: = issSet
         IsCategory.univalent :isCategory: = univalent
 
@@ -107,13 +107,13 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
       proj₁ : Catt [ :product: , ℂ ]
       proj₁ = record
         { raw = record { func* = fst ; func→ = fst }
-        ; isFunctor = record { ident = refl ; distrib = refl }
+        ; isFunctor = record { isIdentity = refl ; distrib = refl }
         }
 
       proj₂ : Catt [ :product: , 𝔻 ]
       proj₂ = record
         { raw = record { func* = snd ; func→ = snd }
-        ; isFunctor = record { ident = refl ; distrib = refl }
+        ; isFunctor = record { isIdentity = refl ; distrib = refl }
         }
 
       module _ {X : Object Catt} (x₁ : Catt [ X , ℂ ]) (x₂ : Catt [ X , 𝔻 ]) where
@@ -124,7 +124,7 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
             ; func→ = λ x → func→ x₁ x , func→ x₂ x
             }
           ; isFunctor = record
-            { ident   = Σ≡ x₁.ident x₂.ident
+            { isIdentity   = Σ≡ x₁.isIdentity x₂.isIdentity
             ; distrib = Σ≡ x₁.distrib x₂.distrib
             }
           }
@@ -230,7 +230,7 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
 
         -- NaturalTransformation F G × ℂ .Arrow A B
         -- :ident: : :func→: {c} {c} (identityNat F , ℂ .𝟙) ≡ 𝔻 .𝟙
-        -- :ident: = trans (proj₂ 𝔻.ident) (F .ident)
+        -- :ident: = trans (proj₂ 𝔻.isIdentity) (F .isIdentity)
         --   where
         --     open module 𝔻 = IsCategory (𝔻 .isCategory)
         -- Unfortunately the equational version has some ambigous arguments.
@@ -239,8 +239,8 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
           :func→: {c} {c} (𝟙 (Product.obj (:obj: ×p ℂ)) {c}) ≡⟨⟩
           :func→: {c} {c} (identityNat F , 𝟙 ℂ)             ≡⟨⟩
           𝔻 [ identityTrans F C ∘ func→ F (𝟙 ℂ)]           ≡⟨⟩
-          𝔻 [ 𝟙 𝔻 ∘ func→ F (𝟙 ℂ)]                        ≡⟨ proj₂ 𝔻.ident ⟩
-          func→ F (𝟙 ℂ)                                    ≡⟨ F.ident ⟩
+          𝔻 [ 𝟙 𝔻 ∘ func→ F (𝟙 ℂ)]                        ≡⟨ proj₂ 𝔻.isIdentity ⟩
+          func→ F (𝟙 ℂ)                                    ≡⟨ F.isIdentity ⟩
           𝟙 𝔻                                               ∎
           where
             open module 𝔻 = Category 𝔻
@@ -313,7 +313,7 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
           ; func→ = λ {dom} {cod} → :func→: {dom} {cod}
           }
         ; isFunctor = record
-          { ident = λ {o} → :ident: {o}
+          { isIdentity = λ {o} → :ident: {o}
           ; distrib = λ {f u n k y} → :distrib: {f} {u} {n} {k} {y}
           }
         }

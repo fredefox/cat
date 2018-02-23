@@ -26,8 +26,8 @@ module _ (ℓ : Level) where
 
     SetsIsCategory : IsCategory SetsRaw
     isAssociative SetsIsCategory = refl
-    proj₁ (ident SetsIsCategory) = funExt λ _ → refl
-    proj₂ (ident SetsIsCategory) = funExt λ _ → refl
+    proj₁ (isIdentity SetsIsCategory) = funExt λ _ → refl
+    proj₂ (isIdentity SetsIsCategory) = funExt λ _ → refl
     arrowIsSet SetsIsCategory {B = (_ , s)} = setPi λ _ → s
     univalent SetsIsCategory = {!!}
 
@@ -98,7 +98,7 @@ module _ {ℓa ℓb : Level} where
       ; func→ = ℂ [_∘_]
       }
     ; isFunctor = record
-      { ident = funExt λ _ → proj₂ ident
+      { isIdentity = funExt λ _ → proj₂ isIdentity
       ; distrib = funExt λ x → sym isAssociative
       }
     }
@@ -113,7 +113,7 @@ module _ {ℓa ℓb : Level} where
       ; func→ = λ f g → ℂ [ g ∘ f ]
     }
     ; isFunctor = record
-      { ident = funExt λ x → proj₁ ident
+      { isIdentity = funExt λ x → proj₁ isIdentity
       ; distrib = funExt λ x → isAssociative
       }
     }
