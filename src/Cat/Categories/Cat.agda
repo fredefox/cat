@@ -107,13 +107,13 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
       proj₁ : Catt [ :product: , ℂ ]
       proj₁ = record
         { raw = record { func* = fst ; func→ = fst }
-        ; isFunctor = record { isIdentity = refl ; distrib = refl }
+        ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
         }
 
       proj₂ : Catt [ :product: , 𝔻 ]
       proj₂ = record
         { raw = record { func* = snd ; func→ = snd }
-        ; isFunctor = record { isIdentity = refl ; distrib = refl }
+        ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
         }
 
       module _ {X : Object Catt} (x₁ : Catt [ X , ℂ ]) (x₂ : Catt [ X , 𝔻 ]) where
@@ -125,7 +125,7 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
             }
           ; isFunctor = record
             { isIdentity   = Σ≡ x₁.isIdentity x₂.isIdentity
-            ; distrib = Σ≡ x₁.distrib x₂.distrib
+            ; isDistributive = Σ≡ x₁.isDistributive x₂.isDistributive
             }
           }
           where
@@ -279,14 +279,14 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
             ηθ = proj₁ ηθNT
             ηθNat = proj₂ ηθNT
 
-          :distrib: :
+          :isDistributive: :
               𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ func→ F ( ℂ [ g ∘ f ] ) ]
             ≡ 𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ θ B ∘ func→ F f ] ]
-          :distrib: = begin
+          :isDistributive: = begin
             𝔻 [ (ηθ C) ∘ func→ F (ℂ [ g ∘ f ]) ]
               ≡⟨ ηθNat (ℂ [ g ∘ f ]) ⟩
             𝔻 [ func→ H (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
-              ≡⟨ cong (λ φ → 𝔻 [ φ ∘ ηθ A ]) (H.distrib) ⟩
+              ≡⟨ cong (λ φ → 𝔻 [ φ ∘ ηθ A ]) (H.isDistributive) ⟩
             𝔻 [ 𝔻 [ func→ H g ∘ func→ H f ] ∘ (ηθ A) ]
               ≡⟨ sym isAssociative ⟩
             𝔻 [ func→ H g ∘ 𝔻 [ func→ H f ∘ ηθ A ] ]
@@ -314,7 +314,7 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
           }
         ; isFunctor = record
           { isIdentity = λ {o} → :ident: {o}
-          ; distrib = λ {f u n k y} → :distrib: {f} {u} {n} {k} {y}
+          ; isDistributive = λ {f u n k y} → :isDistributive: {f} {u} {n} {k} {y}
           }
         }
 

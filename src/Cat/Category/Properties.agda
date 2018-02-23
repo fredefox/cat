@@ -88,6 +88,6 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat
       }
     ; isFunctor = record
       { isIdentity = :ident:
-      ; distrib = {!!}
+      ; isDistributive = {!!}
       }
     }

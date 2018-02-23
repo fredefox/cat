@@ -99,7 +99,7 @@ module _ {ℓa ℓb : Level} where
       }
     ; isFunctor = record
       { isIdentity = funExt λ _ → proj₂ isIdentity
-      ; distrib = funExt λ x → sym isAssociative
+      ; isDistributive = funExt λ x → sym isAssociative
       }
     }
     where
@@ -114,7 +114,7 @@ module _ {ℓa ℓb : Level} where
     }
     ; isFunctor = record
       { isIdentity = funExt λ x → proj₁ isIdentity
-      ; distrib = funExt λ x → isAssociative
+      ; isDistributive = funExt λ x → isAssociative
       }
     }
     where
