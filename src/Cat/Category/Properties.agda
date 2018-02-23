@@ -72,33 +72,13 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat
         [ (λ _ x → ℂ [ ℂ.𝟙 ∘ x ]) ≡ identityTrans (prshf c) ]
       eqTrans = funExt λ x → funExt λ x → ℂ.ident .proj₂
 
-      eqNat : (λ i → Natural (prshf c) (prshf c) (eqTrans i))
-        [(λ _ → funExt (λ _ → ℂ.assoc)) ≡ identityNatural (prshf c)]
-      eqNat = λ i {A} {B} f →
-        let
-         open Category 𝓢
-         lemm : (𝓢 [ eqTrans i B ∘ func→ (prshf c) f ]) ≡
-           (𝓢 [ func→ (prshf c) f ∘ eqTrans i A ])
-         lemm = {!!}
-         lem : (λ _ → 𝓢 [ Functor.func* (prshf c) A , func* (prshf c) B ])
-                [ 𝓢 [ eqTrans i B ∘ func→ (prshf c) f ]
-                ≡ 𝓢 [ func→ (prshf c) f ∘ eqTrans i A ] ]
-         lem
-           = arrowIsSet _ _ lemm _ i
-            -- (Sets [ eqTrans i B ∘ prshf c .func→ f ])
-            -- (Sets [ prshf c .func→ f ∘ eqTrans i A ])
-            -- lemm
-            -- _ i
-        in
-          lem
-      -- eqNat = λ {A} {B} i ℂ[B,A] i' ℂ[A,c] →
-      --   let
-      --     k : ℂ [ {!!} , {!!} ]
-      --     k = ℂ[A,c]
-      --   in {!ℂ [ ? ∘ ? ]!}
-
-      :ident: : (:func→: (ℂ.𝟙 {c})) ≡ (Category.𝟙 Fun {A = prshf c})
-      :ident: = Σ≡ eqTrans eqNat
+      open import Cubical.NType.Properties
+      open import Cat.Categories.Fun
+      :ident: : :func→: (ℂ.𝟙 {c}) ≡ Category.𝟙 Fun {A = prshf c}
+      :ident: = lemSig (naturalIsProp {F = prshf c} {prshf c}) _ _ eq
+        where
+          eq : (λ C x → ℂ [ ℂ.𝟙 ∘ x ]) ≡ identityTrans (prshf c)
+          eq = funExt λ A → funExt λ B → proj₂ ℂ.ident
 
   yoneda : Functor ℂ (Fun {ℂ = Opposite ℂ} {𝔻 = 𝓢})
   yoneda = record
