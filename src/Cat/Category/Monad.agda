@@ -119,7 +119,7 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     -- (>>=) : m a -> (a -> m b) -> m b
     -- (>=>) : (a -> m b) -> (b -> m c) -> a -> m c
     _>=>_ : {A B C : Object} → ℂ [ A , RR B ] → ℂ [ B , RR C ] → ℂ [ A , RR C ]
-    f >=> g = ℂ [ rr g ∘ f ]
+    f >=> g = rr g ∘ f
 
     -- fmap id ≡ id
     IsIdentity     = {X : Object}
@@ -182,7 +182,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         ζ {X} = η X
 
         rr : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
-        rr {X} {Y} f = ℂ [ μ Y ∘ func→ R f ]
+        rr {X} {Y} f = μ Y ∘ func→ R f
 
       forthRaw : K.RawMonad
       Kraw.RR forthRaw = RR
@@ -198,7 +198,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       isIdentity {X} = begin
         rr ζ                      ≡⟨⟩
         rr (η X)                  ≡⟨⟩
-        ℂ [ μ X ∘ func→ R (η X) ] ≡⟨ proj₂ isInverse ⟩
+        μ X ∘ func→ R (η X)       ≡⟨ proj₂ isInverse ⟩
         𝟙 ∎
 
       module R = Functor R
