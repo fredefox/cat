@@ -41,6 +41,8 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   codomain : { a b : Object } → Arrow a b → Object
   codomain {b = b} _ = b
 
+  -- TODO: It seems counter-intuitive that the normal-form is on the
+  -- right-hand-side.
   IsAssociative : Set (ℓa ⊔ ℓb)
   IsAssociative = ∀ {A B C D} {f : Arrow A B} {g : Arrow B C} {h : Arrow C D}
     → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f

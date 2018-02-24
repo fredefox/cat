@@ -21,10 +21,11 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   open NaturalTransformation ℂ ℂ
   record RawMonad : Set ℓ where
     field
+      -- R ~ m
       R : Functor ℂ ℂ
-      -- pure
+      -- η ~ pure
       ηNat : NaturalTransformation F.identity R
-      -- (>=>)
+      -- μ ~ join
       μNat : NaturalTransformation F[ R ∘ R ] R
 
     η : Transformation F.identity R
@@ -59,6 +60,33 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       raw : RawMonad
       isMonad : IsMonad raw
     open IsMonad isMonad public
+    module R = Functor R
+    module RR = Functor F[ R ∘ R ]
+    module _ {X Y Z : _} {g : ℂ [ Y , R.func* Z ]} {f : ℂ [ X , R.func* Y ]} where
+      lem : μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡ μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f)
+      lem = begin
+        μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡⟨ {!!} ⟩
+        μ Z ∘ R.func→     (μ Z ∘ R.func→ g ∘ f) ∎
+        where
+          open Category ℂ using () renaming (isAssociative to c-assoc)
+          μN : Natural F[ R ∘ R ] R μ
+          -- μN : (f : ℂ [ Y , R.func* Z ]) → μ (R.func* Z) ∘ RR.func→ f ≡ R.func→ f ∘ μ Y
+          μN = proj₂ μNat
+          μg : μ (R.func* Z) ∘ RR.func→ g ≡ R.func→ g ∘ μ Y
+          μg = μN g
+          μf : μ (R.func* Y) ∘ RR.func→ f ≡ R.func→ f ∘ μ X
+          μf = μN f
+          ηN : Natural F.identity R η
+          ηN = proj₂ ηNat
+          ηg : η (R.func* Z) ∘ g ≡ R.func→ g ∘ η Y
+          ηg = ηN g
+          -- Alternate route:
+          res = begin
+            μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡⟨ c-assoc ⟩
+            μ Z ∘ R.func→ g ∘ μ Y ∘ R.func→ f   ≡⟨ {!!} ⟩
+            μ Z ∘ (R.func→ g ∘ μ Y) ∘ R.func→ f ≡⟨ {!!} ⟩
+            μ Z ∘ (μ (R.func* Z) ∘ RR.func→ g) ∘ R.func→ f ≡⟨ {!!} ⟩
+            μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f) ∎
 
 -- "A monad in the Kleisli form" [voe]
 module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
@@ -93,12 +121,32 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     _>=>_ : {A B C : Object} → ℂ [ A , RR B ] → ℂ [ B , RR C ] → ℂ [ A , RR C ]
     f >=> g = ℂ [ rr g ∘ f ]
 
+    -- fmap id ≡ id
     IsIdentity     = {X : Object}
       → rr ζ ≡ 𝟙 {RR X}
     IsNatural      = {X Y : Object}   (f : ℂ [ X , RR Y ])
-      → (ℂ [ rr f ∘ ζ ]) ≡ f
+      → rr f ∘ ζ ≡ f
     IsDistributive = {X Y Z : Object} (g : ℂ [ Y , RR Z ]) (f : ℂ [ X , RR Y ])
-      → ℂ [ rr g ∘ rr f ] ≡ rr (ℂ [ rr g ∘ f ])
+      → rr g ∘ rr f ≡ rr (rr g ∘ f)
+    -- I assume `Fusion` is admissable - it certainly looks more like the
+    -- distributive law for monads I know from Haskell.
+    Fusion = {X Y Z : Object} (g : ℂ [ Y , Z ]) (f : ℂ [ X , Y ])
+      → rr (ζ ∘ g ∘ f) ≡ rr (ζ ∘ g) ∘ rr (ζ ∘ f)
+    -- NatDist2Fus : IsNatural → IsDistributive → Fusion
+    -- NatDist2Fus isNatural isDistributive g f =
+    --   let
+    --     ζf = ζ ∘ f
+    --     ζg = ζ ∘ g
+    --     Nζf : rr (ζ ∘ f) ∘ ζ ≡ ζ ∘ f
+    --     Nζf = isNatural ζf
+    --     Nζg : rr (ζ ∘ g) ∘ ζ ≡ ζ ∘ g
+    --     Nζg = isNatural ζg
+    --     ζgf = ζ ∘ g ∘ f
+    --     Nζgf : rr (ζ ∘ g ∘ f) ∘ ζ ≡ ζ ∘ g ∘ f
+    --     Nζgf = isNatural ζgf
+    --     res  : rr (ζ ∘ g ∘ f) ≡ rr (ζ ∘ g) ∘ rr (ζ ∘ f)
+    --     res = {!!}
+    --   in res
 
   record IsMonad (raw : RawMonad) : Set ℓ where
     open RawMonad raw public
@@ -129,9 +177,6 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
         RR : Object → Object
         RR = func* R
-
-        R→ : {A B : Object} → ℂ [ A , B ] → ℂ [ RR A , RR B ]
-        R→ = func→ R
 
         ζ : {X : Object} → ℂ [ X , RR X ]
         ζ {X} = η X
@@ -168,13 +213,17 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         𝟙 ∘ f                     ≡⟨ proj₂ ℂ.isIdentity ⟩
         f ∎
         where
-          module ℂ = Category ℂ
           open NaturalTransformation
+          module ℂ = Category ℂ
           ηN : Natural ℂ ℂ F.identity R η
           ηN = proj₂ ηNat
 
       isDistributive : IsDistributive
-      isDistributive = {!!}
+      isDistributive {X} {Y} {Z} g f = begin
+        rr g ∘ rr f                         ≡⟨⟩
+        μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡⟨ {!!} ⟩
+        μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f) ≡⟨⟩
+        μ Z ∘ R.func→ (rr g ∘ f) ∎
 
       forthIsMonad : K.IsMonad (forthRaw raw)
       Kis.isIdentity forthIsMonad = isIdentity
@@ -189,7 +238,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     back = {!!}
 
     fortheq : (m : K.Monad) → forth (back m) ≡ m
-    fortheq = {!!}
+    fortheq m = {!!}
 
     backeq : (m : M.Monad) → back (forth m) ≡ m
     backeq = {!!}
