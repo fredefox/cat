@@ -84,6 +84,15 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     --     pure : x → m x
     --     flip (>>=) :: (a → m b) → m a → m b
     --
+    pure : {X : Object} → ℂ [ X , RR X ]
+    pure = ζ
+    -- Why is (>>=) not implementable?
+    --
+    -- (>>=) : m a -> (a -> m b) -> m b
+    -- (>=>) : (a -> m b) -> (b -> m c) -> a -> m c
+    _>=>_ : {A B C : Object} → ℂ [ A , RR B ] → ℂ [ B , RR C ] → ℂ [ A , RR C ]
+    f >=> g = ℂ [ rr g ∘ f ]
+
     IsIdentity     = {X : Object}
       → rr ζ ≡ 𝟙 {RR X}
     IsNatural      = {X Y : Object}   (f : ℂ [ X , RR Y ])
