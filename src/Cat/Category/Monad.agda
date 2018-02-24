@@ -36,28 +36,12 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       module R  = Functor R
       module RR = Functor F[ R ∘ R ]
       module _ {X : Object} where
-        -- module IdRX = Functor (F.identity {C = RX})
-        ηX  : ℂ [ X                    , R.func* X ]
-        ηX = η X
-        RηX : ℂ [ R.func* X            , R.func* (R.func* X) ] -- ℂ [ R.func* X , {!R.func* (R.func* X))!} ]
-        RηX = R.func→ ηX
-        ηRX = η (R.func* X)
-        IdRX : Arrow (R.func* X) (R.func* X)
-        IdRX = 𝟙 {R.func* X}
-
-        μX  : ℂ [ RR.func* X           , R.func* X ]
-        μX = μ X
-        RμX : ℂ [ R.func* (RR.func* X) , RR.func* X ]
-        RμX = R.func→ μX
-        μRX : ℂ [ RR.func* (R.func* X) , R.func* (R.func* X) ]
-        μRX = μ (R.func* X)
-
         IsAssociative' : Set _
-        IsAssociative' = ℂ [ μX ∘ RμX ] ≡ ℂ [ μX ∘ μRX ]
+        IsAssociative' = μ X ∘ R.func→ (μ X) ≡ μ X ∘ μ (R.func* X)
         IsInverse' : Set _
         IsInverse'
-          = ℂ [ μX ∘ ηRX ] ≡ IdRX
-          × ℂ [ μX ∘ RηX ] ≡ IdRX
+          = μ X ∘ η (R.func* X) ≡ 𝟙
+          × μ X ∘ R.func→ (η X) ≡ 𝟙
 
     -- We don't want the objects to be indexes of the type, but rather just
     -- universally quantify over *all* objects of the category.
@@ -123,33 +107,28 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 -- Problem 2.3
 module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
   private
-    open Category ℂ using (Object ; Arrow ; 𝟙)
+    open Category ℂ using (Object ; Arrow ; 𝟙 ; _∘_)
     open Functor using (func* ; func→)
     module M = Monoidal ℂ
     module K = Kleisli ℂ
 
+    -- Note similarity with locally defined things in Kleisly.RawMonad!!
     module _ (m : M.RawMonad) where
       private
         open M.RawMonad m
         module Kraw = K.RawMonad
 
-      RR : Object → Object
-      RR = func* R
+        RR : Object → Object
+        RR = func* R
 
-      R→ : {A B : Object} → ℂ [ A , B ] → ℂ [ RR A , RR B ]
-      R→ = func→ R
+        R→ : {A B : Object} → ℂ [ A , B ] → ℂ [ RR A , RR B ]
+        R→ = func→ R
 
-      ζ : {X : Object} → ℂ [ X , RR X ]
-      ζ = {!!}
+        ζ : {X : Object} → ℂ [ X , RR X ]
+        ζ {X} = η X
 
-      rr : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
-      -- Order is different now!
-      rr {X} {Y} f = ℂ [ f ∘ {!!} ]
-        where
-          μY : ℂ [ func* F[ R ∘ R ] Y , func* R Y ]
-          μY = μ Y
-          ζY : ℂ [ Y , RR Y ]
-          ζY = ζ {Y}
+        rr : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
+        rr {X} {Y} f = ℂ [ μ Y ∘ func→ R f ]
 
       forthRaw : K.RawMonad
       Kraw.RR forthRaw = RR
@@ -158,15 +137,34 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
     module _ {raw : M.RawMonad} (m : M.IsMonad raw) where
       open M.IsMonad m
-      module Kraw = K.RawMonad (forthRaw raw)
+      open K.RawMonad (forthRaw raw)
       module Kis = K.IsMonad
-      isIdentity : Kraw.IsIdentity
-      isIdentity = {!!}
 
-      isNatural : Kraw.IsNatural
-      isNatural = {!!}
+      isIdentity : IsIdentity
+      isIdentity {X} = begin
+        rr ζ                      ≡⟨⟩
+        rr (η X)                  ≡⟨⟩
+        ℂ [ μ X ∘ func→ R (η X) ] ≡⟨ proj₂ isInverse ⟩
+        𝟙 ∎
 
-      isDistributive : Kraw.IsDistributive
+      module R = Functor R
+      isNatural : IsNatural
+      isNatural {X} {Y} f = begin
+        rr f ∘ ζ                  ≡⟨⟩
+        rr f ∘ η X                ≡⟨⟩
+        μ Y ∘ R.func→ f ∘ η X     ≡⟨ sym ℂ.isAssociative ⟩
+        μ Y ∘ (R.func→ f ∘ η X)   ≡⟨ cong (λ φ → μ Y ∘ φ) (sym (ηN f)) ⟩
+        μ Y ∘ (η (R.func* Y) ∘ f) ≡⟨ ℂ.isAssociative ⟩
+        μ Y ∘ η (R.func* Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (proj₁ isInverse) ⟩
+        𝟙 ∘ f                     ≡⟨ proj₂ ℂ.isIdentity ⟩
+        f ∎
+        where
+          module ℂ = Category ℂ
+          open NaturalTransformation
+          ηN : Natural ℂ ℂ F.identity R η
+          ηN = proj₂ ηNat
+
+      isDistributive : IsDistributive
       isDistributive = {!!}
 
       forthIsMonad : K.IsMonad (forthRaw raw)
@@ -178,8 +176,18 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     Kleisli.Monad.raw     (forth m) = forthRaw (M.Monad.raw m)
     Kleisli.Monad.isMonad (forth m) = forthIsMonad (M.Monad.isMonad m)
 
+    back : K.Monad → M.Monad
+    back = {!!}
+
+    fortheq : (m : K.Monad) → forth (back m) ≡ m
+    fortheq = {!!}
+
+    backeq : (m : M.Monad) → back (forth m) ≡ m
+    backeq = {!!}
+
+    open import Cubical.GradLemma
     eqv : isEquiv M.Monad K.Monad forth
-    eqv = {!!}
+    eqv = gradLemma forth back fortheq backeq
 
   Monoidal≃Kleisli : M.Monad ≃ K.Monad
   Monoidal≃Kleisli = forth , eqv
