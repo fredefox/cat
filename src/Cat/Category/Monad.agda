@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical #-}
+{-# OPTIONS --cubical --allow-unsolved-metas #-}
 module Cat.Category.Monad where
 
 open import Agda.Primitive
@@ -12,7 +12,7 @@ open import Cat.Category.Functor as F
 open import Cat.Category.NaturalTransformation
 open import Cat.Categories.Fun
 
--- "A monad in the monoidal form" [vlad]
+-- "A monad in the monoidal form" [voe]
 module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     ℓ = ℓa ⊔ ℓb
@@ -27,15 +27,16 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       -- (>=>)
       μNat : NaturalTransformation F[ R ∘ R ] R
 
+    η : Transformation F.identity R
+    η = proj₁ ηNat
+    μ : Transformation F[ R ∘ R ] R
+    μ = proj₁ μNat
 
     private
       module R  = Functor R
       module RR = Functor F[ R ∘ R ]
       module _ {X : Object} where
         -- module IdRX = Functor (F.identity {C = RX})
-
-        η : Transformation F.identity R
-        η = proj₁ ηNat
         ηX  : ℂ [ X                    , R.func* X ]
         ηX = η X
         RηX : ℂ [ R.func* X            , R.func* (R.func* X) ] -- ℂ [ R.func* X , {!R.func* (R.func* X))!} ]
@@ -44,8 +45,6 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         IdRX : Arrow (R.func* X) (R.func* X)
         IdRX = 𝟙 {R.func* X}
 
-        μ : Transformation F[ R ∘ R ] R
-        μ = proj₁ μNat
         μX  : ℂ [ RR.func* X           , R.func* X ]
         μX = μ X
         RμX : ℂ [ R.func* (RR.func* X) , RR.func* X ]
@@ -77,7 +76,7 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       isMonad : IsMonad raw
     open IsMonad isMonad public
 
--- "A monad in the Kleisli form" [vlad]
+-- "A monad in the Kleisli form" [voe]
 module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     ℓ = ℓa ⊔ ℓb
@@ -86,13 +85,14 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   record RawMonad : Set ℓ where
     field
       RR : Object → Object
-      η : {X : Object} → ℂ [ X , RR X ]
+      -- Note name-change from [voe]
+      ζ : {X : Object} → ℂ [ X , RR X ]
       rr : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
     -- Name suggestions are welcome!
     IsIdentity     = {X : Object}
-      → rr η ≡ 𝟙 {RR X}
+      → rr ζ ≡ 𝟙 {RR X}
     IsNatural      = {X Y : Object}   (f : ℂ [ X , RR Y ])
-      → (ℂ [ rr f ∘ η ]) ≡ f
+      → (ℂ [ rr f ∘ ζ ]) ≡ f
     IsDistributive = {X Y Z : Object} (g : ℂ [ Y , RR Z ]) (f : ℂ [ X , RR Y ])
       → ℂ [ rr g ∘ rr f ] ≡ rr (ℂ [ rr g ∘ f ])
 
@@ -108,3 +108,67 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       raw : RawMonad
       isMonad : IsMonad raw
     open IsMonad isMonad public
+
+-- Problem 2.3
+module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
+  private
+    open Category ℂ using (Object ; Arrow ; 𝟙)
+    open Functor using (func* ; func→)
+    module M = Monoidal ℂ
+    module K = Kleisli ℂ
+
+    module _ (m : M.RawMonad) where
+      private
+        open M.RawMonad m
+        module Kraw = K.RawMonad
+
+      RR : Object → Object
+      RR = func* R
+
+      R→ : {A B : Object} → ℂ [ A , B ] → ℂ [ RR A , RR B ]
+      R→ = func→ R
+
+      ζ : {X : Object} → ℂ [ X , RR X ]
+      ζ = {!!}
+
+      rr : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
+      -- Order is different now!
+      rr {X} {Y} f = ℂ [ f ∘ {!!} ]
+        where
+          μY : ℂ [ func* F[ R ∘ R ] Y , func* R Y ]
+          μY = μ Y
+          ζY : ℂ [ Y , RR Y ]
+          ζY = ζ {Y}
+
+      forthRaw : K.RawMonad
+      Kraw.RR forthRaw = RR
+      Kraw.ζ  forthRaw = ζ
+      Kraw.rr forthRaw = rr
+
+    module _ {raw : M.RawMonad} (m : M.IsMonad raw) where
+      open M.IsMonad m
+      module Kraw = K.RawMonad (forthRaw raw)
+      module Kis = K.IsMonad
+      isIdentity : Kraw.IsIdentity
+      isIdentity = {!!}
+
+      isNatural : Kraw.IsNatural
+      isNatural = {!!}
+
+      isDistributive : Kraw.IsDistributive
+      isDistributive = {!!}
+
+      forthIsMonad : K.IsMonad (forthRaw raw)
+      Kis.isIdentity forthIsMonad = isIdentity
+      Kis.isNatural forthIsMonad = isNatural
+      Kis.isDistributive forthIsMonad = isDistributive
+
+    forth : M.Monad → K.Monad
+    Kleisli.Monad.raw     (forth m) = forthRaw (M.Monad.raw m)
+    Kleisli.Monad.isMonad (forth m) = forthIsMonad (M.Monad.isMonad m)
+
+    eqv : isEquiv M.Monad K.Monad forth
+    eqv = {!!}
+
+  Monoidal≃Kleisli : M.Monad ≃ K.Monad
+  Monoidal≃Kleisli = forth , eqv
