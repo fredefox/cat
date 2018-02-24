@@ -124,8 +124,9 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
         ; isDistributive = dist
         }
 
-  _∘f_ : Functor A C
-  raw _∘f_ = _∘fr_
+  F[_∘_] _∘f_ : Functor A C
+  raw F[_∘_] = _∘fr_
+  _∘f_ = F[_∘_]
 
 -- The identity functor
 identity : ∀ {ℓ ℓ'} → {C : Category ℓ ℓ'} → Functor C C
