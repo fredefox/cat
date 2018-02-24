@@ -71,6 +71,12 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       isAssociative : IsAssociative
       isInverse : IsInverse
 
+  record Monad : Set ℓ where
+    field
+      raw : RawMonad
+      isMonad : IsMonad raw
+    open IsMonad isMonad public
+
 -- "A monad in the Kleisli form" [vlad]
 module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
