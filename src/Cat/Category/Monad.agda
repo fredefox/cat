@@ -27,9 +27,10 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       -- (>=>)
       μNat : NaturalTransformation F[ R ∘ R ] R
 
-    module R  = Functor R
-    module RR = Functor F[ R ∘ R ]
+
     private
+      module R  = Functor R
+      module RR = Functor F[ R ∘ R ]
       module _ {X : Object} where
         -- module IdRX = Functor (F.identity {C = RX})
 
@@ -69,3 +70,35 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     field
       isAssociative : IsAssociative
       isInverse : IsInverse
+
+-- "A monad in the Kleisli form" [vlad]
+module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+  private
+    ℓ = ℓa ⊔ ℓb
+
+  open Category ℂ hiding (IsIdentity)
+  record RawMonad : Set ℓ where
+    field
+      RR : Object → Object
+      η : {X : Object} → ℂ [ X , RR X ]
+      rr : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
+    -- Name suggestions are welcome!
+    IsIdentity     = {X : Object}
+      → rr η ≡ 𝟙 {RR X}
+    IsNatural      = {X Y : Object}   (f : ℂ [ X , RR Y ])
+      → (ℂ [ rr f ∘ η ]) ≡ f
+    IsDistributive = {X Y Z : Object} (g : ℂ [ Y , RR Z ]) (f : ℂ [ X , RR Y ])
+      → ℂ [ rr g ∘ rr f ] ≡ rr (ℂ [ rr g ∘ f ])
+
+  record IsMonad (raw : RawMonad) : Set ℓ where
+    open RawMonad raw public
+    field
+      isIdentity     : IsIdentity
+      isNatural      : IsNatural
+      isDistributive : IsDistributive
+
+  record Monad : Set ℓ where
+    field
+      raw : RawMonad
+      isMonad : IsMonad raw
+    open IsMonad isMonad public
