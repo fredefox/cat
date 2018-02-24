@@ -24,14 +24,14 @@ open Category using (Object ; 𝟙)
 module _ (ℓ ℓ' : Level) where
   private
     module _ {𝔸 𝔹 ℂ 𝔻 : Category ℓ ℓ'} {F : Functor 𝔸 𝔹} {G : Functor 𝔹 ℂ} {H : Functor ℂ 𝔻} where
-      assc : H ∘f (G ∘f F) ≡ (H ∘f G) ∘f F
+      assc : F[ H ∘ F[ G ∘ F ] ] ≡ F[ F[ H ∘ G ] ∘ F ]
       assc = Functor≡ refl refl
 
     module _ {ℂ 𝔻 : Category ℓ ℓ'} {F : Functor ℂ 𝔻} where
-      ident-r : F ∘f identity ≡ F
+      ident-r : F[ F ∘ identity ] ≡ F
       ident-r = Functor≡ refl refl
 
-      ident-l : identity ∘f F ≡ F
+      ident-l : F[ identity ∘ F ] ≡ F
       ident-l = Functor≡ refl refl
 
   RawCat : RawCategory (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
@@ -40,7 +40,7 @@ module _ (ℓ ℓ' : Level) where
       { Object = Category ℓ ℓ'
       ; Arrow = Functor
       ; 𝟙 = identity
-      ; _∘_ = _∘f_
+      ; _∘_ = F[_∘_]
       }
   private
     open RawCategory RawCat
