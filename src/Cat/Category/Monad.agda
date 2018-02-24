@@ -88,7 +88,18 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       -- Note name-change from [voe]
       ζ : {X : Object} → ℂ [ X , RR X ]
       rr : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
-    -- Name suggestions are welcome!
+    -- Note the correspondance with Haskell:
+    --
+    --     RR ~ m
+    --     ζ  ~ pure
+    --     rr ~ flip (>>=)
+    --
+    -- Where those things have these types:
+    --
+    --     m : 𝓤 → 𝓤
+    --     pure : x → m x
+    --     flip (>>=) :: (a → m b) → m a → m b
+    --
     IsIdentity     = {X : Object}
       → rr ζ ≡ 𝟙 {RR X}
     IsNatural      = {X Y : Object}   (f : ℂ [ X , RR Y ])
