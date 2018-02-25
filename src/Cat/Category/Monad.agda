@@ -35,19 +35,13 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
     private
       module R  = Functor R
-      module RR = Functor F[ R ∘ R ]
-      module _ {X : Object} where
-        IsAssociative' : Set _
-        IsAssociative' = μ X ∘ R.func→ (μ X) ≡ μ X ∘ μ (R.func* X)
-        IsInverse' : Set _
-        IsInverse'
-          = μ X ∘ η (R.func* X) ≡ 𝟙
-          × μ X ∘ R.func→ (η X) ≡ 𝟙
-
-    -- We don't want the objects to be indexes of the type, but rather just
-    -- universally quantify over *all* objects of the category.
-    IsAssociative = {X : Object} → IsAssociative' {X}
-    IsInverse = {X : Object} → IsInverse' {X}
+    IsAssociative : Set _
+    IsAssociative = {X : Object}
+      → μ X ∘ R.func→ (μ X) ≡ μ X ∘ μ (R.func* X)
+    IsInverse : Set _
+    IsInverse = {X : Object}
+      → μ X ∘ η (R.func* X) ≡ 𝟙
+      × μ X ∘ R.func→ (η X) ≡ 𝟙
 
   record IsMonad (raw : RawMonad) : Set ℓ where
     open RawMonad raw public
