@@ -17,7 +17,7 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     ℓ = ℓa ⊔ ℓb
 
-  open Category ℂ hiding (IsAssociative)
+  open Category ℂ using (Object ; Arrow ; 𝟙 ; _∘_)
   open NaturalTransformation ℂ ℂ
   record RawMonad : Set ℓ where
     field
@@ -60,33 +60,6 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       raw : RawMonad
       isMonad : IsMonad raw
     open IsMonad isMonad public
-    module R = Functor R
-    module RR = Functor F[ R ∘ R ]
-    module _ {X Y Z : _} {g : ℂ [ Y , R.func* Z ]} {f : ℂ [ X , R.func* Y ]} where
-      lem : μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡ μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f)
-      lem = begin
-        μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡⟨ {!!} ⟩
-        μ Z ∘ R.func→     (μ Z ∘ R.func→ g ∘ f) ∎
-        where
-          open Category ℂ using () renaming (isAssociative to c-assoc)
-          μN : Natural F[ R ∘ R ] R μ
-          -- μN : (f : ℂ [ Y , R.func* Z ]) → μ (R.func* Z) ∘ RR.func→ f ≡ R.func→ f ∘ μ Y
-          μN = proj₂ μNat
-          μg : μ (R.func* Z) ∘ RR.func→ g ≡ R.func→ g ∘ μ Y
-          μg = μN g
-          μf : μ (R.func* Y) ∘ RR.func→ f ≡ R.func→ f ∘ μ X
-          μf = μN f
-          ηN : Natural F.identity R η
-          ηN = proj₂ ηNat
-          ηg : η (R.func* Z) ∘ g ≡ R.func→ g ∘ η Y
-          ηg = ηN g
-          -- Alternate route:
-          res = begin
-            μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡⟨ c-assoc ⟩
-            μ Z ∘ R.func→ g ∘ μ Y ∘ R.func→ f   ≡⟨ {!!} ⟩
-            μ Z ∘ (R.func→ g ∘ μ Y) ∘ R.func→ f ≡⟨ {!!} ⟩
-            μ Z ∘ (μ (R.func* Z) ∘ RR.func→ g) ∘ R.func→ f ≡⟨ {!!} ⟩
-            μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f) ∎
 
 -- "A monad in the Kleisli form" [voe]
 module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
@@ -221,9 +194,38 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       isDistributive : IsDistributive
       isDistributive {X} {Y} {Z} g f = begin
         rr g ∘ rr f                         ≡⟨⟩
-        μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡⟨ {!!} ⟩
+        μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡⟨ sym lem2 ⟩
         μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f) ≡⟨⟩
         μ Z ∘ R.func→ (rr g ∘ f) ∎
+        where
+          -- Proved it in reverse here... otherwise it could be neatly inlined.
+          lem2
+            : μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f)
+            ≡ μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f)
+          lem2 = begin
+            μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f)                     ≡⟨ cong (λ φ → μ Z ∘ φ) distrib ⟩
+            μ Z ∘ (R.func→ (μ Z) ∘ R.func→ (R.func→ g) ∘ R.func→ f) ≡⟨⟩
+            μ Z ∘ (R.func→ (μ Z) ∘ RR.func→ g ∘ R.func→ f)          ≡⟨ {!!} ⟩ -- ●-solver?
+            (μ Z ∘ R.func→ (μ Z)) ∘ (RR.func→ g ∘ R.func→ f)        ≡⟨ cong (λ φ → φ ∘ (RR.func→ g ∘ R.func→ f)) lemmm ⟩
+            (μ Z ∘ μ (R.func* Z)) ∘ (RR.func→ g ∘ R.func→ f)        ≡⟨ {!!} ⟩ -- ●-solver?
+            μ Z ∘ μ (R.func* Z) ∘ RR.func→ g ∘ R.func→ f            ≡⟨ {!!} ⟩ -- ●-solver + lem4
+            μ Z ∘ R.func→ g ∘ μ Y ∘ R.func→ f                       ≡⟨ sym (Category.isAssociative ℂ) ⟩
+            μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ∎
+            where
+              module RR = Functor F[ R ∘ R ]
+              distrib : ∀ {A B C D} {a : Arrow C D} {b : Arrow B C} {c : Arrow A B}
+                → R.func→ (a ∘ b ∘ c)
+                ≡ R.func→ a ∘ R.func→ b ∘ R.func→ c
+              distrib = {!!}
+              comm : ∀ {A B C D E}
+                → {a : Arrow D E} {b : Arrow C D} {c : Arrow B C} {d : Arrow A B}
+                → a ∘ (b ∘ c ∘ d) ≡ a ∘ b ∘ c ∘ d
+              comm = {!!}
+              μN = proj₂ μNat
+              lemmm : μ Z ∘ R.func→ (μ Z) ≡ μ Z ∘ μ (R.func* Z)
+              lemmm = isAssociative
+              lem4 : μ (R.func* Z) ∘ RR.func→ g ≡ R.func→ g ∘ μ Y
+              lem4 = μN g
 
       forthIsMonad : K.IsMonad (forthRaw raw)
       Kis.isIdentity forthIsMonad = isIdentity
