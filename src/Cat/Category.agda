@@ -1,3 +1,32 @@
+-- | Univalent categories
+--
+-- This module defines:
+--
+-- Categories
+-- ==========
+--
+-- Types
+-- ------
+--
+-- Object, Arrow
+--
+-- Data
+-- ----
+-- 𝟙; the identity arrow
+-- _∘_; function composition
+--
+-- Laws
+-- ----
+--
+-- associativity, identity, arrows form sets, univalence.
+--
+-- Lemmas
+-- ------
+--
+-- Propositionality for all laws about the category.
+--
+-- TODO: An equality principle for categories that focuses on the pure data-part.
+--
 {-# OPTIONS --allow-unsolved-metas --cubical #-}
 
 module Cat.Category where
@@ -16,6 +45,11 @@ open import Cubical.NType.Properties using ( propIsEquiv )
 
 open import Cat.Wishlist
 
+-----------------
+-- * Utilities --
+-----------------
+
+-- | Unique existensials.
 ∃! : ∀ {a b} {A : Set a}
   → (A → Set b) → Set (a ⊔ b)
 ∃! = ∃!≈ _≡_
@@ -25,6 +59,15 @@ open import Cat.Wishlist
 
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
+-----------------
+-- * Categories --
+-----------------
+
+-- | Raw categories
+--
+-- This record desribes the data that a category consist of as well as some laws
+-- about these. The laws defined are the types the propositions - not the
+-- witnesses to them!
 record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   no-eta-equality
   field
@@ -35,11 +78,15 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
   infixl 10 _∘_
 
+  -- | Operations on data
+
   domain : { a b : Object } → Arrow a b → Object
   domain {a = a} _ = a
 
   codomain : { a b : Object } → Arrow a b → Object
   codomain {b = b} _ = b
+
+  -- | Laws about the data
 
   -- TODO: It seems counter-intuitive that the normal-form is on the
   -- right-hand-side.
@@ -93,12 +140,16 @@ module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
     id-to-iso : (A B : Object) → A ≡ B → A ≅ B
     id-to-iso A B eq = transp (\ i → A ≅ eq i) (idIso A)
 
-    -- TODO: might want to implement isEquiv
-    -- differently, there are 3
-    -- equivalent formulations in the book.
     Univalent : Set (ℓa ⊔ ℓb)
     Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
 
+-- | The mere proposition of being a category.
+--
+-- Also defines a few lemmas:
+--
+--     iso-is-epi  : Isomorphism f → Epimorphism {X = X} f
+--     iso-is-mono : Isomorphism f → Monomorphism {X = X} f
+--
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   open RawCategory ℂ public
   open Univalence ℂ public
@@ -107,6 +158,8 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
     isIdentity    : IsIdentity 𝟙
     arrowsAreSets : ArrowsAreSets
     univalent     : Univalent isIdentity
+
+  -- Some common lemmas about categories.
   module _ {A B : Object} {X : Object} (f : Arrow A B) where
     iso-is-epi : Isomorphism f → Epimorphism {X = X} f
     iso-is-epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
@@ -134,7 +187,10 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
     iso-is-epi-mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
     iso-is-epi-mono iso = iso-is-epi iso , iso-is-mono iso
 
--- `IsCategory` is a mere proposition.
+-- | Propositionality of being a category
+--
+-- Proves that all projections of `IsCategory` are mere propositions as well as
+-- `IsCategory` itself being a mere proposition.
 module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
   open RawCategory C
   module _ (ℂ : IsCategory C) where
@@ -217,6 +273,9 @@ module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
   propIsCategory : isProp (IsCategory C)
   propIsCategory = done
 
+-- | Univalent categories
+--
+-- Just bundles up the data with witnesses inhabting the propositions.
 record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   field
     raw : RawCategory ℓa ℓb
@@ -224,6 +283,7 @@ record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
   open IsCategory isCategory public
 
+-- | Syntax for arrows- and composition in a given category.
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   open Category ℂ
   _[_,_] : (A : Object) → (B : Object) → Set ℓb
@@ -232,48 +292,48 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   _[_∘_] : {A B C : Object} → (g : Arrow B C) → (f : Arrow A B) → Arrow A C
   _[_∘_] = _∘_
 
-module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
-  private
+-- | The opposite category
+--
+-- The opposite category is the category where the direction of the arrows are
+-- flipped.
+module Opposite {ℓa ℓb : Level} where
+  module _ (ℂ : Category ℓa ℓb) where
     open Category ℂ
+    private
+      opRaw : RawCategory ℓa ℓb
+      RawCategory.Object opRaw = Object
+      RawCategory.Arrow  opRaw = Function.flip Arrow
+      RawCategory.𝟙      opRaw = 𝟙
+      RawCategory._∘_    opRaw = Function.flip _∘_
 
-    OpRaw : RawCategory ℓa ℓb
-    RawCategory.Object OpRaw = Object
-    RawCategory.Arrow OpRaw = Function.flip Arrow
-    RawCategory.𝟙 OpRaw = 𝟙
-    RawCategory._∘_ OpRaw = Function.flip _∘_
+      opIsCategory : IsCategory opRaw
+      IsCategory.isAssociative opIsCategory = sym isAssociative
+      IsCategory.isIdentity    opIsCategory = swap isIdentity
+      IsCategory.arrowsAreSets opIsCategory = arrowsAreSets
+      IsCategory.univalent     opIsCategory = {!!}
 
-    OpIsCategory : IsCategory OpRaw
-    IsCategory.isAssociative OpIsCategory = sym isAssociative
-    IsCategory.isIdentity OpIsCategory = swap isIdentity
-    IsCategory.arrowsAreSets OpIsCategory = arrowsAreSets
-    IsCategory.univalent OpIsCategory = {!!}
+    opposite : Category ℓa ℓb
+    raw opposite = opRaw
+    Category.isCategory opposite = opIsCategory
 
-  Opposite : Category ℓa ℓb
-  raw Opposite = OpRaw
-  Category.isCategory Opposite = OpIsCategory
+  -- As demonstrated here a side-effect of having no-eta-equality on constructors
+  -- means that we need to pick things apart to show that things are indeed
+  -- definitionally equal. I.e; a thing that would normally be provable in one
+  -- line now takes 13!! Admittedly it's a simple proof.
+  module _ {ℂ : Category ℓa ℓb} where
+    open Category ℂ
+    private
+      -- Since they really are definitionally equal we just need to pick apart
+      -- the data-type.
+      rawInv : Category.raw (opposite (opposite ℂ)) ≡ raw
+      RawCategory.Object   (rawInv _) = Object
+      RawCategory.Arrow    (rawInv _) = Arrow
+      RawCategory.𝟙        (rawInv _) = 𝟙
+      RawCategory._∘_      (rawInv _) = _∘_
 
--- As demonstrated here a side-effect of having no-eta-equality on constructors
--- means that we need to pick things apart to show that things are indeed
--- definitionally equal. I.e; a thing that would normally be provable in one
--- line now takes more than 20!!
-module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
-  private
-    open RawCategory
-    module C = Category ℂ
-    rawOp : Category.raw (Opposite (Opposite ℂ)) ≡ Category.raw ℂ
-    Object (rawOp _) = C.Object
-    Arrow (rawOp _) = C.Arrow
-    𝟙 (rawOp _) = C.𝟙
-    _∘_ (rawOp _) = C._∘_
-    open Category
-    open IsCategory
-    module IsCat = IsCategory (ℂ .isCategory)
-    rawIsCat : (i : I) → IsCategory (rawOp i)
-    isAssociative (rawIsCat i) = IsCat.isAssociative
-    isIdentity (rawIsCat i) = IsCat.isIdentity
-    arrowsAreSets (rawIsCat i) = IsCat.arrowsAreSets
-    univalent (rawIsCat i) = IsCat.univalent
+    -- TODO: Define and use Monad≡
+    oppositeIsInvolution : opposite (opposite ℂ) ≡ ℂ
+    Category.raw        (oppositeIsInvolution i) = rawInv i
+    Category.isCategory (oppositeIsInvolution x) = {!!}
 
-  Opposite-is-involution : Opposite (Opposite ℂ) ≡ ℂ
-  raw (Opposite-is-involution i) = rawOp i
-  isCategory (Opposite-is-involution i) = rawIsCat i
+open Opposite public renaming (opposite to Opposite)
