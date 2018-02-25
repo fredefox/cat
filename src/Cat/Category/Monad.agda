@@ -302,21 +302,25 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     Monoidal.Monad.raw     (back m) = backRaw     m
     Monoidal.Monad.isMonad (back m) = backIsMonad m
 
-
-    forthRawEq : (m : K.Monad) → forthRaw (backRaw m) ≡ K.Monad.raw m
-    K.RawMonad.RR (forthRawEq m _) = K.RawMonad.RR (K.Monad.raw m)
-    K.RawMonad.ζ  (forthRawEq m _) = K.RawMonad.ζ  (K.Monad.raw m)
-    -- stuck
-    K.RawMonad.rr (forthRawEq m i) = {!!}
+    -- I believe all the proofs here should be `refl`.
+    module _ (m : K.Monad) where
+      open K.RawMonad (K.Monad.raw m)
+      forthRawEq : forthRaw (backRaw m) ≡ K.Monad.raw m
+      K.RawMonad.RR (forthRawEq _) = RR
+      K.RawMonad.ζ  (forthRawEq _) = ζ
+      -- stuck
+      K.RawMonad.rr (forthRawEq i) = {!!}
 
     fortheq : (m : K.Monad) → forth (back m) ≡ m
     fortheq m = K.Monad≡ (forthRawEq m)
 
-    backRawEq : (m : M.Monad) → backRaw (forth m) ≡ M.Monad.raw m
-    -- stuck
-    M.RawMonad.R    (backRawEq m _) = ?
-    M.RawMonad.ηNat (backRawEq m x) = {!!}
-    M.RawMonad.μNat (backRawEq m x) = {!!}
+    module _ (m : M.Monad) where
+      open M.RawMonad (M.Monad.raw m)
+      backRawEq : backRaw (forth m) ≡ M.Monad.raw m
+      -- stuck
+      M.RawMonad.R    (backRawEq i) = {!!}
+      M.RawMonad.ηNat (backRawEq i) = {!!}
+      M.RawMonad.μNat (backRawEq i) = {!!}
 
     backeq : (m : M.Monad) → back (forth m) ≡ m
     backeq m = M.Monad≡ (backRawEq m)
