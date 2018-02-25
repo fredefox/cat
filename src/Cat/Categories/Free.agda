@@ -7,8 +7,6 @@ open import Data.Product
 
 open import Cat.Category
 
-open IsCategory
-
 data Path {ℓ ℓ' : Level} {A : Set ℓ} (R : A → A → Set ℓ') : (a b : A) → Set (ℓ ⊔ ℓ') where
   empty : {a : A} → Path R a a
   cons : {a b c : A} → R b c → Path R a b → Path R a c

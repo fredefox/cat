@@ -100,7 +100,7 @@ module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
     Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
 
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
-  open RawCategory ℂ
+  open RawCategory ℂ public
   open Univalence ℂ public
   field
     isAssociative : IsAssociative
@@ -112,7 +112,7 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
 module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
   open RawCategory C
   module _ (ℂ : IsCategory C) where
-    open IsCategory ℂ
+    open IsCategory ℂ using (isAssociative ; arrowsAreSets ; isIdentity ; Univalent)
     open import Cubical.NType
     open import Cubical.NType.Properties
 
@@ -196,7 +196,6 @@ record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     raw : RawCategory ℓa ℓb
     {{isCategory}} : IsCategory raw
 
-  open RawCategory raw public
   open IsCategory isCategory public
 
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
