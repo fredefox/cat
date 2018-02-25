@@ -1,4 +1,4 @@
-module Cat.CwF where
+module Cat.Categories.CwF where
 
 open import Agda.Primitive
 open import Data.Product

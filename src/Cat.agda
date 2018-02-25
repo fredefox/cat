@@ -1,7 +1,6 @@
 module Cat where
 
 import Cat.Category
-import Cat.CwF
 
 import Cat.Category.Functor
 import Cat.Category.Product
@@ -19,3 +18,4 @@ import Cat.Categories.Rel
 import Cat.Categories.Free
 import Cat.Categories.Fun
 import Cat.Categories.Cube
+import Cat.Categories.CwF
