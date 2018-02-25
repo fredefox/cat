@@ -1,6 +1,6 @@
 {-# OPTIONS --allow-unsolved-metas --cubical #-}
 
-module Cat.Category.Properties where
+module Cat.Category.Yoneda where
 
 open import Agda.Primitive
 open import Data.Product

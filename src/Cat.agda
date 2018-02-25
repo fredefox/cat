@@ -9,7 +9,7 @@ import Cat.Category.CartesianClosed
 import Cat.Category.NaturalTransformation
 import Cat.Category.Pathy
 import Cat.Category.Bij
-import Cat.Category.Properties
+import Cat.Category.Yoneda
 import Cat.Category.Monad
 
 import Cat.Categories.Sets
