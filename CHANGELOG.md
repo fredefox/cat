@@ -1,6 +1,27 @@
 Changelog
 =========
 
+Version 1.3.0
+-------------
+
+Removed unused modules and streamlined things more: All specific categories are
+in the namespace `Cat.Categories`.
+
+Lemmas about categories are now in the appropriate record e.g. `IsCategory`.
+Also changed how category reexports stuff.
+
+Rename the module Properties to Yoneda - because that's all it talks about now.
+
+Rename Opposite to opposite
+
+Add documentation in Category-module
+
+Formulation of monads in two ways; the "monoidal-" and "kleisli-" form.
+
+WIP: Equivalence of these two formulations
+
+Also use hSets in a few concrete categories rather than just pure `Set`.
+
 Version 1.2.0
 -------------
 This version is mainly a huge refactor.
