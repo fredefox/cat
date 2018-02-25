@@ -12,6 +12,7 @@ open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
 open import Cat.Category.Exponential
+open import Cat.Category.NaturalTransformation
 
 open import Cat.Equality
 open Equality.Data.Product
@@ -23,14 +24,14 @@ open Category using (Object ; 𝟙)
 module _ (ℓ ℓ' : Level) where
   private
     module _ {𝔸 𝔹 ℂ 𝔻 : Category ℓ ℓ'} {F : Functor 𝔸 𝔹} {G : Functor 𝔹 ℂ} {H : Functor ℂ 𝔻} where
-      assc : H ∘f (G ∘f F) ≡ (H ∘f G) ∘f F
+      assc : F[ H ∘ F[ G ∘ F ] ] ≡ F[ F[ H ∘ G ] ∘ F ]
       assc = Functor≡ refl refl
 
     module _ {ℂ 𝔻 : Category ℓ ℓ'} {F : Functor ℂ 𝔻} where
-      ident-r : F ∘f identity ≡ F
+      ident-r : F[ F ∘ identity ] ≡ F
       ident-r = Functor≡ refl refl
 
-      ident-l : identity ∘f F ≡ F
+      ident-l : F[ identity ∘ F ] ≡ F
       ident-l = Functor≡ refl refl
 
   RawCat : RawCategory (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
@@ -39,7 +40,7 @@ module _ (ℓ ℓ' : Level) where
       { Object = Category ℓ ℓ'
       ; Arrow = Functor
       ; 𝟙 = identity
-      ; _∘_ = _∘f_
+      ; _∘_ = F[_∘_]
       }
   private
     open RawCategory RawCat
@@ -176,9 +177,10 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
     Catℓ : Category (lsuc (ℓ ⊔ ℓ)) (ℓ ⊔ ℓ)
     Catℓ = Cat ℓ ℓ unprovable
     module _ (ℂ 𝔻 : Category ℓ ℓ) where
+      open Fun ℂ 𝔻 renaming (identity to idN)
       private
         :obj: : Object Catℓ
-        :obj: = Fun {ℂ = ℂ} {𝔻 = 𝔻}
+        :obj: = Fun
 
         :func*: : Functor ℂ 𝔻 × Object ℂ → Object 𝔻
         :func*: (F , A) = func* F A
@@ -234,10 +236,11 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
         --   where
         --     open module 𝔻 = IsCategory (𝔻 .isCategory)
         -- Unfortunately the equational version has some ambigous arguments.
-        :ident: : :func→: {c} {c} (identityNat F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
+
+        :ident: : :func→: {c} {c} (NT.identity F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
         :ident: = begin
           :func→: {c} {c} (𝟙 (Product.obj (:obj: ×p ℂ)) {c}) ≡⟨⟩
-          :func→: {c} {c} (identityNat F , 𝟙 ℂ)             ≡⟨⟩
+          :func→: {c} {c} (idN F , 𝟙 ℂ)             ≡⟨⟩
           𝔻 [ identityTrans F C ∘ func→ F (𝟙 ℂ)]           ≡⟨⟩
           𝔻 [ 𝟙 𝔻 ∘ func→ F (𝟙 ℂ)]                        ≡⟨ proj₂ 𝔻.isIdentity ⟩
           func→ F (𝟙 ℂ)                                    ≡⟨ F.isIdentity ⟩

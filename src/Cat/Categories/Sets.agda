@@ -88,7 +88,7 @@ module _ {ℓa ℓb : Level} where
 
     -- Contravariant Presheaf
     Presheaf : Set (ℓa ⊔ lsuc ℓb)
-    Presheaf = Functor (Opposite ℂ) (𝓢𝓮𝓽 ℓb)
+    Presheaf = Functor (opposite ℂ) (𝓢𝓮𝓽 ℓb)
 
   -- The "co-yoneda" embedding.
   representable : {ℂ : Category ℓa ℓb} → Category.Object ℂ → Representable ℂ
@@ -106,7 +106,7 @@ module _ {ℓa ℓb : Level} where
       open Category ℂ
 
   -- Alternate name: `yoneda`
-  presheaf : {ℂ : Category ℓa ℓb} → Category.Object (Opposite ℂ) → Presheaf ℂ
+  presheaf : {ℂ : Category ℓa ℓb} → Category.Object (opposite ℂ) → Presheaf ℂ
   presheaf {ℂ = ℂ} B = record
     { raw = record
       { func* = λ A → ℂ [ A , B ] , arrowsAreSets

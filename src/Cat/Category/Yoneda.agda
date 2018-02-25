@@ -1,6 +1,6 @@
 {-# OPTIONS --allow-unsolved-metas --cubical #-}
 
-module Cat.Category.Properties where
+module Cat.Category.Yoneda where
 
 open import Agda.Primitive
 open import Data.Product
@@ -8,38 +8,8 @@ open import Cubical
 
 open import Cat.Category
 open import Cat.Category.Functor
-open import Cat.Categories.Sets
 open import Cat.Equality
 open Equality.Data.Product
-
-module _ {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} { A B : Category.Object ℂ } {X : Category.Object ℂ} (f : Category.Arrow ℂ A B) where
-  open Category ℂ
-
-  iso-is-epi : Isomorphism f → Epimorphism {X = X} f
-  iso-is-epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
-    g₀              ≡⟨ sym (proj₁ isIdentity) ⟩
-    g₀ ∘ 𝟙          ≡⟨ cong (_∘_ g₀) (sym right-inv) ⟩
-    g₀ ∘ (f ∘ f-)   ≡⟨ isAssociative ⟩
-    (g₀ ∘ f) ∘ f-   ≡⟨ cong (λ φ → φ ∘ f-) eq ⟩
-    (g₁ ∘ f) ∘ f-   ≡⟨ sym isAssociative ⟩
-    g₁ ∘ (f ∘ f-)   ≡⟨ cong (_∘_ g₁) right-inv ⟩
-    g₁ ∘ 𝟙          ≡⟨ proj₁ isIdentity ⟩
-    g₁              ∎
-
-  iso-is-mono : Isomorphism f → Monomorphism {X = X} f
-  iso-is-mono (f- , (left-inv , right-inv)) g₀ g₁ eq =
-    begin
-    g₀            ≡⟨ sym (proj₂ isIdentity) ⟩
-    𝟙 ∘ g₀        ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
-    (f- ∘ f) ∘ g₀ ≡⟨ sym isAssociative ⟩
-    f- ∘ (f ∘ g₀) ≡⟨ cong (_∘_ f-) eq ⟩
-    f- ∘ (f ∘ g₁) ≡⟨ isAssociative ⟩
-    (f- ∘ f) ∘ g₁ ≡⟨ cong (λ φ → φ ∘ g₁) left-inv ⟩
-    𝟙 ∘ g₁        ≡⟨ proj₂ isIdentity ⟩
-    g₁            ∎
-
-  iso-is-epi-mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
-  iso-is-epi-mono iso = iso-is-epi iso , iso-is-mono iso
 
 -- TODO: We want to avoid defining the yoneda embedding going through the
 -- category of categories (since it doesn't exist).
@@ -52,6 +22,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat
   open import Cat.Category.Exponential
   open Functor
   𝓢 = Sets ℓ
+  open Fun (opposite ℂ) 𝓢
   private
     Catℓ : Category _ _
     Catℓ = record { raw = RawCat ℓ ℓ ; isCategory = unprovable}
@@ -80,7 +51,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat
           eq : (λ C x → ℂ [ ℂ.𝟙 ∘ x ]) ≡ identityTrans (prshf c)
           eq = funExt λ A → funExt λ B → proj₂ ℂ.isIdentity
 
-  yoneda : Functor ℂ (Fun {ℂ = Opposite ℂ} {𝔻 = 𝓢})
+  yoneda : Functor ℂ Fun
   yoneda = record
     { raw = record
       { func* = prshf

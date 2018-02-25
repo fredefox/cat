@@ -51,7 +51,7 @@ module _
     (F : RawFunctor ℂ 𝔻)
     where
   private
-    module 𝔻 = IsCategory (isCategory 𝔻)
+    module 𝔻 = Category 𝔻
 
   propIsFunctor : isProp (IsFunctor _ _ F)
   propIsFunctor isF0 isF1 i = record
@@ -69,7 +69,7 @@ module _
     {F : I → RawFunctor ℂ 𝔻}
     where
   private
-    module 𝔻 = IsCategory (isCategory 𝔻)
+    module 𝔻 = Category 𝔻
   IsProp' : {ℓ : Level} (A : I → Set ℓ) → Set ℓ
   IsProp' A = (a0 : A i0) (a1 : A i1) → A [ a0 ≡ a1 ]
 
@@ -124,8 +124,8 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
         ; isDistributive = dist
         }
 
-  _∘f_ : Functor A C
-  raw _∘f_ = _∘fr_
+  F[_∘_] : Functor A C
+  raw F[_∘_] = _∘fr_
 
 -- The identity functor
 identity : ∀ {ℓ ℓ'} → {C : Category ℓ ℓ'} → Functor C C
