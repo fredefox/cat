@@ -22,7 +22,7 @@ module _ {ℓa ℓb : Level} where
     Substitutions = Arrow ℂ
     field
       -- A functor T
-      T : Functor (Opposite ℂ) (Fam ℓa ℓb)
+      T : Functor (opposite ℂ) (Fam ℓa ℓb)
       -- Empty context
       [] : Terminal ℂ
     private

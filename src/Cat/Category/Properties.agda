@@ -22,7 +22,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat
   open import Cat.Category.Exponential
   open Functor
   𝓢 = Sets ℓ
-  open Fun (Opposite ℂ) 𝓢
+  open Fun (opposite ℂ) 𝓢
   private
     Catℓ : Category _ _
     Catℓ = record { raw = RawCat ℓ ℓ ; isCategory = unprovable}

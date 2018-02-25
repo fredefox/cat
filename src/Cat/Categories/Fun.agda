@@ -108,7 +108,7 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
 
 module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
   open import Cat.Categories.Sets
-  open NaturalTransformation (Opposite ℂ) (𝓢𝓮𝓽 ℓ')
+  open NaturalTransformation (opposite ℂ) (𝓢𝓮𝓽 ℓ')
 
   -- Restrict the functors to Presheafs.
   RawPresh : RawCategory (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')

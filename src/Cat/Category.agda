@@ -336,4 +336,4 @@ module Opposite {ℓa ℓb : Level} where
     Category.raw        (oppositeIsInvolution i) = rawInv i
     Category.isCategory (oppositeIsInvolution x) = {!!}
 
-open Opposite public renaming (opposite to Opposite)
+open Opposite public
