@@ -11,37 +11,6 @@ open import Cat.Category.Functor
 open import Cat.Equality
 open Equality.Data.Product
 
--- Maybe inline into RawCategory"
-module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
-  open Category ℂ
-
-  module _ {A B : Object} {X : Object} (f : Arrow A B) where
-    iso-is-epi : Isomorphism f → Epimorphism {X = X} f
-    iso-is-epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
-      g₀              ≡⟨ sym (proj₁ isIdentity) ⟩
-      g₀ ∘ 𝟙          ≡⟨ cong (_∘_ g₀) (sym right-inv) ⟩
-      g₀ ∘ (f ∘ f-)   ≡⟨ isAssociative ⟩
-      (g₀ ∘ f) ∘ f-   ≡⟨ cong (λ φ → φ ∘ f-) eq ⟩
-      (g₁ ∘ f) ∘ f-   ≡⟨ sym isAssociative ⟩
-      g₁ ∘ (f ∘ f-)   ≡⟨ cong (_∘_ g₁) right-inv ⟩
-      g₁ ∘ 𝟙          ≡⟨ proj₁ isIdentity ⟩
-      g₁              ∎
-
-    iso-is-mono : Isomorphism f → Monomorphism {X = X} f
-    iso-is-mono (f- , (left-inv , right-inv)) g₀ g₁ eq =
-      begin
-      g₀            ≡⟨ sym (proj₂ isIdentity) ⟩
-      𝟙 ∘ g₀        ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
-      (f- ∘ f) ∘ g₀ ≡⟨ sym isAssociative ⟩
-      f- ∘ (f ∘ g₀) ≡⟨ cong (_∘_ f-) eq ⟩
-      f- ∘ (f ∘ g₁) ≡⟨ isAssociative ⟩
-      (f- ∘ f) ∘ g₁ ≡⟨ cong (λ φ → φ ∘ g₁) left-inv ⟩
-      𝟙 ∘ g₁        ≡⟨ proj₂ isIdentity ⟩
-      g₁            ∎
-
-    iso-is-epi-mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
-    iso-is-epi-mono iso = iso-is-epi iso , iso-is-mono iso
-
 -- TODO: We want to avoid defining the yoneda embedding going through the
 -- category of categories (since it doesn't exist).
 open import Cat.Categories.Cat using (RawCat)
