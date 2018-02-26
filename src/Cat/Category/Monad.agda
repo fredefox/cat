@@ -48,12 +48,15 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       → μ X ∘ η (R.func* X) ≡ 𝟙
       × μ X ∘ R.func→ (η X) ≡ 𝟙
     IsNatural' = ∀ {X Y f} → μ Y ∘ R.func→ f ∘ η X ≡ f
+    IsDistributive' = ∀ {X Y Z} {f : Arrow X (R.func* Y)} {g : Arrow Y (R.func* Z)}
+      → μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f)
+      ≡ μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f)
 
   record IsMonad (raw : RawMonad) : Set ℓ where
     open RawMonad raw public
     field
       isAssociative : IsAssociative
-      isInverse : IsInverse
+      isInverse     : IsInverse
 
     private
       module R = Functor R
@@ -67,6 +70,31 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       μ Y ∘ η (R.func* Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (proj₁ isInverse) ⟩
       𝟙 ∘ f                     ≡⟨ proj₂ ℂ.isIdentity ⟩
       f                         ∎
+
+    isDistributive' : IsDistributive'
+    isDistributive' {X} {Y} {Z} {f} {g} = begin
+      μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f)                     ≡⟨ cong (λ φ → μ Z ∘ φ) distrib ⟩
+      μ Z ∘ (R.func→ (μ Z) ∘ R.func→ (R.func→ g) ∘ R.func→ f) ≡⟨⟩
+      μ Z ∘ (R.func→ (μ Z) ∘ R².func→ g ∘ R.func→ f)          ≡⟨ {!!} ⟩ -- ●-solver?
+      (μ Z ∘ R.func→ (μ Z)) ∘ (R².func→ g ∘ R.func→ f)        ≡⟨ cong (λ φ → φ ∘ (R².func→ g ∘ R.func→ f)) lemmm ⟩
+      (μ Z ∘ μ (R.func* Z)) ∘ (R².func→ g ∘ R.func→ f)        ≡⟨ {!!} ⟩ -- ●-solver?
+      μ Z ∘ μ (R.func* Z) ∘ R².func→ g ∘ R.func→ f            ≡⟨ {!!} ⟩ -- ●-solver + lem4
+      μ Z ∘ R.func→ g ∘ μ Y ∘ R.func→ f                       ≡⟨ sym (Category.isAssociative ℂ) ⟩
+      μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ∎
+      where
+        module R² = Functor F[ R ∘ R ]
+        distrib : ∀ {A B C D} {a : Arrow C D} {b : Arrow B C} {c : Arrow A B}
+          → R.func→ (a ∘ b ∘ c)
+          ≡ R.func→ a ∘ R.func→ b ∘ R.func→ c
+        distrib = {!!}
+        comm : ∀ {A B C D E}
+          → {a : Arrow D E} {b : Arrow C D} {c : Arrow B C} {d : Arrow A B}
+          → a ∘ (b ∘ c ∘ d) ≡ a ∘ b ∘ c ∘ d
+        comm = {!!}
+        lemmm : μ Z ∘ R.func→ (μ Z) ≡ μ Z ∘ μ (R.func* Z)
+        lemmm = isAssociative
+        lem4 : μ (R.func* Z) ∘ R².func→ g ≡ R.func→ g ∘ μ Y
+        lem4 = μNat g
 
   record Monad : Set ℓ where
     field
@@ -212,7 +240,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
         isIdentity : IsIdentity
         isIdentity {X} = begin
-          bind pure                    ≡⟨⟩
+          bind pure                  ≡⟨⟩
           bind (η X)                ≡⟨⟩
           μ X ∘ func→ R (η X)       ≡⟨ proj₂ isInverse ⟩
           𝟙 ∎
@@ -232,38 +260,9 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         isDistributive : IsDistributive
         isDistributive {X} {Y} {Z} g f = begin
           bind g ∘ bind f                     ≡⟨⟩
-          μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡⟨ sym lem2 ⟩
+          μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡⟨ sym isDistributive' ⟩
           μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f) ≡⟨⟩
           μ Z ∘ R.func→ (bind g ∘ f) ∎
-          where
-            -- Proved it in reverse here... otherwise it could be neatly inlined.
-            lem2
-              : μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f)
-              ≡ μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f)
-            lem2 = begin
-              μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f)                     ≡⟨ cong (λ φ → μ Z ∘ φ) distrib ⟩
-              μ Z ∘ (R.func→ (μ Z) ∘ R.func→ (R.func→ g) ∘ R.func→ f) ≡⟨⟩
-              μ Z ∘ (R.func→ (μ Z) ∘ RR.func→ g ∘ R.func→ f)          ≡⟨ {!!} ⟩ -- ●-solver?
-              (μ Z ∘ R.func→ (μ Z)) ∘ (RR.func→ g ∘ R.func→ f)        ≡⟨ cong (λ φ → φ ∘ (RR.func→ g ∘ R.func→ f)) lemmm ⟩
-              (μ Z ∘ μ (R.func* Z)) ∘ (RR.func→ g ∘ R.func→ f)        ≡⟨ {!!} ⟩ -- ●-solver?
-              μ Z ∘ μ (R.func* Z) ∘ RR.func→ g ∘ R.func→ f            ≡⟨ {!!} ⟩ -- ●-solver + lem4
-              μ Z ∘ R.func→ g ∘ μ Y ∘ R.func→ f                       ≡⟨ sym (Category.isAssociative ℂ) ⟩
-              μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ∎
-              where
-                module RR = Functor F[ R ∘ R ]
-                distrib : ∀ {A B C D} {a : Arrow C D} {b : Arrow B C} {c : Arrow A B}
-                  → R.func→ (a ∘ b ∘ c)
-                  ≡ R.func→ a ∘ R.func→ b ∘ R.func→ c
-                distrib = {!!}
-                comm : ∀ {A B C D E}
-                  → {a : Arrow D E} {b : Arrow C D} {c : Arrow B C} {d : Arrow A B}
-                  → a ∘ (b ∘ c ∘ d) ≡ a ∘ b ∘ c ∘ d
-                comm = {!!}
-                μN = proj₂ μNatTrans
-                lemmm : μ Z ∘ R.func→ (μ Z) ≡ μ Z ∘ μ (R.func* Z)
-                lemmm = isAssociative
-                lem4 : μ (R.func* Z) ∘ RR.func→ g ≡ R.func→ g ∘ μ Y
-                lem4 = μN g
 
       module KI = K.IsMonad
       forthIsMonad : K.IsMonad (forthRaw raw)
