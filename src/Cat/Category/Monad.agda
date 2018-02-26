@@ -70,34 +70,49 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     ℓ = ℓa ⊔ ℓb
 
   open Category ℂ using (Arrow ; 𝟙 ; Object ; _∘_ ; _>>>_)
+
+  -- | Data for a monad.
+  --
+  -- Note that (>>=) is not expressible in a general category because objects
+  -- are not generally types.
   record RawMonad : Set ℓ where
     field
       RR : Object → Object
       -- Note name-change from [voe]
       pure : {X : Object} → ℂ [ X , RR X ]
       bind : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
+
+    -- | functor map
+    --
+    -- This should perhaps be defined in a "Klesli-version" of functors as well?
     fmap : ∀ {A B} → ℂ [ A , B ] → ℂ [ RR A , RR B ]
     fmap f = bind (pure ∘ f)
-    -- Why is (>>=) not implementable? - Because in e.g. the category of sets is
-    -- `m a` a set. This is not necessarily the case.
+
+    -- | Composition of monads aka. the kleisli-arrow.
     _>=>_ : {A B C : Object} → ℂ [ A , RR B ] → ℂ [ B , RR C ] → ℂ [ A , RR C ]
     f >=> g = f >>> (bind g)
-    -- _>>=_ : {A B C : Object} {m : RR A} → ℂ [ A , RR B ] → RR C
-    -- m >>= f = ?
+
+    -- | Flattening nested monads.
     join : {A : Object} → ℂ [ RR (RR A) , RR A ]
     join = bind 𝟙
 
-    -- fmap id ≡ id
+    ------------------
+    -- * Monad laws --
+    ------------------
+
+    -- There may be better names than what I've chosen here.
+
     IsIdentity     = {X : Object}
-      -- aka. `>>= pure ≡ 𝟙`
       → bind pure ≡ 𝟙 {RR X}
     IsNatural      = {X Y : Object}   (f : ℂ [ X , RR Y ])
-      -- aka. `pure >>= f ≡ f`
       → pure >>> (bind f) ≡ f
-    -- Not stricly a distributive law, since ∘ becomes >=>
     IsDistributive = {X Y Z : Object} (g : ℂ [ Y , RR Z ]) (f : ℂ [ X , RR Y ])
-      -- `>>= g . >>= f ≡ >>= (>>= g . f) ≡ >>= (\x -> (f x) >>= g)`
       → (bind f) >>> (bind g) ≡ bind (f >=> g)
+
+    -- | Functor map fusion.
+    --
+    -- This is really a functor law. Should we have a kleisli-representation of
+    -- functors as well and make them a super-class?
     Fusion = {X Y Z : Object} {g : ℂ [ Y , Z ]} {f : ℂ [ X , Y ]}
       → fmap (g ∘ f) ≡ fmap g ∘ fmap f
 
