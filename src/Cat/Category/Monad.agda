@@ -30,8 +30,13 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
     η : Transformation F.identity R
     η = proj₁ ηNatTrans
+    ηNat : Natural F.identity R η
+    ηNat = proj₂ ηNatTrans
+
     μ : Transformation F[ R ∘ R ] R
     μ = proj₁ μNatTrans
+    μNat : Natural F[ R ∘ R ] R μ
+    μNat = proj₂ μNatTrans
 
     private
       module R  = Functor R
@@ -42,12 +47,26 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     IsInverse = {X : Object}
       → μ X ∘ η (R.func* X) ≡ 𝟙
       × μ X ∘ R.func→ (η X) ≡ 𝟙
+    IsNatural' = ∀ {X Y f} → μ Y ∘ R.func→ f ∘ η X ≡ f
 
   record IsMonad (raw : RawMonad) : Set ℓ where
     open RawMonad raw public
     field
       isAssociative : IsAssociative
       isInverse : IsInverse
+
+    private
+      module R = Functor R
+      module ℂ = Category ℂ
+
+    isNatural' : IsNatural'
+    isNatural' {X} {Y} {f} = begin
+      μ Y ∘ R.func→ f ∘ η X     ≡⟨ sym ℂ.isAssociative ⟩
+      μ Y ∘ (R.func→ f ∘ η X)   ≡⟨ cong (λ φ → μ Y ∘ φ) (sym (ηNat f)) ⟩
+      μ Y ∘ (η (R.func* Y) ∘ f) ≡⟨ ℂ.isAssociative ⟩
+      μ Y ∘ η (R.func* Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (proj₁ isInverse) ⟩
+      𝟙 ∘ f                     ≡⟨ proj₂ ℂ.isIdentity ⟩
+      f                         ∎
 
   record Monad : Set ℓ where
     field
@@ -202,11 +221,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         isNatural {X} {Y} f = begin
           bind f ∘ pure             ≡⟨⟩
           bind f ∘ η X              ≡⟨⟩
-          μ Y ∘ R.func→ f ∘ η X     ≡⟨ sym ℂ.isAssociative ⟩
-          μ Y ∘ (R.func→ f ∘ η X)   ≡⟨ cong (λ φ → μ Y ∘ φ) (sym (ηN f)) ⟩
-          μ Y ∘ (η (R.func* Y) ∘ f) ≡⟨ ℂ.isAssociative ⟩
-          μ Y ∘ η (R.func* Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (proj₁ isInverse) ⟩
-          𝟙 ∘ f                     ≡⟨ proj₂ ℂ.isIdentity ⟩
+          μ Y ∘ R.func→ f ∘ η X     ≡⟨ isNatural' ⟩
           f ∎
           where
             open NaturalTransformation
