@@ -75,37 +75,37 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       RR : Object → Object
       -- Note name-change from [voe]
       ζ : {X : Object} → ℂ [ X , RR X ]
-      rr : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
-    -- Note the correspondance with Haskell:
-    --
-    --     RR ~ m
-    --     ζ  ~ pure
-    --     rr ~ flip (>>=)
-    --
-    -- Where those things have these types:
-    --
-    --     m : 𝓤 → 𝓤
-    --     pure : x → m x
-    --     flip (>>=) :: (a → m b) → m a → m b
-    --
+      bind : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
     pure : {X : Object} → ℂ [ X , RR X ]
     pure = ζ
     fmap : ∀ {A B} → ℂ [ A , B ] → ℂ [ RR A , RR B ]
-    fmap f = rr (ζ ∘ f)
-    -- Why is (>>=) not implementable?
+    fmap f = bind (ζ ∘ f)
+    -- Why is (>>=) not implementable? - Because in e.g. the category of sets is
+    -- `m a` a set. This is not necessarily the case.
     --
     -- (>>=) : m a -> (a -> m b) -> m b
     -- (>=>) : (a -> m b) -> (b -> m c) -> a -> m c
+    -- Is really like a lifting operation from ∘ (the low level of functions) to >=> (the level of monads)
+    _>>>_ : {A B C : Object} → (Arrow A B) → (Arrow B C) → Arrow A C
+    f >>> g = g ∘ f
     _>=>_ : {A B C : Object} → ℂ [ A , RR B ] → ℂ [ B , RR C ] → ℂ [ A , RR C ]
-    f >=> g = rr g ∘ f
+    f >=> g = f >>> (bind g)
+    -- _>>=_ : {A B C : Object} {m : RR A} → ℂ [ A , RR B ] → RR C
+    -- m >>= f = ?
+    join : {A : Object} → ℂ [ RR (RR A) , RR A ]
+    join = bind 𝟙
 
     -- fmap id ≡ id
     IsIdentity     = {X : Object}
-      → rr ζ ≡ 𝟙 {RR X}
+      -- aka. `>>= pure ≡ 𝟙`
+      → bind pure ≡ 𝟙 {RR X}
     IsNatural      = {X Y : Object}   (f : ℂ [ X , RR Y ])
-      → rr f ∘ ζ ≡ f
+      -- aka. `pure >>= f ≡ f`
+      → pure >>> (bind f) ≡ f
+    -- Not stricly a distributive law, since ∘ becomes >=>
     IsDistributive = {X Y Z : Object} (g : ℂ [ Y , RR Z ]) (f : ℂ [ X , RR Y ])
-      → rr g ∘ rr f ≡ rr (rr g ∘ f)
+      -- `>>= g . >>= f ≡ >>= (>>= g . f) ≡ >>= (\x -> (f x) >>= g)`
+      → (bind f) >>> (bind g) ≡ bind (f >=> g)
     Fusion = {X Y Z : Object} {g : ℂ [ Y , Z ]} {f : ℂ [ X , Y ]}
       → fmap (g ∘ f) ≡ fmap g ∘ fmap f
 
@@ -118,12 +118,19 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     fusion : Fusion
     fusion {g = g} {f} = begin
       fmap (g ∘ f)              ≡⟨⟩
-      rr (ζ ∘ (g ∘ f))          ≡⟨ {!!} ⟩
-      rr (rr (ζ ∘ g) ∘ (ζ ∘ f)) ≡⟨ sym lem ⟩
-      rr (ζ ∘ g) ∘ rr (ζ ∘ f)   ≡⟨⟩
+      --     f >=> g = >>= g ∘ f
+      bind ((f >>> g) >>> pure)  ≡⟨ cong bind isAssociative ⟩
+      bind (f >>> (g >>> pure))  ≡⟨ cong (λ φ → bind (f >>> φ)) (sym (isNatural _)) ⟩
+      bind (f >>> (pure >>> (bind (g >>> pure)))) ≡⟨⟩
+      bind (f >>> (pure >>> fmap g)) ≡⟨⟩
+      bind ((fmap g ∘ pure) ∘ f) ≡⟨ cong bind (sym isAssociative) ⟩
+      bind
+      (fmap g ∘ (pure ∘ f)) ≡⟨ sym lem ⟩
+      bind (ζ ∘ g) ∘ bind (ζ ∘ f)   ≡⟨⟩
       fmap g ∘ fmap f           ∎
       where
-        lem : rr (ζ ∘ g) ∘ rr (ζ ∘ f) ≡ rr (rr (ζ ∘ g) ∘ (ζ ∘ f))
+        open Category ℂ using (isAssociative)
+        lem : fmap g ∘ fmap f ≡ bind (fmap g ∘ (pure ∘ f))
         lem = isDistributive (ζ ∘ g) (ζ ∘ f)
 
   record Monad : Set ℓ where
@@ -161,13 +168,13 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         ζ : {X : Object} → ℂ [ X , RR X ]
         ζ {X} = η X
 
-        rr : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
-        rr {X} {Y} f = μ Y ∘ func→ R f
+        bind : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
+        bind {X} {Y} f = μ Y ∘ func→ R f
 
       forthRaw : K.RawMonad
       Kraw.RR forthRaw = RR
       Kraw.ζ  forthRaw = ζ
-      Kraw.rr forthRaw = rr
+      Kraw.bind forthRaw = bind
 
     module _ {raw : M.RawMonad} (m : M.IsMonad raw) where
       private
@@ -177,16 +184,16 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
         isIdentity : IsIdentity
         isIdentity {X} = begin
-          rr ζ                      ≡⟨⟩
-          rr (η X)                  ≡⟨⟩
+          bind ζ                    ≡⟨⟩
+          bind (η X)                ≡⟨⟩
           μ X ∘ func→ R (η X)       ≡⟨ proj₂ isInverse ⟩
           𝟙 ∎
 
         module R = Functor R
         isNatural : IsNatural
         isNatural {X} {Y} f = begin
-          rr f ∘ ζ                  ≡⟨⟩
-          rr f ∘ η X                ≡⟨⟩
+          bind f ∘ ζ                ≡⟨⟩
+          bind f ∘ η X              ≡⟨⟩
           μ Y ∘ R.func→ f ∘ η X     ≡⟨ sym ℂ.isAssociative ⟩
           μ Y ∘ (R.func→ f ∘ η X)   ≡⟨ cong (λ φ → μ Y ∘ φ) (sym (ηN f)) ⟩
           μ Y ∘ (η (R.func* Y) ∘ f) ≡⟨ ℂ.isAssociative ⟩
@@ -201,10 +208,10 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
         isDistributive : IsDistributive
         isDistributive {X} {Y} {Z} g f = begin
-          rr g ∘ rr f                         ≡⟨⟩
+          bind g ∘ bind f                         ≡⟨⟩
           μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡⟨ sym lem2 ⟩
           μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f) ≡⟨⟩
-          μ Z ∘ R.func→ (rr g ∘ f) ∎
+          μ Z ∘ R.func→ (bind g ∘ f) ∎
           where
             -- Proved it in reverse here... otherwise it could be neatly inlined.
             lem2
@@ -253,18 +260,18 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
         rawR : RawFunctor ℂ ℂ
         RawFunctor.func* rawR = RR
-        RawFunctor.func→ rawR f = rr (ζ ∘ f)
+        RawFunctor.func→ rawR f = bind (ζ ∘ f)
 
         isFunctorR : IsFunctor ℂ ℂ rawR
         IsFunctor.isIdentity     isFunctorR = begin
-          rr (ζ ∘ 𝟙) ≡⟨ cong rr (proj₁ ℂ.isIdentity) ⟩
-          rr ζ       ≡⟨ isIdentity ⟩
+          bind (ζ ∘ 𝟙) ≡⟨ cong bind (proj₁ ℂ.isIdentity) ⟩
+          bind ζ       ≡⟨ isIdentity ⟩
           𝟙 ∎
         IsFunctor.isDistributive isFunctorR {f = f} {g} = begin
-          rr (ζ ∘ (g ∘ f))        ≡⟨⟩
+          bind (ζ ∘ (g ∘ f))        ≡⟨⟩
           fmap (g ∘ f)            ≡⟨ fusion ⟩
           fmap g ∘ fmap f         ≡⟨⟩
-          rr (ζ ∘ g) ∘ rr (ζ ∘ f) ∎
+          bind (ζ ∘ g) ∘ bind (ζ ∘ f) ∎
 
         R : Functor ℂ ℂ
         Functor.raw       R = rawR
@@ -303,7 +310,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       K.RawMonad.RR (forthRawEq _) = RR
       K.RawMonad.ζ  (forthRawEq _) = ζ
       -- stuck
-      K.RawMonad.rr (forthRawEq i) = {!!}
+      K.RawMonad.bind (forthRawEq i) = {!!}
 
     fortheq : (m : K.Monad) → forth (back m) ≡ m
     fortheq m = K.Monad≡ (forthRawEq m)
