@@ -24,14 +24,14 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       -- R ~ m
       R : Functor ℂ ℂ
       -- η ~ pure
-      ηNat : NaturalTransformation F.identity R
+      ηNatTrans : NaturalTransformation F.identity R
       -- μ ~ join
-      μNat : NaturalTransformation F[ R ∘ R ] R
+      μNatTrans : NaturalTransformation F[ R ∘ R ] R
 
     η : Transformation F.identity R
-    η = proj₁ ηNat
+    η = proj₁ ηNatTrans
     μ : Transformation F[ R ∘ R ] R
-    μ = proj₁ μNat
+    μ = proj₁ μNatTrans
 
     private
       module R  = Functor R
@@ -122,17 +122,17 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       isIdentity     : IsIdentity
       isNatural      : IsNatural
       isDistributive : IsDistributive
+
+    -- | Map fusion is admissable.
     fusion : Fusion
     fusion {g = g} {f} = begin
-      fmap (g ∘ f)              ≡⟨⟩
-      --     f >=> g = >>= g ∘ f
+      fmap (g ∘ f)               ≡⟨⟩
       bind ((f >>> g) >>> pure)  ≡⟨ cong bind isAssociative ⟩
       bind (f >>> (g >>> pure))  ≡⟨ cong (λ φ → bind (f >>> φ)) (sym (isNatural _)) ⟩
       bind (f >>> (pure >>> (bind (g >>> pure)))) ≡⟨⟩
       bind (f >>> (pure >>> fmap g)) ≡⟨⟩
       bind ((fmap g ∘ pure) ∘ f) ≡⟨ cong bind (sym isAssociative) ⟩
-      bind
-      (fmap g ∘ (pure ∘ f)) ≡⟨ sym lem ⟩
+      bind (fmap g ∘ (pure ∘ f)) ≡⟨ sym lem ⟩
       bind (pure ∘ g) ∘ bind (pure ∘ f)   ≡⟨⟩
       fmap g ∘ fmap f           ∎
       where
@@ -155,7 +155,9 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       res : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
       res = {!!}
 
--- Problem 2.3
+-- | The monoidal- and kleisli presentation of monads are equivalent.
+--
+-- This is problem 2.3 in [voe].
 module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
   private
     open Category ℂ using (Object ; Arrow ; 𝟙 ; _∘_)
@@ -179,15 +181,15 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         bind {X} {Y} f = μ Y ∘ func→ R f
 
       forthRaw : K.RawMonad
-      Kraw.RR forthRaw = RR
-      Kraw.pure  forthRaw = pure
+      Kraw.RR   forthRaw = RR
+      Kraw.pure forthRaw = pure
       Kraw.bind forthRaw = bind
 
     module _ {raw : M.RawMonad} (m : M.IsMonad raw) where
       private
         open M.IsMonad m
         open K.RawMonad (forthRaw raw)
-        module Kis = K.IsMonad
+        module R = Functor R
 
         isIdentity : IsIdentity
         isIdentity {X} = begin
@@ -196,10 +198,9 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
           μ X ∘ func→ R (η X)       ≡⟨ proj₂ isInverse ⟩
           𝟙 ∎
 
-        module R = Functor R
         isNatural : IsNatural
         isNatural {X} {Y} f = begin
-          bind f ∘ pure                ≡⟨⟩
+          bind f ∘ pure             ≡⟨⟩
           bind f ∘ η X              ≡⟨⟩
           μ Y ∘ R.func→ f ∘ η X     ≡⟨ sym ℂ.isAssociative ⟩
           μ Y ∘ (R.func→ f ∘ η X)   ≡⟨ cong (λ φ → μ Y ∘ φ) (sym (ηN f)) ⟩
@@ -211,11 +212,11 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
             open NaturalTransformation
             module ℂ = Category ℂ
             ηN : Natural ℂ ℂ F.identity R η
-            ηN = proj₂ ηNat
+            ηN = proj₂ ηNatTrans
 
         isDistributive : IsDistributive
         isDistributive {X} {Y} {Z} g f = begin
-          bind g ∘ bind f                         ≡⟨⟩
+          bind g ∘ bind f                     ≡⟨⟩
           μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ≡⟨ sym lem2 ⟩
           μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f) ≡⟨⟩
           μ Z ∘ R.func→ (bind g ∘ f) ∎
@@ -243,16 +244,17 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
                   → {a : Arrow D E} {b : Arrow C D} {c : Arrow B C} {d : Arrow A B}
                   → a ∘ (b ∘ c ∘ d) ≡ a ∘ b ∘ c ∘ d
                 comm = {!!}
-                μN = proj₂ μNat
+                μN = proj₂ μNatTrans
                 lemmm : μ Z ∘ R.func→ (μ Z) ≡ μ Z ∘ μ (R.func* Z)
                 lemmm = isAssociative
                 lem4 : μ (R.func* Z) ∘ RR.func→ g ≡ R.func→ g ∘ μ Y
                 lem4 = μN g
 
+      module KI = K.IsMonad
       forthIsMonad : K.IsMonad (forthRaw raw)
-      Kis.isIdentity forthIsMonad = isIdentity
-      Kis.isNatural forthIsMonad = isNatural
-      Kis.isDistributive forthIsMonad = isDistributive
+      KI.isIdentity     forthIsMonad = isIdentity
+      KI.isNatural      forthIsMonad = isNatural
+      KI.isDistributive forthIsMonad = isDistributive
 
     forth : M.Monad → K.Monad
     Kleisli.Monad.raw     (forth m) = forthRaw     (M.Monad.raw m)
@@ -262,41 +264,42 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       private
         module ℂ = Category ℂ
         open K.Monad m
-        module Mraw = M.RawMonad
         open NaturalTransformation ℂ ℂ
 
         rawR : RawFunctor ℂ ℂ
-        RawFunctor.func* rawR = RR
+        RawFunctor.func* rawR   = RR
         RawFunctor.func→ rawR f = bind (pure ∘ f)
 
         isFunctorR : IsFunctor ℂ ℂ rawR
-        IsFunctor.isIdentity     isFunctorR = begin
+        IsFunctor.isIdentity isFunctorR = begin
           bind (pure ∘ 𝟙) ≡⟨ cong bind (proj₁ ℂ.isIdentity) ⟩
           bind pure       ≡⟨ isIdentity ⟩
-          𝟙 ∎
+          𝟙               ∎
+
         IsFunctor.isDistributive isFunctorR {f = f} {g} = begin
-          bind (pure ∘ (g ∘ f))        ≡⟨⟩
-          fmap (g ∘ f)            ≡⟨ fusion ⟩
-          fmap g ∘ fmap f         ≡⟨⟩
+          bind (pure ∘ (g ∘ f))             ≡⟨⟩
+          fmap (g ∘ f)                      ≡⟨ fusion ⟩
+          fmap g ∘ fmap f                   ≡⟨⟩
           bind (pure ∘ g) ∘ bind (pure ∘ f) ∎
 
         R : Functor ℂ ℂ
         Functor.raw       R = rawR
         Functor.isFunctor R = isFunctorR
 
-        R2 : Functor ℂ ℂ
-        R2 = F[ R ∘ R ]
+        R² : Functor ℂ ℂ
+        R² = F[ R ∘ R ]
 
-        ηNat : NaturalTransformation F.identity R
-        ηNat = {!!}
+        ηNatTrans : NaturalTransformation F.identity R
+        ηNatTrans = {!!}
 
-        μNat : NaturalTransformation R2 R
-        μNat = {!!}
+        μNatTrans : NaturalTransformation R² R
+        μNatTrans = {!!}
 
+      module MR = M.RawMonad
       backRaw : M.RawMonad
-      Mraw.R    backRaw = R
-      Mraw.ηNat backRaw = ηNat
-      Mraw.μNat backRaw = μNat
+      MR.R         backRaw = R
+      MR.ηNatTrans backRaw = ηNatTrans
+      MR.μNatTrans backRaw = μNatTrans
 
     module _ (m : K.Monad) where
       open K.Monad m
@@ -314,10 +317,10 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     module _ (m : K.Monad) where
       open K.RawMonad (K.Monad.raw m)
       forthRawEq : forthRaw (backRaw m) ≡ K.Monad.raw m
-      K.RawMonad.RR (forthRawEq _) = RR
+      K.RawMonad.RR    (forthRawEq _) = RR
       K.RawMonad.pure  (forthRawEq _) = pure
       -- stuck
-      K.RawMonad.bind (forthRawEq i) = {!!}
+      K.RawMonad.bind  (forthRawEq i) = {!!}
 
     fortheq : (m : K.Monad) → forth (back m) ≡ m
     fortheq m = K.Monad≡ (forthRawEq m)
@@ -326,9 +329,9 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       open M.RawMonad (M.Monad.raw m)
       backRawEq : backRaw (forth m) ≡ M.Monad.raw m
       -- stuck
-      M.RawMonad.R    (backRawEq i) = {!!}
-      M.RawMonad.ηNat (backRawEq i) = {!!}
-      M.RawMonad.μNat (backRawEq i) = {!!}
+      M.RawMonad.R         (backRawEq i) = {!!}
+      M.RawMonad.ηNatTrans (backRawEq i) = {!!}
+      M.RawMonad.μNatTrans (backRawEq i) = {!!}
 
     backeq : (m : M.Monad) → back (forth m) ≡ m
     backeq m = M.Monad≡ (backRawEq m)
