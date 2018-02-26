@@ -69,7 +69,7 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     ℓ = ℓa ⊔ ℓb
 
-  open Category ℂ using (Arrow ; 𝟙 ; Object ; _∘_)
+  open Category ℂ using (Arrow ; 𝟙 ; Object ; _∘_ ; _>>>_)
   record RawMonad : Set ℓ where
     field
       RR : Object → Object
@@ -80,12 +80,6 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     fmap f = bind (pure ∘ f)
     -- Why is (>>=) not implementable? - Because in e.g. the category of sets is
     -- `m a` a set. This is not necessarily the case.
-    --
-    -- (>>=) : m a -> (a -> m b) -> m b
-    -- (>=>) : (a -> m b) -> (b -> m c) -> a -> m c
-    -- Is really like a lifting operation from ∘ (the low level of functions) to >=> (the level of monads)
-    _>>>_ : {A B C : Object} → (Arrow A B) → (Arrow B C) → Arrow A C
-    f >>> g = g ∘ f
     _>=>_ : {A B C : Object} → ℂ [ A , RR B ] → ℂ [ B , RR C ] → ℂ [ A , RR C ]
     f >=> g = f >>> (bind g)
     -- _>>=_ : {A B C : Object} {m : RR A} → ℂ [ A , RR B ] → RR C

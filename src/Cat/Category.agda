@@ -86,6 +86,9 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   codomain : { a b : Object } → Arrow a b → Object
   codomain {b = b} _ = b
 
+  _>>>_ : {A B C : Object} → (Arrow A B) → (Arrow B C) → Arrow A C
+  f >>> g = g ∘ f
+
   -- | Laws about the data
 
   -- TODO: It seems counter-intuitive that the normal-form is on the
