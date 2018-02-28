@@ -192,8 +192,8 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     -- | This formulation gives rise to the following endo-functor.
     private
       rawR : RawFunctor ℂ ℂ
-      RawFunctor.func* rawR   = RR
-      RawFunctor.func→ rawR f = bind (pure ∘ f)
+      RawFunctor.func* rawR = RR
+      RawFunctor.func→ rawR = fmap
 
       isFunctorR : IsFunctor ℂ ℂ rawR
       IsFunctor.isIdentity isFunctorR = begin
@@ -211,6 +211,38 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     R : EndoFunctor ℂ
     Functor.raw       R = rawR
     Functor.isFunctor R = isFunctorR
+
+    private
+      open NaturalTransformation ℂ ℂ
+
+      R⁰ : EndoFunctor ℂ
+      R⁰ = F.identity
+      R² : EndoFunctor ℂ
+      R² = F[ R ∘ R ]
+      module R  = Functor R
+      module R⁰ = Functor R⁰
+      module R² = Functor R²
+      ηTrans : Transformation R⁰ R
+      ηTrans A = pure
+      ηNatural : Natural R⁰ R ηTrans
+      ηNatural {A} {B} f = begin
+        ηTrans B        ∘ R⁰.func→ f ≡⟨⟩
+        pure            ∘ f          ≡⟨ sym (isNatural _) ⟩
+        bind (pure ∘ f) ∘ pure       ≡⟨⟩
+        fmap f          ∘ pure       ≡⟨⟩
+        R.func→ f       ∘ ηTrans A   ∎
+      μTrans : Transformation R² R
+      μTrans = {!!}
+      μNatural : Natural R² R μTrans
+      μNatural = {!!}
+
+    ηNatTrans : NaturalTransformation R⁰ R
+    proj₁ ηNatTrans = ηTrans
+    proj₂ ηNatTrans = ηNatural
+
+    μNatTrans : NaturalTransformation R² R
+    proj₁ μNatTrans = μTrans
+    proj₂ μNatTrans = μNatural
 
   record Monad : Set ℓ where
     field
@@ -274,15 +306,6 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         module ℂ = Category ℂ
         open K.Monad m
         open NaturalTransformation ℂ ℂ
-
-        R² : EndoFunctor ℂ
-        R² = F[ R ∘ R ]
-
-        ηNatTrans : NaturalTransformation F.identity R
-        ηNatTrans = {!!}
-
-        μNatTrans : NaturalTransformation R² R
-        μNatTrans = {!!}
 
       module MR = M.RawMonad
       backRaw : M.RawMonad
