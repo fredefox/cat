@@ -117,7 +117,8 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     ℓ = ℓa ⊔ ℓb
 
-  open Category ℂ using (Arrow ; 𝟙 ; Object ; _∘_ ; _>>>_)
+  module ℂ = Category ℂ
+  open ℂ using (Arrow ; 𝟙 ; Object ; _∘_ ; _>>>_)
 
   -- | Data for a monad.
   --
@@ -188,6 +189,29 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         lem : fmap g ∘ fmap f ≡ bind (fmap g ∘ (pure ∘ f))
         lem = isDistributive (pure ∘ g) (pure ∘ f)
 
+    -- | This formulation gives rise to the following endo-functor.
+    private
+      rawR : RawFunctor ℂ ℂ
+      RawFunctor.func* rawR   = RR
+      RawFunctor.func→ rawR f = bind (pure ∘ f)
+
+      isFunctorR : IsFunctor ℂ ℂ rawR
+      IsFunctor.isIdentity isFunctorR = begin
+        bind (pure ∘ 𝟙) ≡⟨ cong bind (proj₁ ℂ.isIdentity) ⟩
+        bind pure       ≡⟨ isIdentity ⟩
+        𝟙               ∎
+
+      IsFunctor.isDistributive isFunctorR {f = f} {g} = begin
+        bind (pure ∘ (g ∘ f))             ≡⟨⟩
+        fmap (g ∘ f)                      ≡⟨ fusion ⟩
+        fmap g ∘ fmap f                   ≡⟨⟩
+        bind (pure ∘ g) ∘ bind (pure ∘ f) ∎
+
+    -- TODO: Naming!
+    R : Functor ℂ ℂ
+    Functor.raw       R = rawR
+    Functor.isFunctor R = isFunctorR
+
   record Monad : Set ℓ where
     field
       raw : RawMonad
@@ -250,26 +274,6 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         module ℂ = Category ℂ
         open K.Monad m
         open NaturalTransformation ℂ ℂ
-
-        rawR : RawFunctor ℂ ℂ
-        RawFunctor.func* rawR   = RR
-        RawFunctor.func→ rawR f = bind (pure ∘ f)
-
-        isFunctorR : IsFunctor ℂ ℂ rawR
-        IsFunctor.isIdentity isFunctorR = begin
-          bind (pure ∘ 𝟙) ≡⟨ cong bind (proj₁ ℂ.isIdentity) ⟩
-          bind pure       ≡⟨ isIdentity ⟩
-          𝟙               ∎
-
-        IsFunctor.isDistributive isFunctorR {f = f} {g} = begin
-          bind (pure ∘ (g ∘ f))             ≡⟨⟩
-          fmap (g ∘ f)                      ≡⟨ fusion ⟩
-          fmap g ∘ fmap f                   ≡⟨⟩
-          bind (pure ∘ g) ∘ bind (pure ∘ f) ∎
-
-        R : Functor ℂ ℂ
-        Functor.raw       R = rawR
-        Functor.isFunctor R = isFunctorR
 
         R² : Functor ℂ ℂ
         R² = F[ R ∘ R ]
