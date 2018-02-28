@@ -22,7 +22,7 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   record RawMonad : Set ℓ where
     field
       -- R ~ m
-      R : Functor ℂ ℂ
+      R : EndoFunctor ℂ
       -- η ~ pure
       ηNatTrans : NaturalTransformation F.identity R
       -- μ ~ join
@@ -208,7 +208,7 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         bind (pure ∘ g) ∘ bind (pure ∘ f) ∎
 
     -- TODO: Naming!
-    R : Functor ℂ ℂ
+    R : EndoFunctor ℂ
     Functor.raw       R = rawR
     Functor.isFunctor R = isFunctorR
 
@@ -275,7 +275,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         open K.Monad m
         open NaturalTransformation ℂ ℂ
 
-        R² : Functor ℂ ℂ
+        R² : EndoFunctor ℂ
         R² = F[ R ∘ R ]
 
         ηNatTrans : NaturalTransformation F.identity R

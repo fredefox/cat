@@ -45,6 +45,9 @@ module _ {ℓc ℓc' ℓd ℓd'}
 
 open Functor
 
+EndoFunctor : ∀ {ℓa ℓb} (ℂ : Category ℓa ℓb) → Set _
+EndoFunctor ℂ = Functor ℂ ℂ
+
 module _
     {ℓa ℓb : Level}
     {ℂ 𝔻 : Category ℓa ℓb}
