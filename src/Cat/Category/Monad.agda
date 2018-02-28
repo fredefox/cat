@@ -232,9 +232,35 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         fmap f          ∘ pure       ≡⟨⟩
         R.func→ f       ∘ ηTrans A   ∎
       μTrans : Transformation R² R
-      μTrans = {!!}
+      μTrans C = join
       μNatural : Natural R² R μTrans
-      μNatural = {!!}
+      μNatural f = begin
+        join       ∘ R².func→ f  ≡⟨⟩
+        bind 𝟙     ∘ R².func→ f  ≡⟨⟩
+        R².func→ f >>> bind 𝟙    ≡⟨⟩
+        fmap (fmap f) >>> bind 𝟙 ≡⟨⟩
+        fmap (bind (f >>> pure)) >>> bind 𝟙          ≡⟨⟩
+        bind (bind (f >>> pure) >>> pure) >>> bind 𝟙
+          ≡⟨ isDistributive _ _ ⟩
+        bind ((bind (f >>> pure) >>> pure) >=> 𝟙)
+          ≡⟨⟩
+        bind ((bind (f >>> pure) >>> pure) >>> bind 𝟙)
+          ≡⟨ cong bind ℂ.isAssociative ⟩
+        bind (bind (f >>> pure) >>> (pure >>> bind 𝟙))
+          ≡⟨ cong (λ φ → bind (bind (f >>> pure) >>> φ)) (isNatural _) ⟩
+        bind (bind (f >>> pure) >>> 𝟙)
+          ≡⟨ cong bind (proj₂ ℂ.isIdentity) ⟩
+        bind (bind (f >>> pure))
+          ≡⟨ cong bind (sym (proj₁ ℂ.isIdentity)) ⟩
+        bind (𝟙 >>> bind (f >>> pure)) ≡⟨⟩
+        bind (𝟙 >=> (f >>> pure))
+          ≡⟨ sym (isDistributive _ _) ⟩
+        bind 𝟙     >>> bind (f >>> pure)    ≡⟨⟩
+        bind 𝟙     >>> fmap f    ≡⟨⟩
+        bind 𝟙     >>> R.func→ f ≡⟨⟩
+        R.func→ f  ∘ bind 𝟙      ≡⟨⟩
+        R.func→ f  ∘ join        ∎
+        where
 
     ηNatTrans : NaturalTransformation R⁰ R
     proj₁ ηNatTrans = ηTrans
