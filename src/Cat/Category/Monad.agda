@@ -117,9 +117,8 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     ℓ = ℓa ⊔ ℓb
-
-  module ℂ = Category ℂ
-  open ℂ using (Arrow ; 𝟙 ; Object ; _∘_ ; _>>>_)
+    module ℂ = Category ℂ
+    open ℂ using (Arrow ; 𝟙 ; Object ; _∘_ ; _>>>_)
 
   -- | Data for a monad.
   --
@@ -165,6 +164,13 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     -- functors as well and make them a super-class?
     Fusion = {X Y Z : Object} {g : ℂ [ Y , Z ]} {f : ℂ [ X , Y ]}
       → fmap (g ∘ f) ≡ fmap g ∘ fmap f
+
+    -- In the ("foreign") formulation of a monad `IsNatural`'s analogue here would be:
+    IsNaturalForeign : Set _
+    IsNaturalForeign = {X : Object} → join {X} ∘ fmap join ≡ join ∘ join
+
+    IsInverse : Set _
+    IsInverse = {X : Object} → join {X} ∘ pure ≡ 𝟙 × join {X} ∘ fmap pure ≡ 𝟙
 
   record IsMonad (raw : RawMonad) : Set ℓ where
     open RawMonad raw public
@@ -271,6 +277,21 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     proj₁ μNatTrans = μTrans
     proj₂ μNatTrans = μNatural
 
+    isNaturalForeign : IsNaturalForeign
+    isNaturalForeign = begin
+      join ∘ fmap join ≡⟨ {!!} ⟩
+      join ∘ join      ∎
+
+    isInverse : IsInverse
+    isInverse = inv-l , inv-r
+      where
+      inv-l = begin
+        join ∘ pure ≡⟨ {!!} ⟩
+        𝟙 ∎
+      inv-r = begin
+        join ∘ fmap pure ≡⟨ {!!} ⟩
+        𝟙 ∎
+
   record Monad : Set ℓ where
     field
       raw : RawMonad
@@ -330,19 +351,37 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     Kleisli.Monad.isMonad (forth m) = forthIsMonad (M.Monad.isMonad m)
 
     module _ (m : K.Monad) where
-      open K.Monad m
+      private
+        open K.Monad m
+        module MR = M.RawMonad
+        module MI = M.IsMonad
 
-      module MR = M.RawMonad
       backRaw : M.RawMonad
       MR.R         backRaw = R
       MR.ηNatTrans backRaw = ηNatTrans
       MR.μNatTrans backRaw = μNatTrans
 
-      module MI = M.IsMonad
-      -- also prove these in K.Monad!
+      private
+        open MR backRaw
+        module R = Functor (MR.R backRaw)
+
       backIsMonad : M.IsMonad backRaw
-      MI.isAssociative backIsMonad = {!isAssociative!}
-      MI.isInverse backIsMonad = {!!}
+      MI.isAssociative backIsMonad {X} = begin
+        μ X  ∘ R.func→ (μ X)  ≡⟨⟩
+        join ∘ fmap (μ X)     ≡⟨⟩
+        join ∘ fmap join      ≡⟨ isNaturalForeign ⟩
+        join ∘ join           ≡⟨⟩
+        μ X  ∘ μ (R.func* X)  ∎
+      MI.isInverse backIsMonad {X} = inv-l , inv-r
+        where
+        inv-l = begin
+          μ X ∘ η (R.func* X) ≡⟨⟩
+          join ∘ pure         ≡⟨ proj₁ isInverse ⟩
+          𝟙 ∎
+        inv-r = begin
+          μ X ∘ R.func→ (η X) ≡⟨⟩
+          join ∘ fmap pure    ≡⟨ proj₂ isInverse ⟩
+          𝟙 ∎
 
     back : K.Monad → M.Monad
     Monoidal.Monad.raw     (back m) = backRaw     m
