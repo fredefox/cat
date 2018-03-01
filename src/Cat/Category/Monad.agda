@@ -277,8 +277,22 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
     isNaturalForeign : IsNaturalForeign
     isNaturalForeign = begin
-      join ∘ fmap join ≡⟨ {!!} ⟩
-      join ∘ join      ∎
+      fmap join >>> join ≡⟨⟩
+      bind (join >>> pure) >>> bind 𝟙
+        ≡⟨ isDistributive _ _ ⟩
+      bind ((join >>> pure) >>> bind 𝟙)
+        ≡⟨ cong bind ℂ.isAssociative ⟩
+      bind (join >>> (pure >>> bind 𝟙))
+        ≡⟨ cong (λ φ → bind (join >>> φ)) (isNatural _) ⟩
+      bind (join >>> 𝟙)
+        ≡⟨ cong bind (proj₂ ℂ.isIdentity) ⟩
+      bind join           ≡⟨⟩
+      bind (bind 𝟙)
+        ≡⟨ cong bind (sym (proj₁ ℂ.isIdentity)) ⟩
+      bind (𝟙 >>> bind 𝟙) ≡⟨⟩
+      bind (𝟙 >=> 𝟙)      ≡⟨ sym (isDistributive _ _) ⟩
+      bind 𝟙 >>> bind 𝟙   ≡⟨⟩
+      join >>> join       ∎
 
     isInverse : IsInverse
     isInverse = inv-l , inv-r
