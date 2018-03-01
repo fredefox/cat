@@ -7,7 +7,7 @@ open import Data.Product
 
 open import Cubical
 
-open import Cat.Category
+open import Cat.Category hiding (propIsAssociative)
 open import Cat.Category.Functor as F
 open import Cat.Category.NaturalTransformation
 open import Cat.Categories.Fun
@@ -103,13 +103,36 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       isMonad : IsMonad raw
     open IsMonad isMonad public
 
-  postulate propIsMonad : ∀ {raw} → isProp (IsMonad raw)
-  Monad≡ : {m n : Monad} → Monad.raw m ≡ Monad.raw n → m ≡ n
-  Monad.raw     (Monad≡ eq i) = eq i
-  Monad.isMonad (Monad≡ {m} {n} eq i) = res i
-    where
-      -- TODO: PathJ nightmare + `propIsMonad`.
-      postulate res : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
+  private
+    module _ {m : RawMonad} where
+      open RawMonad m
+      propIsAssociative : isProp IsAssociative
+      propIsAssociative x y i {X}
+        = Category.arrowsAreSets ℂ _ _ (x {X}) (y {X}) i
+      propIsInverse : isProp IsInverse
+      propIsInverse x y i {X} = e1 i , e2 i
+        where
+        xX = x {X}
+        yX = y {X}
+        e1 = Category.arrowsAreSets ℂ _ _ (proj₁ xX) (proj₁ yX)
+        e2 = Category.arrowsAreSets ℂ _ _ (proj₂ xX) (proj₂ yX)
+    open IsMonad
+    propIsMonad : (raw : _) → isProp (IsMonad raw)
+    IsMonad.isAssociative (propIsMonad raw a b i) j
+      = propIsAssociative {raw}
+        (isAssociative a) (isAssociative b) i j
+    IsMonad.isInverse     (propIsMonad raw a b i)
+      = propIsInverse {raw}
+        (isInverse a) (isInverse b) i
+
+  module _ {m n : Monad} (eq : Monad.raw m ≡ Monad.raw n) where
+    open import Cubical.NType.Properties
+    eqIsMonad : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
+    eqIsMonad = lemPropF propIsMonad eq
+
+    Monad≡ : m ≡ n
+    Monad.raw     (Monad≡ i) = eq i
+    Monad.isMonad (Monad≡ i) = eqIsMonad i
 
 -- "A monad in the Kleisli form" [voe]
 module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
