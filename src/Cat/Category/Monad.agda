@@ -21,6 +21,7 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   open NaturalTransformation ℂ ℂ
   record RawMonad : Set ℓ where
     field
+      -- TODO rename fields here
       -- R ~ m
       R : EndoFunctor ℂ
       -- η ~ pure
@@ -316,8 +317,9 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       Kraw.bind forthRaw = bind
 
     module _ {raw : M.RawMonad} (m : M.IsMonad raw) where
-      module MI = M.IsMonad m
-      module KI = K.IsMonad
+      private
+        module MI = M.IsMonad m
+        module KI = K.IsMonad
       forthIsMonad : K.IsMonad (forthRaw raw)
       KI.isIdentity     forthIsMonad = proj₂ MI.isInverse
       KI.isNatural      forthIsMonad = MI.isNatural
@@ -328,10 +330,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     Kleisli.Monad.isMonad (forth m) = forthIsMonad (M.Monad.isMonad m)
 
     module _ (m : K.Monad) where
-      private
-        module ℂ = Category ℂ
-        open K.Monad m
-        open NaturalTransformation ℂ ℂ
+      open K.Monad m
 
       module MR = M.RawMonad
       backRaw : M.RawMonad
@@ -339,13 +338,11 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       MR.ηNatTrans backRaw = ηNatTrans
       MR.μNatTrans backRaw = μNatTrans
 
-    module _ (m : K.Monad) where
-      open K.Monad m
-      open M.RawMonad (backRaw m)
-      module Mis = M.IsMonad
-
-      backIsMonad : M.IsMonad (backRaw m)
-      backIsMonad = {!!}
+      module MI = M.IsMonad
+      -- also prove these in K.Monad!
+      backIsMonad : M.IsMonad backRaw
+      MI.isAssociative backIsMonad = {!isAssociative!}
+      MI.isInverse backIsMonad = {!!}
 
     back : K.Monad → M.Monad
     Monoidal.Monad.raw     (back m) = backRaw     m
