@@ -6,8 +6,9 @@ open import Agda.Primitive
 open import Data.Product
 
 open import Cubical
+open import Cubical.NType.Properties using (lemPropF)
 
-open import Cat.Category hiding (propIsAssociative)
+open import Cat.Category hiding (propIsAssociative ; propIsIdentity)
 open import Cat.Category.Functor as F
 open import Cat.Category.NaturalTransformation
 open import Cat.Categories.Fun
@@ -126,7 +127,6 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         (isInverse a) (isInverse b) i
 
   module _ {m n : Monad} (eq : Monad.raw m ≡ Monad.raw n) where
-    open import Cubical.NType.Properties
     eqIsMonad : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
     eqIsMonad = lemPropF propIsMonad eq
 
@@ -344,14 +344,27 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       isMonad : IsMonad raw
     open IsMonad isMonad public
 
-  postulate propIsMonad : ∀ {raw} → isProp (IsMonad raw)
-  Monad≡ : {m n : Monad} → Monad.raw m ≡ Monad.raw n → m ≡ n
-  Monad.raw     (Monad≡ eq i) = eq i
-  Monad.isMonad (Monad≡ {m} {n} eq i) = res i
-    where
-      -- TODO: PathJ nightmare + `propIsMonad`.
-      res : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
-      res = {!!}
+  module _ (raw : RawMonad) where
+    open RawMonad raw
+    postulate
+      propIsIdentity     : isProp IsIdentity
+      propIsNatural      : isProp IsNatural
+      propIsDistributive : isProp IsDistributive
+  open IsMonad
+  propIsMonad : (raw : _) → isProp (IsMonad raw)
+  IsMonad.isIdentity     (propIsMonad raw x y i)
+    = propIsIdentity raw (isIdentity x) (isIdentity y) i
+  IsMonad.isNatural      (propIsMonad raw x y i)
+    = propIsNatural raw (isNatural x) (isNatural y) i
+  IsMonad.isDistributive (propIsMonad raw x y i)
+    = propIsDistributive raw (isDistributive x) (isDistributive y) i
+  module _ {m n : Monad} (eq : Monad.raw m ≡ Monad.raw n) where
+    eqIsMonad : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
+    eqIsMonad = lemPropF propIsMonad eq
+
+    Monad≡ : m ≡ n
+    Monad.raw     (Monad≡ i) = eq i
+    Monad.isMonad (Monad≡ i) = eqIsMonad i
 
 -- | The monoidal- and kleisli presentation of monads are equivalent.
 --
