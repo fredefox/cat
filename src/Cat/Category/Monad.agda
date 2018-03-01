@@ -77,26 +77,55 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     isDistributive {X} {Y} {Z} g f = sym done
       where
       module R² = Functor F[ R ∘ R ]
-      postulate
-        distrib : ∀ {A B C D} {a : Arrow C D} {b : Arrow B C} {c : Arrow A B}
-          → R.func→ (a ∘ b ∘ c)
-          ≡ R.func→ a ∘ R.func→ b ∘ R.func→ c
-        comm : ∀ {A B C D E}
-          → {a : Arrow D E} {b : Arrow C D} {c : Arrow B C} {d : Arrow A B}
-          → a ∘ (b ∘ c ∘ d) ≡ a ∘ b ∘ c ∘ d
+      distrib : ∀ {A B C D} {a : Arrow C D} {b : Arrow B C} {c : Arrow A B}
+        → R.func→ (a ∘ b ∘ c)
+        ≡ R.func→ a ∘ R.func→ b ∘ R.func→ c
+      distrib {a = a} {b} {c} = begin
+        R.func→ (a ∘ b ∘ c)               ≡⟨ distr ⟩
+        R.func→ (a ∘ b) ∘ R.func→ c       ≡⟨ cong (_∘ _) distr ⟩
+        R.func→ a ∘ R.func→ b ∘ R.func→ c ∎
+        where
+        distr = R.isDistributive
+      comm : ∀ {A B C D E}
+        → {a : Arrow D E} {b : Arrow C D} {c : Arrow B C} {d : Arrow A B}
+        → a ∘ (b ∘ c ∘ d) ≡ a ∘ b ∘ c ∘ d
+      comm {a = a} {b} {c} {d} = begin
+        a ∘ (b ∘ c ∘ d)   ≡⟨⟩
+        a ∘ ((b ∘ c) ∘ d) ≡⟨ cong (_∘_ a) (sym asc) ⟩
+        a ∘ (b ∘ (c ∘ d)) ≡⟨ asc ⟩
+        (a ∘ b) ∘ (c ∘ d) ≡⟨ asc ⟩
+        ((a ∘ b) ∘ c) ∘ d ≡⟨⟩
+        a ∘ b ∘ c ∘ d     ∎
+        where
+        asc = ℂ.isAssociative
       lemmm : μ Z ∘ R.func→ (μ Z) ≡ μ Z ∘ μ (R.func* Z)
       lemmm = isAssociative
       lem4 : μ (R.func* Z) ∘ R².func→ g ≡ R.func→ g ∘ μ Y
       lem4 = μNat g
       done = begin
-        μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f)                     ≡⟨ cong (λ φ → μ Z ∘ φ) distrib ⟩
-        μ Z ∘ (R.func→ (μ Z) ∘ R.func→ (R.func→ g) ∘ R.func→ f) ≡⟨⟩
-        μ Z ∘ (R.func→ (μ Z) ∘ R².func→ g ∘ R.func→ f)          ≡⟨ {!!} ⟩ -- ●-solver?
-        (μ Z ∘ R.func→ (μ Z)) ∘ (R².func→ g ∘ R.func→ f)        ≡⟨ cong (λ φ → φ ∘ (R².func→ g ∘ R.func→ f)) lemmm ⟩
-        (μ Z ∘ μ (R.func* Z)) ∘ (R².func→ g ∘ R.func→ f)        ≡⟨ {!!} ⟩ -- ●-solver?
-        μ Z ∘ μ (R.func* Z) ∘ R².func→ g ∘ R.func→ f            ≡⟨ {!!} ⟩ -- ●-solver + lem4
-        μ Z ∘ R.func→ g ∘ μ Y ∘ R.func→ f                       ≡⟨ sym (Category.isAssociative ℂ) ⟩
-        μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f) ∎
+        μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f)
+          ≡⟨ cong (λ φ → μ Z ∘ φ) distrib ⟩
+        μ Z ∘ (R.func→ (μ Z) ∘ R.func→ (R.func→ g) ∘ R.func→ f)
+          ≡⟨⟩
+        μ Z ∘ (R.func→ (μ Z) ∘ R².func→ g ∘ R.func→ f)
+          ≡⟨ cong (_∘_ (μ Z)) (sym ℂ.isAssociative) ⟩ -- ●-solver?
+        μ Z ∘ (R.func→ (μ Z) ∘ (R².func→ g ∘ R.func→ f))
+          ≡⟨ ℂ.isAssociative ⟩
+        (μ Z ∘ R.func→ (μ Z)) ∘ (R².func→ g ∘ R.func→ f)
+          ≡⟨ cong (λ φ → φ ∘ (R².func→ g ∘ R.func→ f)) isAssociative ⟩
+        (μ Z ∘ μ (R.func* Z)) ∘ (R².func→ g ∘ R.func→ f)
+          ≡⟨ ℂ.isAssociative ⟩ -- ●-solver?
+        μ Z ∘ μ (R.func* Z) ∘ R².func→ g ∘ R.func→ f
+          ≡⟨⟩ -- ●-solver + lem4
+        ((μ Z ∘ μ (R.func* Z)) ∘ R².func→ g) ∘ R.func→ f
+          ≡⟨ cong (_∘ R.func→ f) (sym ℂ.isAssociative) ⟩
+        (μ Z ∘ (μ (R.func* Z) ∘ R².func→ g)) ∘ R.func→ f
+          ≡⟨ cong (λ φ → φ ∘ R.func→ f) (cong (_∘_ (μ Z)) lem4) ⟩
+        (μ Z ∘ (R.func→ g ∘ μ Y)) ∘ R.func→ f ≡⟨ cong (_∘ R.func→ f) ℂ.isAssociative ⟩
+        μ Z ∘ R.func→ g ∘ μ Y ∘ R.func→ f
+          ≡⟨ sym (Category.isAssociative ℂ) ⟩
+        μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f)
+          ∎
 
   record Monad : Set ℓ where
     field
