@@ -284,10 +284,21 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     isInverse = inv-l , inv-r
       where
       inv-l = begin
-        join ∘ pure ≡⟨ {!!} ⟩
+        pure >>> join   ≡⟨⟩
+        pure >>> bind 𝟙 ≡⟨ isNatural _ ⟩
         𝟙 ∎
       inv-r = begin
-        join ∘ fmap pure ≡⟨ {!!} ⟩
+        fmap pure >>> join ≡⟨⟩
+        bind (pure >>> pure) >>> bind 𝟙
+          ≡⟨ isDistributive _ _ ⟩
+        bind ((pure >>> pure) >=> 𝟙) ≡⟨⟩
+        bind ((pure >>> pure) >>> bind 𝟙)
+          ≡⟨ cong bind ℂ.isAssociative ⟩
+        bind (pure >>> (pure >>> bind 𝟙))
+          ≡⟨ cong (λ φ → bind (pure >>> φ)) (isNatural _) ⟩
+        bind (pure >>> 𝟙)
+          ≡⟨ cong bind (proj₂ ℂ.isIdentity) ⟩
+        bind pure ≡⟨ isIdentity ⟩
         𝟙 ∎
 
   record Monad : Set ℓ where
