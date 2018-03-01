@@ -76,14 +76,13 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     isDistributive {X} {Y} {Z} g f = sym done
       where
       module R² = Functor F[ R ∘ R ]
-      distrib : ∀ {A B C D} {a : Arrow C D} {b : Arrow B C} {c : Arrow A B}
-        → R.func→ (a ∘ b ∘ c)
-        ≡ R.func→ a ∘ R.func→ b ∘ R.func→ c
-      distrib = {!!}
-      comm : ∀ {A B C D E}
-        → {a : Arrow D E} {b : Arrow C D} {c : Arrow B C} {d : Arrow A B}
-        → a ∘ (b ∘ c ∘ d) ≡ a ∘ b ∘ c ∘ d
-      comm = {!!}
+      postulate
+        distrib : ∀ {A B C D} {a : Arrow C D} {b : Arrow B C} {c : Arrow A B}
+          → R.func→ (a ∘ b ∘ c)
+          ≡ R.func→ a ∘ R.func→ b ∘ R.func→ c
+        comm : ∀ {A B C D E}
+          → {a : Arrow D E} {b : Arrow C D} {c : Arrow B C} {d : Arrow A B}
+          → a ∘ (b ∘ c ∘ d) ≡ a ∘ b ∘ c ∘ d
       lemmm : μ Z ∘ R.func→ (μ Z) ≡ μ Z ∘ μ (R.func* Z)
       lemmm = isAssociative
       lem4 : μ (R.func* Z) ∘ R².func→ g ≡ R.func→ g ∘ μ Y
@@ -110,8 +109,7 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   Monad.isMonad (Monad≡ {m} {n} eq i) = res i
     where
       -- TODO: PathJ nightmare + `propIsMonad`.
-      res : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
-      res = {!!}
+      postulate res : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
 
 -- "A monad in the Kleisli form" [voe]
 module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
