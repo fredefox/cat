@@ -8,7 +8,7 @@ open import Data.Product
 open import Cubical
 open import Cubical.NType.Properties using (lemPropF)
 
-open import Cat.Category hiding (propIsAssociative ; propIsIdentity)
+open import Cat.Category
 open import Cat.Category.Functor as F
 open import Cat.Category.NaturalTransformation
 open import Cat.Categories.Fun
@@ -375,10 +375,15 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
   module _ (raw : RawMonad) where
     open RawMonad raw
-    postulate
-      propIsIdentity     : isProp IsIdentity
-      propIsNatural      : isProp IsNatural
-      propIsDistributive : isProp IsDistributive
+    propIsIdentity : isProp IsIdentity
+    propIsIdentity x y i = ℂ.arrowsAreSets _ _ x y i
+    propIsNatural      : isProp IsNatural
+    propIsNatural x y i = λ f
+      → ℂ.arrowsAreSets _ _ (x f) (y f) i
+    propIsDistributive : isProp IsDistributive
+    propIsDistributive x y i = λ g f
+      → ℂ.arrowsAreSets _ _ (x g f) (y g f) i
+
   open IsMonad
   propIsMonad : (raw : _) → isProp (IsMonad raw)
   IsMonad.isIdentity     (propIsMonad raw x y i)

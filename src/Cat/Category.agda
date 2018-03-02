@@ -194,7 +194,7 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
 --
 -- Proves that all projections of `IsCategory` are mere propositions as well as
 -- `IsCategory` itself being a mere proposition.
-module _ {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
+module Propositionality {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
   open RawCategory C
   module _ (ℂ : IsCategory C) where
     open IsCategory ℂ using (isAssociative ; arrowsAreSets ; isIdentity ; Univalent)
