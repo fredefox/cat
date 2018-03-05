@@ -4,47 +4,20 @@ module Cat.Categories.Fun where
 open import Agda.Primitive
 open import Data.Product
 
-open import Data.Nat using (_≤_ ; z≤n ; s≤s)
-module Nat = Data.Nat
-open import Data.Product
 
 open import Cubical
-open import Cubical.Sigma
 open import Cubical.NType.Properties
 
 open import Cat.Category
 open import Cat.Category.Functor hiding (identity)
 open import Cat.Category.NaturalTransformation
-open import Cat.Wishlist
-
-open import Cat.Equality
-import Cat.Category.NaturalTransformation
-open Equality.Data.Product
 
 module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
   open Category using (Object ; 𝟙)
   module NT = NaturalTransformation ℂ 𝔻
   open NT public
-
   private
     module 𝔻 = Category 𝔻
-
-  module _ {F G : Functor ℂ 𝔻} where
-    transformationIsSet : isSet (Transformation F G)
-    transformationIsSet _ _ p q i j C = 𝔻.arrowsAreSets _ _ (λ l → p l C)   (λ l → q l C) i j
-
-    naturalIsProp : (θ : Transformation F G) → isProp (Natural F G θ)
-    naturalIsProp θ θNat θNat' = lem
-      where
-        lem : (λ _ → Natural F G θ) [ (λ f → θNat f) ≡ (λ f → θNat' f) ]
-        lem = λ i f → 𝔻.arrowsAreSets _ _ (θNat f) (θNat' f) i
-
-    naturalTransformationIsSets : isSet (NaturalTransformation F G)
-    naturalTransformationIsSets = sigPresSet transformationIsSet
-      λ θ → ntypeCommulative
-        (s≤s {n = Nat.suc Nat.zero} z≤n)
-        (naturalIsProp θ)
-
   private
     module _ {A B C D : Functor ℂ 𝔻} {θ' : NaturalTransformation A B}
       {η' : NaturalTransformation B C} {ζ' : NaturalTransformation C D} where
@@ -97,7 +70,7 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
     isCategory = record
       { isAssociative = λ {A B C D} → isAssociative {A} {B} {C} {D}
       ; isIdentity = λ {A B} → isIdentity {A} {B}
-      ; arrowsAreSets = λ {F} {G} → naturalTransformationIsSets {F} {G}
+      ; arrowsAreSets = λ {F} {G} → naturalTransformationIsSet {F} {G}
       ; univalent = {!!}
       }
 

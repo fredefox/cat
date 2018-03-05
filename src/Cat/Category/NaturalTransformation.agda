@@ -21,12 +21,16 @@
 module Cat.Category.NaturalTransformation where
 open import Agda.Primitive
 open import Data.Product
+open import Data.Nat using (_≤_ ; z≤n ; s≤s)
+module Nat = Data.Nat
 
 open import Cubical
+open import Cubical.Sigma
 open import Cubical.NType.Properties
 
 open import Cat.Category
 open import Cat.Category.Functor hiding (identity)
+open import Cat.Wishlist
 
 module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
   (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
@@ -96,3 +100,23 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
       𝔻 [ H.func→ f ∘ T[ θ ∘ η ] A ]     ∎
       where
         open Category 𝔻
+
+  module _ {F G : Functor ℂ 𝔻} where
+    private
+      open Category using (Object ; 𝟙)
+      module 𝔻 = Category 𝔻
+
+    transformationIsSet : isSet (Transformation F G)
+    transformationIsSet _ _ p q i j C = 𝔻.arrowsAreSets _ _ (λ l → p l C)   (λ l → q l C) i j
+
+    naturalIsProp : (θ : Transformation F G) → isProp (Natural F G θ)
+    naturalIsProp θ θNat θNat' = lem
+      where
+      lem : (λ _ → Natural F G θ) [ (λ f → θNat f) ≡ (λ f → θNat' f) ]
+      lem = λ i f → 𝔻.arrowsAreSets _ _ (θNat f) (θNat' f) i
+
+    naturalTransformationIsSet : isSet (NaturalTransformation F G)
+    naturalTransformationIsSet = sigPresSet transformationIsSet
+      λ θ → ntypeCommulative
+      (s≤s {n = Nat.suc Nat.zero} z≤n)
+      (naturalIsProp θ)
