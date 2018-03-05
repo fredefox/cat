@@ -12,10 +12,14 @@ module _ (ℓa ℓb : Level) where
   private
     ℓ = lsuc (ℓa ⊔ ℓb)
 
-  -- Might not need this to be able to form products of categories!
-  postulate unprovable : IsCategory (Cat.RawCat ℓa ℓb)
-
-  open HasProducts (Cat.hasProducts unprovable)
+    -- *If* the category of categories existed `_×_` would be equivalent to the
+    -- one brought into scope by doing:
+    --
+    --     open HasProducts (Cat.hasProducts unprovable) using (_×_)
+    --
+    -- Since it doesn't we'll make the following (definitionally equivalent) ad-hoc definition.
+    _×_ : ∀ {ℓa ℓb} → Category ℓa ℓb → Category ℓa ℓb → Category ℓa ℓb
+    ℂ × 𝔻 = Cat.CatProduct.obj ℂ 𝔻
 
   record RawMonoidalCategory : Set ℓ where
     field

@@ -62,7 +62,7 @@ module _ (ℓ ℓ' : Level) where
 
 -- The following to some extend depends on the category of categories being a
 -- category. In some places it may not actually be needed, however.
-module CatProducts {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
+module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
   private
     :Object: = Object ℂ × Object 𝔻
     :Arrow:  : :Object: → :Object: → Set ℓ'
@@ -153,9 +153,10 @@ module CatProducts {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
 module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
   private
     Catℓ = Cat ℓ ℓ' unprovable
+
   module _ (ℂ 𝔻 : Category ℓ ℓ') where
     private
-      module P = CatProducts ℂ 𝔻
+      module P = CatProduct ℂ 𝔻
 
       instance
         isProduct : IsProduct Catℓ P.proj₁ P.proj₂
