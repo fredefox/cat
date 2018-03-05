@@ -80,19 +80,20 @@ module _ {ℓ : Level} where
     SetsHasProducts : HasProducts 𝓢
     SetsHasProducts = record { product = product }
 
-module _ {ℓa ℓb : Level} where
-  module _ (ℂ : Category ℓa ℓb) where
-    -- Covariant Presheaf
-    Representable : Set (ℓa ⊔ lsuc ℓb)
-    Representable = Functor ℂ (𝓢𝓮𝓽 ℓb)
+module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+  -- Covariant Presheaf
+  Representable : Set (ℓa ⊔ lsuc ℓb)
+  Representable = Functor ℂ (𝓢𝓮𝓽 ℓb)
 
-    -- Contravariant Presheaf
-    Presheaf : Set (ℓa ⊔ lsuc ℓb)
-    Presheaf = Functor (opposite ℂ) (𝓢𝓮𝓽 ℓb)
+  -- Contravariant Presheaf
+  Presheaf : Set (ℓa ⊔ lsuc ℓb)
+  Presheaf = Functor (opposite ℂ) (𝓢𝓮𝓽 ℓb)
+
+  open Category ℂ
 
   -- The "co-yoneda" embedding.
-  representable : {ℂ : Category ℓa ℓb} → Category.Object ℂ → Representable ℂ
-  representable {ℂ = ℂ} A = record
+  representable : Category.Object ℂ → Representable
+  representable A = record
     { raw = record
       { func* = λ B → ℂ [ A , B ] , arrowsAreSets
       ; func→ = ℂ [_∘_]
@@ -102,12 +103,10 @@ module _ {ℓa ℓb : Level} where
       ; isDistributive = funExt λ x → sym isAssociative
       }
     }
-    where
-      open Category ℂ
 
   -- Alternate name: `yoneda`
-  presheaf : {ℂ : Category ℓa ℓb} → Category.Object (opposite ℂ) → Presheaf ℂ
-  presheaf {ℂ = ℂ} B = record
+  presheaf : Category.Object (opposite ℂ) → Presheaf
+  presheaf B = record
     { raw = record
       { func* = λ A → ℂ [ A , B ] , arrowsAreSets
       ; func→ = λ f g → ℂ [ g ∘ f ]
@@ -117,5 +116,3 @@ module _ {ℓa ℓb : Level} where
       ; isDistributive = funExt λ x → isAssociative
       }
     }
-    where
-      open Category ℂ
