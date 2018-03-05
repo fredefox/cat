@@ -65,7 +65,6 @@ module _ (ℓ ℓ' : Level) where
 module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
   module _ (ℂ 𝔻 : Category ℓ ℓ') where
     private
-      Catt = Cat ℓ ℓ' unprovable
       :Object: = Object ℂ × Object 𝔻
       :Arrow:  : :Object: → :Object: → Set ℓ'
       :Arrow: (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
@@ -105,19 +104,19 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
       :product: : Category ℓ ℓ'
       Category.raw :product: = :rawProduct:
 
-      proj₁ : Catt [ :product: , ℂ ]
+      proj₁ : Functor :product: ℂ
       proj₁ = record
         { raw = record { func* = fst ; func→ = fst }
         ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
         }
 
-      proj₂ : Catt [ :product: , 𝔻 ]
+      proj₂ : Functor :product: 𝔻
       proj₂ = record
         { raw = record { func* = snd ; func→ = snd }
         ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
         }
 
-      module _ {X : Object Catt} (x₁ : Catt [ X , ℂ ]) (x₂ : Catt [ X , 𝔻 ]) where
+      module _ {X : Category ℓ ℓ'} (x₁ : Functor X ℂ) (x₂ : Functor X 𝔻) where
         x : Functor X :product:
         x = record
           { raw = record
@@ -133,29 +132,31 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
             open module x₁ = Functor x₁
             open module x₂ = Functor x₂
 
-        isUniqL : Catt [ proj₁ ∘ x ] ≡ x₁
+        isUniqL : F[ proj₁ ∘ x ] ≡ x₁
         isUniqL = Functor≡ eq* eq→
           where
-            eq* : (Catt [ proj₁ ∘ x ]) .func* ≡ x₁ .func*
+            eq* : (F[ proj₁ ∘ x ]) .func* ≡ x₁ .func*
             eq* = refl
             eq→ : (λ i → {A : Object X} {B : Object X} → X [ A , B ] → ℂ [ eq* i A , eq* i B ])
-                    [ (Catt [ proj₁ ∘ x ]) .func→ ≡ x₁ .func→ ]
+                    [ (F[ proj₁ ∘ x ]) .func→ ≡ x₁ .func→ ]
             eq→ = refl
 
-        isUniqR : Catt [ proj₂ ∘ x ] ≡ x₂
+        isUniqR : F[ proj₂ ∘ x ] ≡ x₂
         isUniqR = Functor≡ refl refl
 
-        isUniq : Catt [ proj₁ ∘ x ] ≡ x₁ × Catt [ proj₂ ∘ x ] ≡ x₂
+        isUniq : F[ proj₁ ∘ x ] ≡ x₁ × F[ proj₂ ∘ x ] ≡ x₂
         isUniq = isUniqL , isUniqR
 
-        uniq : ∃![ x ] (Catt [ proj₁ ∘ x ] ≡ x₁ × Catt [ proj₂ ∘ x ] ≡ x₂)
+        uniq : ∃![ x ] (F[ proj₁ ∘ x ] ≡ x₁ × F[ proj₂ ∘ x ] ≡ x₂)
         uniq = x , isUniq
 
+      Catℓ = Cat ℓ ℓ' unprovable
+
     instance
-      isProduct : IsProduct Catt proj₁ proj₂
+      isProduct : IsProduct Catℓ proj₁ proj₂
       isProduct = uniq
 
-    product : Product {ℂ = Catt} ℂ 𝔻
+    product : Product {ℂ = Catℓ} ℂ 𝔻
     product = record
       { obj = :product:
       ; proj₁ = proj₁
