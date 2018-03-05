@@ -523,6 +523,8 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
     module _ (m : M.Monad) where
       open M.RawMonad (M.Monad.raw m)
+      Romap = Functor.func* R
+      Rfmap = Functor.func→ R
       rawEq* : Functor.func* (K.Monad.R (forth m)) ≡ Functor.func* R
       rawEq* = refl
       left  = Functor.raw (K.Monad.R (forth m))
@@ -533,22 +535,35 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         → Set _
       P _ eq fmap' = (λ i → Fmap ℂ ℂ (eq i))
         [ RawFunctor.func→ left ≡ fmap' ]
-      -- rawEq→ : (λ i → Fmap ℂ ℂ (refl i)) [ Functor.func→ (K.Monad.R (forth m)) ≡ Functor.func→ R ]
-      rawEq→ : P (RawFunctor.func* right) refl (RawFunctor.func→ right)
-      -- rawEq→ : (fmap' : Fmap ℂ ℂ {!!}) → RawFunctor.func→ left ≡ fmap'
+
+      module KM = K.Monad (forth m)
+      rawEq→ : (λ i → Fmap ℂ ℂ (refl i)) [ Functor.func→ (K.Monad.R (forth m)) ≡ Functor.func→ R ]
+      -- aka:
+      --
+      --     rawEq→ : P (RawFunctor.func* right) refl (RawFunctor.func→ right)
       rawEq→ = begin
         (λ f → RawFunctor.func→ left f) ≡⟨⟩
         (λ f → KM.fmap f)               ≡⟨⟩
         (λ f → KM.bind (f >>> KM.pure)) ≡⟨ {!!} ⟩
+        (λ f → Rfmap f)                 ≡⟨⟩
         (λ f → RawFunctor.func→ right f) ∎
-        where
-        module KM = K.Monad (forth m)
-      -- destfmap =
-      source = (Functor.raw (K.Monad.R (forth m)))
-      -- p : (fmap' : Fmap ℂ ℂ (RawFunctor.func* source)) → (λ i → Fmap ℂ ℂ (refl i)) [ func→ source ≡ fmap' ]
-      -- p = {!!}
+
+      -- This goal is more general than the above goal which I also don't know
+      -- how to close.
+      p : (fmap' : Fmap ℂ ℂ (RawFunctor.func* left))
+        → (λ i → Fmap ℂ ℂ Romap) [ RawFunctor.func→ left ≡ fmap' ]
+      -- aka:
+      --
+      --     p : P (RawFunctor.func* left) refl
+      p fmap' = begin
+        (λ f → RawFunctor.func→ left f) ≡⟨⟩
+        (λ f → KM.fmap f)               ≡⟨⟩
+        (λ f → KM.bind (f >>> KM.pure)) ≡⟨ {!!} ⟩
+        (λ f → fmap' f) ∎
+
       rawEq : Functor.raw (K.Monad.R (forth m)) ≡ Functor.raw R
-      rawEq = RawFunctor≡ ℂ ℂ {x = left} {right} refl λ fmap'  → {!rawEq→!}
+      rawEq = RawFunctor≡ ℂ ℂ {x = left} {right} (λ _ → Romap) p
+
       Req : M.RawMonad.R (backRaw (forth m)) ≡ R
       Req = Functor≡ rawEq
 
