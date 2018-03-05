@@ -25,14 +25,14 @@ module _ (ℓ ℓ' : Level) where
   private
     module _ {𝔸 𝔹 ℂ 𝔻 : Category ℓ ℓ'} {F : Functor 𝔸 𝔹} {G : Functor 𝔹 ℂ} {H : Functor ℂ 𝔻} where
       assc : F[ H ∘ F[ G ∘ F ] ] ≡ F[ F[ H ∘ G ] ∘ F ]
-      assc = Functor≡ refl refl
+      assc = Functor≡ refl
 
     module _ {ℂ 𝔻 : Category ℓ ℓ'} {F : Functor ℂ 𝔻} where
       ident-r : F[ F ∘ identity ] ≡ F
-      ident-r = Functor≡ refl refl
+      ident-r = Functor≡ refl
 
       ident-l : F[ identity ∘ F ] ≡ F
-      ident-l = Functor≡ refl refl
+      ident-l = Functor≡ refl
 
   RawCat : RawCategory (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
   RawCat =
@@ -133,16 +133,10 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
           open module x₂ = Functor x₂
 
       isUniqL : F[ proj₁ ∘ x ] ≡ x₁
-      isUniqL = Functor≡ eq* eq→
-        where
-          eq* : (F[ proj₁ ∘ x ]) .func* ≡ x₁ .func*
-          eq* = refl
-          eq→ : (λ i → {A : Object X} {B : Object X} → X [ A , B ] → ℂ [ eq* i A , eq* i B ])
-                  [ (F[ proj₁ ∘ x ]) .func→ ≡ x₁ .func→ ]
-          eq→ = refl
+      isUniqL = Functor≡ refl
 
       isUniqR : F[ proj₂ ∘ x ] ≡ x₂
-      isUniqR = Functor≡ refl refl
+      isUniqR = Functor≡ refl
 
       isUniq : F[ proj₁ ∘ x ] ≡ x₁ × F[ proj₂ ∘ x ] ≡ x₂
       isUniq = isUniqL , isUniqR

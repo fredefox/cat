@@ -112,25 +112,10 @@ module _
 
 module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
   Functor≡ : {F G : Functor ℂ 𝔻}
-    → (eq* : func* F ≡ func* G)
-    → (eq→ : (λ i → ∀ {x y} → ℂ [ x , y ] → 𝔻 [ eq* i x , eq* i y ])
-        [ func→ F ≡ func→ G ])
-    → F ≡ G
-  Functor≡ {F} {G} eq* eq→ i = record
-    { raw = eqR i
-    ; isFunctor = eqIsF i
-    }
-    where
-      eqR : raw F ≡ raw G
-      eqR i = record { func* = eq* i ; func→ = eq→ i }
-      eqIsF : (λ i →  IsFunctor ℂ 𝔻 (eqR i)) [ isFunctor F ≡ isFunctor G ]
-      eqIsF = IsFunctorIsProp' (isFunctor F) (isFunctor G)
-
-  FunctorEq : {F G : Functor ℂ 𝔻}
     → raw F ≡ raw G
     → F ≡ G
-  raw (FunctorEq eq i) = eq i
-  isFunctor (FunctorEq {F} {G} eq i)
+  raw       (Functor≡ eq i) = eq i
+  isFunctor (Functor≡ {F} {G} eq i)
     = res i
     where
     res : (λ i →  IsFunctor ℂ 𝔻 (eq i)) [ isFunctor F ≡ isFunctor G ]

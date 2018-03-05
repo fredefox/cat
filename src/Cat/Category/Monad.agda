@@ -6,7 +6,7 @@ open import Agda.Primitive
 open import Data.Product
 
 open import Cubical
-open import Cubical.NType.Properties using (lemPropF)
+open import Cubical.NType.Properties using (lemPropF ; lemSig)
 
 open import Cat.Category
 open import Cat.Category.Functor as F
@@ -537,8 +537,12 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       rawEq→ : P (RawFunctor.func* right) refl (RawFunctor.func→ right)
       -- rawEq→ : (fmap' : Fmap ℂ ℂ {!!}) → RawFunctor.func→ left ≡ fmap'
       rawEq→ = begin
-        (λ {A} {B} → RawFunctor.func→ left) ≡⟨ {!!} ⟩
-        (λ {A} {B} → RawFunctor.func→ right) ∎
+        (λ f → RawFunctor.func→ left f) ≡⟨⟩
+        (λ f → KM.fmap f)               ≡⟨⟩
+        (λ f → KM.bind (f >>> KM.pure)) ≡⟨ {!!} ⟩
+        (λ f → RawFunctor.func→ right f) ∎
+        where
+        module KM = K.Monad (forth m)
       -- destfmap =
       source = (Functor.raw (K.Monad.R (forth m)))
       -- p : (fmap' : Fmap ℂ ℂ (RawFunctor.func* source)) → (λ i → Fmap ℂ ℂ (refl i)) [ func→ source ≡ fmap' ]
@@ -546,16 +550,16 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       rawEq : Functor.raw (K.Monad.R (forth m)) ≡ Functor.raw R
       rawEq = RawFunctor≡ ℂ ℂ {x = left} {right} refl λ fmap'  → {!rawEq→!}
       Req : M.RawMonad.R (backRaw (forth m)) ≡ R
-      Req = FunctorEq rawEq
+      Req = Functor≡ rawEq
 
-      ηeq : M.RawMonad.η (backRaw (forth m)) ≡ η
-      ηeq = {!!}
-      postulate ηNatTransEq : {!!} [ M.RawMonad.ηNatTrans (backRaw (forth m)) ≡ ηNatTrans ]
       open NaturalTransformation ℂ ℂ
+      postulate
+        ηNatTransEq : (λ i → NaturalTransformation F.identity (Req i))
+          [ M.RawMonad.ηNatTrans (backRaw (forth m)) ≡ ηNatTrans ]
       backRawEq : backRaw (forth m) ≡ M.Monad.raw m
       -- stuck
       M.RawMonad.R         (backRawEq i) = Req i
-      M.RawMonad.ηNatTrans (backRawEq i) = let t = NaturalTransformation≡ F.identity R ηeq in {!t i!}
+      M.RawMonad.ηNatTrans (backRawEq i) = {!!} -- ηNatTransEq i
       M.RawMonad.μNatTrans (backRawEq i) = {!!}
 
     backeq : (m : M.Monad) → back (forth m) ≡ m
