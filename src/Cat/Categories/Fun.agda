@@ -62,9 +62,7 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
     _h⊕g_ = NT[_∘_] {B} {C} {D}
     :isAssociative: : L ≡ R
     :isAssociative: = lemSig (naturalIsProp {F = A} {D})
-      L R (funExt (λ x → isAssociative))
-      where
-        open Category 𝔻
+      L R (funExt (λ x → 𝔻.isAssociative))
 
   private
     module _ {A B : Functor ℂ 𝔻} {f : NaturalTransformation A B} where
@@ -107,14 +105,22 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
   Category.raw Fun = RawFun
 
 module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
-  open import Cat.Categories.Sets
-  open NaturalTransformation (opposite ℂ) (𝓢𝓮𝓽 ℓ')
+  private
+    open import Cat.Categories.Sets
+    open NaturalTransformation (opposite ℂ) (𝓢𝓮𝓽 ℓ')
 
-  -- Restrict the functors to Presheafs.
-  RawPresh : RawCategory (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')
-  RawPresh = record
-    { Object = Presheaf ℂ
-    ; Arrow = NaturalTransformation
-    ; 𝟙 = λ {F} → identity F
-    ; _∘_ = λ {F G H} → NT[_∘_] {F = F} {G = G} {H = H}
-    }
+    -- Restrict the functors to Presheafs.
+    rawPresh : RawCategory (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')
+    rawPresh = record
+      { Object = Presheaf ℂ
+      ; Arrow = NaturalTransformation
+      ; 𝟙 = λ {F} → identity F
+      ; _∘_ = λ {F G H} → NT[_∘_] {F = F} {G = G} {H = H}
+      }
+    instance
+      isCategory : IsCategory rawPresh
+      isCategory = Fun.:isCategory: _ _
+
+  Presh : Category (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')
+  Category.raw        Presh = rawPresh
+  Category.isCategory Presh = isCategory
