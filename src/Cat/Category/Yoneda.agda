@@ -25,7 +25,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat
     𝓢 = Sets ℓ
     open Fun (opposite ℂ) 𝓢
     Catℓ : Category _ _
-    Catℓ = record { raw = RawCat ℓ ℓ ; isCategory = unprovable}
+    Catℓ = Cat.Cat ℓ ℓ unprovable
     prshf = presheaf {ℂ = ℂ}
     module ℂ = Category ℂ
 
