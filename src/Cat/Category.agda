@@ -155,7 +155,7 @@ module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 --
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   open RawCategory ℂ public
-  open Univalence ℂ public
+  open Univalence  ℂ public
   field
     isAssociative : IsAssociative
     isIdentity    : IsIdentity 𝟙
@@ -301,23 +301,42 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 -- flipped.
 module Opposite {ℓa ℓb : Level} where
   module _ (ℂ : Category ℓa ℓb) where
-    open Category ℂ
     private
+      module ℂ = Category ℂ
       opRaw : RawCategory ℓa ℓb
-      RawCategory.Object opRaw = Object
-      RawCategory.Arrow  opRaw = Function.flip Arrow
-      RawCategory.𝟙      opRaw = 𝟙
-      RawCategory._∘_    opRaw = Function.flip _∘_
+      RawCategory.Object opRaw = ℂ.Object
+      RawCategory.Arrow  opRaw = Function.flip ℂ.Arrow
+      RawCategory.𝟙      opRaw = ℂ.𝟙
+      RawCategory._∘_    opRaw = Function.flip ℂ._∘_
 
-      opIsCategory : IsCategory opRaw
-      IsCategory.isAssociative opIsCategory = sym isAssociative
-      IsCategory.isIdentity    opIsCategory = swap isIdentity
-      IsCategory.arrowsAreSets opIsCategory = arrowsAreSets
-      IsCategory.univalent     opIsCategory = {!!}
+      open RawCategory opRaw
+      open Univalence opRaw
+
+      isIdentity : IsIdentity 𝟙
+      isIdentity = swap ℂ.isIdentity
+
+      module _ {A B : ℂ.Object} where
+        univalent : isEquiv (A ≡ B) (A ≅ B)
+          (id-to-iso (swap ℂ.isIdentity) A B)
+        fst (univalent iso) = flipFiber (fst (ℂ.univalent (flipIso iso)))
+          where
+            flipIso : A ≅ B → B ℂ.≅ A
+            flipIso (f , f~ , iso) = f , f~ , swap iso
+            flipFiber
+              : fiber (ℂ.id-to-iso ℂ.isIdentity B A) (flipIso iso)
+              → fiber (  id-to-iso   isIdentity A B)          iso
+            flipFiber (eq , eqIso) = sym eq , {!!}
+        snd (univalent iso) = {!!}
+
+      isCategory : IsCategory opRaw
+      IsCategory.isAssociative isCategory = sym ℂ.isAssociative
+      IsCategory.isIdentity    isCategory = isIdentity
+      IsCategory.arrowsAreSets isCategory = ℂ.arrowsAreSets
+      IsCategory.univalent     isCategory = univalent
 
     opposite : Category ℓa ℓb
-    raw opposite = opRaw
-    Category.isCategory opposite = opIsCategory
+    Category.raw        opposite = opRaw
+    Category.isCategory opposite = isCategory
 
   -- As demonstrated here a side-effect of having no-eta-equality on constructors
   -- means that we need to pick things apart to show that things are indeed
