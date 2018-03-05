@@ -279,18 +279,18 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       module R  = Functor R
       module R⁰ = Functor R⁰
       module R² = Functor R²
-      ηTrans : Transformation R⁰ R
-      ηTrans A = pure
-      ηNatural : Natural R⁰ R ηTrans
+      η : Transformation R⁰ R
+      η A = pure
+      ηNatural : Natural R⁰ R η
       ηNatural {A} {B} f = begin
-        ηTrans B        ∘ R⁰.func→ f ≡⟨⟩
+        η B             ∘ R⁰.func→ f ≡⟨⟩
         pure            ∘ f          ≡⟨ sym (isNatural _) ⟩
         bind (pure ∘ f) ∘ pure       ≡⟨⟩
         fmap f          ∘ pure       ≡⟨⟩
-        R.func→ f       ∘ ηTrans A   ∎
-      μTrans : Transformation R² R
-      μTrans C = join
-      μNatural : Natural R² R μTrans
+        R.func→ f       ∘ η A        ∎
+      μ : Transformation R² R
+      μ C = join
+      μNatural : Natural R² R μ
       μNatural f = begin
         join       ∘ R².func→ f  ≡⟨⟩
         bind 𝟙     ∘ R².func→ f  ≡⟨⟩
@@ -320,11 +320,11 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         where
 
     ηNatTrans : NaturalTransformation R⁰ R
-    proj₁ ηNatTrans = ηTrans
+    proj₁ ηNatTrans = η
     proj₂ ηNatTrans = ηNatural
 
     μNatTrans : NaturalTransformation R² R
-    proj₁ μNatTrans = μTrans
+    proj₁ μNatTrans = μ
     proj₂ μNatTrans = μNatural
 
     isNaturalForeign : IsNaturalForeign
@@ -405,7 +405,8 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 -- This is problem 2.3 in [voe].
 module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
   private
-    open Category ℂ using (Object ; Arrow ; 𝟙 ; _∘_)
+    module ℂ = Category ℂ
+    open ℂ using (Object ; Arrow ; 𝟙 ; _∘_ ; _>>>_)
     open Functor using (func* ; func→)
     module M = Monoidal ℂ
     module K = Kleisli ℂ
@@ -482,22 +483,79 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
     -- I believe all the proofs here should be `refl`.
     module _ (m : K.Monad) where
-      open K.RawMonad (K.Monad.raw m)
+      open K.Monad m
+      -- open K.RawMonad (K.Monad.raw m)
+      bindEq : ∀ {X Y}
+        → K.RawMonad.bind (forthRaw (backRaw m)) {X} {Y}
+        ≡ K.RawMonad.bind (K.Monad.raw m)
+      bindEq {X} {Y} = begin
+        K.RawMonad.bind (forthRaw (backRaw m)) ≡⟨⟩
+        (λ f → μ Y  ∘ func→ R f)             ≡⟨⟩
+        (λ f → join ∘ fmap f)                ≡⟨⟩
+        (λ f → bind (f >>> pure) >>> bind 𝟙) ≡⟨ funExt lem ⟩
+        (λ f → bind f)                       ≡⟨⟩
+        bind                                 ∎
+        where
+        μ = proj₁ μNatTrans
+        lem : (f : Arrow X (RR Y)) → bind (f >>> pure) >>> bind 𝟙 ≡ bind f
+        lem f = begin
+          bind (f >>> pure) >>> bind 𝟙
+            ≡⟨ isDistributive _ _ ⟩
+          bind ((f >>> pure) >>> bind 𝟙)
+            ≡⟨ cong bind ℂ.isAssociative ⟩
+          bind (f >>> (pure >>> bind 𝟙))
+            ≡⟨ cong (λ φ → bind (f >>> φ)) (isNatural _) ⟩
+          bind (f >>> 𝟙)
+            ≡⟨ cong bind (proj₂ ℂ.isIdentity) ⟩
+          bind f ∎
+
+      _&_ : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} → A → (A → B) → B
+      x & f = f x
+
       forthRawEq : forthRaw (backRaw m) ≡ K.Monad.raw m
       K.RawMonad.RR    (forthRawEq _) = RR
       K.RawMonad.pure  (forthRawEq _) = pure
       -- stuck
-      K.RawMonad.bind  (forthRawEq i) = {!!}
+      K.RawMonad.bind  (forthRawEq i) = bindEq i
 
     fortheq : (m : K.Monad) → forth (back m) ≡ m
     fortheq m = K.Monad≡ (forthRawEq m)
 
     module _ (m : M.Monad) where
       open M.RawMonad (M.Monad.raw m)
+      rawEq* : Functor.func* (K.Monad.R (forth m)) ≡ Functor.func* R
+      rawEq* = refl
+      left  = Functor.raw (K.Monad.R (forth m))
+      right = Functor.raw R
+      P : (omap : Omap ℂ ℂ)
+        → (eq : RawFunctor.func* left ≡ omap)
+        → (fmap' : Fmap ℂ ℂ omap)
+        → Set _
+      P _ eq fmap' = (λ i → Fmap ℂ ℂ (eq i))
+        [ RawFunctor.func→ left ≡ fmap' ]
+      -- rawEq→ : (λ i → Fmap ℂ ℂ (refl i)) [ Functor.func→ (K.Monad.R (forth m)) ≡ Functor.func→ R ]
+      rawEq→ : P (RawFunctor.func* right) refl (RawFunctor.func→ right)
+      -- rawEq→ : (fmap' : Fmap ℂ ℂ {!!}) → RawFunctor.func→ left ≡ fmap'
+      rawEq→ = begin
+        (λ {A} {B} → RawFunctor.func→ left) ≡⟨ {!!} ⟩
+        (λ {A} {B} → RawFunctor.func→ right) ∎
+      -- destfmap =
+      source = (Functor.raw (K.Monad.R (forth m)))
+      -- p : (fmap' : Fmap ℂ ℂ (RawFunctor.func* source)) → (λ i → Fmap ℂ ℂ (refl i)) [ func→ source ≡ fmap' ]
+      -- p = {!!}
+      rawEq : Functor.raw (K.Monad.R (forth m)) ≡ Functor.raw R
+      rawEq = RawFunctor≡ ℂ ℂ {x = left} {right} refl λ fmap'  → {!rawEq→!}
+      Req : M.RawMonad.R (backRaw (forth m)) ≡ R
+      Req = FunctorEq rawEq
+
+      ηeq : M.RawMonad.η (backRaw (forth m)) ≡ η
+      ηeq = {!!}
+      postulate ηNatTransEq : {!!} [ M.RawMonad.ηNatTrans (backRaw (forth m)) ≡ ηNatTrans ]
+      open NaturalTransformation ℂ ℂ
       backRawEq : backRaw (forth m) ≡ M.Monad.raw m
       -- stuck
-      M.RawMonad.R         (backRawEq i) = {!!}
-      M.RawMonad.ηNatTrans (backRawEq i) = {!!}
+      M.RawMonad.R         (backRawEq i) = Req i
+      M.RawMonad.ηNatTrans (backRawEq i) = let t = NaturalTransformation≡ F.identity R ηeq in {!t i!}
       M.RawMonad.μNatTrans (backRawEq i) = {!!}
 
     backeq : (m : M.Monad) → back (forth m) ≡ m

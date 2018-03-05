@@ -23,6 +23,7 @@ open import Agda.Primitive
 open import Data.Product
 
 open import Cubical
+open import Cubical.NType.Properties
 
 open import Cat.Category
 open import Cat.Category.Functor hiding (identity)
@@ -48,17 +49,13 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
     NaturalTransformation : Set (ℓc ⊔ ℓc' ⊔ ℓd')
     NaturalTransformation = Σ Transformation Natural
 
-    -- TODO: Since naturality is a mere proposition this principle can be
-    -- simplified.
+    -- Think I need propPi and that arrows are sets
+    postulate propIsNatural : (θ : _) → isProp (Natural θ)
+
     NaturalTransformation≡ : {α β : NaturalTransformation}
       → (eq₁ : α .proj₁ ≡ β .proj₁)
-      → (eq₂ : PathP
-          (λ i → {A B : Object ℂ} (f : ℂ [ A , B ])
-            → 𝔻 [ eq₁ i B ∘ F.func→ f ]
-            ≡ 𝔻 [ G.func→ f ∘ eq₁ i A ])
-        (α .proj₂) (β .proj₂))
       → α ≡ β
-    NaturalTransformation≡ eq₁ eq₂ i = eq₁ i , eq₂ i
+    NaturalTransformation≡ eq = lemSig propIsNatural _ _ eq
 
   identityTrans : (F : Functor ℂ 𝔻) → Transformation F F
   identityTrans F C = 𝟙 𝔻

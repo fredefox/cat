@@ -18,6 +18,10 @@ module _ {ℓc ℓc' ℓd ℓd'}
     ℓ = ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd'
     𝓤 = Set ℓ
 
+  Omap = Object ℂ → Object 𝔻
+  Fmap : Omap → Set _
+  Fmap omap = ∀ {A B}
+    → ℂ [ A , B ] → 𝔻 [ omap A , omap B ]
   record RawFunctor : 𝓤 where
     field
       func* : Object ℂ → Object 𝔻
@@ -29,6 +33,30 @@ module _ {ℓc ℓc' ℓd ℓd'}
     IsDistributive : Set _
     IsDistributive = {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
       → func→ (ℂ [ g ∘ f ]) ≡ 𝔻 [ func→ g ∘ func→ f ]
+
+  -- | Equality principle for raw functors
+  --
+  -- The type of `func→` depend on the value of `func*`. We can wrap this up
+  -- into an equality principle for this type like is done for e.g. `Σ` using
+  -- `pathJ`.
+  module _ {x y : RawFunctor} where
+    open RawFunctor
+    private
+      P : (omap : Omap) → (eq : func* x ≡ omap) → Set _
+      P y eq = (fmap' : Fmap y) → (λ i → Fmap (eq i))
+        [ func→ x ≡ fmap' ]
+    module _
+        (eq : (λ i → Omap) [ func* x ≡ func* y ])
+        (kk : P (func* x) refl)
+        where
+      private
+        p : P (func* y) eq
+        p = pathJ P kk (func* y) eq
+        eq→ : (λ i → Fmap (eq i)) [ func→ x ≡ func→ y ]
+        eq→ = p (func→ y)
+      RawFunctor≡ : x ≡ y
+      func* (RawFunctor≡ i) = eq  i
+      func→ (RawFunctor≡ i) = eq→ i
 
   record IsFunctor (F : RawFunctor) : 𝓤 where
     open RawFunctor F public
@@ -97,6 +125,16 @@ module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
       eqR i = record { func* = eq* i ; func→ = eq→ i }
       eqIsF : (λ i →  IsFunctor ℂ 𝔻 (eqR i)) [ isFunctor F ≡ isFunctor G ]
       eqIsF = IsFunctorIsProp' (isFunctor F) (isFunctor G)
+
+  FunctorEq : {F G : Functor ℂ 𝔻}
+    → raw F ≡ raw G
+    → F ≡ G
+  raw (FunctorEq eq i) = eq i
+  isFunctor (FunctorEq {F} {G} eq i)
+    = res i
+    where
+    res : (λ i →  IsFunctor ℂ 𝔻 (eq i)) [ isFunctor F ≡ isFunctor G ]
+    res = IsFunctorIsProp' (isFunctor F) (isFunctor G)
 
 module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : Functor A B) where
   private

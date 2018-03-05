@@ -16,14 +16,14 @@ open Equality.Data.Product
 open import Cat.Categories.Cat using (RawCat)
 
 module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat ℓ ℓ)) where
-  open import Cat.Categories.Fun
-  open import Cat.Categories.Sets
-  module Cat = Cat.Categories.Cat
-  open import Cat.Category.Exponential
-  open Functor
-  𝓢 = Sets ℓ
-  open Fun (opposite ℂ) 𝓢
   private
+    open import Cat.Categories.Fun
+    open import Cat.Categories.Sets
+    module Cat = Cat.Categories.Cat
+    open import Cat.Category.Exponential
+    open Functor
+    𝓢 = Sets ℓ
+    open Fun (opposite ℂ) 𝓢
     Catℓ : Category _ _
     Catℓ = record { raw = RawCat ℓ ℓ ; isCategory = unprovable}
     prshf = presheaf {ℂ = ℂ}
