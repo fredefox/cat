@@ -45,9 +45,9 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
         (s≤s {n = Nat.suc Nat.zero} z≤n)
         (naturalIsProp θ)
 
-  module _ {A B C D : Functor ℂ 𝔻} {θ' : NaturalTransformation A B}
-    {η' : NaturalTransformation B C} {ζ' : NaturalTransformation C D} where
-    private
+  private
+    module _ {A B C D : Functor ℂ 𝔻} {θ' : NaturalTransformation A B}
+      {η' : NaturalTransformation B C} {ζ' : NaturalTransformation C D} where
       θ = proj₁ θ'
       η = proj₁ η'
       ζ = proj₁ ζ'
@@ -58,11 +58,11 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
       L = (NT[_∘_] {A} {C} {D} ζ' (NT[_∘_] {A} {B} {C} η' θ'))
       R : NaturalTransformation A D
       R = (NT[_∘_] {A} {B} {D} (NT[_∘_] {B} {C} {D} ζ' η') θ')
-    _g⊕f_ = NT[_∘_] {A} {B} {C}
-    _h⊕g_ = NT[_∘_] {B} {C} {D}
-    :isAssociative: : L ≡ R
-    :isAssociative: = lemSig (naturalIsProp {F = A} {D})
-      L R (funExt (λ x → 𝔻.isAssociative))
+      _g⊕f_ = NT[_∘_] {A} {B} {C}
+      _h⊕g_ = NT[_∘_] {B} {C} {D}
+      isAssociative : L ≡ R
+      isAssociative = lemSig (naturalIsProp {F = A} {D})
+        L R (funExt (λ x → 𝔻.isAssociative))
 
   private
     module _ {A B : Functor ℂ 𝔻} {f : NaturalTransformation A B} where
@@ -93,9 +93,9 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
     }
 
   instance
-    :isCategory: : IsCategory RawFun
-    :isCategory: = record
-      { isAssociative = λ {A B C D} → :isAssociative: {A} {B} {C} {D}
+    isCategory : IsCategory RawFun
+    isCategory = record
+      { isAssociative = λ {A B C D} → isAssociative {A} {B} {C} {D}
       ; isIdentity = λ {A B} → isIdentity {A} {B}
       ; arrowsAreSets = λ {F} {G} → naturalTransformationIsSets {F} {G}
       ; univalent = {!!}
@@ -119,7 +119,7 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
       }
     instance
       isCategory : IsCategory rawPresh
-      isCategory = Fun.:isCategory: _ _
+      isCategory = Fun.isCategory _ _
 
   Presh : Category (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')
   Category.raw        Presh = rawPresh
