@@ -62,112 +62,115 @@ module _ (ℓ ℓ' : Level) where
 
 -- The following to some extend depends on the category of categories being a
 -- category. In some places it may not actually be needed, however.
+module CatProducts {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
+  private
+    :Object: = Object ℂ × Object 𝔻
+    :Arrow:  : :Object: → :Object: → Set ℓ'
+    :Arrow: (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
+    :𝟙: : {o : :Object:} → :Arrow: o o
+    :𝟙: = 𝟙 ℂ , 𝟙 𝔻
+    _:⊕:_ :
+      {a b c : :Object:} →
+      :Arrow: b c →
+      :Arrow: a b →
+      :Arrow: a c
+    _:⊕:_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → ℂ [ bc∈C ∘ ab∈C ] , 𝔻 [ bc∈D ∘ ab∈D ]}
+
+    :rawProduct: : RawCategory ℓ ℓ'
+    RawCategory.Object :rawProduct: = :Object:
+    RawCategory.Arrow :rawProduct: = :Arrow:
+    RawCategory.𝟙 :rawProduct: = :𝟙:
+    RawCategory._∘_ :rawProduct: = _:⊕:_
+    open RawCategory :rawProduct:
+
+    module ℂ = Category ℂ
+    module 𝔻 = Category 𝔻
+    open import Cubical.Sigma
+    arrowsAreSets : ArrowsAreSets -- {A B : RawCategory.Object :rawProduct:} → isSet (Arrow A B)
+    arrowsAreSets = setSig {sA = ℂ.arrowsAreSets} {sB = λ x → 𝔻.arrowsAreSets}
+    isIdentity : IsIdentity :𝟙:
+    isIdentity
+      = Σ≡ (fst ℂ.isIdentity) (fst 𝔻.isIdentity)
+      , Σ≡ (snd ℂ.isIdentity) (snd 𝔻.isIdentity)
+    postulate univalent : Univalence.Univalent :rawProduct: isIdentity
+    instance
+      :isCategory: : IsCategory :rawProduct:
+      IsCategory.isAssociative :isCategory: = Σ≡ ℂ.isAssociative 𝔻.isAssociative
+      IsCategory.isIdentity :isCategory: = isIdentity
+      IsCategory.arrowsAreSets :isCategory: = arrowsAreSets
+      IsCategory.univalent :isCategory: = univalent
+
+  obj : Category ℓ ℓ'
+  Category.raw obj = :rawProduct:
+
+  proj₁ : Functor obj ℂ
+  proj₁ = record
+    { raw = record { func* = fst ; func→ = fst }
+    ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
+    }
+
+  proj₂ : Functor obj 𝔻
+  proj₂ = record
+    { raw = record { func* = snd ; func→ = snd }
+    ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
+    }
+
+  module _ {X : Category ℓ ℓ'} (x₁ : Functor X ℂ) (x₂ : Functor X 𝔻) where
+    private
+      x : Functor X obj
+      x = record
+        { raw = record
+          { func* = λ x → x₁.func* x , x₂.func* x
+          ; func→ = λ x → x₁.func→ x , x₂.func→ x
+          }
+        ; isFunctor = record
+          { isIdentity   = Σ≡ x₁.isIdentity x₂.isIdentity
+          ; isDistributive = Σ≡ x₁.isDistributive x₂.isDistributive
+          }
+        }
+        where
+          open module x₁ = Functor x₁
+          open module x₂ = Functor x₂
+
+      isUniqL : F[ proj₁ ∘ x ] ≡ x₁
+      isUniqL = Functor≡ eq* eq→
+        where
+          eq* : (F[ proj₁ ∘ x ]) .func* ≡ x₁ .func*
+          eq* = refl
+          eq→ : (λ i → {A : Object X} {B : Object X} → X [ A , B ] → ℂ [ eq* i A , eq* i B ])
+                  [ (F[ proj₁ ∘ x ]) .func→ ≡ x₁ .func→ ]
+          eq→ = refl
+
+      isUniqR : F[ proj₂ ∘ x ] ≡ x₂
+      isUniqR = Functor≡ refl refl
+
+      isUniq : F[ proj₁ ∘ x ] ≡ x₁ × F[ proj₂ ∘ x ] ≡ x₂
+      isUniq = isUniqL , isUniqR
+
+    isProduct : ∃![ x ] (F[ proj₁ ∘ x ] ≡ x₁ × F[ proj₂ ∘ x ] ≡ x₂)
+    isProduct = x , isUniq
+
 module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
+  private
+    Catℓ = Cat ℓ ℓ' unprovable
   module _ (ℂ 𝔻 : Category ℓ ℓ') where
     private
-      :Object: = Object ℂ × Object 𝔻
-      :Arrow:  : :Object: → :Object: → Set ℓ'
-      :Arrow: (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
-      :𝟙: : {o : :Object:} → :Arrow: o o
-      :𝟙: = 𝟙 ℂ , 𝟙 𝔻
-      _:⊕:_ :
-        {a b c : :Object:} →
-        :Arrow: b c →
-        :Arrow: a b →
-        :Arrow: a c
-      _:⊕:_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → ℂ [ bc∈C ∘ ab∈C ] , 𝔻 [ bc∈D ∘ ab∈D ]}
+      module P = CatProducts ℂ 𝔻
 
-      :rawProduct: : RawCategory ℓ ℓ'
-      RawCategory.Object :rawProduct: = :Object:
-      RawCategory.Arrow :rawProduct: = :Arrow:
-      RawCategory.𝟙 :rawProduct: = :𝟙:
-      RawCategory._∘_ :rawProduct: = _:⊕:_
-      open RawCategory :rawProduct:
-
-      module C = Category ℂ
-      module D = Category 𝔻
-      open import Cubical.Sigma
-      issSet : {A B : RawCategory.Object :rawProduct:} → isSet (Arrow A B)
-      issSet = setSig {sA = C.arrowsAreSets} {sB = λ x → D.arrowsAreSets}
-      ident' : IsIdentity :𝟙:
-      ident'
-        = Σ≡ (fst C.isIdentity) (fst D.isIdentity)
-        , Σ≡ (snd C.isIdentity) (snd D.isIdentity)
-      postulate univalent : Univalence.Univalent :rawProduct: ident'
       instance
-        :isCategory: : IsCategory :rawProduct:
-        IsCategory.isAssociative :isCategory: = Σ≡ C.isAssociative D.isAssociative
-        IsCategory.isIdentity :isCategory: = ident'
-        IsCategory.arrowsAreSets :isCategory: = issSet
-        IsCategory.univalent :isCategory: = univalent
-
-      :product: : Category ℓ ℓ'
-      Category.raw :product: = :rawProduct:
-
-      proj₁ : Functor :product: ℂ
-      proj₁ = record
-        { raw = record { func* = fst ; func→ = fst }
-        ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
-        }
-
-      proj₂ : Functor :product: 𝔻
-      proj₂ = record
-        { raw = record { func* = snd ; func→ = snd }
-        ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
-        }
-
-      module _ {X : Category ℓ ℓ'} (x₁ : Functor X ℂ) (x₂ : Functor X 𝔻) where
-        x : Functor X :product:
-        x = record
-          { raw = record
-            { func* = λ x → x₁ .func* x , x₂ .func* x
-            ; func→ = λ x → func→ x₁ x , func→ x₂ x
-            }
-          ; isFunctor = record
-            { isIdentity   = Σ≡ x₁.isIdentity x₂.isIdentity
-            ; isDistributive = Σ≡ x₁.isDistributive x₂.isDistributive
-            }
-          }
-          where
-            open module x₁ = Functor x₁
-            open module x₂ = Functor x₂
-
-        isUniqL : F[ proj₁ ∘ x ] ≡ x₁
-        isUniqL = Functor≡ eq* eq→
-          where
-            eq* : (F[ proj₁ ∘ x ]) .func* ≡ x₁ .func*
-            eq* = refl
-            eq→ : (λ i → {A : Object X} {B : Object X} → X [ A , B ] → ℂ [ eq* i A , eq* i B ])
-                    [ (F[ proj₁ ∘ x ]) .func→ ≡ x₁ .func→ ]
-            eq→ = refl
-
-        isUniqR : F[ proj₂ ∘ x ] ≡ x₂
-        isUniqR = Functor≡ refl refl
-
-        isUniq : F[ proj₁ ∘ x ] ≡ x₁ × F[ proj₂ ∘ x ] ≡ x₂
-        isUniq = isUniqL , isUniqR
-
-        uniq : ∃![ x ] (F[ proj₁ ∘ x ] ≡ x₁ × F[ proj₂ ∘ x ] ≡ x₂)
-        uniq = x , isUniq
-
-      Catℓ = Cat ℓ ℓ' unprovable
-
-    instance
-      isProduct : IsProduct Catℓ proj₁ proj₂
-      isProduct = uniq
+        isProduct : IsProduct Catℓ P.proj₁ P.proj₂
+        isProduct = P.isProduct
 
     product : Product {ℂ = Catℓ} ℂ 𝔻
     product = record
-      { obj = :product:
-      ; proj₁ = proj₁
-      ; proj₂ = proj₂
+      { obj = P.obj
+      ; proj₁ = P.proj₁
+      ; proj₂ = P.proj₂
       }
 
-module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
-  Catt = Cat ℓ ℓ' unprovable
   instance
-    hasProducts : HasProducts Catt
-    hasProducts = record { product = product unprovable }
+    hasProducts : HasProducts Catℓ
+    hasProducts = record { product = product }
 
 -- Basically proves that `Cat ℓ ℓ` is cartesian closed.
 module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
