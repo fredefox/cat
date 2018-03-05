@@ -34,7 +34,11 @@ open import Cat.Wishlist
 
 module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
   (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
+
   open Category using (Object ; 𝟙)
+  private
+    module ℂ = Category ℂ
+    module 𝔻 = Category 𝔻
 
   module _ (F G : Functor ℂ 𝔻) where
     private
@@ -74,7 +78,6 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
     where
       module F = Functor F
       F→ = F.func→
-      module 𝔻 = Category 𝔻
 
   identity : (F : Functor ℂ 𝔻) → NaturalTransformation F F
   identity F = identityTrans F , identityNatural F
@@ -91,21 +94,15 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
     proj₁ NT[ (θ , _) ∘ (η , _) ] = T[ θ ∘ η ]
     proj₂ NT[ (θ , θNat) ∘ (η , ηNat) ] {A} {B} f = begin
       𝔻 [ T[ θ ∘ η ] B ∘ F.func→ f ]     ≡⟨⟩
-      𝔻 [ 𝔻 [ θ B ∘ η B ] ∘ F.func→ f ] ≡⟨ sym isAssociative ⟩
+      𝔻 [ 𝔻 [ θ B ∘ η B ] ∘ F.func→ f ] ≡⟨ sym 𝔻.isAssociative ⟩
       𝔻 [ θ B ∘ 𝔻 [ η B ∘ F.func→ f ] ] ≡⟨ cong (λ φ → 𝔻 [ θ B ∘ φ ]) (ηNat f) ⟩
-      𝔻 [ θ B ∘ 𝔻 [ G.func→ f ∘ η A ] ] ≡⟨ isAssociative ⟩
+      𝔻 [ θ B ∘ 𝔻 [ G.func→ f ∘ η A ] ] ≡⟨ 𝔻.isAssociative ⟩
       𝔻 [ 𝔻 [ θ B ∘ G.func→ f ] ∘ η A ] ≡⟨ cong (λ φ → 𝔻 [ φ ∘ η A ]) (θNat f) ⟩
-      𝔻 [ 𝔻 [ H.func→ f ∘ θ A ] ∘ η A ] ≡⟨ sym isAssociative ⟩
+      𝔻 [ 𝔻 [ H.func→ f ∘ θ A ] ∘ η A ] ≡⟨ sym 𝔻.isAssociative ⟩
       𝔻 [ H.func→ f ∘ 𝔻 [ θ A ∘ η A ] ] ≡⟨⟩
       𝔻 [ H.func→ f ∘ T[ θ ∘ η ] A ]     ∎
-      where
-        open Category 𝔻
 
   module _ {F G : Functor ℂ 𝔻} where
-    private
-      open Category using (Object ; 𝟙)
-      module 𝔻 = Category 𝔻
-
     transformationIsSet : isSet (Transformation F G)
     transformationIsSet _ _ p q i j C = 𝔻.arrowsAreSets _ _ (λ l → p l C)   (λ l → q l C) i j
 
