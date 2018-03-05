@@ -58,7 +58,8 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
     NaturalTransformation = Σ Transformation Natural
 
     -- Think I need propPi and that arrows are sets
-    postulate propIsNatural : (θ : _) → isProp (Natural θ)
+    propIsNatural : (θ : _) → isProp (Natural θ)
+    propIsNatural θ x y i {A} {B} f = 𝔻.arrowsAreSets _ _ (x f) (y f) i
 
     NaturalTransformation≡ : {α β : NaturalTransformation}
       → (eq₁ : α .proj₁ ≡ β .proj₁)
