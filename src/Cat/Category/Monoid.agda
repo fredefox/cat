@@ -27,9 +27,10 @@ module _ (ℓa ℓb : Level) where
     open Category category public
     field
       {{hasProducts}} : HasProducts category
-      mempty  : Object
+      empty  : Object
       -- aka. tensor product, monoidal product.
-      mappend : Functor (category × category) category
+      append : Functor (category × category) category
+    open HasProducts hasProducts public
 
   record MonoidalCategory : Set ℓ where
     field
@@ -40,10 +41,10 @@ module _ {ℓa ℓb : Level} (ℂ : MonoidalCategory ℓa ℓb) where
   private
     ℓ = ℓa ⊔ ℓb
 
-  module MC = MonoidalCategory ℂ
-  open HasProducts MC.hasProducts
+  open MonoidalCategory ℂ public
+
   record Monoid : Set ℓ where
     field
-      carrier : MC.Object
-      mempty  : MC.Arrow (carrier × carrier)  carrier
-      mappend : MC.Arrow MC.mempty carrier
+      carrier : Object
+      mempty  : Arrow empty carrier
+      mappend : Arrow (carrier × carrier) carrier

@@ -15,7 +15,7 @@ open Equality.Data.Product
 -- category of categories (since it doesn't exist).
 open import Cat.Categories.Cat using (RawCat)
 
-module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat ℓ ℓ)) where
+module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
   private
     open import Cat.Categories.Fun
     open import Cat.Categories.Sets
@@ -24,15 +24,17 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} (unprovable : IsCategory (RawCat
     open Functor
     𝓢 = Sets ℓ
     open Fun (opposite ℂ) 𝓢
-    Catℓ : Category _ _
-    Catℓ = Cat.Cat ℓ ℓ unprovable
     prshf = presheaf ℂ
     module ℂ = Category ℂ
 
-    _⇑_ : (A B : Category.Object Catℓ) → Category.Object Catℓ
-    A ⇑ B = (exponent A B) .obj
-      where
-        open HasExponentials (Cat.hasExponentials ℓ unprovable)
+    -- There is no (small) category of categories. So we won't use _⇑_ from
+    -- `HasExponential`
+    --
+    --     open HasExponentials (Cat.hasExponentials ℓ unprovable) using (_⇑_)
+    --
+    -- In stead we'll use an ad-hoc definition -- which is definitionally
+    -- equivalent to that other one.
+    _⇑_ = Cat.CatExponential.prodObj
 
     module _ {A B : ℂ.Object} (f : ℂ [ A , B ]) where
       :func→: : NaturalTransformation (prshf A) (prshf B)

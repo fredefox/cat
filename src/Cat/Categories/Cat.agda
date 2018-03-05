@@ -11,7 +11,7 @@ open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
-open import Cat.Category.Exponential
+open import Cat.Category.Exponential hiding (_×_ ; product)
 open import Cat.Category.NaturalTransformation
 
 open import Cat.Equality
@@ -174,190 +174,211 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
     hasProducts = record { product = product }
 
 -- Basically proves that `Cat ℓ ℓ` is cartesian closed.
+module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
+  open Data.Product
+  open import Cat.Categories.Fun
+
+  Categoryℓ = Category ℓ ℓ
+  open Fun ℂ 𝔻 renaming (identity to idN)
+  private
+    :func*: : Functor ℂ 𝔻 × Object ℂ → Object 𝔻
+    :func*: (F , A) = func* F A
+
+  prodObj : Categoryℓ
+  prodObj = Fun
+
+  module _ {dom cod : Functor ℂ 𝔻 × Object ℂ} where
+    private
+      F : Functor ℂ 𝔻
+      F = proj₁ dom
+      A : Object ℂ
+      A = proj₂ dom
+
+      G : Functor ℂ 𝔻
+      G = proj₁ cod
+      B : Object ℂ
+      B = proj₂ cod
+
+    :func→: : (pobj : NaturalTransformation F G × ℂ [ A , B ])
+      → 𝔻 [ func* F A , func* G B ]
+    :func→: ((θ , θNat) , f) = result
+      where
+        θA : 𝔻 [ func* F A , func* G A ]
+        θA = θ A
+        θB : 𝔻 [ func* F B , func* G B ]
+        θB = θ B
+        F→f : 𝔻 [ func* F A , func* F B ]
+        F→f = func→ F f
+        G→f : 𝔻 [ func* G A , func* G B ]
+        G→f = func→ G f
+        l : 𝔻 [ func* F A , func* G B ]
+        l = 𝔻 [ θB ∘ F→f ]
+        r : 𝔻 [ func* F A , func* G B ]
+        r = 𝔻 [ G→f ∘ θA ]
+        -- There are two choices at this point,
+        -- but I suppose the whole point is that
+        -- by `θNat f` we have `l ≡ r`
+        --     lem : 𝔻 [ θ B ∘ F .func→ f ] ≡ 𝔻 [ G .func→ f ∘ θ A ]
+        --     lem = θNat f
+        result : 𝔻 [ func* F A , func* G B ]
+        result = l
+
+  open CatProduct renaming (obj to _×p_) using ()
+
+  module _ {c : Functor ℂ 𝔻 × Object ℂ} where
+    private
+      F : Functor ℂ 𝔻
+      F = proj₁ c
+      C : Object ℂ
+      C = proj₂ c
+
+    -- NaturalTransformation F G × ℂ .Arrow A B
+    -- :ident: : :func→: {c} {c} (identityNat F , ℂ .𝟙) ≡ 𝔻 .𝟙
+    -- :ident: = trans (proj₂ 𝔻.isIdentity) (F .isIdentity)
+    --   where
+    --     open module 𝔻 = IsCategory (𝔻 .isCategory)
+    -- Unfortunately the equational version has some ambigous arguments.
+
+    :ident: : :func→: {c} {c} (NT.identity F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
+    :ident: = begin
+      :func→: {c} {c} (𝟙 (prodObj ×p ℂ) {c})    ≡⟨⟩
+      :func→: {c} {c} (idN F , 𝟙 ℂ)             ≡⟨⟩
+      𝔻 [ identityTrans F C ∘ func→ F (𝟙 ℂ)]    ≡⟨⟩
+      𝔻 [ 𝟙 𝔻 ∘ func→ F (𝟙 ℂ)]                  ≡⟨ proj₂ 𝔻.isIdentity ⟩
+      func→ F (𝟙 ℂ)                             ≡⟨ F.isIdentity ⟩
+      𝟙 𝔻                                       ∎
+      where
+        open module 𝔻 = Category 𝔻
+        open module F = Functor F
+
+  module _ {F×A G×B H×C : Functor ℂ 𝔻 × Object ℂ} where
+    F = F×A .proj₁
+    A = F×A .proj₂
+    G = G×B .proj₁
+    B = G×B .proj₂
+    H = H×C .proj₁
+    C = H×C .proj₂
+    -- Not entirely clear what this is at this point:
+    _P⊕_ = Category._∘_ (prodObj ×p ℂ) {F×A} {G×B} {H×C}
+    module _
+      -- NaturalTransformation F G × ℂ .Arrow A B
+      {θ×f : NaturalTransformation F G × ℂ [ A , B ]}
+      {η×g : NaturalTransformation G H × ℂ [ B , C ]} where
+      private
+        θ : Transformation F G
+        θ = proj₁ (proj₁ θ×f)
+        θNat : Natural F G θ
+        θNat = proj₂ (proj₁ θ×f)
+        f : ℂ [ A , B ]
+        f = proj₂ θ×f
+        η : Transformation G H
+        η = proj₁ (proj₁ η×g)
+        ηNat : Natural G H η
+        ηNat = proj₂ (proj₁ η×g)
+        g : ℂ [ B , C ]
+        g = proj₂ η×g
+
+        ηθNT : NaturalTransformation F H
+        ηθNT = Category._∘_ Fun {F} {G} {H} (η , ηNat) (θ , θNat)
+
+        ηθ = proj₁ ηθNT
+        ηθNat = proj₂ ηθNT
+
+      :isDistributive: :
+          𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ func→ F ( ℂ [ g ∘ f ] ) ]
+        ≡ 𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ θ B ∘ func→ F f ] ]
+      :isDistributive: = begin
+        𝔻 [ (ηθ C) ∘ func→ F (ℂ [ g ∘ f ]) ]
+          ≡⟨ ηθNat (ℂ [ g ∘ f ]) ⟩
+        𝔻 [ func→ H (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
+          ≡⟨ cong (λ φ → 𝔻 [ φ ∘ ηθ A ]) (H.isDistributive) ⟩
+        𝔻 [ 𝔻 [ func→ H g ∘ func→ H f ] ∘ (ηθ A) ]
+          ≡⟨ sym isAssociative ⟩
+        𝔻 [ func→ H g ∘ 𝔻 [ func→ H f ∘ ηθ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) isAssociative ⟩
+        𝔻 [ func→ H g ∘ 𝔻 [ 𝔻 [ func→ H f ∘ η A ] ∘ θ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (cong (λ φ → 𝔻 [ φ ∘ θ A ]) (sym (ηNat f))) ⟩
+        𝔻 [ func→ H g ∘ 𝔻 [ 𝔻 [ η B ∘ func→ G f ] ∘ θ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (sym isAssociative) ⟩
+        𝔻 [ func→ H g ∘ 𝔻 [ η B ∘ 𝔻 [ func→ G f ∘ θ A ] ] ]
+          ≡⟨ isAssociative ⟩
+        𝔻 [ 𝔻 [ func→ H g ∘ η B ] ∘ 𝔻 [ func→ G f ∘ θ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ φ ∘ 𝔻 [ func→ G f ∘ θ A ] ]) (sym (ηNat g)) ⟩
+        𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ func→ G f ∘ θ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ φ ]) (sym (θNat f)) ⟩
+        𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ θ B ∘ func→ F f ] ] ∎
+        where
+          open Category 𝔻
+          module H = Functor H
+
+  eval : Functor (CatProduct.obj prodObj ℂ) 𝔻
+  -- :eval: : Functor (prodObj ×p ℂ) 𝔻
+  eval = record
+    { raw = record
+      { func* = :func*:
+      ; func→ = λ {dom} {cod} → :func→: {dom} {cod}
+      }
+    ; isFunctor = record
+      { isIdentity = λ {o} → :ident: {o}
+      ; isDistributive = λ {f u n k y} → :isDistributive: {f} {u} {n} {k} {y}
+      }
+    }
+
+  module _ (𝔸 : Category ℓ ℓ) (F : Functor (𝔸 ×p ℂ) 𝔻) where
+    -- open HasProducts (hasProducts {ℓ} {ℓ} unprovable) renaming (_|×|_ to parallelProduct)
+
+    postulate
+      parallelProduct
+        : Functor 𝔸 prodObj → Functor ℂ ℂ
+        → Functor (𝔸 ×p ℂ) (prodObj ×p ℂ)
+      transpose : Functor 𝔸 prodObj
+      eq : F[ eval ∘ (parallelProduct transpose (identity {C = ℂ})) ] ≡ F
+      -- eq : F[ :eval: ∘ {!!} ] ≡ F
+      -- eq : Catℓ [ :eval: ∘ (HasProducts._|×|_ hasProducts transpose (𝟙 Catℓ {o = ℂ})) ] ≡ F
+      -- eq' : (Catℓ [ :eval: ∘
+      --   (record { product = product } HasProducts.|×| transpose)
+      --   (𝟙 Catℓ)
+      --   ])
+      --   ≡ F
+
+    -- For some reason after `e8215b2c051062c6301abc9b3f6ec67106259758`
+    -- `catTranspose` makes Agda hang. catTranspose : ∃![ F~ ] (Catℓ [
+    -- :eval: ∘ (parallelProduct F~ (𝟙 Catℓ {o = ℂ}))] ≡ F) catTranspose =
+    -- transpose , eq
+
 module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
   private
-    open Data.Product
-    open import Cat.Categories.Fun
-
     Catℓ : Category (lsuc (ℓ ⊔ ℓ)) (ℓ ⊔ ℓ)
     Catℓ = Cat ℓ ℓ unprovable
-    module _ (ℂ 𝔻 : Category ℓ ℓ) where
-      open Fun ℂ 𝔻 renaming (identity to idN)
-      private
-        :obj: : Object Catℓ
-        :obj: = Fun
+  module _ (ℂ 𝔻 : Category ℓ ℓ) where
+    open CatExponential ℂ 𝔻 using (prodObj ; eval)
+    -- Putting in the type annotation causes Agda to loop indefinitely.
+    -- eval' : Functor (CatProduct.obj prodObj ℂ) 𝔻
+    -- Likewise, using it below also results in this.
+    eval' : _
+    eval' = eval
+  --   private
+  --     -- module _ (ℂ 𝔻 : Category ℓ ℓ) where
+  --       postulate :isExponential: : IsExponential Catℓ ℂ 𝔻 prodObj :eval:
+  --       -- :isExponential: : IsExponential Catℓ ℂ 𝔻 :obj: :eval:
+  --       -- :isExponential: = {!catTranspose!}
+  --       --   where
+  --       --     open HasProducts (hasProducts {ℓ} {ℓ} unprovable) using (_|×|_)
+  --       -- :isExponential: = λ 𝔸 F → transpose 𝔸 F , eq' 𝔸 F
 
-        :func*: : Functor ℂ 𝔻 × Object ℂ → Object 𝔻
-        :func*: (F , A) = func* F A
-
-      module _ {dom cod : Functor ℂ 𝔻 × Object ℂ} where
-        private
-          F : Functor ℂ 𝔻
-          F = proj₁ dom
-          A : Object ℂ
-          A = proj₂ dom
-
-          G : Functor ℂ 𝔻
-          G = proj₁ cod
-          B : Object ℂ
-          B = proj₂ cod
-
-        :func→: : (pobj : NaturalTransformation F G × ℂ [ A , B ])
-          → 𝔻 [ func* F A , func* G B ]
-        :func→: ((θ , θNat) , f) = result
-          where
-            θA : 𝔻 [ func* F A , func* G A ]
-            θA = θ A
-            θB : 𝔻 [ func* F B , func* G B ]
-            θB = θ B
-            F→f : 𝔻 [ func* F A , func* F B ]
-            F→f = func→ F f
-            G→f : 𝔻 [ func* G A , func* G B ]
-            G→f = func→ G f
-            l : 𝔻 [ func* F A , func* G B ]
-            l = 𝔻 [ θB ∘ F→f ]
-            r : 𝔻 [ func* F A , func* G B ]
-            r = 𝔻 [ G→f ∘ θA ]
-            -- There are two choices at this point,
-            -- but I suppose the whole point is that
-            -- by `θNat f` we have `l ≡ r`
-            --     lem : 𝔻 [ θ B ∘ F .func→ f ] ≡ 𝔻 [ G .func→ f ∘ θ A ]
-            --     lem = θNat f
-            result : 𝔻 [ func* F A , func* G B ]
-            result = l
-
-      _×p_ = product unprovable
-
-      module _ {c : Functor ℂ 𝔻 × Object ℂ} where
-        private
-          F : Functor ℂ 𝔻
-          F = proj₁ c
-          C : Object ℂ
-          C = proj₂ c
-
-        -- NaturalTransformation F G × ℂ .Arrow A B
-        -- :ident: : :func→: {c} {c} (identityNat F , ℂ .𝟙) ≡ 𝔻 .𝟙
-        -- :ident: = trans (proj₂ 𝔻.isIdentity) (F .isIdentity)
-        --   where
-        --     open module 𝔻 = IsCategory (𝔻 .isCategory)
-        -- Unfortunately the equational version has some ambigous arguments.
-
-        :ident: : :func→: {c} {c} (NT.identity F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
-        :ident: = begin
-          :func→: {c} {c} (𝟙 (Product.obj (:obj: ×p ℂ)) {c}) ≡⟨⟩
-          :func→: {c} {c} (idN F , 𝟙 ℂ)             ≡⟨⟩
-          𝔻 [ identityTrans F C ∘ func→ F (𝟙 ℂ)]           ≡⟨⟩
-          𝔻 [ 𝟙 𝔻 ∘ func→ F (𝟙 ℂ)]                        ≡⟨ proj₂ 𝔻.isIdentity ⟩
-          func→ F (𝟙 ℂ)                                    ≡⟨ F.isIdentity ⟩
-          𝟙 𝔻                                               ∎
-          where
-            open module 𝔻 = Category 𝔻
-            open module F = Functor F
-
-      module _ {F×A G×B H×C : Functor ℂ 𝔻 × Object ℂ} where
-        F = F×A .proj₁
-        A = F×A .proj₂
-        G = G×B .proj₁
-        B = G×B .proj₂
-        H = H×C .proj₁
-        C = H×C .proj₂
-        -- Not entirely clear what this is at this point:
-        _P⊕_ = Category._∘_ (Product.obj (:obj: ×p ℂ)) {F×A} {G×B} {H×C}
-        module _
-          -- NaturalTransformation F G × ℂ .Arrow A B
-          {θ×f : NaturalTransformation F G × ℂ [ A , B ]}
-          {η×g : NaturalTransformation G H × ℂ [ B , C ]} where
-          private
-            θ : Transformation F G
-            θ = proj₁ (proj₁ θ×f)
-            θNat : Natural F G θ
-            θNat = proj₂ (proj₁ θ×f)
-            f : ℂ [ A , B ]
-            f = proj₂ θ×f
-            η : Transformation G H
-            η = proj₁ (proj₁ η×g)
-            ηNat : Natural G H η
-            ηNat = proj₂ (proj₁ η×g)
-            g : ℂ [ B , C ]
-            g = proj₂ η×g
-
-            ηθNT : NaturalTransformation F H
-            ηθNT = Category._∘_ Fun {F} {G} {H} (η , ηNat) (θ , θNat)
-
-            ηθ = proj₁ ηθNT
-            ηθNat = proj₂ ηθNT
-
-          :isDistributive: :
-              𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ func→ F ( ℂ [ g ∘ f ] ) ]
-            ≡ 𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ θ B ∘ func→ F f ] ]
-          :isDistributive: = begin
-            𝔻 [ (ηθ C) ∘ func→ F (ℂ [ g ∘ f ]) ]
-              ≡⟨ ηθNat (ℂ [ g ∘ f ]) ⟩
-            𝔻 [ func→ H (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
-              ≡⟨ cong (λ φ → 𝔻 [ φ ∘ ηθ A ]) (H.isDistributive) ⟩
-            𝔻 [ 𝔻 [ func→ H g ∘ func→ H f ] ∘ (ηθ A) ]
-              ≡⟨ sym isAssociative ⟩
-            𝔻 [ func→ H g ∘ 𝔻 [ func→ H f ∘ ηθ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) isAssociative ⟩
-            𝔻 [ func→ H g ∘ 𝔻 [ 𝔻 [ func→ H f ∘ η A ] ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (cong (λ φ → 𝔻 [ φ ∘ θ A ]) (sym (ηNat f))) ⟩
-            𝔻 [ func→ H g ∘ 𝔻 [ 𝔻 [ η B ∘ func→ G f ] ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (sym isAssociative) ⟩
-            𝔻 [ func→ H g ∘ 𝔻 [ η B ∘ 𝔻 [ func→ G f ∘ θ A ] ] ]
-              ≡⟨ isAssociative ⟩
-            𝔻 [ 𝔻 [ func→ H g ∘ η B ] ∘ 𝔻 [ func→ G f ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ φ ∘ 𝔻 [ func→ G f ∘ θ A ] ]) (sym (ηNat g)) ⟩
-            𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ func→ G f ∘ θ A ] ]
-              ≡⟨ cong (λ φ → 𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ φ ]) (sym (θNat f)) ⟩
-            𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ θ B ∘ func→ F f ] ] ∎
-            where
-              open Category 𝔻
-              module H = Functor H
-
-      :eval: : Functor ((:obj: ×p ℂ) .Product.obj) 𝔻
-      :eval: = record
-        { raw = record
-          { func* = :func*:
-          ; func→ = λ {dom} {cod} → :func→: {dom} {cod}
-          }
-        ; isFunctor = record
-          { isIdentity = λ {o} → :ident: {o}
-          ; isDistributive = λ {f u n k y} → :isDistributive: {f} {u} {n} {k} {y}
-          }
-        }
-
-      module _ (𝔸 : Category ℓ ℓ) (F : Functor ((𝔸 ×p ℂ) .Product.obj) 𝔻) where
-        open HasProducts (hasProducts {ℓ} {ℓ} unprovable) renaming (_|×|_ to parallelProduct)
-
-        postulate
-          transpose : Functor 𝔸 :obj:
-          eq : Catℓ [ :eval: ∘ (parallelProduct transpose (𝟙 Catℓ {A = ℂ})) ] ≡ F
-          -- eq : Catℓ [ :eval: ∘ (HasProducts._|×|_ hasProducts transpose (𝟙 Catℓ {o = ℂ})) ] ≡ F
-          -- eq' : (Catℓ [ :eval: ∘
-          --   (record { product = product } HasProducts.|×| transpose)
-          --   (𝟙 Catℓ)
-          --   ])
-          --   ≡ F
-
-        -- For some reason after `e8215b2c051062c6301abc9b3f6ec67106259758`
-        -- `catTranspose` makes Agda hang. catTranspose : ∃![ F~ ] (Catℓ [
-        -- :eval: ∘ (parallelProduct F~ (𝟙 Catℓ {o = ℂ}))] ≡ F) catTranspose =
-        -- transpose , eq
-
-      postulate :isExponential: : IsExponential Catℓ ℂ 𝔻 :obj: :eval:
-      -- :isExponential: : IsExponential Catℓ ℂ 𝔻 :obj: :eval:
-      -- :isExponential: = {!catTranspose!}
-      --   where
-      --     open HasProducts (hasProducts {ℓ} {ℓ} unprovable) using (_|×|_)
-      -- :isExponential: = λ 𝔸 F → transpose 𝔸 F , eq' 𝔸 F
-
-      -- :exponent: : Exponential (Cat ℓ ℓ) A B
-      :exponent: : Exponential Catℓ ℂ 𝔻
-      :exponent: = record
-        { obj = :obj:
-        ; eval = :eval:
-        ; isExponential = :isExponential:
-        }
+  --       -- :exponent: : Exponential (Cat ℓ ℓ) A B
+    exponent : Exponential Catℓ ℂ 𝔻
+    exponent = record
+      { obj = prodObj
+      ; eval = {!evalll'!}
+      ; isExponential = {!:isExponential:!}
+      }
+      where
+        open HasProducts (hasProducts unprovable) renaming (_×_ to _×p_)
+        open import Cat.Categories.Fun
+        open Fun
+        -- _×p_ = CatProduct.obj -- prodObj ℂ
+        -- eval' : Functor CatP.obj 𝔻
 
   hasExponentials : HasExponentials Catℓ
-  hasExponentials = record { exponent = :exponent: }
+  hasExponentials = record { exponent = exponent }

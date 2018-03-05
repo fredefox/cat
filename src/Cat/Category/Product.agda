@@ -31,6 +31,7 @@ record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : Object ℂ) :
     proj₂ : ℂ [ obj , B ]
     {{isProduct}} : IsProduct ℂ proj₁ proj₂
 
+  -- | Arrow product
   _P[_×_] : ∀ {X} → (π₁ : ℂ [ X , A ]) (π₂ : ℂ [ X , B ])
     → ℂ [ X , obj ]
   _P[_×_] π₁ π₂ = proj₁ (isProduct π₁ π₂)
@@ -39,16 +40,21 @@ record HasProducts {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ ⊔ �
   field
     product : ∀ (A B : Object ℂ) → Product {ℂ = ℂ} A B
 
-  open Product
+  open Product hiding (obj)
 
-  _×_ : (A B : Object ℂ) → Object ℂ
-  A × B = Product.obj (product A B)
-  -- The product mentioned in awodey in Def 6.1 is not the regular product of arrows.
-  -- It's a "parallel" product
-  _|×|_ : {A A' B B' : Object ℂ} → ℂ [ A , A' ] → ℂ [ B , B' ]
-    → ℂ [ A × B , A' × B' ]
-  _|×|_ {A = A} {A' = A'} {B = B} {B' = B'} a b
-    = product A' B'
-      P[ ℂ [ a ∘ (product A B) .proj₁ ]
-      ×  ℂ [ b ∘ (product A B) .proj₂ ]
+  module _ (A B : Object ℂ) where
+    open Product (product A B)
+    _×_ : Object ℂ
+    _×_ = obj
+
+  -- | Parallel product of arrows
+  --
+  -- The product mentioned in awodey in Def 6.1 is not the regular product of
+  -- arrows. It's a "parallel" product
+  module _ {A A' B B' : Object ℂ} where
+    open Product (product A B) hiding (_P[_×_]) renaming (proj₁ to fst ; proj₂ to snd)
+    _|×|_ : ℂ [ A , A' ] → ℂ [ B , B' ] → ℂ [ A × B , A' × B' ]
+    a |×| b = product A' B'
+      P[ ℂ [ a ∘ fst ]
+      ×  ℂ [ b ∘ snd ]
       ]
