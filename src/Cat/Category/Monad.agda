@@ -28,6 +28,8 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       pureNT : NaturalTransformation F.identity R
       joinNT : NaturalTransformation F[ R ∘ R ] R
 
+    -- Note that `pureT` and `joinT` differs from their definition in the
+    -- kleisli formulation only by having an explicit parameter.
     pureT : Transformation F.identity R
     pureT = proj₁ pureNT
     pureN : Natural F.identity R pureT
