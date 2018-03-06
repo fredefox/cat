@@ -7,6 +7,7 @@ open import Data.Product
 
 open import Cubical
 open import Cubical.NType.Properties using (lemPropF ; lemSig)
+open import Cubical.GradLemma        using (gradLemma)
 
 open import Cat.Category
 open import Cat.Category.Functor as F
@@ -357,25 +358,27 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       isMonad : IsMonad raw
     open IsMonad isMonad public
 
-  module _ (raw : RawMonad) where
-    open RawMonad raw
-    propIsIdentity : isProp IsIdentity
-    propIsIdentity x y i = ℂ.arrowsAreSets _ _ x y i
-    propIsNatural      : isProp IsNatural
-    propIsNatural x y i = λ f
-      → ℂ.arrowsAreSets _ _ (x f) (y f) i
-    propIsDistributive : isProp IsDistributive
-    propIsDistributive x y i = λ g f
-      → ℂ.arrowsAreSets _ _ (x g f) (y g f) i
+  private
+    module _ (raw : RawMonad) where
+      open RawMonad raw
+      propIsIdentity : isProp IsIdentity
+      propIsIdentity x y i = ℂ.arrowsAreSets _ _ x y i
+      propIsNatural      : isProp IsNatural
+      propIsNatural x y i = λ f
+        → ℂ.arrowsAreSets _ _ (x f) (y f) i
+      propIsDistributive : isProp IsDistributive
+      propIsDistributive x y i = λ g f
+        → ℂ.arrowsAreSets _ _ (x g f) (y g f) i
 
-  open IsMonad
-  propIsMonad : (raw : _) → isProp (IsMonad raw)
-  IsMonad.isIdentity     (propIsMonad raw x y i)
-    = propIsIdentity raw (isIdentity x) (isIdentity y) i
-  IsMonad.isNatural      (propIsMonad raw x y i)
-    = propIsNatural raw (isNatural x) (isNatural y) i
-  IsMonad.isDistributive (propIsMonad raw x y i)
-    = propIsDistributive raw (isDistributive x) (isDistributive y) i
+    open IsMonad
+    propIsMonad : (raw : _) → isProp (IsMonad raw)
+    IsMonad.isIdentity     (propIsMonad raw x y i)
+      = propIsIdentity raw (isIdentity x) (isIdentity y) i
+    IsMonad.isNatural      (propIsMonad raw x y i)
+      = propIsNatural raw (isNatural x) (isNatural y) i
+    IsMonad.isDistributive (propIsMonad raw x y i)
+      = propIsDistributive raw (isDistributive x) (isDistributive y) i
+
   module _ {m n : Monad} (eq : Monad.raw m ≡ Monad.raw n) where
     private
       eqIsMonad : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
@@ -400,7 +403,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       open M.RawMonad m
 
       forthRaw : K.RawMonad
-      K.RawMonad.omap   forthRaw = Romap
+      K.RawMonad.omap forthRaw = Romap
       K.RawMonad.pure forthRaw = pureT _
       K.RawMonad.bind forthRaw = bind
 
@@ -413,63 +416,58 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       K.IsMonad.isDistributive forthIsMonad = MI.isDistributive
 
     forth : M.Monad → K.Monad
-    Kleisli.Monad.raw     (forth m) = forthRaw     (M.Monad.raw m)
+    Kleisli.Monad.raw     (forth m) = forthRaw     (M.Monad.raw     m)
     Kleisli.Monad.isMonad (forth m) = forthIsMonad (M.Monad.isMonad m)
 
     module _ (m : K.Monad) where
-      private
-        open K.Monad m
-        module MR = M.RawMonad
-        module MI = M.IsMonad
+      open K.Monad m
 
       backRaw : M.RawMonad
-      MR.R      backRaw = R
-      MR.pureNT backRaw = pureNT
-      MR.joinNT backRaw = joinNT
+      M.RawMonad.R      backRaw = R
+      M.RawMonad.pureNT backRaw = pureNT
+      M.RawMonad.joinNT backRaw = joinNT
 
       private
-        open MR backRaw
-        module R = Functor (MR.R backRaw)
+        open M.RawMonad backRaw
+        module R = Functor (M.RawMonad.R backRaw)
 
       backIsMonad : M.IsMonad backRaw
-      MI.isAssociative backIsMonad {X} = begin
+      M.IsMonad.isAssociative backIsMonad {X} = begin
         joinT X  ∘ R.func→ (joinT X)  ≡⟨⟩
-        join ∘ fmap (joinT X)     ≡⟨⟩
-        join ∘ fmap join      ≡⟨ isNaturalForeign ⟩
-        join ∘ join           ≡⟨⟩
+        join ∘ fmap (joinT X)         ≡⟨⟩
+        join ∘ fmap join              ≡⟨ isNaturalForeign ⟩
+        join ∘ join                   ≡⟨⟩
         joinT X  ∘ joinT (R.func* X)  ∎
-      MI.isInverse backIsMonad {X} = inv-l , inv-r
+      M.IsMonad.isInverse backIsMonad {X} = inv-l , inv-r
         where
         inv-l = begin
           joinT X ∘ pureT (R.func* X) ≡⟨⟩
-          join ∘ pure         ≡⟨ proj₁ isInverse ⟩
-          𝟙 ∎
+          join ∘ pure                 ≡⟨ proj₁ isInverse ⟩
+          𝟙                           ∎
         inv-r = begin
           joinT X ∘ R.func→ (pureT X) ≡⟨⟩
-          join ∘ fmap pure    ≡⟨ proj₂ isInverse ⟩
-          𝟙 ∎
+          join ∘ fmap pure            ≡⟨ proj₂ isInverse ⟩
+          𝟙                           ∎
 
     back : K.Monad → M.Monad
     Monoidal.Monad.raw     (back m) = backRaw     m
     Monoidal.Monad.isMonad (back m) = backIsMonad m
 
-    -- I believe all the proofs here should be `refl`.
     module _ (m : K.Monad) where
       open K.Monad m
-      -- open K.RawMonad (K.Monad.raw m)
       bindEq : ∀ {X Y}
         → K.RawMonad.bind (forthRaw (backRaw m)) {X} {Y}
         ≡ K.RawMonad.bind (K.Monad.raw m)
       bindEq {X} {Y} = begin
         K.RawMonad.bind (forthRaw (backRaw m)) ≡⟨⟩
-        (λ f → joinT Y  ∘ func→ R f)             ≡⟨⟩
-        (λ f → join ∘ fmap f)                ≡⟨⟩
-        (λ f → bind (f >>> pure) >>> bind 𝟙) ≡⟨ funExt lem ⟩
-        (λ f → bind f)                       ≡⟨⟩
-        bind                                 ∎
+        (λ f → join ∘ fmap f)                  ≡⟨⟩
+        (λ f → bind (f >>> pure) >>> bind 𝟙)   ≡⟨ funExt lem ⟩
+        (λ f → bind f)                         ≡⟨⟩
+        bind                                   ∎
         where
-        joinT = proj₁ joinNT
-        lem : (f : Arrow X (omap Y)) → bind (f >>> pure) >>> bind 𝟙 ≡ bind f
+        lem : (f : Arrow X (omap Y))
+          → bind (f >>> pure) >>> bind 𝟙
+          ≡ bind f
         lem f = begin
           bind (f >>> pure) >>> bind 𝟙
             ≡⟨ isDistributive _ _ ⟩
@@ -481,13 +479,9 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
             ≡⟨ cong bind (proj₂ ℂ.isIdentity) ⟩
           bind f ∎
 
-      _&_ : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} → A → (A → B) → B
-      x & f = f x
-
       forthRawEq : forthRaw (backRaw m) ≡ K.Monad.raw m
       K.RawMonad.omap  (forthRawEq _) = omap
       K.RawMonad.pure  (forthRawEq _) = pure
-      -- stuck
       K.RawMonad.bind  (forthRawEq i) = bindEq i
 
     fortheq : (m : K.Monad) → forth (back m) ≡ m
@@ -543,14 +537,13 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
           [ M.RawMonad.pureNT (backRaw (forth m)) ≡ pureNT ]
       backRawEq : backRaw (forth m) ≡ M.Monad.raw m
       -- stuck
-      M.RawMonad.R         (backRawEq i) = Req i
+      M.RawMonad.R      (backRawEq i) = Req i
       M.RawMonad.pureNT (backRawEq i) = {!!} -- pureNTEq i
       M.RawMonad.joinNT (backRawEq i) = {!!}
 
     backeq : (m : M.Monad) → back (forth m) ≡ m
     backeq m = M.Monad≡ (backRawEq m)
 
-    open import Cubical.GradLemma
     eqv : isEquiv M.Monad K.Monad forth
     eqv = gradLemma forth back fortheq backeq
 
