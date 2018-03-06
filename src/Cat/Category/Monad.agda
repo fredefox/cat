@@ -114,7 +114,7 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
   record Monad : Set ℓ where
     field
-      raw : RawMonad
+      raw     : RawMonad
       isMonad : IsMonad raw
     open IsMonad isMonad public
 
@@ -131,6 +131,7 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         yX = y {X}
         e1 = Category.arrowsAreSets ℂ _ _ (proj₁ xX) (proj₁ yX)
         e2 = Category.arrowsAreSets ℂ _ _ (proj₂ xX) (proj₂ yX)
+
     open IsMonad
     propIsMonad : (raw : _) → isProp (IsMonad raw)
     IsMonad.isAssociative (propIsMonad raw a b i) j
@@ -141,8 +142,9 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         (isInverse a) (isInverse b) i
 
   module _ {m n : Monad} (eq : Monad.raw m ≡ Monad.raw n) where
-    eqIsMonad : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
-    eqIsMonad = lemPropF propIsMonad eq
+    private
+      eqIsMonad : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
+      eqIsMonad = lemPropF propIsMonad eq
 
     Monad≡ : m ≡ n
     Monad.raw     (Monad≡ i) = eq i
@@ -161,23 +163,22 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   -- are not generally types.
   record RawMonad : Set ℓ where
     field
-      Romap : Object → Object
-      -- Note name-change from [voe]
-      pure : {X : Object} → ℂ [ X , Romap X ]
-      bind : {X Y : Object} → ℂ [ X , Romap Y ] → ℂ [ Romap X , Romap Y ]
+      omap : Object → Object
+      pure : {X : Object}   → ℂ [ X , omap X ]
+      bind : {X Y : Object} → ℂ [ X , omap Y ] → ℂ [ omap X , omap Y ]
 
     -- | functor map
     --
     -- This should perhaps be defined in a "Klesli-version" of functors as well?
-    fmap : ∀ {A B} → ℂ [ A , B ] → ℂ [ Romap A , Romap B ]
+    fmap : ∀ {A B} → ℂ [ A , B ] → ℂ [ omap A , omap B ]
     fmap f = bind (pure ∘ f)
 
     -- | Composition of monads aka. the kleisli-arrow.
-    _>=>_ : {A B C : Object} → ℂ [ A , Romap B ] → ℂ [ B , Romap C ] → ℂ [ A , Romap C ]
+    _>=>_ : {A B C : Object} → ℂ [ A , omap B ] → ℂ [ B , omap C ] → ℂ [ A , omap C ]
     f >=> g = f >>> (bind g)
 
     -- | Flattening nested monads.
-    join : {A : Object} → ℂ [ Romap (Romap A) , Romap A ]
+    join : {A : Object} → ℂ [ omap (omap A) , omap A ]
     join = bind 𝟙
 
     ------------------
@@ -187,10 +188,10 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     -- There may be better names than what I've chosen here.
 
     IsIdentity     = {X : Object}
-      → bind pure ≡ 𝟙 {Romap X}
-    IsNatural      = {X Y : Object}   (f : ℂ [ X , Romap Y ])
+      → bind pure ≡ 𝟙 {omap X}
+    IsNatural      = {X Y : Object}   (f : ℂ [ X , omap Y ])
       → pure >>> (bind f) ≡ f
-    IsDistributive = {X Y Z : Object} (g : ℂ [ Y , Romap Z ]) (f : ℂ [ X , Romap Y ])
+    IsDistributive = {X Y Z : Object} (g : ℂ [ Y , omap Z ]) (f : ℂ [ X , omap Y ])
       → (bind f) >>> (bind g) ≡ bind (f >=> g)
 
     -- | Functor map fusion.
@@ -218,23 +219,22 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     fusion : Fusion
     fusion {g = g} {f} = begin
       fmap (g ∘ f)               ≡⟨⟩
-      bind ((f >>> g) >>> pure)  ≡⟨ cong bind isAssociative ⟩
+      bind ((f >>> g) >>> pure)  ≡⟨ cong bind ℂ.isAssociative ⟩
       bind (f >>> (g >>> pure))  ≡⟨ cong (λ φ → bind (f >>> φ)) (sym (isNatural _)) ⟩
       bind (f >>> (pure >>> (bind (g >>> pure)))) ≡⟨⟩
       bind (f >>> (pure >>> fmap g)) ≡⟨⟩
-      bind ((fmap g ∘ pure) ∘ f) ≡⟨ cong bind (sym isAssociative) ⟩
-      bind (fmap g ∘ (pure ∘ f)) ≡⟨ sym lem ⟩
-      bind (pure ∘ g) ∘ bind (pure ∘ f)   ≡⟨⟩
-      fmap g ∘ fmap f           ∎
+      bind ((fmap g ∘ pure) ∘ f) ≡⟨ cong bind (sym ℂ.isAssociative) ⟩
+      bind (fmap g ∘ (pure ∘ f)) ≡⟨ sym distrib ⟩
+      bind (pure ∘ g) ∘ bind (pure ∘ f) ≡⟨⟩
+      fmap g ∘ fmap f            ∎
       where
-        open Category ℂ using (isAssociative)
-        lem : fmap g ∘ fmap f ≡ bind (fmap g ∘ (pure ∘ f))
-        lem = isDistributive (pure ∘ g) (pure ∘ f)
+        distrib : fmap g ∘ fmap f ≡ bind (fmap g ∘ (pure ∘ f))
+        distrib = isDistributive (pure ∘ g) (pure ∘ f)
 
     -- | This formulation gives rise to the following endo-functor.
     private
       rawR : RawFunctor ℂ ℂ
-      RawFunctor.func* rawR = Romap
+      RawFunctor.func* rawR = omap
       RawFunctor.func→ rawR = fmap
 
       isFunctorR : IsFunctor ℂ ℂ rawR
@@ -302,7 +302,6 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         bind 𝟙     >>> R.func→ f ≡⟨⟩
         R.func→ f  ∘ bind 𝟙      ≡⟨⟩
         R.func→ f  ∘ join        ∎
-        where
 
     pureNT : NaturalTransformation R⁰ R
     proj₁ pureNT = pureT
@@ -400,7 +399,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       open M.RawMonad m
 
       forthRaw : K.RawMonad
-      K.RawMonad.Romap   forthRaw = Romap
+      K.RawMonad.omap   forthRaw = Romap
       K.RawMonad.pure forthRaw = pureT _
       K.RawMonad.bind forthRaw = bind
 
@@ -469,7 +468,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         bind                                 ∎
         where
         joinT = proj₁ joinNT
-        lem : (f : Arrow X (Romap Y)) → bind (f >>> pure) >>> bind 𝟙 ≡ bind f
+        lem : (f : Arrow X (omap Y)) → bind (f >>> pure) >>> bind 𝟙 ≡ bind f
         lem f = begin
           bind (f >>> pure) >>> bind 𝟙
             ≡⟨ isDistributive _ _ ⟩
@@ -485,7 +484,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       x & f = f x
 
       forthRawEq : forthRaw (backRaw m) ≡ K.Monad.raw m
-      K.RawMonad.Romap    (forthRawEq _) = Romap
+      K.RawMonad.omap  (forthRawEq _) = omap
       K.RawMonad.pure  (forthRawEq _) = pure
       -- stuck
       K.RawMonad.bind  (forthRawEq i) = bindEq i
