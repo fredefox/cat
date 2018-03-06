@@ -25,34 +25,32 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       -- TODO rename fields here
       -- R ~ m
       R : EndoFunctor ℂ
-      -- η ~ pure
-      ηNatTrans : NaturalTransformation F.identity R
-      -- μ ~ join
-      μNatTrans : NaturalTransformation F[ R ∘ R ] R
+      pureNT : NaturalTransformation F.identity R
+      joinNT : NaturalTransformation F[ R ∘ R ] R
 
-    η : Transformation F.identity R
-    η = proj₁ ηNatTrans
-    ηNat : Natural F.identity R η
-    ηNat = proj₂ ηNatTrans
+    pureT : Transformation F.identity R
+    pureT = proj₁ pureNT
+    pureN : Natural F.identity R pureT
+    pureN = proj₂ pureNT
 
-    μ : Transformation F[ R ∘ R ] R
-    μ = proj₁ μNatTrans
-    μNat : Natural F[ R ∘ R ] R μ
-    μNat = proj₂ μNatTrans
+    joinT : Transformation F[ R ∘ R ] R
+    joinT = proj₁ joinNT
+    joinN : Natural F[ R ∘ R ] R joinT
+    joinN = proj₂ joinNT
 
     private
       module R  = Functor R
     IsAssociative : Set _
     IsAssociative = {X : Object}
-      → μ X ∘ R.func→ (μ X) ≡ μ X ∘ μ (R.func* X)
+      → joinT X ∘ R.func→ (joinT X) ≡ joinT X ∘ joinT (R.func* X)
     IsInverse : Set _
     IsInverse = {X : Object}
-      → μ X ∘ η (R.func* X) ≡ 𝟙
-      × μ X ∘ R.func→ (η X) ≡ 𝟙
-    IsNatural = ∀ {X Y} f → μ Y ∘ R.func→ f ∘ η X ≡ f
+      → joinT X ∘ pureT (R.func* X) ≡ 𝟙
+      × joinT X ∘ R.func→ (pureT X) ≡ 𝟙
+    IsNatural = ∀ {X Y} f → joinT Y ∘ R.func→ f ∘ pureT X ≡ f
     IsDistributive = ∀ {X Y Z} (g : Arrow Y (R.func* Z)) (f : Arrow X (R.func* Y))
-      → μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f)
-      ≡ μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f)
+      → joinT Z ∘ R.func→ g ∘ (joinT Y ∘ R.func→ f)
+      ≡ joinT Z ∘ R.func→ (joinT Z ∘ R.func→ g ∘ f)
 
   record IsMonad (raw : RawMonad) : Set ℓ where
     open RawMonad raw public
@@ -66,10 +64,10 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
     isNatural : IsNatural
     isNatural {X} {Y} f = begin
-      μ Y ∘ R.func→ f ∘ η X     ≡⟨ sym ℂ.isAssociative ⟩
-      μ Y ∘ (R.func→ f ∘ η X)   ≡⟨ cong (λ φ → μ Y ∘ φ) (sym (ηNat f)) ⟩
-      μ Y ∘ (η (R.func* Y) ∘ f) ≡⟨ ℂ.isAssociative ⟩
-      μ Y ∘ η (R.func* Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (proj₁ isInverse) ⟩
+      joinT Y ∘ R.func→ f ∘ pureT X     ≡⟨ sym ℂ.isAssociative ⟩
+      joinT Y ∘ (R.func→ f ∘ pureT X)   ≡⟨ cong (λ φ → joinT Y ∘ φ) (sym (pureN f)) ⟩
+      joinT Y ∘ (pureT (R.func* Y) ∘ f) ≡⟨ ℂ.isAssociative ⟩
+      joinT Y ∘ pureT (R.func* Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (proj₁ isInverse) ⟩
       𝟙 ∘ f                     ≡⟨ proj₂ ℂ.isIdentity ⟩
       f                         ∎
 
@@ -98,33 +96,33 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         a ∘ b ∘ c ∘ d     ∎
         where
         asc = ℂ.isAssociative
-      lemmm : μ Z ∘ R.func→ (μ Z) ≡ μ Z ∘ μ (R.func* Z)
+      lemmm : joinT Z ∘ R.func→ (joinT Z) ≡ joinT Z ∘ joinT (R.func* Z)
       lemmm = isAssociative
-      lem4 : μ (R.func* Z) ∘ R².func→ g ≡ R.func→ g ∘ μ Y
-      lem4 = μNat g
+      lem4 : joinT (R.func* Z) ∘ R².func→ g ≡ R.func→ g ∘ joinT Y
+      lem4 = joinN g
       done = begin
-        μ Z ∘ R.func→ (μ Z ∘ R.func→ g ∘ f)
-          ≡⟨ cong (λ φ → μ Z ∘ φ) distrib ⟩
-        μ Z ∘ (R.func→ (μ Z) ∘ R.func→ (R.func→ g) ∘ R.func→ f)
+        joinT Z ∘ R.func→ (joinT Z ∘ R.func→ g ∘ f)
+          ≡⟨ cong (λ φ → joinT Z ∘ φ) distrib ⟩
+        joinT Z ∘ (R.func→ (joinT Z) ∘ R.func→ (R.func→ g) ∘ R.func→ f)
           ≡⟨⟩
-        μ Z ∘ (R.func→ (μ Z) ∘ R².func→ g ∘ R.func→ f)
-          ≡⟨ cong (_∘_ (μ Z)) (sym ℂ.isAssociative) ⟩ -- ●-solver?
-        μ Z ∘ (R.func→ (μ Z) ∘ (R².func→ g ∘ R.func→ f))
+        joinT Z ∘ (R.func→ (joinT Z) ∘ R².func→ g ∘ R.func→ f)
+          ≡⟨ cong (_∘_ (joinT Z)) (sym ℂ.isAssociative) ⟩ -- ●-solver?
+        joinT Z ∘ (R.func→ (joinT Z) ∘ (R².func→ g ∘ R.func→ f))
           ≡⟨ ℂ.isAssociative ⟩
-        (μ Z ∘ R.func→ (μ Z)) ∘ (R².func→ g ∘ R.func→ f)
+        (joinT Z ∘ R.func→ (joinT Z)) ∘ (R².func→ g ∘ R.func→ f)
           ≡⟨ cong (λ φ → φ ∘ (R².func→ g ∘ R.func→ f)) isAssociative ⟩
-        (μ Z ∘ μ (R.func* Z)) ∘ (R².func→ g ∘ R.func→ f)
+        (joinT Z ∘ joinT (R.func* Z)) ∘ (R².func→ g ∘ R.func→ f)
           ≡⟨ ℂ.isAssociative ⟩ -- ●-solver?
-        μ Z ∘ μ (R.func* Z) ∘ R².func→ g ∘ R.func→ f
+        joinT Z ∘ joinT (R.func* Z) ∘ R².func→ g ∘ R.func→ f
           ≡⟨⟩ -- ●-solver + lem4
-        ((μ Z ∘ μ (R.func* Z)) ∘ R².func→ g) ∘ R.func→ f
+        ((joinT Z ∘ joinT (R.func* Z)) ∘ R².func→ g) ∘ R.func→ f
           ≡⟨ cong (_∘ R.func→ f) (sym ℂ.isAssociative) ⟩
-        (μ Z ∘ (μ (R.func* Z) ∘ R².func→ g)) ∘ R.func→ f
-          ≡⟨ cong (λ φ → φ ∘ R.func→ f) (cong (_∘_ (μ Z)) lem4) ⟩
-        (μ Z ∘ (R.func→ g ∘ μ Y)) ∘ R.func→ f ≡⟨ cong (_∘ R.func→ f) ℂ.isAssociative ⟩
-        μ Z ∘ R.func→ g ∘ μ Y ∘ R.func→ f
+        (joinT Z ∘ (joinT (R.func* Z) ∘ R².func→ g)) ∘ R.func→ f
+          ≡⟨ cong (λ φ → φ ∘ R.func→ f) (cong (_∘_ (joinT Z)) lem4) ⟩
+        (joinT Z ∘ (R.func→ g ∘ joinT Y)) ∘ R.func→ f ≡⟨ cong (_∘ R.func→ f) ℂ.isAssociative ⟩
+        joinT Z ∘ R.func→ g ∘ joinT Y ∘ R.func→ f
           ≡⟨ sym (Category.isAssociative ℂ) ⟩
-        μ Z ∘ R.func→ g ∘ (μ Y ∘ R.func→ f)
+        joinT Z ∘ R.func→ g ∘ (joinT Y ∘ R.func→ f)
           ∎
 
   record Monad : Set ℓ where
@@ -279,19 +277,19 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       module R  = Functor R
       module R⁰ = Functor R⁰
       module R² = Functor R²
-      η : Transformation R⁰ R
-      η A = pure
-      ηNatural : Natural R⁰ R η
-      ηNatural {A} {B} f = begin
-        η B             ∘ R⁰.func→ f ≡⟨⟩
+      pureT : Transformation R⁰ R
+      pureT A = pure
+      pureTNatural : Natural R⁰ R pureT
+      pureTNatural {A} {B} f = begin
+        pureT B             ∘ R⁰.func→ f ≡⟨⟩
         pure            ∘ f          ≡⟨ sym (isNatural _) ⟩
         bind (pure ∘ f) ∘ pure       ≡⟨⟩
         fmap f          ∘ pure       ≡⟨⟩
-        R.func→ f       ∘ η A        ∎
-      μ : Transformation R² R
-      μ C = join
-      μNatural : Natural R² R μ
-      μNatural f = begin
+        R.func→ f       ∘ pureT A        ∎
+      joinT : Transformation R² R
+      joinT C = join
+      joinTNatural : Natural R² R joinT
+      joinTNatural f = begin
         join       ∘ R².func→ f  ≡⟨⟩
         bind 𝟙     ∘ R².func→ f  ≡⟨⟩
         R².func→ f >>> bind 𝟙    ≡⟨⟩
@@ -319,13 +317,13 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         R.func→ f  ∘ join        ∎
         where
 
-    ηNatTrans : NaturalTransformation R⁰ R
-    proj₁ ηNatTrans = η
-    proj₂ ηNatTrans = ηNatural
+    pureNT : NaturalTransformation R⁰ R
+    proj₁ pureNT = pureT
+    proj₂ pureNT = pureTNatural
 
-    μNatTrans : NaturalTransformation R² R
-    proj₁ μNatTrans = μ
-    proj₂ μNatTrans = μNatural
+    joinNT : NaturalTransformation R² R
+    proj₁ joinNT = joinT
+    proj₂ joinNT = joinTNatural
 
     isNaturalForeign : IsNaturalForeign
     isNaturalForeign = begin
@@ -421,10 +419,10 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         RR = func* R
 
         pure : {X : Object} → ℂ [ X , RR X ]
-        pure {X} = η X
+        pure {X} = pureT X
 
         bind : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
-        bind {X} {Y} f = μ Y ∘ func→ R f
+        bind {X} {Y} f = joinT Y ∘ func→ R f
 
       forthRaw : K.RawMonad
       Kraw.RR   forthRaw = RR
@@ -452,8 +450,8 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
       backRaw : M.RawMonad
       MR.R         backRaw = R
-      MR.ηNatTrans backRaw = ηNatTrans
-      MR.μNatTrans backRaw = μNatTrans
+      MR.pureNT backRaw = pureNT
+      MR.joinNT backRaw = joinNT
 
       private
         open MR backRaw
@@ -461,19 +459,19 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
       backIsMonad : M.IsMonad backRaw
       MI.isAssociative backIsMonad {X} = begin
-        μ X  ∘ R.func→ (μ X)  ≡⟨⟩
-        join ∘ fmap (μ X)     ≡⟨⟩
+        joinT X  ∘ R.func→ (joinT X)  ≡⟨⟩
+        join ∘ fmap (joinT X)     ≡⟨⟩
         join ∘ fmap join      ≡⟨ isNaturalForeign ⟩
         join ∘ join           ≡⟨⟩
-        μ X  ∘ μ (R.func* X)  ∎
+        joinT X  ∘ joinT (R.func* X)  ∎
       MI.isInverse backIsMonad {X} = inv-l , inv-r
         where
         inv-l = begin
-          μ X ∘ η (R.func* X) ≡⟨⟩
+          joinT X ∘ pureT (R.func* X) ≡⟨⟩
           join ∘ pure         ≡⟨ proj₁ isInverse ⟩
           𝟙 ∎
         inv-r = begin
-          μ X ∘ R.func→ (η X) ≡⟨⟩
+          joinT X ∘ R.func→ (pureT X) ≡⟨⟩
           join ∘ fmap pure    ≡⟨ proj₂ isInverse ⟩
           𝟙 ∎
 
@@ -490,13 +488,13 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         ≡ K.RawMonad.bind (K.Monad.raw m)
       bindEq {X} {Y} = begin
         K.RawMonad.bind (forthRaw (backRaw m)) ≡⟨⟩
-        (λ f → μ Y  ∘ func→ R f)             ≡⟨⟩
+        (λ f → joinT Y  ∘ func→ R f)             ≡⟨⟩
         (λ f → join ∘ fmap f)                ≡⟨⟩
         (λ f → bind (f >>> pure) >>> bind 𝟙) ≡⟨ funExt lem ⟩
         (λ f → bind f)                       ≡⟨⟩
         bind                                 ∎
         where
-        μ = proj₁ μNatTrans
+        joinT = proj₁ joinNT
         lem : (f : Arrow X (RR Y)) → bind (f >>> pure) >>> bind 𝟙 ≡ bind f
         lem f = begin
           bind (f >>> pure) >>> bind 𝟙
@@ -569,13 +567,13 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
       open NaturalTransformation ℂ ℂ
       postulate
-        ηNatTransEq : (λ i → NaturalTransformation F.identity (Req i))
-          [ M.RawMonad.ηNatTrans (backRaw (forth m)) ≡ ηNatTrans ]
+        pureNTEq : (λ i → NaturalTransformation F.identity (Req i))
+          [ M.RawMonad.pureNT (backRaw (forth m)) ≡ pureNT ]
       backRawEq : backRaw (forth m) ≡ M.Monad.raw m
       -- stuck
       M.RawMonad.R         (backRawEq i) = Req i
-      M.RawMonad.ηNatTrans (backRawEq i) = {!!} -- ηNatTransEq i
-      M.RawMonad.μNatTrans (backRawEq i) = {!!}
+      M.RawMonad.pureNT (backRawEq i) = {!!} -- pureNTEq i
+      M.RawMonad.joinNT (backRawEq i) = {!!}
 
     backeq : (m : M.Monad) → back (forth m) ≡ m
     backeq m = M.Monad≡ (backRawEq m)
