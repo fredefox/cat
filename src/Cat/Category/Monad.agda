@@ -72,54 +72,37 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       f                         ∎
 
     isDistributive : IsDistributive
-    isDistributive {X} {Y} {Z} g f = sym done
+    isDistributive {X} {Y} {Z} g f = sym aux
       where
       module R² = Functor F[ R ∘ R ]
-      distrib : ∀ {A B C D} {a : Arrow C D} {b : Arrow B C} {c : Arrow A B}
+      distrib3 : ∀ {A B C D} {a : Arrow C D} {b : Arrow B C} {c : Arrow A B}
         → R.func→ (a ∘ b ∘ c)
         ≡ R.func→ a ∘ R.func→ b ∘ R.func→ c
-      distrib {a = a} {b} {c} = begin
-        R.func→ (a ∘ b ∘ c)               ≡⟨ distr ⟩
-        R.func→ (a ∘ b) ∘ R.func→ c       ≡⟨ cong (_∘ _) distr ⟩
+      distrib3 {a = a} {b} {c} = begin
+        R.func→ (a ∘ b ∘ c)               ≡⟨ R.isDistributive ⟩
+        R.func→ (a ∘ b) ∘ R.func→ c       ≡⟨ cong (_∘ _) R.isDistributive ⟩
         R.func→ a ∘ R.func→ b ∘ R.func→ c ∎
-        where
-        distr = R.isDistributive
-      comm : ∀ {A B C D E}
-        → {a : Arrow D E} {b : Arrow C D} {c : Arrow B C} {d : Arrow A B}
-        → a ∘ (b ∘ c ∘ d) ≡ a ∘ b ∘ c ∘ d
-      comm {a = a} {b} {c} {d} = begin
-        a ∘ (b ∘ c ∘ d)   ≡⟨⟩
-        a ∘ ((b ∘ c) ∘ d) ≡⟨ cong (_∘_ a) (sym asc) ⟩
-        a ∘ (b ∘ (c ∘ d)) ≡⟨ asc ⟩
-        (a ∘ b) ∘ (c ∘ d) ≡⟨ asc ⟩
-        ((a ∘ b) ∘ c) ∘ d ≡⟨⟩
-        a ∘ b ∘ c ∘ d     ∎
-        where
-        asc = ℂ.isAssociative
-      lemmm : joinT Z ∘ R.func→ (joinT Z) ≡ joinT Z ∘ joinT (R.func* Z)
-      lemmm = isAssociative
-      lem4 : joinT (R.func* Z) ∘ R².func→ g ≡ R.func→ g ∘ joinT Y
-      lem4 = joinN g
-      done = begin
+      aux = begin
         joinT Z ∘ R.func→ (joinT Z ∘ R.func→ g ∘ f)
-          ≡⟨ cong (λ φ → joinT Z ∘ φ) distrib ⟩
+          ≡⟨ cong (λ φ → joinT Z ∘ φ) distrib3 ⟩
         joinT Z ∘ (R.func→ (joinT Z) ∘ R.func→ (R.func→ g) ∘ R.func→ f)
           ≡⟨⟩
         joinT Z ∘ (R.func→ (joinT Z) ∘ R².func→ g ∘ R.func→ f)
-          ≡⟨ cong (_∘_ (joinT Z)) (sym ℂ.isAssociative) ⟩ -- ●-solver?
+          ≡⟨ cong (_∘_ (joinT Z)) (sym ℂ.isAssociative) ⟩
         joinT Z ∘ (R.func→ (joinT Z) ∘ (R².func→ g ∘ R.func→ f))
           ≡⟨ ℂ.isAssociative ⟩
         (joinT Z ∘ R.func→ (joinT Z)) ∘ (R².func→ g ∘ R.func→ f)
           ≡⟨ cong (λ φ → φ ∘ (R².func→ g ∘ R.func→ f)) isAssociative ⟩
         (joinT Z ∘ joinT (R.func* Z)) ∘ (R².func→ g ∘ R.func→ f)
-          ≡⟨ ℂ.isAssociative ⟩ -- ●-solver?
+          ≡⟨ ℂ.isAssociative ⟩
         joinT Z ∘ joinT (R.func* Z) ∘ R².func→ g ∘ R.func→ f
-          ≡⟨⟩ -- ●-solver + lem4
+          ≡⟨⟩
         ((joinT Z ∘ joinT (R.func* Z)) ∘ R².func→ g) ∘ R.func→ f
           ≡⟨ cong (_∘ R.func→ f) (sym ℂ.isAssociative) ⟩
         (joinT Z ∘ (joinT (R.func* Z) ∘ R².func→ g)) ∘ R.func→ f
-          ≡⟨ cong (λ φ → φ ∘ R.func→ f) (cong (_∘_ (joinT Z)) lem4) ⟩
-        (joinT Z ∘ (R.func→ g ∘ joinT Y)) ∘ R.func→ f ≡⟨ cong (_∘ R.func→ f) ℂ.isAssociative ⟩
+          ≡⟨ cong (λ φ → φ ∘ R.func→ f) (cong (_∘_ (joinT Z)) (joinN g)) ⟩
+        (joinT Z ∘ (R.func→ g ∘ joinT Y)) ∘ R.func→ f
+          ≡⟨ cong (_∘ R.func→ f) ℂ.isAssociative ⟩
         joinT Z ∘ R.func→ g ∘ joinT Y ∘ R.func→ f
           ≡⟨ sym (Category.isAssociative ℂ) ⟩
         joinT Z ∘ R.func→ g ∘ (joinT Y ∘ R.func→ f)
