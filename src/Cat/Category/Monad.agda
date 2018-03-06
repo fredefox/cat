@@ -42,6 +42,13 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
     private
       module R  = Functor R
+
+    Romap = Functor.func* R
+    Rfmap = Functor.func→ R
+
+    bind : {X Y : Object} → ℂ [ X , Romap Y ] → ℂ [ Romap X , Romap Y ]
+    bind {X} {Y} f = joinT Y ∘ Rfmap f
+
     IsAssociative : Set _
     IsAssociative = {X : Object}
       → joinT X ∘ R.func→ (joinT X) ≡ joinT X ∘ joinT (R.func* X)
@@ -396,23 +403,12 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
     -- Note similarity with locally defined things in Kleisly.RawMonad!!
     module _ (m : M.RawMonad) where
-      private
-        open M.RawMonad m
-        module Kraw = K.RawMonad
-
-        RR : Object → Object
-        RR = func* R
-
-        pure : {X : Object} → ℂ [ X , RR X ]
-        pure {X} = pureT X
-
-        bind : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
-        bind {X} {Y} f = joinT Y ∘ func→ R f
+      open M.RawMonad m
 
       forthRaw : K.RawMonad
-      Kraw.RR   forthRaw = RR
-      Kraw.pure forthRaw = pure
-      Kraw.bind forthRaw = bind
+      K.RawMonad.RR   forthRaw = Romap
+      K.RawMonad.pure forthRaw = pureT _
+      K.RawMonad.bind forthRaw = bind
 
     module _ {raw : M.RawMonad} (m : M.IsMonad raw) where
       private
@@ -506,8 +502,6 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
     module _ (m : M.Monad) where
       open M.RawMonad (M.Monad.raw m)
-      Romap = Functor.func* R
-      Rfmap = Functor.func→ R
       rawEq* : Functor.func* (K.Monad.R (forth m)) ≡ Functor.func* R
       rawEq* = refl
       left  = Functor.raw (K.Monad.R (forth m))
