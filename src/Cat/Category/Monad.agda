@@ -166,23 +166,23 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   -- are not generally types.
   record RawMonad : Set ℓ where
     field
-      RR : Object → Object
+      Romap : Object → Object
       -- Note name-change from [voe]
-      pure : {X : Object} → ℂ [ X , RR X ]
-      bind : {X Y : Object} → ℂ [ X , RR Y ] → ℂ [ RR X , RR Y ]
+      pure : {X : Object} → ℂ [ X , Romap X ]
+      bind : {X Y : Object} → ℂ [ X , Romap Y ] → ℂ [ Romap X , Romap Y ]
 
     -- | functor map
     --
     -- This should perhaps be defined in a "Klesli-version" of functors as well?
-    fmap : ∀ {A B} → ℂ [ A , B ] → ℂ [ RR A , RR B ]
+    fmap : ∀ {A B} → ℂ [ A , B ] → ℂ [ Romap A , Romap B ]
     fmap f = bind (pure ∘ f)
 
     -- | Composition of monads aka. the kleisli-arrow.
-    _>=>_ : {A B C : Object} → ℂ [ A , RR B ] → ℂ [ B , RR C ] → ℂ [ A , RR C ]
+    _>=>_ : {A B C : Object} → ℂ [ A , Romap B ] → ℂ [ B , Romap C ] → ℂ [ A , Romap C ]
     f >=> g = f >>> (bind g)
 
     -- | Flattening nested monads.
-    join : {A : Object} → ℂ [ RR (RR A) , RR A ]
+    join : {A : Object} → ℂ [ Romap (Romap A) , Romap A ]
     join = bind 𝟙
 
     ------------------
@@ -192,10 +192,10 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     -- There may be better names than what I've chosen here.
 
     IsIdentity     = {X : Object}
-      → bind pure ≡ 𝟙 {RR X}
-    IsNatural      = {X Y : Object}   (f : ℂ [ X , RR Y ])
+      → bind pure ≡ 𝟙 {Romap X}
+    IsNatural      = {X Y : Object}   (f : ℂ [ X , Romap Y ])
       → pure >>> (bind f) ≡ f
-    IsDistributive = {X Y Z : Object} (g : ℂ [ Y , RR Z ]) (f : ℂ [ X , RR Y ])
+    IsDistributive = {X Y Z : Object} (g : ℂ [ Y , Romap Z ]) (f : ℂ [ X , Romap Y ])
       → (bind f) >>> (bind g) ≡ bind (f >=> g)
 
     -- | Functor map fusion.
@@ -239,7 +239,7 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     -- | This formulation gives rise to the following endo-functor.
     private
       rawR : RawFunctor ℂ ℂ
-      RawFunctor.func* rawR = RR
+      RawFunctor.func* rawR = Romap
       RawFunctor.func→ rawR = fmap
 
       isFunctorR : IsFunctor ℂ ℂ rawR
@@ -399,25 +399,23 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     open ℂ using (Object ; Arrow ; 𝟙 ; _∘_ ; _>>>_)
     open Functor using (func* ; func→)
     module M = Monoidal ℂ
-    module K = Kleisli ℂ
+    module K = Kleisli  ℂ
 
-    -- Note similarity with locally defined things in Kleisly.RawMonad!!
     module _ (m : M.RawMonad) where
       open M.RawMonad m
 
       forthRaw : K.RawMonad
-      K.RawMonad.RR   forthRaw = Romap
+      K.RawMonad.Romap   forthRaw = Romap
       K.RawMonad.pure forthRaw = pureT _
       K.RawMonad.bind forthRaw = bind
 
     module _ {raw : M.RawMonad} (m : M.IsMonad raw) where
       private
         module MI = M.IsMonad m
-        module KI = K.IsMonad
       forthIsMonad : K.IsMonad (forthRaw raw)
-      KI.isIdentity     forthIsMonad = proj₂ MI.isInverse
-      KI.isNatural      forthIsMonad = MI.isNatural
-      KI.isDistributive forthIsMonad = MI.isDistributive
+      K.IsMonad.isIdentity     forthIsMonad = proj₂ MI.isInverse
+      K.IsMonad.isNatural      forthIsMonad = MI.isNatural
+      K.IsMonad.isDistributive forthIsMonad = MI.isDistributive
 
     forth : M.Monad → K.Monad
     Kleisli.Monad.raw     (forth m) = forthRaw     (M.Monad.raw m)
@@ -430,7 +428,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         module MI = M.IsMonad
 
       backRaw : M.RawMonad
-      MR.R         backRaw = R
+      MR.R      backRaw = R
       MR.pureNT backRaw = pureNT
       MR.joinNT backRaw = joinNT
 
@@ -476,7 +474,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         bind                                 ∎
         where
         joinT = proj₁ joinNT
-        lem : (f : Arrow X (RR Y)) → bind (f >>> pure) >>> bind 𝟙 ≡ bind f
+        lem : (f : Arrow X (Romap Y)) → bind (f >>> pure) >>> bind 𝟙 ≡ bind f
         lem f = begin
           bind (f >>> pure) >>> bind 𝟙
             ≡⟨ isDistributive _ _ ⟩
@@ -492,7 +490,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       x & f = f x
 
       forthRawEq : forthRaw (backRaw m) ≡ K.Monad.raw m
-      K.RawMonad.RR    (forthRawEq _) = RR
+      K.RawMonad.Romap    (forthRawEq _) = Romap
       K.RawMonad.pure  (forthRawEq _) = pure
       -- stuck
       K.RawMonad.bind  (forthRawEq i) = bindEq i
