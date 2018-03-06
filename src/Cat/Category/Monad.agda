@@ -377,8 +377,9 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   IsMonad.isDistributive (propIsMonad raw x y i)
     = propIsDistributive raw (isDistributive x) (isDistributive y) i
   module _ {m n : Monad} (eq : Monad.raw m ≡ Monad.raw n) where
-    eqIsMonad : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
-    eqIsMonad = lemPropF propIsMonad eq
+    private
+      eqIsMonad : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
+      eqIsMonad = lemPropF propIsMonad eq
 
     Monad≡ : m ≡ n
     Monad.raw     (Monad≡ i) = eq i
