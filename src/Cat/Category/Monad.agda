@@ -264,8 +264,8 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       module R² = Functor R²
       pureT : Transformation R⁰ R
       pureT A = pure
-      pureTNatural : Natural R⁰ R pureT
-      pureTNatural {A} {B} f = begin
+      pureN : Natural R⁰ R pureT
+      pureN {A} {B} f = begin
         pureT B             ∘ R⁰.func→ f ≡⟨⟩
         pure            ∘ f          ≡⟨ sym (isNatural _) ⟩
         bind (pure ∘ f) ∘ pure       ≡⟨⟩
@@ -273,8 +273,8 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         R.func→ f       ∘ pureT A        ∎
       joinT : Transformation R² R
       joinT C = join
-      joinTNatural : Natural R² R joinT
-      joinTNatural f = begin
+      joinN : Natural R² R joinT
+      joinN f = begin
         join       ∘ R².func→ f  ≡⟨⟩
         bind 𝟙     ∘ R².func→ f  ≡⟨⟩
         R².func→ f >>> bind 𝟙    ≡⟨⟩
@@ -304,11 +304,11 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
     pureNT : NaturalTransformation R⁰ R
     proj₁ pureNT = pureT
-    proj₂ pureNT = pureTNatural
+    proj₂ pureNT = pureN
 
     joinNT : NaturalTransformation R² R
     proj₁ joinNT = joinT
-    proj₂ joinNT = joinTNatural
+    proj₂ joinNT = joinN
 
     isNaturalForeign : IsNaturalForeign
     isNaturalForeign = begin
