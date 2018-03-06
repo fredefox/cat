@@ -23,6 +23,8 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {A B obj : Object ℂ} whe
 
 -- open IsProduct
 
+-- TODO `isProp (Product ...)`
+-- TODO `isProp (HasProducts ...)`
 record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : Object ℂ) : Set (ℓ ⊔ ℓ') where
   no-eta-equality
   field

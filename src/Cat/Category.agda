@@ -76,7 +76,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     𝟙      : {A : Object} → Arrow A A
     _∘_    : {A B C : Object} → Arrow B C → Arrow A B → Arrow A C
 
-  infixl 10 _∘_
+  infixl 10 _∘_ _>>>_
 
   -- | Operations on data
 

@@ -454,30 +454,31 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     Monoidal.Monad.isMonad (back m) = backIsMonad m
 
     module _ (m : K.Monad) where
-      open K.Monad m
-      bindEq : ∀ {X Y}
-        → K.RawMonad.bind (forthRaw (backRaw m)) {X} {Y}
-        ≡ K.RawMonad.bind (K.Monad.raw m)
-      bindEq {X} {Y} = begin
-        K.RawMonad.bind (forthRaw (backRaw m)) ≡⟨⟩
-        (λ f → join ∘ fmap f)                  ≡⟨⟩
-        (λ f → bind (f >>> pure) >>> bind 𝟙)   ≡⟨ funExt lem ⟩
-        (λ f → bind f)                         ≡⟨⟩
-        bind                                   ∎
-        where
-        lem : (f : Arrow X (omap Y))
-          → bind (f >>> pure) >>> bind 𝟙
-          ≡ bind f
-        lem f = begin
-          bind (f >>> pure) >>> bind 𝟙
-            ≡⟨ isDistributive _ _ ⟩
-          bind ((f >>> pure) >>> bind 𝟙)
-            ≡⟨ cong bind ℂ.isAssociative ⟩
-          bind (f >>> (pure >>> bind 𝟙))
-            ≡⟨ cong (λ φ → bind (f >>> φ)) (isNatural _) ⟩
-          bind (f >>> 𝟙)
-            ≡⟨ cong bind (proj₂ ℂ.isIdentity) ⟩
-          bind f ∎
+      private
+        open K.Monad m
+        bindEq : ∀ {X Y}
+          → K.RawMonad.bind (forthRaw (backRaw m)) {X} {Y}
+          ≡ K.RawMonad.bind (K.Monad.raw m)
+        bindEq {X} {Y} = begin
+          K.RawMonad.bind (forthRaw (backRaw m)) ≡⟨⟩
+          (λ f → join ∘ fmap f)                  ≡⟨⟩
+          (λ f → bind (f >>> pure) >>> bind 𝟙)   ≡⟨ funExt lem ⟩
+          (λ f → bind f)                         ≡⟨⟩
+          bind                                   ∎
+          where
+          lem : (f : Arrow X (omap Y))
+            → bind (f >>> pure) >>> bind 𝟙
+            ≡ bind f
+          lem f = begin
+            bind (f >>> pure) >>> bind 𝟙
+              ≡⟨ isDistributive _ _ ⟩
+            bind ((f >>> pure) >>> bind 𝟙)
+              ≡⟨ cong bind ℂ.isAssociative ⟩
+            bind (f >>> (pure >>> bind 𝟙))
+              ≡⟨ cong (λ φ → bind (f >>> φ)) (isNatural _) ⟩
+            bind (f >>> 𝟙)
+              ≡⟨ cong bind (proj₂ ℂ.isIdentity) ⟩
+            bind f ∎
 
       forthRawEq : forthRaw (backRaw m) ≡ K.Monad.raw m
       K.RawMonad.omap  (forthRawEq _) = omap
@@ -488,47 +489,44 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     fortheq m = K.Monad≡ (forthRawEq m)
 
     module _ (m : M.Monad) where
-      open M.RawMonad (M.Monad.raw m) using (R ; Romap ; Rfmap ; pureNT ; joinNT)
-      module KM = K.Monad (forth m)
-      omapEq : KM.omap ≡ Romap
-      omapEq = refl
+      private
+        open M.Monad m
+        module KM = K.Monad (forth m)
+        module R = Functor R
+        omapEq : KM.omap ≡ Romap
+        omapEq = refl
 
-      D : (omap : Omap ℂ ℂ) → Romap ≡ omap → Set _
-      D omap eq = (fmap' : Fmap ℂ ℂ omap)
-        → (λ i → Fmap ℂ ℂ (eq i))
-        [ (λ f → KM.fmap f) ≡ fmap' ]
+        bindEq : ∀ {X Y} {f : Arrow X (Romap Y)} → KM.bind f ≡ bind f
+        bindEq {X} {Y} {f} = begin
+          KM.bind f         ≡⟨⟩
+          joinT Y ∘ Rfmap f ≡⟨⟩
+          bind f            ∎
 
-      -- The "base-case" for path induction on the family `D`.
-      d : D Romap λ _ → Romap
-      d = res
-        where
-        -- aka:
-        res
-          : (fmap : Fmap ℂ ℂ Romap)
-          → (λ _ → Fmap ℂ ℂ Romap) [ KM.fmap ≡ fmap ]
-        res fmap = begin
-          (λ f → KM.fmap f)               ≡⟨⟩
-          (λ f → KM.bind (f >>> KM.pure)) ≡⟨ {!!} ⟩
-          (λ f → fmap f)                  ∎
+        joinEq : ∀ {X} → KM.join ≡ joinT X
+        joinEq {X} = begin
+          KM.join                ≡⟨⟩
+          KM.bind 𝟙              ≡⟨⟩
+          bind 𝟙                 ≡⟨⟩
+          joinT X ∘ Rfmap 𝟙      ≡⟨ cong (λ φ → _ ∘ φ) R.isIdentity ⟩
+          joinT X ∘ 𝟙            ≡⟨ proj₁ ℂ.isIdentity ⟩
+          joinT X                ∎
 
-      -- This is sort of equivalent to `d` though the the order of
-      -- quantification is different. `KM.fmap` is defined in terms of `Rfmap`
-      -- (via `forth`) whereas in `d` above `fmap` is universally quantified.
-      --
-      -- I'm not sure `d` is provable. I believe `d'` should be, but I can also
-      -- not prove it.
-      d' : (λ i → Fmap ℂ ℂ Romap) [ KM.fmap ≡ Rfmap ]
-      d' = begin
-        (λ f → KM.fmap f)               ≡⟨⟩
-        (λ f → KM.bind (f >>> KM.pure)) ≡⟨ {!!} ⟩
-        (λ f → Rfmap f)                 ∎
+        fmapEq : ∀ {A B} → KM.fmap {A} {B} ≡ Rfmap
+        fmapEq {A} {B} = funExt (λ f → begin
+          KM.fmap f                                ≡⟨⟩
+          KM.bind (f >>> KM.pure)                  ≡⟨⟩
+             bind (f >>> pureT _)                  ≡⟨⟩
+             Rfmap (f >>> pureT B) >>> joinT B     ≡⟨⟩
+          Rfmap (f >>> pureT B) >>> joinT B        ≡⟨ cong (λ φ → φ >>> joinT B) R.isDistributive ⟩
+          Rfmap f >>> Rfmap (pureT B) >>> joinT B  ≡⟨ ℂ.isAssociative ⟩
+          joinT B ∘ Rfmap (pureT B) ∘ Rfmap f      ≡⟨ cong (λ φ → φ ∘ Rfmap f) (proj₂ isInverse) ⟩
+          𝟙 ∘ Rfmap f                              ≡⟨ proj₂ ℂ.isIdentity ⟩
+          Rfmap f                                  ∎
+          )
 
-      fmapEq : (λ i → Fmap ℂ ℂ (omapEq i)) [ KM.fmap ≡ Rfmap ]
-      fmapEq = pathJ D d Romap refl Rfmap
-
-      rawEq : Functor.raw KM.R ≡ Functor.raw R
-      RawFunctor.func* (rawEq i) = omapEq i
-      RawFunctor.func→ (rawEq i) = fmapEq i
+        rawEq : Functor.raw KM.R ≡ Functor.raw R
+        RawFunctor.func* (rawEq i) = omapEq i
+        RawFunctor.func→ (rawEq i) = fmapEq i
 
       Req : M.RawMonad.R (backRaw (forth m)) ≡ R
       Req = Functor≡ rawEq
