@@ -22,9 +22,7 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   open NaturalTransformation ℂ ℂ
   record RawMonad : Set ℓ where
     field
-      -- TODO rename fields here
-      -- R ~ m
-      R : EndoFunctor ℂ
+      R      : EndoFunctor ℂ
       pureNT : NaturalTransformation F.identity R
       joinNT : NaturalTransformation F[ R ∘ R ] R
 
@@ -40,9 +38,6 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     joinN : Natural F[ R ∘ R ] R joinT
     joinN = proj₂ joinNT
 
-    private
-      module R  = Functor R
-
     Romap = Functor.func* R
     Rfmap = Functor.func→ R
 
@@ -51,15 +46,15 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
     IsAssociative : Set _
     IsAssociative = {X : Object}
-      → joinT X ∘ R.func→ (joinT X) ≡ joinT X ∘ joinT (R.func* X)
+      → joinT X ∘ Rfmap (joinT X) ≡ joinT X ∘ joinT (Romap X)
     IsInverse : Set _
     IsInverse = {X : Object}
-      → joinT X ∘ pureT (R.func* X) ≡ 𝟙
-      × joinT X ∘ R.func→ (pureT X) ≡ 𝟙
-    IsNatural = ∀ {X Y} f → joinT Y ∘ R.func→ f ∘ pureT X ≡ f
-    IsDistributive = ∀ {X Y Z} (g : Arrow Y (R.func* Z)) (f : Arrow X (R.func* Y))
-      → joinT Z ∘ R.func→ g ∘ (joinT Y ∘ R.func→ f)
-      ≡ joinT Z ∘ R.func→ (joinT Z ∘ R.func→ g ∘ f)
+      → joinT X ∘ pureT (Romap X) ≡ 𝟙
+      × joinT X ∘ Rfmap (pureT X) ≡ 𝟙
+    IsNatural = ∀ {X Y} f → joinT Y ∘ Rfmap f ∘ pureT X ≡ f
+    IsDistributive = ∀ {X Y Z} (g : Arrow Y (Romap Z)) (f : Arrow X (Romap Y))
+      → joinT Z ∘ Rfmap g ∘ (joinT Y ∘ Rfmap f)
+      ≡ joinT Z ∘ Rfmap (joinT Z ∘ Rfmap g ∘ f)
 
   record IsMonad (raw : RawMonad) : Set ℓ where
     open RawMonad raw public
