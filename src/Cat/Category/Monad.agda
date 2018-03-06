@@ -390,6 +390,7 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
 -- | The monoidal- and kleisli presentation of monads are equivalent.
 --
+-- This is *not* problem 2.3 in [voe].
 -- This is problem 2.3 in [voe].
 module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
   private
@@ -540,7 +541,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       backRawEq : backRaw (forth m) ≡ M.Monad.raw m
       -- stuck
       M.RawMonad.R      (backRawEq i) = Req i
-      M.RawMonad.pureNT (backRawEq i) = pureNTEq i -- pureNTEq i
+      M.RawMonad.pureNT (backRawEq i) = pureNTEq i
       M.RawMonad.joinNT (backRawEq i) = joinNTEq i
 
     backeq : (m : M.Monad) → back (forth m) ≡ m
@@ -551,3 +552,129 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
   Monoidal≃Kleisli : M.Monad ≃ K.Monad
   Monoidal≃Kleisli = forth , eqv
+
+module voe-2-3 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
+  private
+    ℓ = ℓa ⊔ ℓb
+    module ℂ = Category ℂ
+    open ℂ using (Object ; Arrow ; _∘_)
+    open NaturalTransformation ℂ ℂ
+    module M = Monoidal ℂ
+    module K = Kleisli  ℂ
+
+  module _ (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
+    record voe-2-3-1 : Set ℓ where
+      open M
+
+      field
+        fmap : Fmap ℂ ℂ omap
+        join : {A : Object} → ℂ [ omap (omap A) , omap A ]
+
+      Rraw : RawFunctor ℂ ℂ
+      Rraw = record
+        { func* = omap
+        ; func→ = fmap
+        }
+
+      field
+        RisFunctor : IsFunctor ℂ ℂ Rraw
+
+      R : EndoFunctor ℂ
+      R = record
+        { raw = Rraw
+        ; isFunctor = RisFunctor
+        }
+
+      pureT : (X : Object) → Arrow X (omap X)
+      pureT X = pure {X}
+
+      field
+        pureN : Natural F.identity R pureT
+
+      pureNT : NaturalTransformation F.identity R
+      pureNT = pureT , pureN
+
+      joinT : (A : Object) → ℂ [ omap (omap A) , omap A ]
+      joinT A = join {A}
+
+      field
+        joinN : Natural F[ R ∘ R ] R joinT
+
+      joinNT : NaturalTransformation F[ R ∘ R ] R
+      joinNT = joinT , joinN
+
+      rawMnd : RawMonad
+      rawMnd = record
+        { R = R
+        ; pureNT = pureNT
+        ; joinNT = joinNT
+        }
+
+      field
+        isMnd : IsMonad rawMnd
+
+      mnd : Monad
+      mnd = record
+        { raw     = rawMnd
+        ; isMonad = isMnd
+        }
+
+    record voe-2-3-2 : Set ℓ where
+      open K
+
+      field
+        bind : {X Y : Object} → ℂ [ X , omap Y ] → ℂ [ omap X , omap Y ]
+
+      rawMnd : RawMonad
+      rawMnd = record
+        { omap = omap
+        ; pure = pure
+        ; bind = bind
+        }
+
+      field
+        isMnd : IsMonad rawMnd
+
+      mnd : Monad
+      mnd = record
+        { raw     = rawMnd
+        ; isMonad = isMnd
+        }
+
+module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
+  private
+    ℓ = ℓa ⊔ ℓb
+    module ℂ = Category ℂ
+    open ℂ using (Object ; Arrow ; _∘_)
+    open NaturalTransformation ℂ ℂ
+    module M = Monoidal ℂ
+    module K = Kleisli  ℂ
+    open voe-2-3 {ℂ = ℂ}
+
+    forth
+      : {omap : Omap ℂ ℂ} {pure : {X : Object} → Arrow X (omap X)}
+      → voe-2-3-1 omap pure → M.Monad
+    forth = voe-2-3-1.mnd
+
+    back : (m : M.Monad) → voe-2-3-1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
+    back m = record
+      { fmap = Functor.func→ R
+      ; RisFunctor = Functor.isFunctor R
+      ; pureN = pureN
+      ; join = λ {X} → joinT X
+      ; joinN = joinN
+      ; isMnd = M.Monad.isMonad m
+      }
+      where
+      raw = M.Monad.raw m
+      R   = M.RawMonad.R raw
+      pureT = M.RawMonad.pureT raw
+      pureN = M.RawMonad.pureN raw
+      joinT = M.RawMonad.joinT raw
+      joinN = M.RawMonad.joinN raw
+
+    -- Unfortunately the two above definitions don't really give rise to a
+    -- bijection - at least not directly. Q: What to put in the indices for
+    -- `voe-2-3-1`?
+    equiv-2-3-1 : voe-2-3-1 {!!} {!!} ≃ M.Monad
+    equiv-2-3-1 = {!!}
