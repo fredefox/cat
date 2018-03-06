@@ -535,11 +535,13 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       postulate
         pureNTEq : (λ i → NaturalTransformation F.identity (Req i))
           [ M.RawMonad.pureNT (backRaw (forth m)) ≡ pureNT ]
+        joinNTEq : (λ i → NaturalTransformation F[ Req i ∘ Req i ] (Req i))
+          [ M.RawMonad.joinNT (backRaw (forth m)) ≡ joinNT ]
       backRawEq : backRaw (forth m) ≡ M.Monad.raw m
       -- stuck
       M.RawMonad.R      (backRawEq i) = Req i
-      M.RawMonad.pureNT (backRawEq i) = {!!} -- pureNTEq i
-      M.RawMonad.joinNT (backRawEq i) = {!!}
+      M.RawMonad.pureNT (backRawEq i) = pureNTEq i -- pureNTEq i
+      M.RawMonad.joinNT (backRawEq i) = joinNTEq i
 
     backeq : (m : M.Monad) → back (forth m) ≡ m
     backeq m = M.Monad≡ (backRawEq m)
