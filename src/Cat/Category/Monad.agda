@@ -488,45 +488,47 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     fortheq m = K.Monad≡ (forthRawEq m)
 
     module _ (m : M.Monad) where
-      open M.RawMonad (M.Monad.raw m)
-      rawEq* : Functor.func* (K.Monad.R (forth m)) ≡ Functor.func* R
-      rawEq* = refl
-      left  = Functor.raw (K.Monad.R (forth m))
-      right = Functor.raw R
-      P : (omap : Omap ℂ ℂ)
-        → (eq : RawFunctor.func* left ≡ omap)
-        → (fmap' : Fmap ℂ ℂ omap)
-        → Set _
-      P _ eq fmap' = (λ i → Fmap ℂ ℂ (eq i))
-        [ RawFunctor.func→ left ≡ fmap' ]
-
+      open M.RawMonad (M.Monad.raw m) using (R ; Romap ; Rfmap ; pureNT ; joinNT)
       module KM = K.Monad (forth m)
-      rawEq→ : (λ i → Fmap ℂ ℂ (refl i)) [ Functor.func→ (K.Monad.R (forth m)) ≡ Functor.func→ R ]
-      -- aka:
+      omapEq : KM.omap ≡ Romap
+      omapEq = refl
+
+      D : (omap : Omap ℂ ℂ) → Romap ≡ omap → Set _
+      D omap eq = (fmap' : Fmap ℂ ℂ omap)
+        → (λ i → Fmap ℂ ℂ (eq i))
+        [ (λ f → KM.fmap f) ≡ fmap' ]
+
+      -- The "base-case" for path induction on the family `D`.
+      d : D Romap λ _ → Romap
+      d = res
+        where
+        -- aka:
+        res
+          : (fmap : Fmap ℂ ℂ Romap)
+          → (λ _ → Fmap ℂ ℂ Romap) [ KM.fmap ≡ fmap ]
+        res fmap = begin
+          (λ f → KM.fmap f)               ≡⟨⟩
+          (λ f → KM.bind (f >>> KM.pure)) ≡⟨ {!!} ⟩
+          (λ f → fmap f)                  ∎
+
+      -- This is sort of equivalent to `d` though the the order of
+      -- quantification is different. `KM.fmap` is defined in terms of `Rfmap`
+      -- (via `forth`) whereas in `d` above `fmap` is universally quantified.
       --
-      --     rawEq→ : P (RawFunctor.func* right) refl (RawFunctor.func→ right)
-      rawEq→ = begin
-        (λ f → RawFunctor.func→ left f) ≡⟨⟩
+      -- I'm not sure `d` is provable. I believe `d'` should be, but I can also
+      -- not prove it.
+      d' : (λ i → Fmap ℂ ℂ Romap) [ KM.fmap ≡ Rfmap ]
+      d' = begin
         (λ f → KM.fmap f)               ≡⟨⟩
         (λ f → KM.bind (f >>> KM.pure)) ≡⟨ {!!} ⟩
-        (λ f → Rfmap f)                 ≡⟨⟩
-        (λ f → RawFunctor.func→ right f) ∎
+        (λ f → Rfmap f)                 ∎
 
-      -- This goal is more general than the above goal which I also don't know
-      -- how to close.
-      p : (fmap' : Fmap ℂ ℂ (RawFunctor.func* left))
-        → (λ i → Fmap ℂ ℂ Romap) [ RawFunctor.func→ left ≡ fmap' ]
-      -- aka:
-      --
-      --     p : P (RawFunctor.func* left) refl
-      p fmap' = begin
-        (λ f → RawFunctor.func→ left f) ≡⟨⟩
-        (λ f → KM.fmap f)               ≡⟨⟩
-        (λ f → KM.bind (f >>> KM.pure)) ≡⟨ {!!} ⟩
-        (λ f → fmap' f) ∎
+      fmapEq : (λ i → Fmap ℂ ℂ (omapEq i)) [ KM.fmap ≡ Rfmap ]
+      fmapEq = pathJ D d Romap refl Rfmap
 
-      rawEq : Functor.raw (K.Monad.R (forth m)) ≡ Functor.raw R
-      rawEq = RawFunctor≡ ℂ ℂ {x = left} {right} (λ _ → Romap) p
+      rawEq : Functor.raw KM.R ≡ Functor.raw R
+      RawFunctor.func* (rawEq i) = omapEq i
+      RawFunctor.func→ (rawEq i) = fmapEq i
 
       Req : M.RawMonad.R (backRaw (forth m)) ≡ R
       Req = Functor≡ rawEq
