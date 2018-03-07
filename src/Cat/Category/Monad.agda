@@ -735,16 +735,59 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
       Voe-2-3-1-inverse = (toMonad ∘f fromMonad) ≡ Function.id
         where
-        toMonad : voe-2-3-1 → M.Monad
-        toMonad = voe-2-3-1.toMonad
-        t : (m : M.Monad) → voe-2-3.voe-2-3-1 ℂ (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
-        t = voe-2-3-1-fromMonad
-        -- Problem: `t` does not fit the type of `fromMonad`!
-        fromMonad : M.Monad → voe-2-3-1
-        fromMonad = {!t!}
+        fromMonad : (m : M.Monad) → voe-2-3.voe-2-3-1 ℂ (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
+        fromMonad = voe-2-3-1-fromMonad
+        toMonad : ∀ {omap} {pure : {X : Object} → Arrow X (omap X)} → voe-2-3.voe-2-3-1 ℂ omap pure → M.Monad
+        toMonad = voe-2-3.voe-2-3-1.toMonad
 
+      -- voe-2-3-1-inverse : (voe-2-3.voe-2-3-1.toMonad ∘f voe-2-3-1-fromMonad) ≡ Function.id
       voe-2-3-1-inverse : Voe-2-3-1-inverse
-      voe-2-3-1-inverse = {!!}
+      voe-2-3-1-inverse = refl
+
+      Voe-2-3-2-inverse = (toMonad ∘f fromMonad) ≡ Function.id
+        where
+        fromMonad : (m : K.Monad) → voe-2-3.voe-2-3-2 ℂ (K.Monad.omap m) (K.Monad.pure m)
+        fromMonad = voe-2-3-2-fromMonad
+        toMonad : ∀ {omap} {pure : {X : Object} → Arrow X (omap X)} → voe-2-3.voe-2-3-2 ℂ omap pure → K.Monad
+        toMonad = voe-2-3.voe-2-3-2.toMonad
+
+      voe-2-3-2-inverse : Voe-2-3-2-inverse
+      voe-2-3-2-inverse = refl
+
+      forthEq' : ∀ m → _ ≡ _
+      forthEq' m = begin
+        (forth ∘f back) m ≡⟨⟩
+        -- In full gory detail:
+        (  voe-2-3-2-fromMonad
+        ∘f Monoidal→Kleisli
+        ∘f voe-2-3.voe-2-3-1.toMonad
+        ∘f voe-2-3-1-fromMonad
+        ∘f Kleisli→Monoidal
+        ∘f voe-2-3.voe-2-3-2.toMonad
+        )  m ≡⟨⟩ -- fromMonad and toMonad are inverses
+        (  voe-2-3-2-fromMonad
+        ∘f Monoidal→Kleisli
+        ∘f Kleisli→Monoidal
+        ∘f voe-2-3.voe-2-3-2.toMonad
+        )  m ≡⟨ u ⟩
+        -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
+        -- I should be able to prove this using congruence and `lem` below.
+        (  voe-2-3-2-fromMonad
+        ∘f voe-2-3.voe-2-3-2.toMonad
+        )  m ≡⟨⟩
+        (  voe-2-3-2-fromMonad
+        ∘f voe-2-3.voe-2-3-2.toMonad
+        )  m ≡⟨⟩ -- fromMonad and toMonad are inverses
+        m ∎
+        where
+        lem : Monoidal→Kleisli ∘f Kleisli→Monoidal ≡ Function.id
+        lem = verso-recto Monoidal≃Kleisli
+        t : {ℓ : Level} {A B : Set ℓ} {a : _ → A} {b : B → _}
+          → a ∘f (Monoidal→Kleisli ∘f Kleisli→Monoidal) ∘f b ≡ a ∘f b
+        t {a = a} {b} = cong (λ φ → a ∘f φ ∘f b) lem
+        u : {ℓ : Level} {A B : Set ℓ} {a : _ → A} {b : B → _}
+          → {m : _} → (a ∘f (Monoidal→Kleisli ∘f Kleisli→Monoidal) ∘f b) m ≡ (a ∘f b) m
+        u {m = m} = cong (λ φ → φ m) t
 
       forthEq : ∀ m → (forth ∘f back) m ≡ m
       forthEq m = begin
