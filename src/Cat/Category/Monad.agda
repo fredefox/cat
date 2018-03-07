@@ -759,7 +759,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       Monoidal→Kleisli = proj₁ Monoidal≃Kleisli
 
       Kleisli→Monoidal : K.Monad → M.Monad
-      Kleisli→Monoidal = reverse Monoidal≃Kleisli
+      Kleisli→Monoidal = inverse Monoidal≃Kleisli
 
       forth : voe-2-3-1 → voe-2-3-2
       forth = voe-2-3-2-fromMonad ∘f Monoidal→Kleisli ∘f voe-2-3-1.toMonad
