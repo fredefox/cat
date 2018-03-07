@@ -695,31 +695,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     open import Function using (_∘_ ; _$_)
 
   module _ (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
-    open voe-2-3 ℂ omap pure
-    -- Idea:
-    -- We want to prove
-    --
-    --     voe-2-3-1 ≃ voe-2-3-2
-    --
-    -- By using the equivalence we have already constructed.
-    --
-    -- We can construct `forth` by composing `forth0`, `forth1` and `forth2`:
-    --
-    --     forth0 : voe-2-3-1 → M.Monad
-    --
-    -- Where the we will naturally pick `omap` and `pure` as the corresponding
-    -- fields in M.Monad
-    --
-    -- `forth1` will be the equivalence we have already constructed.
-    --
-    --     forth1 : M.Monad ≃ K.Monad
-    --
-    -- `forth2` is the straight-forward isomporphism:
-    --
-    --     forth1 : K.Monad → voe-2-3-2
-    --
-    -- NB! This may not be so straightforward since the index of `voe-2-3-2` is
-    -- given before `K.Monad`.
+    open voe-2-3 ℂ
     private
       Monoidal→Kleisli : M.Monad → K.Monad
       Monoidal→Kleisli = proj₁ Monoidal≃Kleisli
@@ -727,57 +703,36 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       Kleisli→Monoidal : K.Monad → M.Monad
       Kleisli→Monoidal = inverse Monoidal≃Kleisli
 
-      forth : voe-2-3-1 → voe-2-3-2
-      forth = voe-2-3-2-fromMonad ∘ Monoidal→Kleisli ∘ voe-2-3-1.toMonad
+      forth : voe-2-3-1 omap pure → voe-2-3-2 omap pure
+      forth = voe-2-3-2-fromMonad ∘ Monoidal→Kleisli ∘ voe-2-3.voe-2-3-1.toMonad
 
-      back : voe-2-3-2 → voe-2-3-1
-      back = voe-2-3-1-fromMonad ∘ Kleisli→Monoidal ∘ voe-2-3-2.toMonad
+      back : voe-2-3-2 omap pure → voe-2-3-1 omap pure
+      back = voe-2-3-1-fromMonad ∘ Kleisli→Monoidal ∘ voe-2-3.voe-2-3-2.toMonad
 
-      Voe-2-3-1-inverse = (toMonad ∘ fromMonad) ≡ Function.id
-        where
-        fromMonad : (m : M.Monad) → voe-2-3.voe-2-3-1 ℂ (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
-        fromMonad = voe-2-3-1-fromMonad
-        toMonad : ∀ {omap} {pure : {X : Object} → Arrow X (omap X)} → voe-2-3.voe-2-3-1 ℂ omap pure → M.Monad
-        toMonad = voe-2-3.voe-2-3-1.toMonad
-
-      -- voe-2-3-1-inverse : (voe-2-3.voe-2-3-1.toMonad ∘ voe-2-3-1-fromMonad) ≡ Function.id
-      voe-2-3-1-inverse : Voe-2-3-1-inverse
-      voe-2-3-1-inverse = refl
-
-      Voe-2-3-2-inverse = (toMonad ∘ fromMonad) ≡ Function.id
-        where
-        fromMonad : (m : K.Monad) → voe-2-3.voe-2-3-2 ℂ (K.Monad.omap m) (K.Monad.pure m)
-        fromMonad = voe-2-3-2-fromMonad
-        toMonad : ∀ {omap} {pure : {X : Object} → Arrow X (omap X)} → voe-2-3.voe-2-3-2 ℂ omap pure → K.Monad
-        toMonad = voe-2-3.voe-2-3-2.toMonad
-
-      voe-2-3-2-inverse : Voe-2-3-2-inverse
-      voe-2-3-2-inverse = refl
-
-      forthEq' : ∀ m → _ ≡ _
-      forthEq' m = begin
+      forthEq : ∀ m → _ ≡ _
+      forthEq m = begin
         (forth ∘ back) m ≡⟨⟩
         -- In full gory detail:
-        (  voe-2-3-2-fromMonad
+        ( voe-2-3-2-fromMonad
         ∘ Monoidal→Kleisli
         ∘ voe-2-3.voe-2-3-1.toMonad
         ∘ voe-2-3-1-fromMonad
         ∘ Kleisli→Monoidal
         ∘ voe-2-3.voe-2-3-2.toMonad
-        )  m ≡⟨⟩ -- fromMonad and toMonad are inverses
+        ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         (  voe-2-3-2-fromMonad
         ∘ Monoidal→Kleisli
         ∘ Kleisli→Monoidal
         ∘ voe-2-3.voe-2-3-2.toMonad
-        )  m ≡⟨ u ⟩
+        ) m ≡⟨ u ⟩
         -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
         -- I should be able to prove this using congruence and `lem` below.
+        ( voe-2-3-2-fromMonad
+        ∘ voe-2-3.voe-2-3-2.toMonad
+        ) m ≡⟨⟩
         (  voe-2-3-2-fromMonad
         ∘ voe-2-3.voe-2-3-2.toMonad
-        )  m ≡⟨⟩
-        (  voe-2-3-2-fromMonad
-        ∘ voe-2-3.voe-2-3-2.toMonad
-        )  m ≡⟨⟩ -- fromMonad and toMonad are inverses
+        ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
         where
         lem : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
@@ -789,49 +744,30 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
           → {m : _} → (a ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ b) m ≡ (a ∘ b) m
         u {m = m} = cong (λ φ → φ m) t
 
-      forthEq : ∀ m → (forth ∘ back) m ≡ m
-      forthEq m = begin
-        (forth ∘ back) m ≡⟨⟩
-        -- In full gory detail:
-        (  voe-2-3-2-fromMonad
-        ∘ Monoidal→Kleisli
-        ∘ voe-2-3-1.toMonad
-        ∘ voe-2-3-1-fromMonad
-        ∘ Kleisli→Monoidal
-        ∘ voe-2-3-2.toMonad
-        )  m ≡⟨ {!!} ⟩ -- fromMonad and toMonad are inverses
-        (  voe-2-3-2-fromMonad
-        ∘ Monoidal→Kleisli
-        ∘ Kleisli→Monoidal
-        ∘ voe-2-3-2.toMonad
-        )  m ≡⟨ {!!} ⟩ -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
-        (  voe-2-3-2-fromMonad
-        ∘ voe-2-3-2.toMonad
-        )  m ≡⟨ {!!} ⟩ -- fromMonad and toMonad are inverses
-        m ∎
-
       backEq : ∀ m → (back ∘ forth) m ≡ m
       backEq m = begin
         (back ∘ forth) m ≡⟨⟩
-        (  voe-2-3-1-fromMonad
+        ( voe-2-3-1-fromMonad
         ∘ Kleisli→Monoidal
-        ∘ voe-2-3-2.toMonad
+        ∘ voe-2-3.voe-2-3-2.toMonad
         ∘ voe-2-3-2-fromMonad
         ∘ Monoidal→Kleisli
-        ∘ voe-2-3-1.toMonad
-        )  m ≡⟨ {!!} ⟩ -- fromMonad and toMonad are inverses
-        (  voe-2-3-1-fromMonad
+        ∘ voe-2-3.voe-2-3-1.toMonad
+        ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
+        ( voe-2-3-1-fromMonad
         ∘ Kleisli→Monoidal
         ∘ Monoidal→Kleisli
-        ∘ voe-2-3-1.toMonad
-        )  m ≡⟨ {!!} ⟩ -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
-        (  voe-2-3-1-fromMonad
-        ∘ voe-2-3-1.toMonad
-        )  m ≡⟨ {!!} ⟩ -- fromMonad and toMonad are inverses
+        ∘ voe-2-3.voe-2-3-1.toMonad
+        ) m ≡⟨ cong (λ φ → φ m) t ⟩ -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
+        ( voe-2-3-1-fromMonad
+        ∘ voe-2-3.voe-2-3-1.toMonad
+        ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
+        where
+        t = cong (λ φ → voe-2-3-1-fromMonad ∘ φ ∘ voe-2-3.voe-2-3-1.toMonad) (recto-verso Monoidal≃Kleisli)
 
-      voe-isEquiv : isEquiv voe-2-3-1 voe-2-3-2 forth
+      voe-isEquiv : isEquiv (voe-2-3-1 omap pure) (voe-2-3-2 omap pure) forth
       voe-isEquiv = gradLemma forth back forthEq backEq
 
-    equiv-2-3 : voe-2-3-1 ≃ voe-2-3-2
+    equiv-2-3 : voe-2-3-1 omap pure ≃ voe-2-3-2 omap pure
     equiv-2-3 = forth , voe-isEquiv
