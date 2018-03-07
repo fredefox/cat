@@ -554,7 +554,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
   Monoidal≃Kleisli : M.Monad ≃ K.Monad
   Monoidal≃Kleisli = forth , eqv
 
-module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
+module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     ℓ = ℓa ⊔ ℓb
     module ℂ = Category ℂ
@@ -644,18 +644,9 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
 module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
   private
-    ℓ = ℓa ⊔ ℓb
-    module ℂ = Category ℂ
-    open ℂ using (Object ; Arrow ; _∘_)
-    open NaturalTransformation ℂ ℂ
     module M = Monoidal ℂ
     module K = Kleisli  ℂ
-    open voe-2-3 {ℂ = ℂ}
-
-    forth
-      : {omap : Omap ℂ ℂ} {pure : {X : Object} → Arrow X (omap X)}
-      → voe-2-3-1 omap pure → M.Monad
-    forth {omap} {pure} m = voe-2-3-1.toMonad omap pure m
+    open voe-2-3 ℂ
 
   voe-2-3-1-fromMonad : (m : M.Monad) → voe-2-3-1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
   voe-2-3-1-fromMonad m = record
@@ -680,12 +671,6 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     ; isMnd = K.Monad.isMonad m
     }
 
-  -- Unfortunately the two above definitions don't really give rise to a
-  -- bijection - at least not directly. Q: What to put in the indices for
-  -- `voe-2-3-1`?
-  equiv-2-3-1 : voe-2-3-1 {!!} {!!} ≃ M.Monad
-  equiv-2-3-1 = {!!}
-
 module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
   private
     ℓ = ℓa ⊔ ℓb
@@ -696,7 +681,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     module K = Kleisli  ℂ
 
   module _ (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
-    open voe-2-3 {ℂ = ℂ} omap pure
+    open voe-2-3 ℂ omap pure
     -- Idea:
     -- We want to prove
     --
