@@ -7,7 +7,7 @@ open import Data.Product
 open import Function renaming (_∘_ to _∘f_) using (_$_)
 
 open import Cubical
-open import Cubical.NType.Properties using (lemPropF ; lemSig)
+open import Cubical.NType.Properties using (lemPropF ; lemSig ;  lemSigP)
 open import Cubical.GradLemma        using (gradLemma)
 
 open import Cat.Category
@@ -538,43 +538,9 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       pureTEq : M.RawMonad.pureT (backRaw (forth m)) ≡ pureT
       pureTEq = funExt (λ X → refl)
 
-      -- TODO: Make equaility principle for natural transformations that allows
-      -- us to only focus on the data-part but for heterogeneous paths!
-      --
-      -- It should be something like (but not exactly because this is ill-typed!)
-      --
-      -- P : I → Set -- A family that varies over natural transformations.
-      -- θ : P i0
-      -- η : P i1
-      NaturalTransformation~≡ : ∀ {F G} {P : I → Set _} {θ η : NaturalTransformation F G} → proj₁ θ ≡ proj₁ η → _ [ θ ≡ η ]
-      NaturalTransformation~≡ = {!!}
-
       pureNTEq : (λ i → NaturalTransformation F.identity (Req i))
         [ M.RawMonad.pureNT (backRaw (forth m)) ≡ pureNT ]
-      pureNTEq = res
-        where
-        Base = Transformation F.identity R
-        base : Base
-        base = M.RawMonad.pureT (backRaw (forth m))
-        target : Base
-        target = pureT
-        -- No matter what the proof of naturality is (whether it'd be at `base`
-        -- or at `target` propositionality of naturality means that we can prove
-        -- two natural transformations equal just by focusing on the data-part.
-        d : {nat : Natural F.identity R base}
-          → (λ i → NaturalTransformation F.identity R)
-          [ (base   , nat)
-          ≡ (target , nat)
-          ]
-        d = NaturalTransformation≡ F.identity R pureTEq
-        -- I think that `d` should be the "base-case" somehow in my
-        -- path-induction but I don't know how to define a suitable type-family.
-        D : (y : Base) → ({!!} ≡ y) → Set _
-        D y eq = {!!}
-        res
-          : (λ i → NaturalTransformation F.identity (Req i))
-          [ M.RawMonad.pureNT (backRaw (forth m)) ≡ pureNT ]
-        res = pathJ D d base pureTEq {!!}
+      pureNTEq = lemSigP (λ i → propIsNatural F.identity (Req i)) _ _ pureTEq
 
       joinTEq : M.RawMonad.joinT (backRaw (forth m)) ≡ joinT
       joinTEq = funExt (λ X → begin
@@ -586,7 +552,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
       joinNTEq : (λ i → NaturalTransformation F[ Req i ∘ Req i ] (Req i))
         [ M.RawMonad.joinNT (backRaw (forth m)) ≡ joinNT ]
-      joinNTEq = NaturalTransformation~≡ joinTEq
+      joinNTEq = lemSigP (λ i → propIsNatural F[ Req i ∘ Req i ] (Req i)) _ _ joinTEq
 
       backRawEq : backRaw (forth m) ≡ M.Monad.raw m
       M.RawMonad.R      (backRawEq i) = Req i
