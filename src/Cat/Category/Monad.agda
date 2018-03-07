@@ -4,7 +4,6 @@ module Cat.Category.Monad where
 open import Agda.Primitive
 
 open import Data.Product
-open import Function renaming (_∘_ to _∘f_) using (_$_)
 
 open import Cubical
 open import Cubical.NType.Properties using (lemPropF ; lemSig ;  lemSigP)
@@ -689,10 +688,11 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
   private
     ℓ = ℓa ⊔ ℓb
     module ℂ = Category ℂ
-    open ℂ using (Object ; Arrow ; _∘_)
+    open ℂ using (Object ; Arrow)
     open NaturalTransformation ℂ ℂ
     module M = Monoidal ℂ
     module K = Kleisli  ℂ
+    open import Function using (_∘_ ; _$_)
 
   module _ (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
     open voe-2-3 ℂ omap pure
@@ -728,23 +728,23 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       Kleisli→Monoidal = inverse Monoidal≃Kleisli
 
       forth : voe-2-3-1 → voe-2-3-2
-      forth = voe-2-3-2-fromMonad ∘f Monoidal→Kleisli ∘f voe-2-3-1.toMonad
+      forth = voe-2-3-2-fromMonad ∘ Monoidal→Kleisli ∘ voe-2-3-1.toMonad
 
       back : voe-2-3-2 → voe-2-3-1
-      back = voe-2-3-1-fromMonad ∘f Kleisli→Monoidal ∘f voe-2-3-2.toMonad
+      back = voe-2-3-1-fromMonad ∘ Kleisli→Monoidal ∘ voe-2-3-2.toMonad
 
-      Voe-2-3-1-inverse = (toMonad ∘f fromMonad) ≡ Function.id
+      Voe-2-3-1-inverse = (toMonad ∘ fromMonad) ≡ Function.id
         where
         fromMonad : (m : M.Monad) → voe-2-3.voe-2-3-1 ℂ (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
         fromMonad = voe-2-3-1-fromMonad
         toMonad : ∀ {omap} {pure : {X : Object} → Arrow X (omap X)} → voe-2-3.voe-2-3-1 ℂ omap pure → M.Monad
         toMonad = voe-2-3.voe-2-3-1.toMonad
 
-      -- voe-2-3-1-inverse : (voe-2-3.voe-2-3-1.toMonad ∘f voe-2-3-1-fromMonad) ≡ Function.id
+      -- voe-2-3-1-inverse : (voe-2-3.voe-2-3-1.toMonad ∘ voe-2-3-1-fromMonad) ≡ Function.id
       voe-2-3-1-inverse : Voe-2-3-1-inverse
       voe-2-3-1-inverse = refl
 
-      Voe-2-3-2-inverse = (toMonad ∘f fromMonad) ≡ Function.id
+      Voe-2-3-2-inverse = (toMonad ∘ fromMonad) ≡ Function.id
         where
         fromMonad : (m : K.Monad) → voe-2-3.voe-2-3-2 ℂ (K.Monad.omap m) (K.Monad.pure m)
         fromMonad = voe-2-3-2-fromMonad
@@ -756,77 +756,77 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
       forthEq' : ∀ m → _ ≡ _
       forthEq' m = begin
-        (forth ∘f back) m ≡⟨⟩
+        (forth ∘ back) m ≡⟨⟩
         -- In full gory detail:
         (  voe-2-3-2-fromMonad
-        ∘f Monoidal→Kleisli
-        ∘f voe-2-3.voe-2-3-1.toMonad
-        ∘f voe-2-3-1-fromMonad
-        ∘f Kleisli→Monoidal
-        ∘f voe-2-3.voe-2-3-2.toMonad
+        ∘ Monoidal→Kleisli
+        ∘ voe-2-3.voe-2-3-1.toMonad
+        ∘ voe-2-3-1-fromMonad
+        ∘ Kleisli→Monoidal
+        ∘ voe-2-3.voe-2-3-2.toMonad
         )  m ≡⟨⟩ -- fromMonad and toMonad are inverses
         (  voe-2-3-2-fromMonad
-        ∘f Monoidal→Kleisli
-        ∘f Kleisli→Monoidal
-        ∘f voe-2-3.voe-2-3-2.toMonad
+        ∘ Monoidal→Kleisli
+        ∘ Kleisli→Monoidal
+        ∘ voe-2-3.voe-2-3-2.toMonad
         )  m ≡⟨ u ⟩
         -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
         -- I should be able to prove this using congruence and `lem` below.
         (  voe-2-3-2-fromMonad
-        ∘f voe-2-3.voe-2-3-2.toMonad
+        ∘ voe-2-3.voe-2-3-2.toMonad
         )  m ≡⟨⟩
         (  voe-2-3-2-fromMonad
-        ∘f voe-2-3.voe-2-3-2.toMonad
+        ∘ voe-2-3.voe-2-3-2.toMonad
         )  m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
         where
-        lem : Monoidal→Kleisli ∘f Kleisli→Monoidal ≡ Function.id
+        lem : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
         lem = verso-recto Monoidal≃Kleisli
         t : {ℓ : Level} {A B : Set ℓ} {a : _ → A} {b : B → _}
-          → a ∘f (Monoidal→Kleisli ∘f Kleisli→Monoidal) ∘f b ≡ a ∘f b
-        t {a = a} {b} = cong (λ φ → a ∘f φ ∘f b) lem
+          → a ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ b ≡ a ∘ b
+        t {a = a} {b} = cong (λ φ → a ∘ φ ∘ b) lem
         u : {ℓ : Level} {A B : Set ℓ} {a : _ → A} {b : B → _}
-          → {m : _} → (a ∘f (Monoidal→Kleisli ∘f Kleisli→Monoidal) ∘f b) m ≡ (a ∘f b) m
+          → {m : _} → (a ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ b) m ≡ (a ∘ b) m
         u {m = m} = cong (λ φ → φ m) t
 
-      forthEq : ∀ m → (forth ∘f back) m ≡ m
+      forthEq : ∀ m → (forth ∘ back) m ≡ m
       forthEq m = begin
-        (forth ∘f back) m ≡⟨⟩
+        (forth ∘ back) m ≡⟨⟩
         -- In full gory detail:
         (  voe-2-3-2-fromMonad
-        ∘f Monoidal→Kleisli
-        ∘f voe-2-3-1.toMonad
-        ∘f voe-2-3-1-fromMonad
-        ∘f Kleisli→Monoidal
-        ∘f voe-2-3-2.toMonad
+        ∘ Monoidal→Kleisli
+        ∘ voe-2-3-1.toMonad
+        ∘ voe-2-3-1-fromMonad
+        ∘ Kleisli→Monoidal
+        ∘ voe-2-3-2.toMonad
         )  m ≡⟨ {!!} ⟩ -- fromMonad and toMonad are inverses
         (  voe-2-3-2-fromMonad
-        ∘f Monoidal→Kleisli
-        ∘f Kleisli→Monoidal
-        ∘f voe-2-3-2.toMonad
+        ∘ Monoidal→Kleisli
+        ∘ Kleisli→Monoidal
+        ∘ voe-2-3-2.toMonad
         )  m ≡⟨ {!!} ⟩ -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
         (  voe-2-3-2-fromMonad
-        ∘f voe-2-3-2.toMonad
+        ∘ voe-2-3-2.toMonad
         )  m ≡⟨ {!!} ⟩ -- fromMonad and toMonad are inverses
         m ∎
 
-      backEq : ∀ m → (back ∘f forth) m ≡ m
+      backEq : ∀ m → (back ∘ forth) m ≡ m
       backEq m = begin
-        (back ∘f forth) m ≡⟨⟩
+        (back ∘ forth) m ≡⟨⟩
         (  voe-2-3-1-fromMonad
-        ∘f Kleisli→Monoidal
-        ∘f voe-2-3-2.toMonad
-        ∘f voe-2-3-2-fromMonad
-        ∘f Monoidal→Kleisli
-        ∘f voe-2-3-1.toMonad
+        ∘ Kleisli→Monoidal
+        ∘ voe-2-3-2.toMonad
+        ∘ voe-2-3-2-fromMonad
+        ∘ Monoidal→Kleisli
+        ∘ voe-2-3-1.toMonad
         )  m ≡⟨ {!!} ⟩ -- fromMonad and toMonad are inverses
         (  voe-2-3-1-fromMonad
-        ∘f Kleisli→Monoidal
-        ∘f Monoidal→Kleisli
-        ∘f voe-2-3-1.toMonad
+        ∘ Kleisli→Monoidal
+        ∘ Monoidal→Kleisli
+        ∘ voe-2-3-1.toMonad
         )  m ≡⟨ {!!} ⟩ -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
         (  voe-2-3-1-fromMonad
-        ∘f voe-2-3-1.toMonad
+        ∘ voe-2-3-1.toMonad
         )  m ≡⟨ {!!} ⟩ -- fromMonad and toMonad are inverses
         m ∎
 
