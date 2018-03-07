@@ -61,6 +61,7 @@ module _ {ℓc ℓc' ℓd ℓd'}
   record IsFunctor (F : RawFunctor) : 𝓤 where
     open RawFunctor F public
     field
+      -- TODO Really ought to be preserves identity or something like this.
       isIdentity : IsIdentity
       isDistributive : IsDistributive
 
