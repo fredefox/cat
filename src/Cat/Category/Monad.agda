@@ -719,6 +719,19 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       back : voe-2-3-2 → voe-2-3-1
       back = voe-2-3-1-fromMonad ∘f Kleisli→Monoidal ∘f voe-2-3-2.toMonad
 
+      Voe-2-3-1-inverse = (toMonad ∘f fromMonad) ≡ Function.id
+        where
+        toMonad : voe-2-3-1 → M.Monad
+        toMonad = voe-2-3-1.toMonad
+        t : (m : M.Monad) → voe-2-3.voe-2-3-1 ℂ (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
+        t = voe-2-3-1-fromMonad
+        -- Problem: `t` does not fit the type of `fromMonad`!
+        fromMonad : M.Monad → voe-2-3-1
+        fromMonad = {!t!}
+
+      voe-2-3-1-inverse : Voe-2-3-1-inverse
+      voe-2-3-1-inverse = {!!}
+
       forthEq : ∀ m → (forth ∘f back) m ≡ m
       forthEq m = begin
         (forth ∘f back) m ≡⟨⟩
