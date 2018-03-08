@@ -64,17 +64,17 @@ module _ {ℓ : Level} where
             lem : proj₁ Function.∘′ (f &&& g) ≡ f × proj₂ Function.∘′ (f &&& g) ≡ g
             proj₁ lem = refl
             proj₂ lem = refl
-        instance
-          isProduct : IsProduct 𝓢 {0A} {0B} {0A×0B} proj₁ proj₂
-          isProduct {X = X} f g = (f &&& g) , lem {0X = X} f g
+        rawProduct : RawProduct {ℂ = 𝓢} 0A 0B
+        RawProduct.obj   rawProduct = 0A×0B
+        RawProduct.proj₁ rawProduct = Data.Product.proj₁
+        RawProduct.proj₂ rawProduct = Data.Product.proj₂
+        isProduct : IsProduct 𝓢 rawProduct
+        IsProduct.isProduct isProduct {X = X} f g
+          = (f &&& g) , lem {0X = X} f g
 
       product : Product {ℂ = 𝓢} 0A 0B
-      product = record
-        { obj = 0A×0B
-        ; proj₁ = Data.Product.proj₁
-        ; proj₂ = Data.Product.proj₂
-        ; isProduct = λ { {X} → isProduct {X = X}}
-        }
+      Product.raw       product = rawProduct
+      Product.isProduct product = isProduct
 
   instance
     SetsHasProducts : HasProducts 𝓢

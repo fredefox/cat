@@ -151,16 +151,17 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
     private
       module P = CatProduct ℂ 𝔻
 
-      instance
-        isProduct : IsProduct Catℓ P.proj₁ P.proj₂
-        isProduct = P.isProduct
+      rawProduct : RawProduct {ℂ = Catℓ} ℂ 𝔻
+      RawProduct.obj   rawProduct = P.obj
+      RawProduct.proj₁ rawProduct = P.proj₁
+      RawProduct.proj₂ rawProduct = P.proj₂
+
+      isProduct : IsProduct Catℓ rawProduct
+      IsProduct.isProduct isProduct = P.isProduct
 
     product : Product {ℂ = Catℓ} ℂ 𝔻
-    product = record
-      { obj = P.obj
-      ; proj₁ = P.proj₁
-      ; proj₂ = P.proj₂
-      }
+    Product.raw       product = rawProduct
+    Product.isProduct product = isProduct
 
   instance
     hasProducts : HasProducts Catℓ
