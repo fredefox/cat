@@ -250,7 +250,7 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         fmap g ∘ fmap f                   ≡⟨⟩
         bind (pure ∘ g) ∘ bind (pure ∘ f) ∎
 
-    -- TODO: Naming!
+    -- FIXME Naming!
     R : EndoFunctor ℂ
     Functor.raw       R = rawR
     Functor.isFunctor R = isFunctorR

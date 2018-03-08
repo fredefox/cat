@@ -46,9 +46,8 @@ module _ (ℓ ℓ' : Level) where
     open RawCategory RawCat
     isAssociative : IsAssociative
     isAssociative {f = F} {G} {H} = assc {F = F} {G = G} {H = H}
-    -- TODO: Rename `ident'` to `ident` after changing how names are exposed in Functor.
-    ident' : IsIdentity identity
-    ident' = ident-r , ident-l
+    ident : IsIdentity identity
+    ident = ident-r , ident-l
     -- NB! `ArrowsAreSets RawCat` is *not* provable. The type of functors,
     -- however, form a groupoid! Therefore there is no (1-)category of
     -- categories. There does, however, exist a 2-category of 1-categories.

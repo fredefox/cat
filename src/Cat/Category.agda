@@ -24,9 +24,6 @@
 -- ------
 --
 -- Propositionality for all laws about the category.
---
--- TODO: An equality principle for categories that focuses on the pure data-part.
---
 {-# OPTIONS --allow-unsolved-metas --cubical #-}
 
 module Cat.Category where
@@ -91,7 +88,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
   -- | Laws about the data
 
-  -- TODO: It seems counter-intuitive that the normal-form is on the
+  -- FIXME It seems counter-intuitive that the normal-form is on the
   -- right-hand-side.
   IsAssociative : Set (ℓa ⊔ ℓb)
   IsAssociative = ∀ {A B C D} {f : Arrow A B} {g : Arrow B C} {h : Arrow C D}
@@ -286,6 +283,17 @@ record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
   open IsCategory isCategory public
 
+Category≡ : {ℓa ℓb : Level} {ℂ 𝔻 : Category ℓa ℓb} → Category.raw ℂ ≡ Category.raw 𝔻 → ℂ ≡ 𝔻
+Category≡ {ℂ = ℂ} {𝔻} eq i = record
+  { raw        = eq i
+  ; isCategory = isCategoryEq i
+  }
+  where
+  open Category
+  module ℂ = Category ℂ
+  isCategoryEq : (λ i → IsCategory (eq i)) [ isCategory ℂ ≡ isCategory 𝔻 ]
+  isCategoryEq = {!!}
+
 -- | Syntax for arrows- and composition in a given category.
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   open Category ℂ
@@ -353,9 +361,7 @@ module Opposite {ℓa ℓb : Level} where
       RawCategory.𝟙        (rawInv _) = 𝟙
       RawCategory._∘_      (rawInv _) = _∘_
 
-    -- TODO: Define and use Monad≡
     oppositeIsInvolution : opposite (opposite ℂ) ≡ ℂ
-    Category.raw        (oppositeIsInvolution i) = rawInv i
-    Category.isCategory (oppositeIsInvolution x) = {!!}
+    oppositeIsInvolution = Category≡ rawInv
 
 open Opposite public

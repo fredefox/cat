@@ -15,6 +15,10 @@ Prove univalence for the category of
   * sets
   * functors and natural transformations
 
+Prove:
+  * `isProp (Product ...)`
+  * `isProp (HasProducts ...)`
+
 * Functor ✓
 * Applicative Functor ✗
   * Lax monoidal functor ✗
