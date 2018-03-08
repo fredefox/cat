@@ -5,7 +5,6 @@ module Cat.Categories.Cat where
 
 open import Agda.Primitive
 open import Cubical
-open import Function
 open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
 
 open import Cat.Category
@@ -62,44 +61,44 @@ module _ (ℓ ℓ' : Level) where
 -- category. In some places it may not actually be needed, however.
 module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
   private
-    :Object: = Object ℂ × Object 𝔻
-    :Arrow:  : :Object: → :Object: → Set ℓ'
-    :Arrow: (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
-    :𝟙: : {o : :Object:} → :Arrow: o o
-    :𝟙: = 𝟙 ℂ , 𝟙 𝔻
-    _:⊕:_ :
-      {a b c : :Object:} →
-      :Arrow: b c →
-      :Arrow: a b →
-      :Arrow: a c
-    _:⊕:_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → ℂ [ bc∈C ∘ ab∈C ] , 𝔻 [ bc∈D ∘ ab∈D ]}
+    Obj = Object ℂ × Object 𝔻
+    Arr  : Obj → Obj → Set ℓ'
+    Arr (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
+    𝟙' : {o : Obj} → Arr o o
+    𝟙' = 𝟙 ℂ , 𝟙 𝔻
+    _∘_ :
+      {a b c : Obj} →
+      Arr b c →
+      Arr a b →
+      Arr a c
+    _∘_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → ℂ [ bc∈C ∘ ab∈C ] , 𝔻 [ bc∈D ∘ ab∈D ]}
 
-    :rawProduct: : RawCategory ℓ ℓ'
-    RawCategory.Object :rawProduct: = :Object:
-    RawCategory.Arrow :rawProduct: = :Arrow:
-    RawCategory.𝟙 :rawProduct: = :𝟙:
-    RawCategory._∘_ :rawProduct: = _:⊕:_
-    open RawCategory :rawProduct:
+    rawProduct : RawCategory ℓ ℓ'
+    RawCategory.Object rawProduct = Obj
+    RawCategory.Arrow  rawProduct = Arr
+    RawCategory.𝟙      rawProduct = 𝟙'
+    RawCategory._∘_    rawProduct = _∘_
+    open RawCategory   rawProduct
 
     module ℂ = Category ℂ
     module 𝔻 = Category 𝔻
     open import Cubical.Sigma
-    arrowsAreSets : ArrowsAreSets -- {A B : RawCategory.Object :rawProduct:} → isSet (Arrow A B)
+    arrowsAreSets : ArrowsAreSets
     arrowsAreSets = setSig {sA = ℂ.arrowsAreSets} {sB = λ x → 𝔻.arrowsAreSets}
-    isIdentity : IsIdentity :𝟙:
+    isIdentity : IsIdentity 𝟙'
     isIdentity
       = Σ≡ (fst ℂ.isIdentity) (fst 𝔻.isIdentity)
       , Σ≡ (snd ℂ.isIdentity) (snd 𝔻.isIdentity)
-    postulate univalent : Univalence.Univalent :rawProduct: isIdentity
+    postulate univalent : Univalence.Univalent rawProduct isIdentity
     instance
-      :isCategory: : IsCategory :rawProduct:
-      IsCategory.isAssociative :isCategory: = Σ≡ ℂ.isAssociative 𝔻.isAssociative
-      IsCategory.isIdentity :isCategory: = isIdentity
-      IsCategory.arrowsAreSets :isCategory: = arrowsAreSets
-      IsCategory.univalent :isCategory: = univalent
+      isCategory : IsCategory rawProduct
+      IsCategory.isAssociative isCategory = Σ≡ ℂ.isAssociative 𝔻.isAssociative
+      IsCategory.isIdentity    isCategory = isIdentity
+      IsCategory.arrowsAreSets isCategory = arrowsAreSets
+      IsCategory.univalent     isCategory = univalent
 
   obj : Category ℓ ℓ'
-  Category.raw obj = :rawProduct:
+  Category.raw obj = rawProduct
 
   proj₁ : Functor obj ℂ
   proj₁ = record
@@ -177,8 +176,8 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
   Categoryℓ = Category ℓ ℓ
   open Fun ℂ 𝔻 renaming (identity to idN)
   private
-    :omap: : Functor ℂ 𝔻 × Object ℂ → Object 𝔻
-    :omap: (F , A) = F.omap A
+    omap : Functor ℂ 𝔻 × Object ℂ → Object 𝔻
+    omap (F , A) = F.omap A
       where
         module F = Functor F
 
@@ -200,9 +199,9 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
       module F = Functor F
       module G = Functor G
 
-    :fmap: : (pobj : NaturalTransformation F G × ℂ [ A , B ])
+    fmap : (pobj : NaturalTransformation F G × ℂ [ A , B ])
       → 𝔻 [ F.omap A , G.omap B ]
-    :fmap: ((θ , θNat) , f) = result
+    fmap ((θ , θNat) , f) = result
       where
         θA : 𝔻 [ F.omap A , G.omap A ]
         θA = θ A
@@ -233,23 +232,16 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
       C : Object ℂ
       C = proj₂ c
 
-    -- NaturalTransformation F G × ℂ .Arrow A B
-    -- :ident: : :fmap: {c} {c} (identityNat F , ℂ .𝟙) ≡ 𝔻 .𝟙
-    -- :ident: = trans (proj₂ 𝔻.isIdentity) (F .isIdentity)
-    --   where
-    --     open module 𝔻 = IsCategory (𝔻 .isCategory)
-    -- Unfortunately the equational version has some ambigous arguments.
-
-    :ident: : :fmap: {c} {c} (NT.identity F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
-    :ident: = begin
-      :fmap: {c} {c} (𝟙 (prodObj ×p ℂ) {c})    ≡⟨⟩
-      :fmap: {c} {c} (idN F , 𝟙 ℂ)             ≡⟨⟩
+    ident : fmap {c} {c} (NT.identity F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
+    ident = begin
+      fmap {c} {c} (𝟙 (prodObj ×p ℂ) {c})    ≡⟨⟩
+      fmap {c} {c} (idN F , 𝟙 ℂ)             ≡⟨⟩
       𝔻 [ identityTrans F C ∘ F.fmap (𝟙 ℂ)]    ≡⟨⟩
       𝔻 [ 𝟙 𝔻 ∘ F.fmap (𝟙 ℂ)]                  ≡⟨ proj₂ 𝔻.isIdentity ⟩
       F.fmap (𝟙 ℂ)                             ≡⟨ F.isIdentity ⟩
       𝟙 𝔻                                       ∎
       where
-        open module F = Functor F
+        module F = Functor F
 
   module _ {F×A G×B H×C : Functor ℂ 𝔻 × Object ℂ} where
     private
@@ -289,10 +281,10 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
         ηθ = proj₁ ηθNT
         ηθNat = proj₂ ηθNT
 
-      :isDistributive: :
+      isDistributive :
           𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ F.fmap ( ℂ [ g ∘ f ] ) ]
         ≡ 𝔻 [ 𝔻 [ η C ∘ G.fmap g ] ∘ 𝔻 [ θ B ∘ F.fmap f ] ]
-      :isDistributive: = begin
+      isDistributive = begin
         𝔻 [ (ηθ C) ∘ F.fmap (ℂ [ g ∘ f ]) ]
           ≡⟨ ηθNat (ℂ [ g ∘ f ]) ⟩
         𝔻 [ H.fmap (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
@@ -314,15 +306,14 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
         𝔻 [ 𝔻 [ η C ∘ G.fmap g ] ∘ 𝔻 [ θ B ∘ F.fmap f ] ] ∎
 
   eval : Functor (CatProduct.obj prodObj ℂ) 𝔻
-  -- :eval: : Functor (prodObj ×p ℂ) 𝔻
   eval = record
     { raw = record
-      { omap = :omap:
-      ; fmap = λ {dom} {cod} → :fmap: {dom} {cod}
+      { omap = omap
+      ; fmap = λ {dom} {cod} → fmap {dom} {cod}
       }
     ; isFunctor = record
-      { isIdentity = λ {o} → :ident: {o}
-      ; isDistributive = λ {f u n k y} → :isDistributive: {f} {u} {n} {k} {y}
+      { isIdentity = λ {o} → ident {o}
+      ; isDistributive = λ {f u n k y} → isDistributive {f} {u} {n} {k} {y}
       }
     }
 
