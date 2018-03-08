@@ -40,10 +40,8 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     field
       product : ∀ (A B : Object) → Product A B
 
-    module _ (A B : Object) where
-      open Product (product A B)
-      _×_ : Object
-      _×_ = obj
+    _×_ : Object → Object → Object
+    A × B = Product.obj (product A B)
 
     -- | Parallel product of arrows
     --
@@ -53,9 +51,9 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       open Product
       open Product (product A B) hiding (_P[_×_]) renaming (proj₁ to fst ; proj₂ to snd)
       _|×|_ : ℂ [ A , A' ] → ℂ [ B , B' ] → ℂ [ A × B , A' × B' ]
-      a |×| b = product A' B'
-        P[ ℂ [ a ∘ fst ]
-        ×  ℂ [ b ∘ snd ]
+      f |×| g = product A' B'
+        P[ ℂ [ f ∘ fst ]
+        ×  ℂ [ g ∘ snd ]
         ]
 
 module Propositionality where
