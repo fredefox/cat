@@ -18,11 +18,13 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         proj₁ : ℂ [ obj , A ]
         proj₂ : ℂ [ obj , B ]
 
+    -- FIXME Not sure this is actually a proposition - so this name is
+    -- misleading.
     record IsProduct (raw : RawProduct) : Set (ℓa ⊔ ℓb) where
       open RawProduct raw public
       field
-        isProduct : ∀ {X : Object} (x₁ : ℂ [ X , A ]) (x₂ : ℂ [ X , B ])
-          → ∃![ x ] (ℂ [ proj₁ ∘ x ] ≡ x₁ P.× ℂ [ proj₂ ∘ x ] ≡ x₂)
+        isProduct : ∀ {X : Object} (f : ℂ [ X , A ]) (g : ℂ [ X , B ])
+          → ∃![ f×g ] (ℂ [ proj₁ ∘ f×g ] ≡ f P.× ℂ [ proj₂ ∘ f×g ] ≡ g)
 
       -- | Arrow product
       _P[_×_] : ∀ {X} → (π₁ : ℂ [ X , A ]) (π₂ : ℂ [ X , B ])
@@ -56,6 +58,9 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ×  ℂ [ g ∘ snd ]
         ]
 
-module Propositionality where
-  -- TODO `isProp (Product ...)`
-  -- TODO `isProp (HasProducts ...)`
+module Propositionality {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object ℂ} where
+  propProduct : isProp (Product ℂ A B)
+  propProduct = {!!}
+
+  propHasProducts : isProp (HasProducts ℂ)
+  propHasProducts = {!!}
