@@ -151,7 +151,7 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
     private
       module P = CatProduct ℂ 𝔻
 
-      rawProduct : RawProduct {ℂ = Catℓ} ℂ 𝔻
+      rawProduct : RawProduct Catℓ ℂ 𝔻
       RawProduct.obj   rawProduct = P.obj
       RawProduct.proj₁ rawProduct = P.proj₁
       RawProduct.proj₂ rawProduct = P.proj₂
@@ -159,7 +159,7 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
       isProduct : IsProduct Catℓ rawProduct
       IsProduct.isProduct isProduct = P.isProduct
 
-    product : Product {ℂ = Catℓ} ℂ 𝔻
+    product : Product Catℓ ℂ 𝔻
     Product.raw       product = rawProduct
     Product.isProduct product = isProduct
 

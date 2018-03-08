@@ -9,14 +9,14 @@ open import Cat.Category hiding (module Propositionality)
 open Category
 
 module _ {ℓa ℓb : Level} where
-  record RawProduct {ℂ : Category ℓa ℓb} (A B : Object ℂ) : Set (ℓa ⊔ ℓb) where
+  record RawProduct (ℂ : Category ℓa ℓb) (A B : Object ℂ) : Set (ℓa ⊔ ℓb) where
     no-eta-equality
     field
       obj : Object ℂ
       proj₁ : ℂ [ obj , A ]
       proj₂ : ℂ [ obj , B ]
 
-  record IsProduct (ℂ : Category ℓa ℓb) {A B : Object ℂ} (raw : RawProduct {ℂ = ℂ} A B) : Set (ℓa ⊔ ℓb) where
+  record IsProduct (ℂ : Category ℓa ℓb) {A B : Object ℂ} (raw : RawProduct ℂ A B) : Set (ℓa ⊔ ℓb) where
     open RawProduct raw public
     field
       isProduct : ∀ {X : Object ℂ} (x₁ : ℂ [ X , A ]) (x₂ : ℂ [ X , B ])
@@ -27,16 +27,16 @@ module _ {ℓa ℓb : Level} where
       → ℂ [ X , obj ]
     _P[_×_] π₁ π₂ = P.proj₁ (isProduct π₁ π₂)
 
-  record Product {ℂ : Category ℓa ℓb} (A B : Object ℂ) : Set (ℓa ⊔ ℓb) where
+  record Product (ℂ : Category ℓa ℓb) (A B : Object ℂ) : Set (ℓa ⊔ ℓb) where
     field
-      raw        : RawProduct {ℂ = ℂ} A B
+      raw        : RawProduct ℂ A B
       isProduct  : IsProduct ℂ {A} {B} raw
 
     open IsProduct isProduct public
 
   record HasProducts (ℂ : Category ℓa ℓb) : Set (ℓa ⊔ ℓb) where
     field
-      product : ∀ (A B : Object ℂ) → Product {ℂ = ℂ} A B
+      product : ∀ (A B : Object ℂ) → Product ℂ A B
 
     module _ (A B : Object ℂ) where
       open Product (product A B)
