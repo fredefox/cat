@@ -17,7 +17,6 @@ open import Cat.Category.NaturalTransformation
 open import Cat.Equality
 open Equality.Data.Product
 
-open Functor using (fmap ; omap)
 open Category using (Object ; 𝟙)
 
 -- The category of categories
@@ -169,14 +168,19 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
 
 -- Basically proves that `Cat ℓ ℓ` is cartesian closed.
 module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
-  open Data.Product
-  open import Cat.Categories.Fun
+  private
+    open Data.Product
+    open import Cat.Categories.Fun
+    module ℂ = Category ℂ
+    module 𝔻 = Category 𝔻
 
   Categoryℓ = Category ℓ ℓ
   open Fun ℂ 𝔻 renaming (identity to idN)
   private
     :omap: : Functor ℂ 𝔻 × Object ℂ → Object 𝔻
-    :omap: (F , A) = omap F A
+    :omap: (F , A) = F.omap A
+      where
+        module F = Functor F
 
   prodObj : Categoryℓ
   prodObj = Fun
@@ -193,28 +197,31 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
       B : Object ℂ
       B = proj₂ cod
 
+      module F = Functor F
+      module G = Functor G
+
     :fmap: : (pobj : NaturalTransformation F G × ℂ [ A , B ])
-      → 𝔻 [ omap F A , omap G B ]
+      → 𝔻 [ F.omap A , G.omap B ]
     :fmap: ((θ , θNat) , f) = result
       where
-        θA : 𝔻 [ omap F A , omap G A ]
+        θA : 𝔻 [ F.omap A , G.omap A ]
         θA = θ A
-        θB : 𝔻 [ omap F B , omap G B ]
+        θB : 𝔻 [ F.omap B , G.omap B ]
         θB = θ B
-        F→f : 𝔻 [ omap F A , omap F B ]
-        F→f = fmap F f
-        G→f : 𝔻 [ omap G A , omap G B ]
-        G→f = fmap G f
-        l : 𝔻 [ omap F A , omap G B ]
-        l = 𝔻 [ θB ∘ F→f ]
-        r : 𝔻 [ omap F A , omap G B ]
-        r = 𝔻 [ G→f ∘ θA ]
+        F→f : 𝔻 [ F.omap A , F.omap B ]
+        F→f = F.fmap f
+        G→f : 𝔻 [ G.omap A , G.omap B ]
+        G→f = G.fmap f
+        l : 𝔻 [ F.omap A , G.omap B ]
+        l = 𝔻 [ θB ∘ F.fmap f ]
+        r : 𝔻 [ F.omap A , G.omap B ]
+        r = 𝔻 [ G.fmap f ∘ θA ]
         -- There are two choices at this point,
         -- but I suppose the whole point is that
         -- by `θNat f` we have `l ≡ r`
         --     lem : 𝔻 [ θ B ∘ F .fmap f ] ≡ 𝔻 [ G .fmap f ∘ θ A ]
         --     lem = θNat f
-        result : 𝔻 [ omap F A , omap G B ]
+        result : 𝔻 [ F.omap A , G.omap B ]
         result = l
 
   open CatProduct renaming (obj to _×p_) using ()
@@ -237,23 +244,27 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
     :ident: = begin
       :fmap: {c} {c} (𝟙 (prodObj ×p ℂ) {c})    ≡⟨⟩
       :fmap: {c} {c} (idN F , 𝟙 ℂ)             ≡⟨⟩
-      𝔻 [ identityTrans F C ∘ fmap F (𝟙 ℂ)]    ≡⟨⟩
-      𝔻 [ 𝟙 𝔻 ∘ fmap F (𝟙 ℂ)]                  ≡⟨ proj₂ 𝔻.isIdentity ⟩
-      fmap F (𝟙 ℂ)                             ≡⟨ F.isIdentity ⟩
+      𝔻 [ identityTrans F C ∘ F.fmap (𝟙 ℂ)]    ≡⟨⟩
+      𝔻 [ 𝟙 𝔻 ∘ F.fmap (𝟙 ℂ)]                  ≡⟨ proj₂ 𝔻.isIdentity ⟩
+      F.fmap (𝟙 ℂ)                             ≡⟨ F.isIdentity ⟩
       𝟙 𝔻                                       ∎
       where
-        open module 𝔻 = Category 𝔻
         open module F = Functor F
 
   module _ {F×A G×B H×C : Functor ℂ 𝔻 × Object ℂ} where
-    F = F×A .proj₁
-    A = F×A .proj₂
-    G = G×B .proj₁
-    B = G×B .proj₂
-    H = H×C .proj₁
-    C = H×C .proj₂
-    -- Not entirely clear what this is at this point:
-    _P⊕_ = Category._∘_ (prodObj ×p ℂ) {F×A} {G×B} {H×C}
+    private
+      F = F×A .proj₁
+      A = F×A .proj₂
+      G = G×B .proj₁
+      B = G×B .proj₂
+      H = H×C .proj₁
+      C = H×C .proj₂
+      module F = Functor F
+      module G = Functor G
+      module H = Functor H
+      -- Not entirely clear what this is at this point:
+      _P⊕_ = Category._∘_ (prodObj ×p ℂ) {F×A} {G×B} {H×C}
+
     module _
       -- NaturalTransformation F G × ℂ .Arrow A B
       {θ×f : NaturalTransformation F G × ℂ [ A , B ]}
@@ -279,31 +290,28 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
         ηθNat = proj₂ ηθNT
 
       :isDistributive: :
-          𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ fmap F ( ℂ [ g ∘ f ] ) ]
-        ≡ 𝔻 [ 𝔻 [ η C ∘ fmap G g ] ∘ 𝔻 [ θ B ∘ fmap F f ] ]
+          𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ F.fmap ( ℂ [ g ∘ f ] ) ]
+        ≡ 𝔻 [ 𝔻 [ η C ∘ G.fmap g ] ∘ 𝔻 [ θ B ∘ F.fmap f ] ]
       :isDistributive: = begin
-        𝔻 [ (ηθ C) ∘ fmap F (ℂ [ g ∘ f ]) ]
+        𝔻 [ (ηθ C) ∘ F.fmap (ℂ [ g ∘ f ]) ]
           ≡⟨ ηθNat (ℂ [ g ∘ f ]) ⟩
-        𝔻 [ fmap H (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
+        𝔻 [ H.fmap (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
           ≡⟨ cong (λ φ → 𝔻 [ φ ∘ ηθ A ]) (H.isDistributive) ⟩
-        𝔻 [ 𝔻 [ fmap H g ∘ fmap H f ] ∘ (ηθ A) ]
-          ≡⟨ sym isAssociative ⟩
-        𝔻 [ fmap H g ∘ 𝔻 [ fmap H f ∘ ηθ A ] ]
-          ≡⟨ cong (λ φ → 𝔻 [ fmap H g ∘ φ ]) isAssociative ⟩
-        𝔻 [ fmap H g ∘ 𝔻 [ 𝔻 [ fmap H f ∘ η A ] ∘ θ A ] ]
-          ≡⟨ cong (λ φ → 𝔻 [ fmap H g ∘ φ ]) (cong (λ φ → 𝔻 [ φ ∘ θ A ]) (sym (ηNat f))) ⟩
-        𝔻 [ fmap H g ∘ 𝔻 [ 𝔻 [ η B ∘ fmap G f ] ∘ θ A ] ]
-          ≡⟨ cong (λ φ → 𝔻 [ fmap H g ∘ φ ]) (sym isAssociative) ⟩
-        𝔻 [ fmap H g ∘ 𝔻 [ η B ∘ 𝔻 [ fmap G f ∘ θ A ] ] ]
-          ≡⟨ isAssociative ⟩
-        𝔻 [ 𝔻 [ fmap H g ∘ η B ] ∘ 𝔻 [ fmap G f ∘ θ A ] ]
-          ≡⟨ cong (λ φ → 𝔻 [ φ ∘ 𝔻 [ fmap G f ∘ θ A ] ]) (sym (ηNat g)) ⟩
-        𝔻 [ 𝔻 [ η C ∘ fmap G g ] ∘ 𝔻 [ fmap G f ∘ θ A ] ]
-          ≡⟨ cong (λ φ → 𝔻 [ 𝔻 [ η C ∘ fmap G g ] ∘ φ ]) (sym (θNat f)) ⟩
-        𝔻 [ 𝔻 [ η C ∘ fmap G g ] ∘ 𝔻 [ θ B ∘ fmap F f ] ] ∎
-        where
-          open Category 𝔻
-          module H = Functor H
+        𝔻 [ 𝔻 [ H.fmap g ∘ H.fmap f ] ∘ (ηθ A) ]
+          ≡⟨ sym 𝔻.isAssociative ⟩
+        𝔻 [ H.fmap g ∘ 𝔻 [ H.fmap f ∘ ηθ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ H.fmap g ∘ φ ]) 𝔻.isAssociative ⟩
+        𝔻 [ H.fmap g ∘ 𝔻 [ 𝔻 [ H.fmap f ∘ η A ] ∘ θ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ H.fmap g ∘ φ ]) (cong (λ φ → 𝔻 [ φ ∘ θ A ]) (sym (ηNat f))) ⟩
+        𝔻 [ H.fmap g ∘ 𝔻 [ 𝔻 [ η B ∘ G.fmap f ] ∘ θ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ H.fmap g ∘ φ ]) (sym 𝔻.isAssociative) ⟩
+        𝔻 [ H.fmap g ∘ 𝔻 [ η B ∘ 𝔻 [ G.fmap f ∘ θ A ] ] ]
+          ≡⟨ 𝔻.isAssociative ⟩
+        𝔻 [ 𝔻 [ H.fmap g ∘ η B ] ∘ 𝔻 [ G.fmap f ∘ θ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ φ ∘ 𝔻 [ G.fmap f ∘ θ A ] ]) (sym (ηNat g)) ⟩
+        𝔻 [ 𝔻 [ η C ∘ G.fmap g ] ∘ 𝔻 [ G.fmap f ∘ θ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ 𝔻 [ η C ∘ G.fmap g ] ∘ φ ]) (sym (θNat f)) ⟩
+        𝔻 [ 𝔻 [ η C ∘ G.fmap g ] ∘ 𝔻 [ θ B ∘ F.fmap f ] ] ∎
 
   eval : Functor (CatProduct.obj prodObj ℂ) 𝔻
   -- :eval: : Functor (prodObj ×p ℂ) 𝔻
