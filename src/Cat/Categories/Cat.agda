@@ -4,8 +4,10 @@
 module Cat.Categories.Cat where
 
 open import Agda.Primitive
-open import Cubical
 open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
+
+open import Cubical
+open import Cubical.Sigma
 
 open import Cat.Category
 open import Cat.Category.Functor
@@ -46,21 +48,30 @@ module _ (ℓ ℓ' : Level) where
     isAssociative {f = F} {G} {H} = assc {F = F} {G = G} {H = H}
     ident : IsIdentity identity
     ident = ident-r , ident-l
-    -- NB! `ArrowsAreSets RawCat` is *not* provable. The type of functors,
-    -- however, form a groupoid! Therefore there is no (1-)category of
-    -- categories. There does, however, exist a 2-category of 1-categories.
 
-  -- Because of the note above there is not category of categories.
+  -- NB! `ArrowsAreSets RawCat` is *not* provable. The type of functors,
+  -- however, form a groupoid! Therefore there is no (1-)category of
+  -- categories. There does, however, exist a 2-category of 1-categories.
+  --
+  -- Because of this there is no category of categories.
   Cat : (unprovable : IsCategory RawCat) → Category (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
   Category.raw        (Cat _) = RawCat
   Category.isCategory (Cat unprovable) = unprovable
-  -- Category.raw Cat _ = RawCat
-  -- Category.isCategory Cat unprovable = unprovable
 
--- The following to some extend depends on the category of categories being a
--- category. In some places it may not actually be needed, however.
+-- | In the following we will pretend there is a category of categories when
+-- e.g. talking about it being cartesian closed. It still makes sense to
+-- construct these things even though that category does not exist.
+--
+-- If the notion of a category is later generalized to work on different
+-- homotopy levels, then the proof that the category of categories is cartesian
+-- closed will follow immediately from these constructions.
+
+-- | the category of categories have products.
 module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
   private
+    module ℂ = Category ℂ
+    module 𝔻 = Category 𝔻
+
     Obj = Object ℂ × Object 𝔻
     Arr  : Obj → Obj → Set ℓ'
     Arr (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
@@ -80,9 +91,6 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
     RawCategory._∘_    rawProduct = _∘_
     open RawCategory   rawProduct
 
-    module ℂ = Category ℂ
-    module 𝔻 = Category 𝔻
-    open import Cubical.Sigma
     arrowsAreSets : ArrowsAreSets
     arrowsAreSets = setSig {sA = ℂ.arrowsAreSets} {sB = λ x → 𝔻.arrowsAreSets}
     isIdentity : IsIdentity 𝟙'
@@ -97,31 +105,35 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
       IsCategory.arrowsAreSets isCategory = arrowsAreSets
       IsCategory.univalent     isCategory = univalent
 
-  obj : Category ℓ ℓ'
-  Category.raw obj = rawProduct
+  object : Category ℓ ℓ'
+  Category.raw object = rawProduct
 
-  proj₁ : Functor obj ℂ
+  proj₁ : Functor object ℂ
   proj₁ = record
-    { raw = record { omap = fst ; fmap = fst }
-    ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
+    { raw = record
+      { omap = fst ; fmap = fst }
+    ; isFunctor = record
+      { isIdentity = refl ; isDistributive = refl }
     }
 
-  proj₂ : Functor obj 𝔻
+  proj₂ : Functor object 𝔻
   proj₂ = record
-    { raw = record { omap = snd ; fmap = snd }
-    ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
+    { raw = record
+      { omap = snd ; fmap = snd }
+    ; isFunctor = record
+      { isIdentity = refl ; isDistributive = refl }
     }
 
   module _ {X : Category ℓ ℓ'} (x₁ : Functor X ℂ) (x₂ : Functor X 𝔻) where
     private
-      x : Functor X obj
+      x : Functor X object
       x = record
         { raw = record
           { omap = λ x → x₁.omap x , x₂.omap x
           ; fmap = λ x → x₁.fmap x , x₂.fmap x
           }
         ; isFunctor = record
-          { isIdentity   = Σ≡ x₁.isIdentity x₂.isIdentity
+          { isIdentity     = Σ≡ x₁.isIdentity x₂.isIdentity
           ; isDistributive = Σ≡ x₁.isDistributive x₂.isDistributive
           }
         }
@@ -150,7 +162,7 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
       module P = CatProduct ℂ 𝔻
 
       rawProduct : RawProduct Catℓ ℂ 𝔻
-      RawProduct.object rawProduct = P.obj
+      RawProduct.object rawProduct = P.object
       RawProduct.proj₁  rawProduct = P.proj₁
       RawProduct.proj₂  rawProduct = P.proj₂
 
@@ -165,24 +177,23 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
     hasProducts : HasProducts Catℓ
     hasProducts = record { product = product }
 
--- Basically proves that `Cat ℓ ℓ` is cartesian closed.
+-- | The category of categories have expoentntials - and because it has products
+-- it is therefory also cartesian closed.
 module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
   private
     open Data.Product
     open import Cat.Categories.Fun
     module ℂ = Category ℂ
     module 𝔻 = Category 𝔻
+    Categoryℓ = Category ℓ ℓ
+    open Fun ℂ 𝔻 renaming (identity to idN)
 
-  Categoryℓ = Category ℓ ℓ
-  open Fun ℂ 𝔻 renaming (identity to idN)
-  private
     omap : Functor ℂ 𝔻 × Object ℂ → Object 𝔻
-    omap (F , A) = F.omap A
-      where
-        module F = Functor F
+    omap (F , A) = Functor.omap F A
 
-  prodObj : Categoryℓ
-  prodObj = Fun
+  -- The exponential object
+  object : Categoryℓ
+  object = Fun
 
   module _ {dom cod : Functor ℂ 𝔻 × Object ℂ} where
     private
@@ -215,15 +226,10 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
         l = 𝔻 [ θB ∘ F.fmap f ]
         r : 𝔻 [ F.omap A , G.omap B ]
         r = 𝔻 [ G.fmap f ∘ θA ]
-        -- There are two choices at this point,
-        -- but I suppose the whole point is that
-        -- by `θNat f` we have `l ≡ r`
-        --     lem : 𝔻 [ θ B ∘ F .fmap f ] ≡ 𝔻 [ G .fmap f ∘ θ A ]
-        --     lem = θNat f
         result : 𝔻 [ F.omap A , G.omap B ]
         result = l
 
-  open CatProduct renaming (obj to _×p_) using ()
+  open CatProduct renaming (object to _⊗_) using ()
 
   module _ {c : Functor ℂ 𝔻 × Object ℂ} where
     private
@@ -234,7 +240,7 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
 
     ident : fmap {c} {c} (NT.identity F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
     ident = begin
-      fmap {c} {c} (𝟙 (prodObj ×p ℂ) {c})    ≡⟨⟩
+      fmap {c} {c} (𝟙 (object ⊗ ℂ) {c})    ≡⟨⟩
       fmap {c} {c} (idN F , 𝟙 ℂ)             ≡⟨⟩
       𝔻 [ identityTrans F C ∘ F.fmap (𝟙 ℂ)]    ≡⟨⟩
       𝔻 [ 𝟙 𝔻 ∘ F.fmap (𝟙 ℂ)]                  ≡⟨ proj₂ 𝔻.isIdentity ⟩
@@ -254,8 +260,6 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
       module F = Functor F
       module G = Functor G
       module H = Functor H
-      -- Not entirely clear what this is at this point:
-      _P⊕_ = Category._∘_ (prodObj ×p ℂ) {F×A} {G×B} {H×C}
 
     module _
       -- NaturalTransformation F G × ℂ .Arrow A B
@@ -305,7 +309,7 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
           ≡⟨ cong (λ φ → 𝔻 [ 𝔻 [ η C ∘ G.fmap g ] ∘ φ ]) (sym (θNat f)) ⟩
         𝔻 [ 𝔻 [ η C ∘ G.fmap g ] ∘ 𝔻 [ θ B ∘ F.fmap f ] ] ∎
 
-  eval : Functor (CatProduct.obj prodObj ℂ) 𝔻
+  eval : Functor (CatProduct.object object ℂ) 𝔻
   eval = record
     { raw = record
       { omap = omap
@@ -317,14 +321,12 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
       }
     }
 
-  module _ (𝔸 : Category ℓ ℓ) (F : Functor (𝔸 ×p ℂ) 𝔻) where
-    -- open HasProducts (hasProducts {ℓ} {ℓ} unprovable) renaming (_|×|_ to parallelProduct)
-
+  module _ (𝔸 : Category ℓ ℓ) (F : Functor (𝔸 ⊗ ℂ) 𝔻) where
     postulate
       parallelProduct
-        : Functor 𝔸 prodObj → Functor ℂ ℂ
-        → Functor (𝔸 ×p ℂ) (prodObj ×p ℂ)
-      transpose : Functor 𝔸 prodObj
+        : Functor 𝔸 object → Functor ℂ ℂ
+        → Functor (𝔸 ⊗ ℂ) (object ⊗ ℂ)
+      transpose : Functor 𝔸 object
       eq : F[ eval ∘ (parallelProduct transpose (identity {C = ℂ})) ] ≡ F
       -- eq : F[ :eval: ∘ {!!} ] ≡ F
       -- eq : Catℓ [ :eval: ∘ (HasProducts._|×|_ hasProducts transpose (𝟙 Catℓ {o = ℂ})) ] ≡ F
@@ -339,39 +341,30 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
     -- :eval: ∘ (parallelProduct F~ (𝟙 Catℓ {o = ℂ}))] ≡ F) catTranspose =
     -- transpose , eq
 
+-- We don't care about filling out the holes below since they are anyways hidden
+-- behind an unprovable statement.
 module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
   private
     Catℓ : Category (lsuc (ℓ ⊔ ℓ)) (ℓ ⊔ ℓ)
     Catℓ = Cat ℓ ℓ unprovable
-  module _ (ℂ 𝔻 : Category ℓ ℓ) where
-    open CatExponential ℂ 𝔻 using (prodObj ; eval)
-    -- Putting in the type annotation causes Agda to loop indefinitely.
-    -- eval' : Functor (CatProduct.obj prodObj ℂ) 𝔻
-    -- Likewise, using it below also results in this.
-    eval' : _
-    eval' = eval
-  --   private
-  --     -- module _ (ℂ 𝔻 : Category ℓ ℓ) where
-  --       postulate :isExponential: : IsExponential Catℓ ℂ 𝔻 prodObj :eval:
-  --       -- :isExponential: : IsExponential Catℓ ℂ 𝔻 :obj: :eval:
-  --       -- :isExponential: = {!catTranspose!}
-  --       --   where
-  --       --     open HasProducts (hasProducts {ℓ} {ℓ} unprovable) using (_|×|_)
-  --       -- :isExponential: = λ 𝔸 F → transpose 𝔸 F , eq' 𝔸 F
 
-  --       -- :exponent: : Exponential (Cat ℓ ℓ) A B
-    exponent : Exponential Catℓ ℂ 𝔻
-    exponent = record
-      { obj = prodObj
-      ; eval = {!evalll'!}
-      ; isExponential = {!:isExponential:!}
-      }
-      where
-        open HasProducts (hasProducts unprovable) renaming (_×_ to _×p_)
-        open import Cat.Categories.Fun
-        open Fun
-        -- _×p_ = CatProduct.obj -- prodObj ℂ
-        -- eval' : Functor CatP.obj 𝔻
+    module _ (ℂ 𝔻 : Category ℓ ℓ) where
+      module CatExp = CatExponential ℂ 𝔻
+      _⊗_ = CatProduct.object
+
+      -- Filling the hole causes Agda to loop indefinitely.
+      eval : Functor (CatExp.object ⊗ ℂ) 𝔻
+      eval = {!CatExp.eval!}
+
+      isExponential : IsExponential Catℓ ℂ 𝔻 CatExp.object eval
+      isExponential = {!CatExp.isExponential!}
+
+      exponent : Exponential Catℓ ℂ 𝔻
+      exponent = record
+        { obj           = CatExp.object
+        ; eval          = eval
+        ; isExponential = isExponential
+        }
 
   hasExponentials : HasExponentials Catℓ
   hasExponentials = record { exponent = exponent }
