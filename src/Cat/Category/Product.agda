@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 module Cat.Category.Product where
 
 open import Agda.Primitive
@@ -14,9 +15,9 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     record RawProduct : Set (ℓa ⊔ ℓb) where
       no-eta-equality
       field
-        obj : Object
-        proj₁ : ℂ [ obj , A ]
-        proj₂ : ℂ [ obj , B ]
+        object : Object
+        proj₁  : ℂ [ object , A ]
+        proj₂  : ℂ [ object , B ]
 
     -- FIXME Not sure this is actually a proposition - so this name is
     -- misleading.
@@ -28,7 +29,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
       -- | Arrow product
       _P[_×_] : ∀ {X} → (π₁ : ℂ [ X , A ]) (π₂ : ℂ [ X , B ])
-        → ℂ [ X , obj ]
+        → ℂ [ X , object ]
       _P[_×_] π₁ π₂ = P.proj₁ (isProduct π₁ π₂)
 
     record Product : Set (ℓa ⊔ ℓb) where
@@ -43,7 +44,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       product : ∀ (A B : Object) → Product A B
 
     _×_ : Object → Object → Object
-    A × B = Product.obj (product A B)
+    A × B = Product.object (product A B)
 
     -- | Parallel product of arrows
     --

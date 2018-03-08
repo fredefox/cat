@@ -66,9 +66,9 @@ module _ {ℓ : Level} where
             proj₂ lem = refl
 
         rawProduct : RawProduct 𝓢 0A 0B
-        RawProduct.obj   rawProduct = 0A×0B
-        RawProduct.proj₁ rawProduct = Data.Product.proj₁
-        RawProduct.proj₂ rawProduct = Data.Product.proj₂
+        RawProduct.object rawProduct = 0A×0B
+        RawProduct.proj₁  rawProduct = Data.Product.proj₁
+        RawProduct.proj₂  rawProduct = Data.Product.proj₂
 
         isProduct : IsProduct 𝓢 _ _ rawProduct
         IsProduct.isProduct isProduct {X = X} f g
