@@ -39,8 +39,8 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     joinN : Natural F[ R ∘ R ] R joinT
     joinN = proj₂ joinNT
 
-    Romap = Functor.func* R
-    Rfmap = Functor.func→ R
+    Romap = Functor.omap R
+    Rfmap = Functor.fmap R
 
     bind : {X Y : Object} → ℂ [ X , Romap Y ] → ℂ [ Romap X , Romap Y ]
     bind {X} {Y} f = joinT Y ∘ Rfmap f
@@ -69,10 +69,10 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
     isNatural : IsNatural
     isNatural {X} {Y} f = begin
-      joinT Y ∘ R.func→ f ∘ pureT X     ≡⟨ sym ℂ.isAssociative ⟩
-      joinT Y ∘ (R.func→ f ∘ pureT X)   ≡⟨ cong (λ φ → joinT Y ∘ φ) (sym (pureN f)) ⟩
-      joinT Y ∘ (pureT (R.func* Y) ∘ f) ≡⟨ ℂ.isAssociative ⟩
-      joinT Y ∘ pureT (R.func* Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (proj₁ isInverse) ⟩
+      joinT Y ∘ R.fmap f ∘ pureT X     ≡⟨ sym ℂ.isAssociative ⟩
+      joinT Y ∘ (R.fmap f ∘ pureT X)   ≡⟨ cong (λ φ → joinT Y ∘ φ) (sym (pureN f)) ⟩
+      joinT Y ∘ (pureT (R.omap Y) ∘ f) ≡⟨ ℂ.isAssociative ⟩
+      joinT Y ∘ pureT (R.omap Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (proj₁ isInverse) ⟩
       𝟙 ∘ f                     ≡⟨ proj₂ ℂ.isIdentity ⟩
       f                         ∎
 
@@ -81,36 +81,36 @@ module Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       where
       module R² = Functor F[ R ∘ R ]
       distrib3 : ∀ {A B C D} {a : Arrow C D} {b : Arrow B C} {c : Arrow A B}
-        → R.func→ (a ∘ b ∘ c)
-        ≡ R.func→ a ∘ R.func→ b ∘ R.func→ c
+        → R.fmap (a ∘ b ∘ c)
+        ≡ R.fmap a ∘ R.fmap b ∘ R.fmap c
       distrib3 {a = a} {b} {c} = begin
-        R.func→ (a ∘ b ∘ c)               ≡⟨ R.isDistributive ⟩
-        R.func→ (a ∘ b) ∘ R.func→ c       ≡⟨ cong (_∘ _) R.isDistributive ⟩
-        R.func→ a ∘ R.func→ b ∘ R.func→ c ∎
+        R.fmap (a ∘ b ∘ c)               ≡⟨ R.isDistributive ⟩
+        R.fmap (a ∘ b) ∘ R.fmap c       ≡⟨ cong (_∘ _) R.isDistributive ⟩
+        R.fmap a ∘ R.fmap b ∘ R.fmap c ∎
       aux = begin
-        joinT Z ∘ R.func→ (joinT Z ∘ R.func→ g ∘ f)
+        joinT Z ∘ R.fmap (joinT Z ∘ R.fmap g ∘ f)
           ≡⟨ cong (λ φ → joinT Z ∘ φ) distrib3 ⟩
-        joinT Z ∘ (R.func→ (joinT Z) ∘ R.func→ (R.func→ g) ∘ R.func→ f)
+        joinT Z ∘ (R.fmap (joinT Z) ∘ R.fmap (R.fmap g) ∘ R.fmap f)
           ≡⟨⟩
-        joinT Z ∘ (R.func→ (joinT Z) ∘ R².func→ g ∘ R.func→ f)
+        joinT Z ∘ (R.fmap (joinT Z) ∘ R².fmap g ∘ R.fmap f)
           ≡⟨ cong (_∘_ (joinT Z)) (sym ℂ.isAssociative) ⟩
-        joinT Z ∘ (R.func→ (joinT Z) ∘ (R².func→ g ∘ R.func→ f))
+        joinT Z ∘ (R.fmap (joinT Z) ∘ (R².fmap g ∘ R.fmap f))
           ≡⟨ ℂ.isAssociative ⟩
-        (joinT Z ∘ R.func→ (joinT Z)) ∘ (R².func→ g ∘ R.func→ f)
-          ≡⟨ cong (λ φ → φ ∘ (R².func→ g ∘ R.func→ f)) isAssociative ⟩
-        (joinT Z ∘ joinT (R.func* Z)) ∘ (R².func→ g ∘ R.func→ f)
+        (joinT Z ∘ R.fmap (joinT Z)) ∘ (R².fmap g ∘ R.fmap f)
+          ≡⟨ cong (λ φ → φ ∘ (R².fmap g ∘ R.fmap f)) isAssociative ⟩
+        (joinT Z ∘ joinT (R.omap Z)) ∘ (R².fmap g ∘ R.fmap f)
           ≡⟨ ℂ.isAssociative ⟩
-        joinT Z ∘ joinT (R.func* Z) ∘ R².func→ g ∘ R.func→ f
+        joinT Z ∘ joinT (R.omap Z) ∘ R².fmap g ∘ R.fmap f
           ≡⟨⟩
-        ((joinT Z ∘ joinT (R.func* Z)) ∘ R².func→ g) ∘ R.func→ f
-          ≡⟨ cong (_∘ R.func→ f) (sym ℂ.isAssociative) ⟩
-        (joinT Z ∘ (joinT (R.func* Z) ∘ R².func→ g)) ∘ R.func→ f
-          ≡⟨ cong (λ φ → φ ∘ R.func→ f) (cong (_∘_ (joinT Z)) (joinN g)) ⟩
-        (joinT Z ∘ (R.func→ g ∘ joinT Y)) ∘ R.func→ f
-          ≡⟨ cong (_∘ R.func→ f) ℂ.isAssociative ⟩
-        joinT Z ∘ R.func→ g ∘ joinT Y ∘ R.func→ f
+        ((joinT Z ∘ joinT (R.omap Z)) ∘ R².fmap g) ∘ R.fmap f
+          ≡⟨ cong (_∘ R.fmap f) (sym ℂ.isAssociative) ⟩
+        (joinT Z ∘ (joinT (R.omap Z) ∘ R².fmap g)) ∘ R.fmap f
+          ≡⟨ cong (λ φ → φ ∘ R.fmap f) (cong (_∘_ (joinT Z)) (joinN g)) ⟩
+        (joinT Z ∘ (R.fmap g ∘ joinT Y)) ∘ R.fmap f
+          ≡⟨ cong (_∘ R.fmap f) ℂ.isAssociative ⟩
+        joinT Z ∘ R.fmap g ∘ joinT Y ∘ R.fmap f
           ≡⟨ sym (Category.isAssociative ℂ) ⟩
-        joinT Z ∘ R.func→ g ∘ (joinT Y ∘ R.func→ f)
+        joinT Z ∘ R.fmap g ∘ (joinT Y ∘ R.fmap f)
           ∎
 
   record Monad : Set ℓ where
@@ -235,8 +235,8 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     -- | This formulation gives rise to the following endo-functor.
     private
       rawR : RawFunctor ℂ ℂ
-      RawFunctor.func* rawR = omap
-      RawFunctor.func→ rawR = fmap
+      RawFunctor.omap rawR = omap
+      RawFunctor.fmap rawR = fmap
 
       isFunctorR : IsFunctor ℂ ℂ rawR
       IsFunctor.isIdentity isFunctorR = begin
@@ -269,18 +269,18 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       pureT A = pure
       pureN : Natural R⁰ R pureT
       pureN {A} {B} f = begin
-        pureT B             ∘ R⁰.func→ f ≡⟨⟩
+        pureT B             ∘ R⁰.fmap f ≡⟨⟩
         pure            ∘ f          ≡⟨ sym (isNatural _) ⟩
         bind (pure ∘ f) ∘ pure       ≡⟨⟩
         fmap f          ∘ pure       ≡⟨⟩
-        R.func→ f       ∘ pureT A        ∎
+        R.fmap f       ∘ pureT A        ∎
       joinT : Transformation R² R
       joinT C = join
       joinN : Natural R² R joinT
       joinN f = begin
-        join       ∘ R².func→ f  ≡⟨⟩
-        bind 𝟙     ∘ R².func→ f  ≡⟨⟩
-        R².func→ f >>> bind 𝟙    ≡⟨⟩
+        join       ∘ R².fmap f  ≡⟨⟩
+        bind 𝟙     ∘ R².fmap f  ≡⟨⟩
+        R².fmap f >>> bind 𝟙    ≡⟨⟩
         fmap (fmap f) >>> bind 𝟙 ≡⟨⟩
         fmap (bind (f >>> pure)) >>> bind 𝟙          ≡⟨⟩
         bind (bind (f >>> pure) >>> pure) >>> bind 𝟙
@@ -300,9 +300,9 @@ module Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
           ≡⟨ sym (isDistributive _ _) ⟩
         bind 𝟙     >>> bind (f >>> pure)    ≡⟨⟩
         bind 𝟙     >>> fmap f    ≡⟨⟩
-        bind 𝟙     >>> R.func→ f ≡⟨⟩
-        R.func→ f  ∘ bind 𝟙      ≡⟨⟩
-        R.func→ f  ∘ join        ∎
+        bind 𝟙     >>> R.fmap f ≡⟨⟩
+        R.fmap f  ∘ bind 𝟙      ≡⟨⟩
+        R.fmap f  ∘ join        ∎
 
     pureNT : NaturalTransformation R⁰ R
     proj₁ pureNT = pureT
@@ -396,7 +396,6 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
   private
     module ℂ = Category ℂ
     open ℂ using (Object ; Arrow ; 𝟙 ; _∘_ ; _>>>_)
-    open Functor using (func* ; func→)
     module M = Monoidal ℂ
     module K = Kleisli  ℂ
 
@@ -434,19 +433,19 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
       backIsMonad : M.IsMonad backRaw
       M.IsMonad.isAssociative backIsMonad {X} = begin
-        joinT X  ∘ R.func→ (joinT X)  ≡⟨⟩
+        joinT X  ∘ R.fmap (joinT X)  ≡⟨⟩
         join ∘ fmap (joinT X)         ≡⟨⟩
         join ∘ fmap join              ≡⟨ isNaturalForeign ⟩
         join ∘ join                   ≡⟨⟩
-        joinT X  ∘ joinT (R.func* X)  ∎
+        joinT X  ∘ joinT (R.omap X)  ∎
       M.IsMonad.isInverse backIsMonad {X} = inv-l , inv-r
         where
         inv-l = begin
-          joinT X ∘ pureT (R.func* X) ≡⟨⟩
+          joinT X ∘ pureT (R.omap X) ≡⟨⟩
           join ∘ pure                 ≡⟨ proj₁ isInverse ⟩
           𝟙                           ∎
         inv-r = begin
-          joinT X ∘ R.func→ (pureT X) ≡⟨⟩
+          joinT X ∘ R.fmap (pureT X) ≡⟨⟩
           join ∘ fmap pure            ≡⟨ proj₂ isInverse ⟩
           𝟙                           ∎
 
@@ -526,8 +525,8 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
           )
 
         rawEq : Functor.raw KM.R ≡ Functor.raw R
-        RawFunctor.func* (rawEq i) = omapEq i
-        RawFunctor.func→ (rawEq i) = fmapEq i
+        RawFunctor.omap (rawEq i) = omapEq i
+        RawFunctor.fmap (rawEq i) = fmapEq i
 
       Req : M.RawMonad.R (backRaw (forth m)) ≡ R
       Req = Functor≡ rawEq
@@ -586,8 +585,8 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
       Rraw : RawFunctor ℂ ℂ
       Rraw = record
-        { func* = omap
-        ; func→ = fmap
+        { omap = omap
+        ; fmap = fmap
         }
 
       field
@@ -663,7 +662,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
   voe-2-3-1-fromMonad : (m : M.Monad) → voe-2-3-1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
   voe-2-3-1-fromMonad m = record
-    { fmap = Functor.func→ R
+    { fmap = Functor.fmap R
     ; RisFunctor = Functor.isFunctor R
     ; pureN = pureN
     ; join = λ {X} → joinT X

@@ -17,7 +17,7 @@ open import Cat.Category.NaturalTransformation
 open import Cat.Equality
 open Equality.Data.Product
 
-open Functor using (func→ ; func*)
+open Functor using (fmap ; omap)
 open Category using (Object ; 𝟙)
 
 -- The category of categories
@@ -104,13 +104,13 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
 
   proj₁ : Functor obj ℂ
   proj₁ = record
-    { raw = record { func* = fst ; func→ = fst }
+    { raw = record { omap = fst ; fmap = fst }
     ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
     }
 
   proj₂ : Functor obj 𝔻
   proj₂ = record
-    { raw = record { func* = snd ; func→ = snd }
+    { raw = record { omap = snd ; fmap = snd }
     ; isFunctor = record { isIdentity = refl ; isDistributive = refl }
     }
 
@@ -119,8 +119,8 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
       x : Functor X obj
       x = record
         { raw = record
-          { func* = λ x → x₁.func* x , x₂.func* x
-          ; func→ = λ x → x₁.func→ x , x₂.func→ x
+          { omap = λ x → x₁.omap x , x₂.omap x
+          ; fmap = λ x → x₁.fmap x , x₂.fmap x
           }
         ; isFunctor = record
           { isIdentity   = Σ≡ x₁.isIdentity x₂.isIdentity
@@ -175,8 +175,8 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
   Categoryℓ = Category ℓ ℓ
   open Fun ℂ 𝔻 renaming (identity to idN)
   private
-    :func*: : Functor ℂ 𝔻 × Object ℂ → Object 𝔻
-    :func*: (F , A) = func* F A
+    :omap: : Functor ℂ 𝔻 × Object ℂ → Object 𝔻
+    :omap: (F , A) = omap F A
 
   prodObj : Categoryℓ
   prodObj = Fun
@@ -193,28 +193,28 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
       B : Object ℂ
       B = proj₂ cod
 
-    :func→: : (pobj : NaturalTransformation F G × ℂ [ A , B ])
-      → 𝔻 [ func* F A , func* G B ]
-    :func→: ((θ , θNat) , f) = result
+    :fmap: : (pobj : NaturalTransformation F G × ℂ [ A , B ])
+      → 𝔻 [ omap F A , omap G B ]
+    :fmap: ((θ , θNat) , f) = result
       where
-        θA : 𝔻 [ func* F A , func* G A ]
+        θA : 𝔻 [ omap F A , omap G A ]
         θA = θ A
-        θB : 𝔻 [ func* F B , func* G B ]
+        θB : 𝔻 [ omap F B , omap G B ]
         θB = θ B
-        F→f : 𝔻 [ func* F A , func* F B ]
-        F→f = func→ F f
-        G→f : 𝔻 [ func* G A , func* G B ]
-        G→f = func→ G f
-        l : 𝔻 [ func* F A , func* G B ]
+        F→f : 𝔻 [ omap F A , omap F B ]
+        F→f = fmap F f
+        G→f : 𝔻 [ omap G A , omap G B ]
+        G→f = fmap G f
+        l : 𝔻 [ omap F A , omap G B ]
         l = 𝔻 [ θB ∘ F→f ]
-        r : 𝔻 [ func* F A , func* G B ]
+        r : 𝔻 [ omap F A , omap G B ]
         r = 𝔻 [ G→f ∘ θA ]
         -- There are two choices at this point,
         -- but I suppose the whole point is that
         -- by `θNat f` we have `l ≡ r`
-        --     lem : 𝔻 [ θ B ∘ F .func→ f ] ≡ 𝔻 [ G .func→ f ∘ θ A ]
+        --     lem : 𝔻 [ θ B ∘ F .fmap f ] ≡ 𝔻 [ G .fmap f ∘ θ A ]
         --     lem = θNat f
-        result : 𝔻 [ func* F A , func* G B ]
+        result : 𝔻 [ omap F A , omap G B ]
         result = l
 
   open CatProduct renaming (obj to _×p_) using ()
@@ -227,19 +227,19 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
       C = proj₂ c
 
     -- NaturalTransformation F G × ℂ .Arrow A B
-    -- :ident: : :func→: {c} {c} (identityNat F , ℂ .𝟙) ≡ 𝔻 .𝟙
+    -- :ident: : :fmap: {c} {c} (identityNat F , ℂ .𝟙) ≡ 𝔻 .𝟙
     -- :ident: = trans (proj₂ 𝔻.isIdentity) (F .isIdentity)
     --   where
     --     open module 𝔻 = IsCategory (𝔻 .isCategory)
     -- Unfortunately the equational version has some ambigous arguments.
 
-    :ident: : :func→: {c} {c} (NT.identity F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
+    :ident: : :fmap: {c} {c} (NT.identity F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
     :ident: = begin
-      :func→: {c} {c} (𝟙 (prodObj ×p ℂ) {c})    ≡⟨⟩
-      :func→: {c} {c} (idN F , 𝟙 ℂ)             ≡⟨⟩
-      𝔻 [ identityTrans F C ∘ func→ F (𝟙 ℂ)]    ≡⟨⟩
-      𝔻 [ 𝟙 𝔻 ∘ func→ F (𝟙 ℂ)]                  ≡⟨ proj₂ 𝔻.isIdentity ⟩
-      func→ F (𝟙 ℂ)                             ≡⟨ F.isIdentity ⟩
+      :fmap: {c} {c} (𝟙 (prodObj ×p ℂ) {c})    ≡⟨⟩
+      :fmap: {c} {c} (idN F , 𝟙 ℂ)             ≡⟨⟩
+      𝔻 [ identityTrans F C ∘ fmap F (𝟙 ℂ)]    ≡⟨⟩
+      𝔻 [ 𝟙 𝔻 ∘ fmap F (𝟙 ℂ)]                  ≡⟨ proj₂ 𝔻.isIdentity ⟩
+      fmap F (𝟙 ℂ)                             ≡⟨ F.isIdentity ⟩
       𝟙 𝔻                                       ∎
       where
         open module 𝔻 = Category 𝔻
@@ -279,28 +279,28 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
         ηθNat = proj₂ ηθNT
 
       :isDistributive: :
-          𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ func→ F ( ℂ [ g ∘ f ] ) ]
-        ≡ 𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ θ B ∘ func→ F f ] ]
+          𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ fmap F ( ℂ [ g ∘ f ] ) ]
+        ≡ 𝔻 [ 𝔻 [ η C ∘ fmap G g ] ∘ 𝔻 [ θ B ∘ fmap F f ] ]
       :isDistributive: = begin
-        𝔻 [ (ηθ C) ∘ func→ F (ℂ [ g ∘ f ]) ]
+        𝔻 [ (ηθ C) ∘ fmap F (ℂ [ g ∘ f ]) ]
           ≡⟨ ηθNat (ℂ [ g ∘ f ]) ⟩
-        𝔻 [ func→ H (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
+        𝔻 [ fmap H (ℂ [ g ∘ f ]) ∘ (ηθ A) ]
           ≡⟨ cong (λ φ → 𝔻 [ φ ∘ ηθ A ]) (H.isDistributive) ⟩
-        𝔻 [ 𝔻 [ func→ H g ∘ func→ H f ] ∘ (ηθ A) ]
+        𝔻 [ 𝔻 [ fmap H g ∘ fmap H f ] ∘ (ηθ A) ]
           ≡⟨ sym isAssociative ⟩
-        𝔻 [ func→ H g ∘ 𝔻 [ func→ H f ∘ ηθ A ] ]
-          ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) isAssociative ⟩
-        𝔻 [ func→ H g ∘ 𝔻 [ 𝔻 [ func→ H f ∘ η A ] ∘ θ A ] ]
-          ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (cong (λ φ → 𝔻 [ φ ∘ θ A ]) (sym (ηNat f))) ⟩
-        𝔻 [ func→ H g ∘ 𝔻 [ 𝔻 [ η B ∘ func→ G f ] ∘ θ A ] ]
-          ≡⟨ cong (λ φ → 𝔻 [ func→ H g ∘ φ ]) (sym isAssociative) ⟩
-        𝔻 [ func→ H g ∘ 𝔻 [ η B ∘ 𝔻 [ func→ G f ∘ θ A ] ] ]
+        𝔻 [ fmap H g ∘ 𝔻 [ fmap H f ∘ ηθ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ fmap H g ∘ φ ]) isAssociative ⟩
+        𝔻 [ fmap H g ∘ 𝔻 [ 𝔻 [ fmap H f ∘ η A ] ∘ θ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ fmap H g ∘ φ ]) (cong (λ φ → 𝔻 [ φ ∘ θ A ]) (sym (ηNat f))) ⟩
+        𝔻 [ fmap H g ∘ 𝔻 [ 𝔻 [ η B ∘ fmap G f ] ∘ θ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ fmap H g ∘ φ ]) (sym isAssociative) ⟩
+        𝔻 [ fmap H g ∘ 𝔻 [ η B ∘ 𝔻 [ fmap G f ∘ θ A ] ] ]
           ≡⟨ isAssociative ⟩
-        𝔻 [ 𝔻 [ func→ H g ∘ η B ] ∘ 𝔻 [ func→ G f ∘ θ A ] ]
-          ≡⟨ cong (λ φ → 𝔻 [ φ ∘ 𝔻 [ func→ G f ∘ θ A ] ]) (sym (ηNat g)) ⟩
-        𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ func→ G f ∘ θ A ] ]
-          ≡⟨ cong (λ φ → 𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ φ ]) (sym (θNat f)) ⟩
-        𝔻 [ 𝔻 [ η C ∘ func→ G g ] ∘ 𝔻 [ θ B ∘ func→ F f ] ] ∎
+        𝔻 [ 𝔻 [ fmap H g ∘ η B ] ∘ 𝔻 [ fmap G f ∘ θ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ φ ∘ 𝔻 [ fmap G f ∘ θ A ] ]) (sym (ηNat g)) ⟩
+        𝔻 [ 𝔻 [ η C ∘ fmap G g ] ∘ 𝔻 [ fmap G f ∘ θ A ] ]
+          ≡⟨ cong (λ φ → 𝔻 [ 𝔻 [ η C ∘ fmap G g ] ∘ φ ]) (sym (θNat f)) ⟩
+        𝔻 [ 𝔻 [ η C ∘ fmap G g ] ∘ 𝔻 [ θ B ∘ fmap F f ] ] ∎
         where
           open Category 𝔻
           module H = Functor H
@@ -309,8 +309,8 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
   -- :eval: : Functor (prodObj ×p ℂ) 𝔻
   eval = record
     { raw = record
-      { func* = :func*:
-      ; func→ = λ {dom} {cod} → :func→: {dom} {cod}
+      { omap = :omap:
+      ; fmap = λ {dom} {cod} → :fmap: {dom} {cod}
       }
     ; isFunctor = record
       { isIdentity = λ {o} → :ident: {o}

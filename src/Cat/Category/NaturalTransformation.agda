@@ -46,13 +46,13 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
       module G = Functor G
     -- What do you call a non-natural tranformation?
     Transformation : Set (ℓc ⊔ ℓd')
-    Transformation = (C : Object ℂ) → 𝔻 [ F.func* C , G.func* C ]
+    Transformation = (C : Object ℂ) → 𝔻 [ F.omap C , G.omap C ]
 
     Natural : Transformation → Set (ℓc ⊔ (ℓc' ⊔ ℓd'))
     Natural θ
       = {A B : Object ℂ}
       → (f : ℂ [ A , B ])
-      → 𝔻 [ θ B ∘ F.func→ f ] ≡ 𝔻 [ G.func→ f ∘ θ A ]
+      → 𝔻 [ θ B ∘ F.fmap f ] ≡ 𝔻 [ G.fmap f ∘ θ A ]
 
     NaturalTransformation : Set (ℓc ⊔ ℓc' ⊔ ℓd')
     NaturalTransformation = Σ Transformation Natural
@@ -78,7 +78,7 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
     𝔻 [ F→ f ∘ identityTrans F A ]  ∎
     where
       module F = Functor F
-      F→ = F.func→
+      F→ = F.fmap
 
   identity : (F : Functor ℂ 𝔻) → NaturalTransformation F F
   identity F = identityTrans F , identityNatural F
@@ -94,14 +94,14 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
     NT[_∘_] : NaturalTransformation G H → NaturalTransformation F G → NaturalTransformation F H
     proj₁ NT[ (θ , _) ∘ (η , _) ] = T[ θ ∘ η ]
     proj₂ NT[ (θ , θNat) ∘ (η , ηNat) ] {A} {B} f = begin
-      𝔻 [ T[ θ ∘ η ] B ∘ F.func→ f ]     ≡⟨⟩
-      𝔻 [ 𝔻 [ θ B ∘ η B ] ∘ F.func→ f ] ≡⟨ sym 𝔻.isAssociative ⟩
-      𝔻 [ θ B ∘ 𝔻 [ η B ∘ F.func→ f ] ] ≡⟨ cong (λ φ → 𝔻 [ θ B ∘ φ ]) (ηNat f) ⟩
-      𝔻 [ θ B ∘ 𝔻 [ G.func→ f ∘ η A ] ] ≡⟨ 𝔻.isAssociative ⟩
-      𝔻 [ 𝔻 [ θ B ∘ G.func→ f ] ∘ η A ] ≡⟨ cong (λ φ → 𝔻 [ φ ∘ η A ]) (θNat f) ⟩
-      𝔻 [ 𝔻 [ H.func→ f ∘ θ A ] ∘ η A ] ≡⟨ sym 𝔻.isAssociative ⟩
-      𝔻 [ H.func→ f ∘ 𝔻 [ θ A ∘ η A ] ] ≡⟨⟩
-      𝔻 [ H.func→ f ∘ T[ θ ∘ η ] A ]     ∎
+      𝔻 [ T[ θ ∘ η ] B ∘ F.fmap f ]     ≡⟨⟩
+      𝔻 [ 𝔻 [ θ B ∘ η B ] ∘ F.fmap f ] ≡⟨ sym 𝔻.isAssociative ⟩
+      𝔻 [ θ B ∘ 𝔻 [ η B ∘ F.fmap f ] ] ≡⟨ cong (λ φ → 𝔻 [ θ B ∘ φ ]) (ηNat f) ⟩
+      𝔻 [ θ B ∘ 𝔻 [ G.fmap f ∘ η A ] ] ≡⟨ 𝔻.isAssociative ⟩
+      𝔻 [ 𝔻 [ θ B ∘ G.fmap f ] ∘ η A ] ≡⟨ cong (λ φ → 𝔻 [ φ ∘ η A ]) (θNat f) ⟩
+      𝔻 [ 𝔻 [ H.fmap f ∘ θ A ] ∘ η A ] ≡⟨ sym 𝔻.isAssociative ⟩
+      𝔻 [ H.fmap f ∘ 𝔻 [ θ A ∘ η A ] ] ≡⟨⟩
+      𝔻 [ H.fmap f ∘ T[ θ ∘ η ] A ]     ∎
 
   module _ {F G : Functor ℂ 𝔻} where
     transformationIsSet : isSet (Transformation F G)

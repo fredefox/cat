@@ -42,9 +42,9 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
       fmapNT = fmap , fmapNatural
 
     rawYoneda : RawFunctor ℂ Fun
-    RawFunctor.func* rawYoneda = prshf
-    RawFunctor.func→ rawYoneda = fmapNT
-    open RawFunctor rawYoneda
+    RawFunctor.omap rawYoneda = prshf
+    RawFunctor.fmap rawYoneda = fmapNT
+    open RawFunctor rawYoneda hiding (fmap)
 
     isIdentity : IsIdentity
     isIdentity {c} = lemSig (naturalIsProp {F = prshf c} {prshf c}) _ _ eq

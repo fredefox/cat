@@ -28,20 +28,20 @@ module _ {ℓa ℓb : Level} where
     private
       module T = Functor T
     Type : (Γ : Object ℂ) → Set ℓa
-    Type Γ = proj₁ (proj₁ (T.func* Γ))
+    Type Γ = proj₁ (proj₁ (T.omap Γ))
 
     module _ {Γ : Object ℂ} {A : Type Γ} where
 
       -- module _ {A B : Object ℂ} {γ : ℂ [ A , B ]} where
-      --   k : Σ (proj₁ (func* T B) → proj₁ (func* T A))
+      --   k : Σ (proj₁ (omap T B) → proj₁ (omap T A))
       --     (λ f →
-      --     {x : proj₁ (func* T B)} →
-      --     proj₂ (func* T B) x → proj₂ (func* T A) (f x))
-      --   k = T.func→ γ
-      --   k₁ : proj₁ (func* T B) → proj₁ (func* T A)
+      --     {x : proj₁ (omap T B)} →
+      --     proj₂ (omap T B) x → proj₂ (omap T A) (f x))
+      --   k = T.fmap γ
+      --   k₁ : proj₁ (omap T B) → proj₁ (omap T A)
       --   k₁ = proj₁ k
-      --   k₂ : ({x : proj₁ (func* T B)} →
-      --     proj₂ (func* T B) x → proj₂ (func* T A) (k₁ x))
+      --   k₂ : ({x : proj₁ (omap T B)} →
+      --     proj₂ (omap T B) x → proj₂ (omap T A) (k₁ x))
       --   k₂ = proj₂ k
 
       record ContextComprehension : Set (ℓa ⊔ ℓb) where
@@ -51,7 +51,7 @@ module _ {ℓa ℓb : Level} where
           -- proj2 : ????
 
         -- if γ : ℂ [ A , B ]
-        -- then T .func→ γ (written T[γ]) interpret substitutions in types and terms respectively.
+        -- then T .fmap γ (written T[γ]) interpret substitutions in types and terms respectively.
         -- field
         --   ump : {Δ : ℂ .Object} → (γ : ℂ [ Δ , Γ ])
         --     → (a : {!!}) → {!!}

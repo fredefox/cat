@@ -97,8 +97,8 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   representable : Category.Object ℂ → Representable
   representable A = record
     { raw = record
-      { func* = λ B → ℂ [ A , B ] , arrowsAreSets
-      ; func→ = ℂ [_∘_]
+      { omap = λ B → ℂ [ A , B ] , arrowsAreSets
+      ; fmap = ℂ [_∘_]
       }
     ; isFunctor = record
       { isIdentity = funExt λ _ → proj₂ isIdentity
@@ -110,8 +110,8 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   presheaf : Category.Object (opposite ℂ) → Presheaf
   presheaf B = record
     { raw = record
-      { func* = λ A → ℂ [ A , B ] , arrowsAreSets
-      ; func→ = λ f g → ℂ [ g ∘ f ]
+      { omap = λ A → ℂ [ A , B ] , arrowsAreSets
+      ; fmap = λ f g → ℂ [ g ∘ f ]
     }
     ; isFunctor = record
       { isIdentity = funExt λ x → proj₁ isIdentity
