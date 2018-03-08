@@ -60,6 +60,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ]
 
 module Propositionality {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object ℂ} where
+  -- TODO I'm not sure this is actually provable. Check with Thierry.
   propProduct : isProp (Product ℂ A B)
   propProduct = {!!}
 
