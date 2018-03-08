@@ -70,7 +70,7 @@ module _ {ℓ : Level} where
         RawProduct.proj₁ rawProduct = Data.Product.proj₁
         RawProduct.proj₂ rawProduct = Data.Product.proj₂
 
-        isProduct : IsProduct 𝓢 rawProduct
+        isProduct : IsProduct 𝓢 _ _ rawProduct
         IsProduct.isProduct isProduct {X = X} f g
           = (f &&& g) , lem {0X = X} f g
 

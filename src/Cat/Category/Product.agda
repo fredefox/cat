@@ -10,30 +10,31 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
   open Category ℂ
 
-  record RawProduct (A B : Object) : Set (ℓa ⊔ ℓb) where
-    no-eta-equality
-    field
-      obj : Object
-      proj₁ : ℂ [ obj , A ]
-      proj₂ : ℂ [ obj , B ]
+  module _ (A B : Object) where
+    record RawProduct : Set (ℓa ⊔ ℓb) where
+      no-eta-equality
+      field
+        obj : Object
+        proj₁ : ℂ [ obj , A ]
+        proj₂ : ℂ [ obj , B ]
 
-  record IsProduct {A B : Object} (raw : RawProduct A B) : Set (ℓa ⊔ ℓb) where
-    open RawProduct raw public
-    field
-      isProduct : ∀ {X : Object} (x₁ : ℂ [ X , A ]) (x₂ : ℂ [ X , B ])
-        → ∃![ x ] (ℂ [ proj₁ ∘ x ] ≡ x₁ P.× ℂ [ proj₂ ∘ x ] ≡ x₂)
+    record IsProduct (raw : RawProduct) : Set (ℓa ⊔ ℓb) where
+      open RawProduct raw public
+      field
+        isProduct : ∀ {X : Object} (x₁ : ℂ [ X , A ]) (x₂ : ℂ [ X , B ])
+          → ∃![ x ] (ℂ [ proj₁ ∘ x ] ≡ x₁ P.× ℂ [ proj₂ ∘ x ] ≡ x₂)
 
-    -- | Arrow product
-    _P[_×_] : ∀ {X} → (π₁ : ℂ [ X , A ]) (π₂ : ℂ [ X , B ])
-      → ℂ [ X , obj ]
-    _P[_×_] π₁ π₂ = P.proj₁ (isProduct π₁ π₂)
+      -- | Arrow product
+      _P[_×_] : ∀ {X} → (π₁ : ℂ [ X , A ]) (π₂ : ℂ [ X , B ])
+        → ℂ [ X , obj ]
+      _P[_×_] π₁ π₂ = P.proj₁ (isProduct π₁ π₂)
 
-  record Product (A B : Object) : Set (ℓa ⊔ ℓb) where
-    field
-      raw        : RawProduct A B
-      isProduct  : IsProduct {A} {B} raw
+    record Product : Set (ℓa ⊔ ℓb) where
+      field
+        raw        : RawProduct
+        isProduct  : IsProduct raw
 
-    open IsProduct isProduct public
+      open IsProduct isProduct public
 
   record HasProducts : Set (ℓa ⊔ ℓb) where
     field

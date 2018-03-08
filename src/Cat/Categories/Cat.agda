@@ -156,7 +156,7 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
       RawProduct.proj₁ rawProduct = P.proj₁
       RawProduct.proj₂ rawProduct = P.proj₂
 
-      isProduct : IsProduct Catℓ rawProduct
+      isProduct : IsProduct Catℓ _ _ rawProduct
       IsProduct.isProduct isProduct = P.isProduct
 
     product : Product Catℓ ℂ 𝔻
