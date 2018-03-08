@@ -1,35 +1,115 @@
+-- | The category of homotopy sets
 {-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Categories.Sets where
 
-open import Cubical
 open import Agda.Primitive
 open import Data.Product
 import Function
 
+open import Cubical hiding (inverse ; _≃_ {- ; obverse ; recto-verso ; verso-recto -} )
+open import Cubical.Univalence using (_≃_ ; ua)
+open import Cubical.GradLemma
+
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
+open import Cat.Wishlist
 
 module _ (ℓ : Level) where
   private
-    open RawCategory
-    open IsCategory
     open import Cubical.Univalence
     open import Cubical.NType.Properties
     open import Cubical.Universe
 
     SetsRaw : RawCategory (lsuc ℓ) ℓ
-    Object SetsRaw = hSet
-    Arrow SetsRaw (T , _) (U , _) = T → U
-    𝟙 SetsRaw = Function.id
-    _∘_ SetsRaw = Function._∘′_
+    RawCategory.Object SetsRaw = hSet
+    RawCategory.Arrow  SetsRaw (T , _) (U , _) = T → U
+    RawCategory.𝟙      SetsRaw = Function.id
+    RawCategory._∘_    SetsRaw = Function._∘′_
+
+    open RawCategory SetsRaw
+    open Univalence  SetsRaw
+
+    isIdentity : IsIdentity Function.id
+    proj₁ isIdentity = funExt λ _ → refl
+    proj₂ isIdentity = funExt λ _ → refl
+
+    arrowsAreSets : ArrowsAreSets
+    arrowsAreSets {B = (_ , s)} = setPi λ _ → s
+
+    module _ {hA hB : Object} where
+      private
+        A = proj₁ hA
+        isSetA : isSet A
+        isSetA = proj₂ hA
+        B = proj₁ hB
+        isSetB : isSet B
+        isSetB = proj₂ hB
+
+        toIsomorphism : A ≃ B → hA ≅ hB
+        toIsomorphism e = obverse , inverse , verso-recto , recto-verso
+          where
+          open _≃_ e
+
+        fromIsomorphism : hA ≅ hB → A ≃ B
+        fromIsomorphism iso = con obverse (gradLemma obverse inverse recto-verso verso-recto)
+          where
+          obverse : A → B
+          obverse = proj₁ iso
+          inverse : B → A
+          inverse = proj₁ (proj₂ iso)
+          -- FIXME IsInverseOf should change name to AreInverses and the
+          -- ordering should be swapped.
+          areInverses : IsInverseOf {A = hA} {hB} obverse inverse
+          areInverses = proj₂ (proj₂ iso)
+          verso-recto : ∀ a → (inverse Function.∘ obverse) a ≡ a
+          verso-recto a i = proj₁ areInverses i a
+          recto-verso : ∀ b → (obverse Function.∘ inverse) b ≡ b
+          recto-verso b i = proj₂ areInverses i b
+
+      univalent : isEquiv (hA ≡ hB) (hA ≅ hB) (id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)
+      univalent = gradLemma obverse inverse verso-recto recto-verso
+        where
+        obverse : hA ≡ hB → hA ≅ hB
+        obverse eq = {!res!}
+          where
+          -- Problem: How do I extract this equality from `eq`?
+          eqq : A ≡ B
+          eqq = {!!}
+          eq' : A ≃ B
+          eq' = fromEquality eqq
+          -- Problem: Why does this not satisfy the goal?
+          res : hA ≅ hB
+          res = toIsomorphism eq'
+
+        inverse : hA ≅ hB → hA ≡ hB
+        inverse iso = res
+          where
+          eq : A ≡ B
+          eq = ua (fromIsomorphism iso)
+
+          -- Use the fact that being an h-level level is a mere proposition.
+          -- This is almost provable using `Wishlist.isSetIsProp` - although
+          -- this creates homogenous paths.
+          isSetEq : (λ i → isSet (eq i)) [ isSetA ≡ isSetB ]
+          isSetEq = {!!}
+
+          res : hA ≡ hB
+          proj₁ (res i) = eq i
+          proj₂ (res i) = isSetEq i
+
+        -- FIXME Either the name of inverse/obverse is flipped or
+        -- recto-verso/verso-recto is flipped.
+        recto-verso : ∀ y → (inverse Function.∘ obverse) y ≡ y
+        recto-verso x = {!!}
+        verso-recto : ∀ x → (obverse Function.∘ inverse) x ≡ x
+        verso-recto x = {!!}
 
     SetsIsCategory : IsCategory SetsRaw
-    isAssociative SetsIsCategory = refl
-    proj₁ (isIdentity SetsIsCategory) = funExt λ _ → refl
-    proj₂ (isIdentity SetsIsCategory) = funExt λ _ → refl
-    arrowsAreSets SetsIsCategory {B = (_ , s)} = setPi λ _ → s
-    univalent SetsIsCategory = {!!}
+    IsCategory.isAssociative SetsIsCategory = refl
+    IsCategory.isIdentity    SetsIsCategory {A} {B} = isIdentity    {A} {B}
+    IsCategory.arrowsAreSets SetsIsCategory {A} {B} = arrowsAreSets {A} {B}
+    IsCategory.univalent     SetsIsCategory = univalent
 
   𝓢𝓮𝓽 Sets : Category (lsuc ℓ) ℓ
   Category.raw 𝓢𝓮𝓽 = SetsRaw
