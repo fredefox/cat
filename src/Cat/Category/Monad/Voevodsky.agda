@@ -175,12 +175,12 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         where
         lem : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
         lem = {!!} -- verso-recto Monoidal≃Kleisli
-        t : {ℓ : Level} {A B : Set ℓ} {a : _ → A} {b : B → _}
-          → a ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ b ≡ a ∘ b
-        t {a = a} {b} = cong (λ φ → a ∘ φ ∘ b) lem
-        u : {ℓ : Level} {A B : Set ℓ} {a : _ → A} {b : B → _}
-          → {m : _} → (a ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ b) m ≡ (a ∘ b) m
-        u {m = m} = cong (λ φ → φ m) t
+        t : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad)
+          ≡ (§2-fromMonad ∘ §2-3.§2.toMonad)
+        t = cong (λ φ → §2-fromMonad ∘ (λ{ {ω} → φ {{!????!}}}) ∘ §2-3.§2.toMonad) {!lem!}
+        u : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad) m
+          ≡ (§2-fromMonad ∘ §2-3.§2.toMonad) m
+        u = cong (λ φ → φ m) t
 
       backEq : ∀ m → (back ∘ forth) m ≡ m
       backEq m = begin
