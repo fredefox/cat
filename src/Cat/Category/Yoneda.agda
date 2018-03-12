@@ -29,7 +29,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
     --
     -- In stead we'll use an ad-hoc definition -- which is definitionally
     -- equivalent to that other one.
-    _⇑_ = CatExponential.prodObj
+    _⇑_ = CatExponential.object
 
     module _ {A B : ℂ.Object} (f : ℂ [ A , B ]) where
       fmap : Transformation (prshf A) (prshf B)

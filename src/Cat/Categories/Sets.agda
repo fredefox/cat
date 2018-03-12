@@ -4,10 +4,15 @@ module Cat.Categories.Sets where
 
 open import Agda.Primitive
 open import Data.Product
-import Function
+open import Function using (_∘_)
 
-open import Cubical hiding (inverse ; _≃_ {- ; obverse ; recto-verso ; verso-recto -} )
-open import Cubical.Univalence using (_≃_ ; ua)
+open import Cubical hiding (_≃_ ; inverse)
+open import Cubical.Equivalence
+  renaming
+    ( _≅_ to _A≅_ )
+  using
+    (_≃_ ; con ; AreInverses)
+open import Cubical.Univalence
 open import Cubical.GradLemma
 
 open import Cat.Category
@@ -27,7 +32,7 @@ module _ (ℓ : Level) where
     RawCategory.𝟙      SetsRaw = Function.id
     RawCategory._∘_    SetsRaw = Function._∘′_
 
-    open RawCategory SetsRaw
+    open RawCategory SetsRaw hiding (_∘_)
     open Univalence  SetsRaw
 
     isIdentity : IsIdentity Function.id
@@ -62,48 +67,100 @@ module _ (ℓ : Level) where
           -- ordering should be swapped.
           areInverses : IsInverseOf {A = hA} {hB} obverse inverse
           areInverses = proj₂ (proj₂ iso)
-          verso-recto : ∀ a → (inverse Function.∘ obverse) a ≡ a
+          verso-recto : ∀ a → (inverse ∘ obverse) a ≡ a
           verso-recto a i = proj₁ areInverses i a
           recto-verso : ∀ b → (obverse Function.∘ inverse) b ≡ b
           recto-verso b i = proj₂ areInverses i b
 
-      univalent : isEquiv (hA ≡ hB) (hA ≅ hB) (id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)
-      univalent = gradLemma obverse inverse verso-recto recto-verso
-        where
+      private
+        univIso : (A ≡ B) A≅ (A ≃ B)
+        univIso = _≃_.toIsomorphism univalence
+        obverse' : A ≡ B → A ≃ B
+        obverse' = proj₁ univIso
+        inverse' : A ≃ B → A ≡ B
+        inverse' = proj₁ (proj₂ univIso)
+        -- Drop proof of being a set from both sides of an equality.
+        dropP : hA ≡ hB → A ≡ B
+        dropP eq i = proj₁ (eq i)
+        -- Add proof of being a set to both sides of a set-theoretic equivalence
+        -- returning a category-theoretic equivalence.
+        addE : A A≅ B → hA ≅ hB
+        addE eqv = proj₁ eqv , (proj₁ (proj₂ eqv)) , asPair
+          where
+          areeqv = proj₂ (proj₂ eqv)
+          asPair =
+            let module Inv = AreInverses areeqv
+            in Inv.verso-recto , Inv.recto-verso
+
         obverse : hA ≡ hB → hA ≅ hB
-        obverse eq = {!res!}
-          where
-          -- Problem: How do I extract this equality from `eq`?
-          eqq : A ≡ B
-          eqq = {!!}
-          eq' : A ≃ B
-          eq' = fromEquality eqq
-          -- Problem: Why does this not satisfy the goal?
-          res : hA ≅ hB
-          res = toIsomorphism eq'
+        obverse = addE ∘ _≃_.toIsomorphism ∘ obverse' ∘ dropP
 
+        -- Drop proof of being a set form both sides of a category-theoretic
+        -- equivalence returning a set-theoretic equivalence.
+        dropE : hA ≅ hB → A A≅ B
+        dropE eqv = obv , inv , asAreInverses
+          where
+          obv = proj₁ eqv
+          inv = proj₁ (proj₂ eqv)
+          areEq = proj₂ (proj₂ eqv)
+          asAreInverses : AreInverses A B obv inv
+          asAreInverses = record { verso-recto = proj₁ areEq ; recto-verso = proj₂ areEq }
+
+        -- Dunno if this is a thing.
+        isoToEquiv : A A≅ B → A ≃ B
+        isoToEquiv = {!!}
+        -- Add proof of being a set to both sides of an equality.
+        addP : A ≡ B → hA ≡ hB
+        addP p = lemSig (λ X → propPi λ x → propPi (λ y → propIsProp)) hA hB p
         inverse : hA ≅ hB → hA ≡ hB
-        inverse iso = res
-          where
-          eq : A ≡ B
-          eq = ua (fromIsomorphism iso)
+        inverse = addP ∘ inverse' ∘ isoToEquiv ∘ dropE
 
-          -- Use the fact that being an h-level level is a mere proposition.
-          -- This is almost provable using `Wishlist.isSetIsProp` - although
-          -- this creates homogenous paths.
-          isSetEq : (λ i → isSet (eq i)) [ isSetA ≡ isSetB ]
-          isSetEq = {!!}
+        -- open AreInverses (proj₂ (proj₂ univIso)) renaming
+        --   ( verso-recto to verso-recto'
+        --   ; recto-verso to recto-verso'
+        --   )
+        -- I can just open them but I wanna be able to see the type annotations.
+        verso-recto' : inverse' ∘ obverse' ≡ Function.id
+        verso-recto' = AreInverses.verso-recto (proj₂ (proj₂ univIso))
+        recto-verso' : obverse' ∘ inverse' ≡ Function.id
+        recto-verso' = AreInverses.recto-verso (proj₂ (proj₂ univIso))
+        verso-recto : (iso : hA ≅ hB) → obverse (inverse iso) ≡ iso
+        verso-recto iso = begin
+          obverse (inverse iso) ≡⟨⟩
+          ( addE ∘ _≃_.toIsomorphism
+          ∘ obverse' ∘ dropP ∘ addP
+          ∘ inverse' ∘ isoToEquiv
+          ∘ dropE) iso
+            ≡⟨⟩
+          ( addE ∘ _≃_.toIsomorphism
+          ∘ obverse'
+          ∘ inverse' ∘ isoToEquiv
+          ∘ dropE) iso
+            ≡⟨ {!!} ⟩ -- obverse' inverse' are inverses
+          ( addE ∘ _≃_.toIsomorphism ∘ isoToEquiv ∘ dropE) iso
+            ≡⟨ {!!} ⟩ -- should be easy to prove
+                      -- _≃_.toIsomorphism ∘ isoToEquiv ≡ id
+          (addE ∘ dropE) iso
+            ≡⟨⟩
+          iso ∎
 
-          res : hA ≡ hB
-          proj₁ (res i) = eq i
-          proj₂ (res i) = isSetEq i
+        -- Similar to above.
+        recto-verso : (eq : hA ≡ hB) → inverse (obverse eq) ≡ eq
+        recto-verso eq = begin
+          inverse (obverse eq) ≡⟨ {!!} ⟩
+          eq ∎
 
-        -- FIXME Either the name of inverse/obverse is flipped or
-        -- recto-verso/verso-recto is flipped.
-        recto-verso : ∀ y → (inverse Function.∘ obverse) y ≡ y
-        recto-verso x = {!!}
-        verso-recto : ∀ x → (obverse Function.∘ inverse) x ≡ x
-        verso-recto x = {!!}
+        -- Use the fact that being an h-level is a mere proposition.
+        -- This is almost provable using `Wishlist.isSetIsProp` - although
+        -- this creates homogenous paths.
+        isSetEq : (p : A ≡ B) → (λ i → isSet (p i)) [ isSetA ≡ isSetB ]
+        isSetEq = {!!}
+
+        res : hA ≡ hB
+        proj₁ (res i) = {!!}
+        proj₂ (res i) = isSetEq {!!} i
+      univalent : isEquiv (hA ≡ hB) (hA ≅ hB) (id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)
+      univalent = {!gradLemma obverse inverse verso-recto recto-verso!}
 
     SetsIsCategory : IsCategory SetsRaw
     IsCategory.isAssociative SetsIsCategory = refl

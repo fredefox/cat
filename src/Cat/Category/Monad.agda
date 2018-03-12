@@ -735,7 +735,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         m ∎
         where
         lem : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
-        lem = verso-recto Monoidal≃Kleisli
+        lem = {!!} -- verso-recto Monoidal≃Kleisli
         t : {ℓ : Level} {A B : Set ℓ} {a : _ → A} {b : B → _}
           → a ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ b ≡ a ∘ b
         t {a = a} {b} = cong (λ φ → a ∘ φ ∘ b) lem
@@ -763,7 +763,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
         where
-        t = cong (λ φ → voe-2-3-1-fromMonad ∘ φ ∘ voe-2-3.voe-2-3-1.toMonad) (recto-verso Monoidal≃Kleisli)
+        t = {!!} -- cong (λ φ → voe-2-3-1-fromMonad ∘ φ ∘ voe-2-3.voe-2-3-1.toMonad) (recto-verso Monoidal≃Kleisli)
 
       voe-isEquiv : isEquiv (voe-2-3-1 omap pure) (voe-2-3-2 omap pure) forth
       voe-isEquiv = gradLemma forth back forthEq backEq

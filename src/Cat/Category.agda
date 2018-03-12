@@ -129,7 +129,9 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   Terminal : Set (ℓa ⊔ ℓb)
   Terminal = Σ Object IsTerminal
 
--- Univalence is indexed by a raw category as well as an identity proof.
+-- | Univalence is indexed by a raw category as well as an identity proof.
+--
+-- FIXME Put this in `RawCategory` and index it on the witness to `isIdentity`.
 module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   open RawCategory ℂ
   module _ (isIdentity : IsIdentity 𝟙) where
@@ -150,6 +152,8 @@ module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 --     iso-is-epi  : Isomorphism f → Epimorphism {X = X} f
 --     iso-is-mono : Isomorphism f → Monomorphism {X = X} f
 --
+-- Sans `univalent` this would be what is referred to as a pre-category in
+-- [HoTT].
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   open RawCategory ℂ public
   open Univalence  ℂ public
@@ -248,51 +252,66 @@ module Propositionality {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
       -- adverse effects this may have.
       isIdentity : (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ Y.isIdentity ]
       isIdentity = propIsIdentity x X.isIdentity Y.isIdentity
-      done : x ≡ y
       U : ∀ {a : IsIdentity 𝟙}
         → (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ a ]
         → (b : Univalent a)
         → Set _
-      U eqwal bbb =
+      U eqwal univ =
         (λ i → Univalent (eqwal i))
-        [ X.univalent ≡ bbb ]
+        [ X.univalent ≡ univ ]
       P : (y : IsIdentity 𝟙)
         → (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ y ] → Set _
-      P y eq = ∀ (b' : Univalent y) → U eq b'
-      helper : ∀ (b' : Univalent X.isIdentity)
+      P y eq = ∀ (univ : Univalent y) → U eq univ
+      p : ∀ (b' : Univalent X.isIdentity)
         → (λ _ → Univalent X.isIdentity) [ X.univalent ≡ b' ]
-      helper univ = propUnivalent x X.univalent univ
-      foo = pathJ P helper Y.isIdentity isIdentity
+      p univ = propUnivalent x X.univalent univ
+      helper : P Y.isIdentity isIdentity
+      helper = pathJ P p Y.isIdentity isIdentity
       eqUni : U isIdentity Y.univalent
-      eqUni = foo Y.univalent
-      IC.isAssociative      (done i) = propIsAssociative x X.isAssociative Y.isAssociative i
-      IC.isIdentity      (done i) = isIdentity i
+      eqUni = helper Y.univalent
+      done : x ≡ y
+      IC.isAssociative (done i) = propIsAssociative x X.isAssociative Y.isAssociative i
+      IC.isIdentity    (done i) = isIdentity i
       IC.arrowsAreSets (done i) = propArrowIsSet x X.arrowsAreSets Y.arrowsAreSets i
-      IC.univalent  (done i) = eqUni i
+      IC.univalent     (done i) = eqUni i
 
   propIsCategory : isProp (IsCategory C)
   propIsCategory = done
 
 -- | Univalent categories
 --
--- Just bundles up the data with witnesses inhabting the propositions.
+-- Just bundles up the data with witnesses inhabiting the propositions.
 record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   field
-    raw : RawCategory ℓa ℓb
+    raw            : RawCategory ℓa ℓb
     {{isCategory}} : IsCategory raw
 
   open IsCategory isCategory public
 
-Category≡ : {ℓa ℓb : Level} {ℂ 𝔻 : Category ℓa ℓb} → Category.raw ℂ ≡ Category.raw 𝔻 → ℂ ≡ 𝔻
-Category≡ {ℂ = ℂ} {𝔻} eq i = record
-  { raw        = eq i
-  ; isCategory = isCategoryEq i
-  }
-  where
-  open Category
-  module ℂ = Category ℂ
-  isCategoryEq : (λ i → IsCategory (eq i)) [ isCategory ℂ ≡ isCategory 𝔻 ]
-  isCategoryEq = {!!}
+-- The fact that being a category is a mere proposition gives rise to this
+-- equality principle for categories.
+module _ {ℓa ℓb : Level} {ℂ 𝔻 : Category ℓa ℓb} where
+  private
+    module ℂ = Category ℂ
+    module 𝔻 = Category 𝔻
+
+  module _ (rawEq : ℂ.raw ≡ 𝔻.raw) where
+    private
+      P : (target : RawCategory ℓa ℓb) → ({!!} ≡ target) → Set _
+      P _ eq = ∀ isCategory' → (λ i → IsCategory (eq i)) [ ℂ.isCategory ≡ isCategory' ]
+
+      p : P ℂ.raw refl
+      p isCategory' = Propositionality.propIsCategory {!!} {!!}
+
+      -- TODO Make and use heterogeneous version of Category≡
+      isCategoryEq : (λ i → IsCategory (rawEq i)) [ ℂ.isCategory ≡ 𝔻.isCategory ]
+      isCategoryEq = {!!}
+
+    Category≡ : ℂ ≡ 𝔻
+    Category≡ i = record
+      { raw        = rawEq i
+      ; isCategory = isCategoryEq i
+      }
 
 -- | Syntax for arrows- and composition in a given category.
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
@@ -318,7 +337,7 @@ module Opposite {ℓa ℓb : Level} where
       RawCategory._∘_    opRaw = Function.flip ℂ._∘_
 
       open RawCategory opRaw
-      open Univalence opRaw
+      open Univalence  opRaw
 
       isIdentity : IsIdentity 𝟙
       isIdentity = swap ℂ.isIdentity
