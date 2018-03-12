@@ -9,6 +9,7 @@ open import Cat.Category.CartesianClosed
 open import Cat.Category.NaturalTransformation
 open import Cat.Category.Yoneda
 open import Cat.Category.Monad
+open import Cat.Category.Monad.Voevodsky
 
 open import Cat.Categories.Sets
 open import Cat.Categories.Cat
