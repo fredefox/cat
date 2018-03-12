@@ -12,7 +12,9 @@ open import Cubical.GradLemma        using (gradLemma)
 open import Cat.Category
 open import Cat.Category.Functor as F
 open import Cat.Category.NaturalTransformation
-open import Cat.Category.Monad
+open import Cat.Category.Monad using (Monoidal≃Kleisli)
+import Cat.Category.Monad.Monoidal as Monoidal
+import Cat.Category.Monad.Kleisli  as Kleisli
 open import Cat.Categories.Fun
 
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
