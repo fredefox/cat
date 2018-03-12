@@ -109,9 +109,9 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ; isMonad = isMnd
         }
 
-  voe-2-3-1-fromMonad : (m : M.Monad) → §2-3.§1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
+  §1-fromMonad : (m : M.Monad) → §2-3.§1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
   -- voe-2-3-1-fromMonad : (m : M.Monad) → voe.§2-3.§1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
-  voe-2-3-1-fromMonad m = record
+  §1-fromMonad m = record
     { fmap = Functor.fmap R
     ; RisFunctor = Functor.isFunctor R
     ; pureN = pureN
@@ -127,8 +127,8 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     joinT = M.RawMonad.joinT raw
     joinN = M.RawMonad.joinN raw
 
-  voe-2-3-2-fromMonad : (m : K.Monad) → §2-3.§2 (K.Monad.omap m) (K.Monad.pure m)
-  voe-2-3-2-fromMonad m = record
+  §2-fromMonad : (m : K.Monad) → §2-3.§2 (K.Monad.omap m) (K.Monad.pure m)
+  §2-fromMonad m = record
     { bind  = K.Monad.bind    m
     ; isMnd = K.Monad.isMonad m
     }
@@ -142,33 +142,33 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       Kleisli→Monoidal = inverse Monoidal≃Kleisli
 
       forth : §2-3.§1 omap pure → §2-3.§2 omap pure
-      forth = voe-2-3-2-fromMonad ∘ Monoidal→Kleisli ∘ §2-3.§1.toMonad
+      forth = §2-fromMonad ∘ Monoidal→Kleisli ∘ §2-3.§1.toMonad
 
       back : §2-3.§2 omap pure → §2-3.§1 omap pure
-      back = voe-2-3-1-fromMonad ∘ Kleisli→Monoidal ∘ §2-3.§2.toMonad
+      back = §1-fromMonad ∘ Kleisli→Monoidal ∘ §2-3.§2.toMonad
 
       forthEq : ∀ m → _ ≡ _
       forthEq m = begin
         (forth ∘ back) m ≡⟨⟩
         -- In full gory detail:
-        ( voe-2-3-2-fromMonad
+        ( §2-fromMonad
         ∘ Monoidal→Kleisli
         ∘ §2-3.§1.toMonad
-        ∘ voe-2-3-1-fromMonad
+        ∘ §1-fromMonad
         ∘ Kleisli→Monoidal
         ∘ §2-3.§2.toMonad
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
-        (  voe-2-3-2-fromMonad
+        ( §2-fromMonad
         ∘ Monoidal→Kleisli
         ∘ Kleisli→Monoidal
         ∘ §2-3.§2.toMonad
         ) m ≡⟨ u ⟩
         -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
         -- I should be able to prove this using congruence and `lem` below.
-        ( voe-2-3-2-fromMonad
+        ( §2-fromMonad
         ∘ §2-3.§2.toMonad
         ) m ≡⟨⟩
-        (  voe-2-3-2-fromMonad
+        (  §2-fromMonad
         ∘ §2-3.§2.toMonad
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
@@ -185,19 +185,19 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       backEq : ∀ m → (back ∘ forth) m ≡ m
       backEq m = begin
         (back ∘ forth) m ≡⟨⟩
-        ( voe-2-3-1-fromMonad
+        ( §1-fromMonad
         ∘ Kleisli→Monoidal
         ∘ §2-3.§2.toMonad
-        ∘ voe-2-3-2-fromMonad
+        ∘ §2-fromMonad
         ∘ Monoidal→Kleisli
         ∘ §2-3.§1.toMonad
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
-        ( voe-2-3-1-fromMonad
+        ( §1-fromMonad
         ∘ Kleisli→Monoidal
         ∘ Monoidal→Kleisli
         ∘ §2-3.§1.toMonad
         ) m ≡⟨ cong (λ φ → φ m) t ⟩ -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
-        ( voe-2-3-1-fromMonad
+        ( §1-fromMonad
         ∘ §2-3.§1.toMonad
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
