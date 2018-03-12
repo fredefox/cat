@@ -1,3 +1,21 @@
+{---
+Monads
+
+This module presents two formulations of monads:
+
+  * The standard monoidal presentation
+  * Kleisli's presentation
+
+The first one defines a monad in terms of an endofunctor and two natural
+transformations. The second defines it in terms of a function on objects and a
+pair of arrows.
+
+These two formulations are proven to be equivalent:
+
+    Monoidal.Monad ≃ Kleisli.Monad
+
+ ---}
+
 {-# OPTIONS --cubical --allow-unsolved-metas #-}
 module Cat.Category.Monad where
 
