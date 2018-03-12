@@ -38,7 +38,7 @@ open import Data.Product renaming
 open import Data.Empty
 import Function
 open import Cubical
-open import Cubical.NType.Properties using ( propIsEquiv )
+open import Cubical.NType.Properties using ( propIsEquiv ; lemPropF )
 
 open import Cat.Wishlist
 
@@ -195,9 +195,9 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
 --
 -- Proves that all projections of `IsCategory` are mere propositions as well as
 -- `IsCategory` itself being a mere proposition.
-module Propositionality {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
-  open RawCategory C
-  module _ (ℂ : IsCategory C) where
+module Propositionality {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
+  open RawCategory ℂ
+  module _ (ℂ : IsCategory ℂ) where
     open IsCategory ℂ using (isAssociative ; arrowsAreSets ; isIdentity ; Univalent)
     open import Cubical.NType
     open import Cubical.NType.Properties
@@ -241,11 +241,11 @@ module Propositionality {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
     propUnivalent a b i = propPi (λ iso → propHasLevel ⟨-2⟩) a b i
 
   private
-    module _ (x y : IsCategory C) where
+    module _ (x y : IsCategory ℂ) where
       module IC = IsCategory
       module X = IsCategory x
       module Y = IsCategory y
-      open Univalence C
+      open Univalence ℂ
       -- In a few places I use the result of propositionality of the various
       -- projections of `IsCategory` - I've arbitrarily chosed to use this
       -- result from `x : IsCategory C`. I don't know which (if any) possibly
@@ -275,7 +275,7 @@ module Propositionality {ℓa ℓb : Level} {C : RawCategory ℓa ℓb} where
       IC.arrowsAreSets (done i) = propArrowIsSet x X.arrowsAreSets Y.arrowsAreSets i
       IC.univalent     (done i) = eqUni i
 
-  propIsCategory : isProp (IsCategory C)
+  propIsCategory : isProp (IsCategory ℂ)
   propIsCategory = done
 
 -- | Univalent categories
@@ -297,15 +297,8 @@ module _ {ℓa ℓb : Level} {ℂ 𝔻 : Category ℓa ℓb} where
 
   module _ (rawEq : ℂ.raw ≡ 𝔻.raw) where
     private
-      P : (target : RawCategory ℓa ℓb) → ({!!} ≡ target) → Set _
-      P _ eq = ∀ isCategory' → (λ i → IsCategory (eq i)) [ ℂ.isCategory ≡ isCategory' ]
-
-      p : P ℂ.raw refl
-      p isCategory' = Propositionality.propIsCategory {!!} {!!}
-
-      -- TODO Make and use heterogeneous version of Category≡
       isCategoryEq : (λ i → IsCategory (rawEq i)) [ ℂ.isCategory ≡ 𝔻.isCategory ]
-      isCategoryEq = {!!}
+      isCategoryEq = lemPropF Propositionality.propIsCategory rawEq
 
     Category≡ : ℂ ≡ 𝔻
     Category≡ i = record
