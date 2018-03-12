@@ -1,3 +1,6 @@
+{-
+This module provides construction 2.3 in [voe]
+-}
 {-# OPTIONS --cubical --allow-unsolved-metas #-}
 module Cat.Category.Monad.Voevodsky where
 
@@ -17,17 +20,18 @@ import Cat.Category.Monad.Monoidal as Monoidal
 import Cat.Category.Monad.Kleisli  as Kleisli
 open import Cat.Categories.Fun
 
-module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     ℓ = ℓa ⊔ ℓb
     module ℂ = Category ℂ
-    open ℂ using (Object ; Arrow ; _∘_)
+    open ℂ using (Object ; Arrow)
     open NaturalTransformation ℂ ℂ
+    open import Function using (_∘_ ; _$_)
     module M = Monoidal ℂ
     module K = Kleisli  ℂ
 
-  module voe-2-3 (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
-    record voe-2-3-1 : Set ℓ where
+  module §2-3 (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
+    record §1 : Set ℓ where
       open M
 
       field
@@ -83,7 +87,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ; isMonad = isMnd
         }
 
-    record voe-2-3-2 : Set ℓ where
+    record §2 : Set ℓ where
       open K
 
       field
@@ -105,13 +109,8 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ; isMonad = isMnd
         }
 
-module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
-  private
-    module M = Monoidal ℂ
-    module K = Kleisli  ℂ
-    open voe-2-3 ℂ
-
-  voe-2-3-1-fromMonad : (m : M.Monad) → voe-2-3-1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
+  voe-2-3-1-fromMonad : (m : M.Monad) → §2-3.§1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
+  -- voe-2-3-1-fromMonad : (m : M.Monad) → voe.§2-3.§1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
   voe-2-3-1-fromMonad m = record
     { fmap = Functor.fmap R
     ; RisFunctor = Functor.isFunctor R
@@ -128,24 +127,13 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
     joinT = M.RawMonad.joinT raw
     joinN = M.RawMonad.joinN raw
 
-  voe-2-3-2-fromMonad : (m : K.Monad) → voe-2-3-2 (K.Monad.omap m) (K.Monad.pure m)
+  voe-2-3-2-fromMonad : (m : K.Monad) → §2-3.§2 (K.Monad.omap m) (K.Monad.pure m)
   voe-2-3-2-fromMonad m = record
     { bind  = K.Monad.bind    m
     ; isMnd = K.Monad.isMonad m
     }
 
-module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
-  private
-    ℓ = ℓa ⊔ ℓb
-    module ℂ = Category ℂ
-    open ℂ using (Object ; Arrow)
-    open NaturalTransformation ℂ ℂ
-    module M = Monoidal ℂ
-    module K = Kleisli  ℂ
-    open import Function using (_∘_ ; _$_)
-
   module _ (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
-    open voe-2-3 ℂ
     private
       Monoidal→Kleisli : M.Monad → K.Monad
       Monoidal→Kleisli = proj₁ Monoidal≃Kleisli
@@ -153,11 +141,11 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
       Kleisli→Monoidal : K.Monad → M.Monad
       Kleisli→Monoidal = inverse Monoidal≃Kleisli
 
-      forth : voe-2-3-1 omap pure → voe-2-3-2 omap pure
-      forth = voe-2-3-2-fromMonad ∘ Monoidal→Kleisli ∘ voe-2-3.voe-2-3-1.toMonad
+      forth : §2-3.§1 omap pure → §2-3.§2 omap pure
+      forth = voe-2-3-2-fromMonad ∘ Monoidal→Kleisli ∘ §2-3.§1.toMonad
 
-      back : voe-2-3-2 omap pure → voe-2-3-1 omap pure
-      back = voe-2-3-1-fromMonad ∘ Kleisli→Monoidal ∘ voe-2-3.voe-2-3-2.toMonad
+      back : §2-3.§2 omap pure → §2-3.§1 omap pure
+      back = voe-2-3-1-fromMonad ∘ Kleisli→Monoidal ∘ §2-3.§2.toMonad
 
       forthEq : ∀ m → _ ≡ _
       forthEq m = begin
@@ -165,23 +153,23 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         -- In full gory detail:
         ( voe-2-3-2-fromMonad
         ∘ Monoidal→Kleisli
-        ∘ voe-2-3.voe-2-3-1.toMonad
+        ∘ §2-3.§1.toMonad
         ∘ voe-2-3-1-fromMonad
         ∘ Kleisli→Monoidal
-        ∘ voe-2-3.voe-2-3-2.toMonad
+        ∘ §2-3.§2.toMonad
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         (  voe-2-3-2-fromMonad
         ∘ Monoidal→Kleisli
         ∘ Kleisli→Monoidal
-        ∘ voe-2-3.voe-2-3-2.toMonad
+        ∘ §2-3.§2.toMonad
         ) m ≡⟨ u ⟩
         -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
         -- I should be able to prove this using congruence and `lem` below.
         ( voe-2-3-2-fromMonad
-        ∘ voe-2-3.voe-2-3-2.toMonad
+        ∘ §2-3.§2.toMonad
         ) m ≡⟨⟩
         (  voe-2-3-2-fromMonad
-        ∘ voe-2-3.voe-2-3-2.toMonad
+        ∘ §2-3.§2.toMonad
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
         where
@@ -199,25 +187,25 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         (back ∘ forth) m ≡⟨⟩
         ( voe-2-3-1-fromMonad
         ∘ Kleisli→Monoidal
-        ∘ voe-2-3.voe-2-3-2.toMonad
+        ∘ §2-3.§2.toMonad
         ∘ voe-2-3-2-fromMonad
         ∘ Monoidal→Kleisli
-        ∘ voe-2-3.voe-2-3-1.toMonad
+        ∘ §2-3.§1.toMonad
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         ( voe-2-3-1-fromMonad
         ∘ Kleisli→Monoidal
         ∘ Monoidal→Kleisli
-        ∘ voe-2-3.voe-2-3-1.toMonad
+        ∘ §2-3.§1.toMonad
         ) m ≡⟨ cong (λ φ → φ m) t ⟩ -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
         ( voe-2-3-1-fromMonad
-        ∘ voe-2-3.voe-2-3-1.toMonad
+        ∘ §2-3.§1.toMonad
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
         where
         t = {!!} -- cong (λ φ → voe-2-3-1-fromMonad ∘ φ ∘ voe-2-3.voe-2-3-1.toMonad) (recto-verso Monoidal≃Kleisli)
 
-      voe-isEquiv : isEquiv (voe-2-3-1 omap pure) (voe-2-3-2 omap pure) forth
+      voe-isEquiv : isEquiv (§2-3.§1 omap pure) (§2-3.§2 omap pure) forth
       voe-isEquiv = gradLemma forth back forthEq backEq
 
-    equiv-2-3 : voe-2-3-1 omap pure ≃ voe-2-3-2 omap pure
+    equiv-2-3 : §2-3.§1 omap pure ≃ §2-3.§2 omap pure
     equiv-2-3 = forth , voe-isEquiv
