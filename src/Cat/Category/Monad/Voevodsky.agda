@@ -7,6 +7,7 @@ module Cat.Category.Monad.Voevodsky where
 open import Agda.Primitive
 
 open import Data.Product
+open import Function using (_∘_ ; _$_)
 
 open import Cubical
 open import Cubical.NType.Properties using (lemPropF ; lemSig ;  lemSigP)
@@ -20,13 +21,26 @@ import Cat.Category.Monad.Monoidal as Monoidal
 import Cat.Category.Monad.Kleisli  as Kleisli
 open import Cat.Categories.Fun
 
+-- Utilities
+module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
+  module _ (e : A ≃ B) where
+    obverse : A → B
+    obverse = proj₁ e
+
+    reverse : B → A
+    reverse = inverse e
+
+    -- TODO Implement and push upstream.
+    postulate
+      verso-recto : reverse ∘ obverse ≡ Function.id
+      recto-verso : obverse ∘ reverse ≡ Function.id
+
 module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     ℓ = ℓa ⊔ ℓb
     module ℂ = Category ℂ
     open ℂ using (Object ; Arrow)
     open NaturalTransformation ℂ ℂ
-    open import Function using (_∘_ ; _$_)
     module M = Monoidal ℂ
     module K = Kleisli  ℂ
 
@@ -162,7 +176,7 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ∘ Monoidal→Kleisli
         ∘ Kleisli→Monoidal
         ∘ §2-3.§2.toMonad
-        ) m ≡⟨ u ⟩
+        ) m ≡⟨ cong (λ φ → φ m) t ⟩
         -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
         -- I should be able to prove this using congruence and `lem` below.
         ( §2-fromMonad
@@ -173,14 +187,12 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
         where
-        lem : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
-        lem = {!!} -- verso-recto Monoidal≃Kleisli
+        ve-re : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
+        ve-re = recto-verso Monoidal≃Kleisli
         t : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad)
           ≡ (§2-fromMonad ∘ §2-3.§2.toMonad)
-        t = cong (λ φ → §2-fromMonad ∘ (λ{ {ω} → φ {{!????!}}}) ∘ §2-3.§2.toMonad) {!lem!}
-        u : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad) m
-          ≡ (§2-fromMonad ∘ §2-3.§2.toMonad) m
-        u = cong (λ φ → φ m) t
+        -- Why can I not give φ in the first hole like I do below in `backEq.t`?
+        t = cong (λ φ → §2-fromMonad ∘ {!φ!} ∘ §2-3.§2.toMonad) ve-re
 
       backEq : ∀ m → (back ∘ forth) m ≡ m
       backEq m = begin
@@ -202,7 +214,12 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
         where
-        t = {!!} -- cong (λ φ → voe-2-3-1-fromMonad ∘ φ ∘ voe-2-3.voe-2-3-1.toMonad) (recto-verso Monoidal≃Kleisli)
+        re-ve : Kleisli→Monoidal ∘ Monoidal→Kleisli ≡ Function.id
+        re-ve = verso-recto Monoidal≃Kleisli
+        t : §1-fromMonad ∘ Kleisli→Monoidal ∘ Monoidal→Kleisli ∘ §2-3.§1.toMonad
+          ≡ §1-fromMonad ∘ §2-3.§1.toMonad
+        -- Why does `re-ve` not satisfy this goal?
+        t = cong (λ φ → §1-fromMonad ∘ φ ∘ §2-3.§1.toMonad) ({!re-ve!})
 
       voe-isEquiv : isEquiv (§2-3.§1 omap pure) (§2-3.§2 omap pure) forth
       voe-isEquiv = gradLemma forth back forthEq backEq
