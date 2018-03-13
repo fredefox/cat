@@ -12,10 +12,14 @@ module _ (ℓa ℓb : Level) where
   private
     ℓ = lsuc (ℓa ⊔ ℓb)
 
-  -- Might not need this to be able to form products of categories!
-  postulate unprovable : IsCategory (Cat.RawCat ℓa ℓb)
-
-  open HasProducts (Cat.hasProducts unprovable)
+    -- *If* the category of categories existed `_×_` would be equivalent to the
+    -- one brought into scope by doing:
+    --
+    --     open HasProducts (Cat.hasProducts unprovable) using (_×_)
+    --
+    -- Since it doesn't we'll make the following (definitionally equivalent) ad-hoc definition.
+    _×_ : ∀ {ℓa ℓb} → Category ℓa ℓb → Category ℓa ℓb → Category ℓa ℓb
+    ℂ × 𝔻 = Cat.CatProduct.obj ℂ 𝔻
 
   record RawMonoidalCategory : Set ℓ where
     field
@@ -23,9 +27,10 @@ module _ (ℓa ℓb : Level) where
     open Category category public
     field
       {{hasProducts}} : HasProducts category
-      mempty  : Object
+      empty  : Object
       -- aka. tensor product, monoidal product.
-      mappend : Functor (category × category) category
+      append : Functor (category × category) category
+    open HasProducts hasProducts public
 
   record MonoidalCategory : Set ℓ where
     field
@@ -36,10 +41,10 @@ module _ {ℓa ℓb : Level} (ℂ : MonoidalCategory ℓa ℓb) where
   private
     ℓ = ℓa ⊔ ℓb
 
-  module MC = MonoidalCategory ℂ
-  open HasProducts MC.hasProducts
+  open MonoidalCategory ℂ public
+
   record Monoid : Set ℓ where
     field
-      carrier : MC.Object
-      mempty  : MC.Arrow (carrier × carrier)  carrier
-      mappend : MC.Arrow MC.mempty carrier
+      carrier : Object
+      mempty  : Arrow empty carrier
+      mappend : Arrow (carrier × carrier) carrier

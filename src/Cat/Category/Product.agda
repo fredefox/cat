@@ -1,54 +1,68 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 module Cat.Category.Product where
 
 open import Agda.Primitive
 open import Cubical
-open import Data.Product as P hiding (_×_)
+open import Data.Product as P hiding (_×_ ; proj₁ ; proj₂)
 
-open import Cat.Category
+open import Cat.Category hiding (module Propositionality)
 
-open Category
+module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
-module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {A B obj : Object ℂ} where
-  IsProduct : (π₁ : ℂ [ obj , A ]) (π₂ : ℂ [ obj , B ]) → Set (ℓ ⊔ ℓ')
-  IsProduct π₁ π₂
-    = ∀ {X : Object ℂ} (x₁ : ℂ [ X , A ]) (x₂ : ℂ [ X , B ])
-    → ∃![ x ] (ℂ [ π₁ ∘ x ] ≡ x₁ P.× ℂ [ π₂ ∘ x ] ≡ x₂)
+  open Category ℂ
 
--- Tip from Andrea; Consider this style for efficiency:
--- record IsProduct {ℓa ℓb : Level} (ℂ : Category ℓa ℓb)
---   {A B obj : Object ℂ} (π₁ : Arrow ℂ obj A) (π₂ : Arrow ℂ obj B) : Set (ℓa ⊔ ℓb) where
---   field
---      issProduct : ∀ {X : Object ℂ} (x₁ : ℂ [ X , A ]) (x₂ : ℂ [ X , B ])
---        → ∃![ x ] (ℂ [ π₁ ∘ x ] ≡ x₁ P.× ℂ [ π₂ ∘ x ] ≡ x₂)
+  module _ (A B : Object) where
+    record RawProduct : Set (ℓa ⊔ ℓb) where
+      no-eta-equality
+      field
+        object : Object
+        proj₁  : ℂ [ object , A ]
+        proj₂  : ℂ [ object , B ]
 
--- open IsProduct
+    -- FIXME Not sure this is actually a proposition - so this name is
+    -- misleading.
+    record IsProduct (raw : RawProduct) : Set (ℓa ⊔ ℓb) where
+      open RawProduct raw public
+      field
+        isProduct : ∀ {X : Object} (f : ℂ [ X , A ]) (g : ℂ [ X , B ])
+          → ∃![ f×g ] (ℂ [ proj₁ ∘ f×g ] ≡ f P.× ℂ [ proj₂ ∘ f×g ] ≡ g)
 
-record Product {ℓ ℓ' : Level} {ℂ : Category ℓ ℓ'} (A B : Object ℂ) : Set (ℓ ⊔ ℓ') where
-  no-eta-equality
-  field
-    obj : Object ℂ
-    proj₁ : ℂ [ obj , A ]
-    proj₂ : ℂ [ obj , B ]
-    {{isProduct}} : IsProduct ℂ proj₁ proj₂
+      -- | Arrow product
+      _P[_×_] : ∀ {X} → (π₁ : ℂ [ X , A ]) (π₂ : ℂ [ X , B ])
+        → ℂ [ X , object ]
+      _P[_×_] π₁ π₂ = P.proj₁ (isProduct π₁ π₂)
 
-  _P[_×_] : ∀ {X} → (π₁ : ℂ [ X , A ]) (π₂ : ℂ [ X , B ])
-    → ℂ [ X , obj ]
-  _P[_×_] π₁ π₂ = proj₁ (isProduct π₁ π₂)
+    record Product : Set (ℓa ⊔ ℓb) where
+      field
+        raw        : RawProduct
+        isProduct  : IsProduct raw
 
-record HasProducts {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') : Set (ℓ ⊔ ℓ') where
-  field
-    product : ∀ (A B : Object ℂ) → Product {ℂ = ℂ} A B
+      open IsProduct isProduct public
 
-  open Product
+  record HasProducts : Set (ℓa ⊔ ℓb) where
+    field
+      product : ∀ (A B : Object) → Product A B
 
-  _×_ : (A B : Object ℂ) → Object ℂ
-  A × B = Product.obj (product A B)
-  -- The product mentioned in awodey in Def 6.1 is not the regular product of arrows.
-  -- It's a "parallel" product
-  _|×|_ : {A A' B B' : Object ℂ} → ℂ [ A , A' ] → ℂ [ B , B' ]
-    → ℂ [ A × B , A' × B' ]
-  _|×|_ {A = A} {A' = A'} {B = B} {B' = B'} a b
-    = product A' B'
-      P[ ℂ [ a ∘ (product A B) .proj₁ ]
-      ×  ℂ [ b ∘ (product A B) .proj₂ ]
-      ]
+    _×_ : Object → Object → Object
+    A × B = Product.object (product A B)
+
+    -- | Parallel product of arrows
+    --
+    -- The product mentioned in awodey in Def 6.1 is not the regular product of
+    -- arrows. It's a "parallel" product
+    module _ {A A' B B' : Object} where
+      open Product
+      open Product (product A B) hiding (_P[_×_]) renaming (proj₁ to fst ; proj₂ to snd)
+      _|×|_ : ℂ [ A , A' ] → ℂ [ B , B' ] → ℂ [ A × B , A' × B' ]
+      f |×| g = product A' B'
+        P[ ℂ [ f ∘ fst ]
+        ×  ℂ [ g ∘ snd ]
+        ]
+
+module Propositionality {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object ℂ} where
+  -- TODO I'm not sure this is actually provable. Check with Thierry.
+  propProduct : isProp (Product ℂ A B)
+  propProduct = {!!}
+
+  propHasProducts : isProp (HasProducts ℂ)
+  propHasProducts = {!!}

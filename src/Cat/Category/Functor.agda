@@ -18,21 +18,50 @@ module _ {ℓc ℓc' ℓd ℓd'}
     ℓ = ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd'
     𝓤 = Set ℓ
 
+  Omap = Object ℂ → Object 𝔻
+  Fmap : Omap → Set _
+  Fmap omap = ∀ {A B}
+    → ℂ [ A , B ] → 𝔻 [ omap A , omap B ]
   record RawFunctor : 𝓤 where
     field
-      func* : Object ℂ → Object 𝔻
-      func→ : ∀ {A B} → ℂ [ A , B ] → 𝔻 [ func* A , func* B ]
+      omap : Object ℂ → Object 𝔻
+      fmap : ∀ {A B} → ℂ [ A , B ] → 𝔻 [ omap A , omap B ]
 
     IsIdentity : Set _
-    IsIdentity = {A : Object ℂ} → func→ (𝟙 ℂ {A}) ≡ 𝟙 𝔻 {func* A}
+    IsIdentity = {A : Object ℂ} → fmap (𝟙 ℂ {A}) ≡ 𝟙 𝔻 {omap A}
 
     IsDistributive : Set _
     IsDistributive = {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
-      → func→ (ℂ [ g ∘ f ]) ≡ 𝔻 [ func→ g ∘ func→ f ]
+      → fmap (ℂ [ g ∘ f ]) ≡ 𝔻 [ fmap g ∘ fmap f ]
+
+  -- | Equality principle for raw functors
+  --
+  -- The type of `fmap` depend on the value of `omap`. We can wrap this up
+  -- into an equality principle for this type like is done for e.g. `Σ` using
+  -- `pathJ`.
+  module _ {x y : RawFunctor} where
+    open RawFunctor
+    private
+      P : (omap' : Omap) → (eq : omap x ≡ omap') → Set _
+      P y eq = (fmap' : Fmap y) → (λ i → Fmap (eq i))
+        [ fmap x ≡ fmap' ]
+    module _
+        (eq : (λ i → Omap) [ omap x ≡ omap y ])
+        (kk : P (omap x) refl)
+        where
+      private
+        p : P (omap y) eq
+        p = pathJ P kk (omap y) eq
+        eq→ : (λ i → Fmap (eq i)) [ fmap x ≡ fmap y ]
+        eq→ = p (fmap y)
+      RawFunctor≡ : x ≡ y
+      omap (RawFunctor≡ i) = eq  i
+      fmap (RawFunctor≡ i) = eq→ i
 
   record IsFunctor (F : RawFunctor) : 𝓤 where
     open RawFunctor F public
     field
+      -- FIXME Really ought to be preserves identity or something like this.
       isIdentity : IsIdentity
       isDistributive : IsDistributive
 
@@ -44,6 +73,9 @@ module _ {ℓc ℓc' ℓd ℓd'}
     open IsFunctor isFunctor public
 
 open Functor
+
+EndoFunctor : ∀ {ℓa ℓb} (ℂ : Category ℓa ℓb) → Set _
+EndoFunctor ℂ = Functor ℂ ℂ
 
 module _
     {ℓa ℓb : Level}
@@ -81,26 +113,21 @@ module _
 
 module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
   Functor≡ : {F G : Functor ℂ 𝔻}
-    → (eq* : func* F ≡ func* G)
-    → (eq→ : (λ i → ∀ {x y} → ℂ [ x , y ] → 𝔻 [ eq* i x , eq* i y ])
-        [ func→ F ≡ func→ G ])
+    → raw F ≡ raw G
     → F ≡ G
-  Functor≡ {F} {G} eq* eq→ i = record
-    { raw = eqR i
-    ; isFunctor = eqIsF i
-    }
+  raw       (Functor≡ eq i) = eq i
+  isFunctor (Functor≡ {F} {G} eq i)
+    = res i
     where
-      eqR : raw F ≡ raw G
-      eqR i = record { func* = eq* i ; func→ = eq→ i }
-      eqIsF : (λ i →  IsFunctor ℂ 𝔻 (eqR i)) [ isFunctor F ≡ isFunctor G ]
-      eqIsF = IsFunctorIsProp' (isFunctor F) (isFunctor G)
+    res : (λ i →  IsFunctor ℂ 𝔻 (eq i)) [ isFunctor F ≡ isFunctor G ]
+    res = IsFunctorIsProp' (isFunctor F) (isFunctor G)
 
 module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : Functor A B) where
   private
-    F* = func* F
-    F→ = func→ F
-    G* = func* G
-    G→ = func→ G
+    F* = omap F
+    F→ = fmap F
+    G* = omap G
+    G→ = fmap G
     module _ {a0 a1 a2 : Object A} {α0 : A [ a0 , a1 ]} {α1 : A [ a1 , a2 ]} where
 
       dist : (F→ ∘ G→) (A [ α1 ∘ α0 ]) ≡ C [ (F→ ∘ G→) α1 ∘ (F→ ∘ G→) α0 ]
@@ -111,8 +138,8 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
         C [ (F→ ∘ G→) α1 ∘ (F→ ∘ G→) α0 ] ∎
 
     _∘fr_ : RawFunctor A C
-    RawFunctor.func* _∘fr_ = F* ∘ G*
-    RawFunctor.func→ _∘fr_ = F→ ∘ G→
+    RawFunctor.omap _∘fr_ = F* ∘ G*
+    RawFunctor.fmap _∘fr_ = F→ ∘ G→
     instance
       isFunctor' : IsFunctor A C _∘fr_
       isFunctor' = record
@@ -131,8 +158,8 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
 identity : ∀ {ℓ ℓ'} → {C : Category ℓ ℓ'} → Functor C C
 identity = record
   { raw = record
-    { func* = λ x → x
-    ; func→ = λ x → x
+    { omap = λ x → x
+    ; fmap = λ x → x
     }
   ; isFunctor = record
     { isIdentity = refl

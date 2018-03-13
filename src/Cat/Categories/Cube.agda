@@ -26,24 +26,24 @@ open Category hiding (_∘_)
 open Functor
 
 module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
-  -- Ns is the "namespace"
-  ℓo = (suc zero ⊔ ℓ)
+  private
+    -- Ns is the "namespace"
+    ℓo = (suc zero ⊔ ℓ)
 
-  FiniteDecidableSubset : Set ℓ
-  FiniteDecidableSubset = Ns → Dec ⊤
+    FiniteDecidableSubset : Set ℓ
+    FiniteDecidableSubset = Ns → Dec ⊤
 
-  isTrue : Bool → Set
-  isTrue false = ⊥
-  isTrue true = ⊤
+    isTrue : Bool → Set
+    isTrue false = ⊥
+    isTrue true = ⊤
 
-  elmsof : FiniteDecidableSubset → Set ℓ
-  elmsof P = Σ Ns (λ σ → True (P σ)) -- (σ : Ns) → isTrue (P σ)
+    elmsof : FiniteDecidableSubset → Set ℓ
+    elmsof P = Σ Ns (λ σ → True (P σ)) -- (σ : Ns) → isTrue (P σ)
 
-  𝟚 : Set
-  𝟚 = Bool
+    𝟚 : Set
+    𝟚 = Bool
 
-  module _ (I J : FiniteDecidableSubset) where
-    private
+    module _ (I J : FiniteDecidableSubset) where
       Hom' : Set ℓ
       Hom' = elmsof I → elmsof J ⊎ 𝟚
       isInl : {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} → A ⊎ B → Set
@@ -63,18 +63,18 @@ module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
           ; (inj₂ _) → Lift ⊤
           }
 
-    Hom = Σ Hom' rules
+      Hom = Σ Hom' rules
 
-  module Raw = RawCategory
-  -- The category of names and substitutions
-  Rawℂ : RawCategory ℓ ℓ -- ℓo (lsuc lzero ⊔ ℓo)
-  Raw.Object Rawℂ = FiniteDecidableSubset
-  Raw.Arrow Rawℂ = Hom
-  Raw.𝟙 Rawℂ {o} = inj₁ , λ { (i , ii) (j , jj) eq → Σ≡ eq {!refl!} }
-  Raw._∘_ Rawℂ = {!!}
+    module Raw = RawCategory
+    -- The category of names and substitutions
+    Rawℂ : RawCategory ℓ ℓ -- ℓo (lsuc lzero ⊔ ℓo)
+    Raw.Object Rawℂ = FiniteDecidableSubset
+    Raw.Arrow Rawℂ = Hom
+    Raw.𝟙 Rawℂ {o} = inj₁ , λ { (i , ii) (j , jj) eq → Σ≡ eq {!refl!} }
+    Raw._∘_ Rawℂ = {!!}
 
-  postulate IsCategoryℂ : IsCategory Rawℂ
+    postulate IsCategoryℂ : IsCategory Rawℂ
 
-  ℂ : Category ℓ ℓ
-  raw ℂ = Rawℂ
-  isCategory ℂ = IsCategoryℂ
+    ℂ : Category ℓ ℓ
+    raw ℂ = Rawℂ
+    isCategory ℂ = IsCategoryℂ

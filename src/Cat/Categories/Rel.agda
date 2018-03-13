@@ -56,7 +56,6 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
       backwards (a' , (a=a' , a'b∈S)) = subst (sym a=a') a'b∈S
 
       fwd-bwd : (x : (a , b) ∈ S) → (backwards ∘ forwards) x ≡ x
-      -- isbijective x = pathJ (λ y x₁ → (backwards ∘ forwards) x ≡ x) {!!} {!!} {!!}
       fwd-bwd x = pathJprop (λ y _ → y) x
 
       bwd-fwd : (x : Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)

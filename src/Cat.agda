@@ -1,19 +1,20 @@
 module Cat where
 
-import Cat.Category
+open import Cat.Category
 
-import Cat.Category.Functor
-import Cat.Category.Product
-import Cat.Category.Exponential
-import Cat.Category.CartesianClosed
-import Cat.Category.NaturalTransformation
-import Cat.Category.Yoneda
-import Cat.Category.Monad
+open import Cat.Category.Functor
+open import Cat.Category.Product
+open import Cat.Category.Exponential
+open import Cat.Category.CartesianClosed
+open import Cat.Category.NaturalTransformation
+open import Cat.Category.Yoneda
+open import Cat.Category.Monad
+open import Cat.Category.Monad.Voevodsky
 
-import Cat.Categories.Sets
-import Cat.Categories.Cat
-import Cat.Categories.Rel
-import Cat.Categories.Free
-import Cat.Categories.Fun
-import Cat.Categories.Cube
-import Cat.Categories.CwF
+open import Cat.Categories.Sets
+open import Cat.Categories.Cat
+open import Cat.Categories.Rel
+open import Cat.Categories.Free
+open import Cat.Categories.Fun
+open import Cat.Categories.Cube
+open import Cat.Categories.CwF

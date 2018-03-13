@@ -21,15 +21,24 @@
 module Cat.Category.NaturalTransformation where
 open import Agda.Primitive
 open import Data.Product
+open import Data.Nat using (_≤_ ; z≤n ; s≤s)
+module Nat = Data.Nat
 
 open import Cubical
+open import Cubical.Sigma
+open import Cubical.NType.Properties
 
 open import Cat.Category
 open import Cat.Category.Functor hiding (identity)
+open import Cat.Wishlist
 
 module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
   (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
+
   open Category using (Object ; 𝟙)
+  private
+    module ℂ = Category ℂ
+    module 𝔻 = Category 𝔻
 
   module _ (F G : Functor ℂ 𝔻) where
     private
@@ -37,28 +46,25 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
       module G = Functor G
     -- What do you call a non-natural tranformation?
     Transformation : Set (ℓc ⊔ ℓd')
-    Transformation = (C : Object ℂ) → 𝔻 [ F.func* C , G.func* C ]
+    Transformation = (C : Object ℂ) → 𝔻 [ F.omap C , G.omap C ]
 
     Natural : Transformation → Set (ℓc ⊔ (ℓc' ⊔ ℓd'))
     Natural θ
       = {A B : Object ℂ}
       → (f : ℂ [ A , B ])
-      → 𝔻 [ θ B ∘ F.func→ f ] ≡ 𝔻 [ G.func→ f ∘ θ A ]
+      → 𝔻 [ θ B ∘ F.fmap f ] ≡ 𝔻 [ G.fmap f ∘ θ A ]
 
     NaturalTransformation : Set (ℓc ⊔ ℓc' ⊔ ℓd')
     NaturalTransformation = Σ Transformation Natural
 
-    -- TODO: Since naturality is a mere proposition this principle can be
-    -- simplified.
+    -- Think I need propPi and that arrows are sets
+    propIsNatural : (θ : _) → isProp (Natural θ)
+    propIsNatural θ x y i {A} {B} f = 𝔻.arrowsAreSets _ _ (x f) (y f) i
+
     NaturalTransformation≡ : {α β : NaturalTransformation}
       → (eq₁ : α .proj₁ ≡ β .proj₁)
-      → (eq₂ : PathP
-          (λ i → {A B : Object ℂ} (f : ℂ [ A , B ])
-            → 𝔻 [ eq₁ i B ∘ F.func→ f ]
-            ≡ 𝔻 [ G.func→ f ∘ eq₁ i A ])
-        (α .proj₂) (β .proj₂))
       → α ≡ β
-    NaturalTransformation≡ eq₁ eq₂ i = eq₁ i , eq₂ i
+    NaturalTransformation≡ eq = lemSig propIsNatural _ _ eq
 
   identityTrans : (F : Functor ℂ 𝔻) → Transformation F F
   identityTrans F C = 𝟙 𝔻
@@ -72,8 +78,7 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
     𝔻 [ F→ f ∘ identityTrans F A ]  ∎
     where
       module F = Functor F
-      F→ = F.func→
-      module 𝔻 = Category 𝔻
+      F→ = F.fmap
 
   identity : (F : Functor ℂ 𝔻) → NaturalTransformation F F
   identity F = identityTrans F , identityNatural F
@@ -89,13 +94,27 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
     NT[_∘_] : NaturalTransformation G H → NaturalTransformation F G → NaturalTransformation F H
     proj₁ NT[ (θ , _) ∘ (η , _) ] = T[ θ ∘ η ]
     proj₂ NT[ (θ , θNat) ∘ (η , ηNat) ] {A} {B} f = begin
-      𝔻 [ T[ θ ∘ η ] B ∘ F.func→ f ]     ≡⟨⟩
-      𝔻 [ 𝔻 [ θ B ∘ η B ] ∘ F.func→ f ] ≡⟨ sym isAssociative ⟩
-      𝔻 [ θ B ∘ 𝔻 [ η B ∘ F.func→ f ] ] ≡⟨ cong (λ φ → 𝔻 [ θ B ∘ φ ]) (ηNat f) ⟩
-      𝔻 [ θ B ∘ 𝔻 [ G.func→ f ∘ η A ] ] ≡⟨ isAssociative ⟩
-      𝔻 [ 𝔻 [ θ B ∘ G.func→ f ] ∘ η A ] ≡⟨ cong (λ φ → 𝔻 [ φ ∘ η A ]) (θNat f) ⟩
-      𝔻 [ 𝔻 [ H.func→ f ∘ θ A ] ∘ η A ] ≡⟨ sym isAssociative ⟩
-      𝔻 [ H.func→ f ∘ 𝔻 [ θ A ∘ η A ] ] ≡⟨⟩
-      𝔻 [ H.func→ f ∘ T[ θ ∘ η ] A ]     ∎
+      𝔻 [ T[ θ ∘ η ] B ∘ F.fmap f ]     ≡⟨⟩
+      𝔻 [ 𝔻 [ θ B ∘ η B ] ∘ F.fmap f ] ≡⟨ sym 𝔻.isAssociative ⟩
+      𝔻 [ θ B ∘ 𝔻 [ η B ∘ F.fmap f ] ] ≡⟨ cong (λ φ → 𝔻 [ θ B ∘ φ ]) (ηNat f) ⟩
+      𝔻 [ θ B ∘ 𝔻 [ G.fmap f ∘ η A ] ] ≡⟨ 𝔻.isAssociative ⟩
+      𝔻 [ 𝔻 [ θ B ∘ G.fmap f ] ∘ η A ] ≡⟨ cong (λ φ → 𝔻 [ φ ∘ η A ]) (θNat f) ⟩
+      𝔻 [ 𝔻 [ H.fmap f ∘ θ A ] ∘ η A ] ≡⟨ sym 𝔻.isAssociative ⟩
+      𝔻 [ H.fmap f ∘ 𝔻 [ θ A ∘ η A ] ] ≡⟨⟩
+      𝔻 [ H.fmap f ∘ T[ θ ∘ η ] A ]     ∎
+
+  module _ {F G : Functor ℂ 𝔻} where
+    transformationIsSet : isSet (Transformation F G)
+    transformationIsSet _ _ p q i j C = 𝔻.arrowsAreSets _ _ (λ l → p l C)   (λ l → q l C) i j
+
+    naturalIsProp : (θ : Transformation F G) → isProp (Natural F G θ)
+    naturalIsProp θ θNat θNat' = lem
       where
-        open Category 𝔻
+      lem : (λ _ → Natural F G θ) [ (λ f → θNat f) ≡ (λ f → θNat' f) ]
+      lem = λ i f → 𝔻.arrowsAreSets _ _ (θNat f) (θNat' f) i
+
+    naturalTransformationIsSet : isSet (NaturalTransformation F G)
+    naturalTransformationIsSet = sigPresSet transformationIsSet
+      λ θ → ntypeCommulative
+      (s≤s {n = Nat.suc Nat.zero} z≤n)
+      (naturalIsProp θ)

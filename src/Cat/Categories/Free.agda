@@ -20,10 +20,10 @@ singleton : ∀ {ℓ} {𝓤 : Set ℓ} {ℓr} {R : 𝓤 → 𝓤 → Set ℓr} {
 singleton f = cons f empty
 
 module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
-  module ℂ = Category ℂ
-  open Category ℂ
-
   private
+    module ℂ = Category ℂ
+    open Category ℂ
+
     p-isAssociative : {A B C D : Object} {r : Path Arrow A B} {q : Path Arrow B C} {p : Path Arrow C D}
       → p ++ (q ++ r) ≡ (p ++ q) ++ r
     p-isAssociative {r = r} {q} {empty} = refl
