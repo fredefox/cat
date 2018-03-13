@@ -1,13 +1,8 @@
 Backlog
 =======
 
-Prove univalence for various categories
-
 Prove postulates in `Cat.Wishlist`
-`propHasLevel` should be in `cubical`
 `ntypeCommulative` might be there as well.
-
-Define and use Monad≡
 
 Prove that the opposite category is a category.
 

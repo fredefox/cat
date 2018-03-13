@@ -1,9 +1,27 @@
 Changelog
 =========
 
+Version 1.4.0
+-------------
+Adds documentation to a number of modules.
+
+Adds an "equality principle" for categories and monads.
+
+Prove that `IsMonad` is a mere proposition.
+
+Provides the yoneda embedding without relying on the existence of a category of
+categories. This is acheived by providing some of the data needed to make a ccc
+out of the category of categories without actually having such a category.
+
+Renames functors object map and arrow map to `omap` and `fmap`.
+
+Prove that kleisli- and monoidal- monads are equivalent!
+
+[WIP] Started working on the proofs for univalence for the category of sets and
+the category of functors.
+
 Version 1.3.0
 -------------
-
 Removed unused modules and streamlined things more: All specific categories are
 in the namespace `Cat.Categories`.
 
