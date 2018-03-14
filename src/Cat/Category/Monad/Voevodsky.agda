@@ -21,7 +21,7 @@ open import Cat.Categories.Fun
 
 -- Utilities
 module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
-  module _ (e : A ≃ B) where
+  module Equivalence (e : A ≃ B) where
     obverse : A → B
     obverse = proj₁ e
 
@@ -145,13 +145,25 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     ; isMnd = K.Monad.isMonad m
     }
 
+  -- | In the following we seek to transform the equivalence `Monoidal≃Kleisli`
+  -- | to talk about voevodsky's construction.
   module _ (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
     private
+      -- Could just open this module and rename stuff accordingly, but as
+      -- documentation I will put in the type-annotations here.
+      module E = Equivalence (Monoidal≃Kleisli ℂ)
+
       Monoidal→Kleisli : M.Monad → K.Monad
-      Monoidal→Kleisli = proj₁ Monoidal≃Kleisli
+      Monoidal→Kleisli = E.obverse
 
       Kleisli→Monoidal : K.Monad → M.Monad
-      Kleisli→Monoidal = inverse Monoidal≃Kleisli
+      Kleisli→Monoidal = E.reverse
+
+      ve-re : Kleisli→Monoidal ∘ Monoidal→Kleisli ≡ Function.id
+      ve-re = E.verso-recto
+
+      re-ve : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
+      re-ve = E.recto-verso
 
       forth : §2-3.§1 omap pure → §2-3.§2 omap pure
       forth = §2-fromMonad ∘ Monoidal→Kleisli ∘ §2-3.§1.toMonad
@@ -185,11 +197,9 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
         where
-        ve-re : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
-        ve-re = {!recto-verso Monoidal≃Kleisli!}
         t' : ((Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad {omap} {pure})
           ≡ §2-3.§2.toMonad
-        t' = cong (\ φ → φ ∘ §2-3.§2.toMonad) ve-re
+        t' = cong (\ φ → φ ∘ §2-3.§2.toMonad) {!re-ve!}
         cong-d : ∀ {ℓ} {A : Set ℓ} {ℓ'} {B : A → Set ℓ'} {x y : A}
           → (f : (x : A) → B x) → (eq : x ≡ y) → PathP (\ i → B (eq i)) (f x) (f y)
         cong-d f p = λ i → f (p i)
@@ -226,12 +236,10 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
         where
-        re-ve : Kleisli→Monoidal ∘ Monoidal→Kleisli ≡ Function.id
-        re-ve = verso-recto Monoidal≃Kleisli
         t : §1-fromMonad ∘ Kleisli→Monoidal ∘ Monoidal→Kleisli ∘ §2-3.§1.toMonad
           ≡ §1-fromMonad ∘ §2-3.§1.toMonad
         -- Why does `re-ve` not satisfy this goal?
-        t = cong (λ φ → §1-fromMonad ∘ φ ∘ §2-3.§1.toMonad) ({!re-ve!})
+        t = cong (λ φ → §1-fromMonad ∘ φ ∘ §2-3.§1.toMonad) ({!ve-re!})
 
       voe-isEquiv : isEquiv (§2-3.§1 omap pure) (§2-3.§2 omap pure) forth
       voe-isEquiv = gradLemma forth back forthEq backEq

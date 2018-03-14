@@ -39,7 +39,7 @@ module Monoidal = Cat.Category.Monad.Monoidal
 module Kleisli = Cat.Category.Monad.Kleisli
 
 -- | The monoidal- and kleisli presentation of monads are equivalent.
-module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
+module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     module ℂ = Category ℂ
     open ℂ using (Object ; Arrow ; 𝟙 ; _∘_ ; _>>>_)
