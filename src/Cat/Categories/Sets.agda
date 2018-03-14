@@ -208,7 +208,7 @@ module _ {ℓ : Level} where
         RawProduct.proj₂  rawProduct = Data.Product.proj₂
 
         isProduct : IsProduct 𝓢 _ _ rawProduct
-        IsProduct.isProduct isProduct {X = X} f g
+        IsProduct.ump isProduct {X = X} f g
           = (f &&& g) , lem {0X = X} f g
 
       product : Product 𝓢 0A 0B
