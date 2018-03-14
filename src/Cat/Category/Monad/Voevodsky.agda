@@ -1,7 +1,7 @@
 {-
 This module provides construction 2.3 in [voe]
 -}
-{-# OPTIONS --cubical --allow-unsolved-metas #-}
+{-# OPTIONS --cubical --allow-unsolved-metas --caching #-}
 module Cat.Category.Monad.Voevodsky where
 
 open import Agda.Primitive
@@ -19,6 +19,7 @@ open import Cat.Category.Monad using (Monoidal≃Kleisli)
 import Cat.Category.Monad.Monoidal as Monoidal
 import Cat.Category.Monad.Kleisli  as Kleisli
 open import Cat.Categories.Fun
+open import Function using (_∘′_)
 
 module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
@@ -147,7 +148,7 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       back : §2-3.§2 omap pure → §2-3.§1 omap pure
       back = §1-fromMonad ∘ Kleisli→Monoidal ∘ §2-3.§2.toMonad
 
-      forthEq : ∀ m → _ ≡ _
+      forthEq : ∀ m → (forth ∘ back) m ≡ m
       forthEq m = begin
         (forth ∘ back) m ≡⟨⟩
         -- In full gory detail:
@@ -175,12 +176,21 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         where
         lem : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
         lem = {!!} -- verso-recto Monoidal≃Kleisli
-        t : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad)
+        t' : ((Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad {omap} {pure})
+          ≡ §2-3.§2.toMonad
+        t' = cong (\ φ → φ ∘ §2-3.§2.toMonad) lem
+        cong-d : ∀ {ℓ} {A : Set ℓ} {ℓ'} {B : A → Set ℓ'} {x y : A} → (f : (x : A) → B x) → (eq : x ≡ y) → PathP (\ i → B (eq i)) (f x) (f y)
+        cong-d f p = λ i → f (p i)
+        t : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad {omap} {pure})
           ≡ (§2-fromMonad ∘ §2-3.§2.toMonad)
-        t = cong (λ φ → §2-fromMonad ∘ (λ{ {ω} → φ {{!????!}}}) ∘ §2-3.§2.toMonad) {!lem!}
+        t = cong-d (\ f → §2-fromMonad ∘ f) t'
         u : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad) m
           ≡ (§2-fromMonad ∘ §2-3.§2.toMonad) m
-        u = cong (λ φ → φ m) t
+        u = cong (\ f → f m) t
+{-
+(K.RawMonad.omap (K.Monad.raw (?0 ℂ omap pure m i (§2-3.§2.toMonad m))) x) = (omap x) : Object
+(K.RawMonad.pure (K.Monad.raw (?0 ℂ omap pure m x (§2-3.§2.toMonad x)))) = pure : Arrow X (_350 ℂ omap pure m x x X)
+-}
 
       backEq : ∀ m → (back ∘ forth) m ≡ m
       backEq m = begin
