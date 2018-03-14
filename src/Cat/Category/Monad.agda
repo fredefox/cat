@@ -31,9 +31,12 @@ open import Cubical.GradLemma        using (gradLemma)
 open import Cat.Category
 open import Cat.Category.Functor as F
 open import Cat.Category.NaturalTransformation
-open import Cat.Category.Monad.Monoidal as Monoidal public
-open import Cat.Category.Monad.Kleisli  as Kleisli
+import Cat.Category.Monad.Monoidal
+import Cat.Category.Monad.Kleisli
 open import Cat.Categories.Fun
+
+module Monoidal = Cat.Category.Monad.Monoidal
+module Kleisli = Cat.Category.Monad.Kleisli
 
 -- | The monoidal- and kleisli presentation of monads are equivalent.
 module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
