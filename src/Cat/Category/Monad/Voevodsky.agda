@@ -18,20 +18,7 @@ open import Cat.Category.Functor as F
 open import Cat.Category.NaturalTransformation
 open import Cat.Category.Monad
 open import Cat.Categories.Fun
-
--- Utilities
-module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
-  module Equivalence (e : A ≃ B) where
-    obverse : A → B
-    obverse = proj₁ e
-
-    reverse : B → A
-    reverse = inverse e
-
-    -- TODO Implement and push upstream.
-    postulate
-      verso-recto : reverse ∘ obverse ≡ Function.id
-      recto-verso : obverse ∘ reverse ≡ Function.id
+open import Cat.Equivalence
 
 module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
@@ -42,7 +29,7 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     module M = Monoidal ℂ
     module K = Kleisli  ℂ
 
-  module §2-3 (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
+  module §2-3 (omap : Object → Object) (pure : {X : Object} → Arrow X (omap X)) where
     record §1 : Set ℓ where
       open M
 
@@ -149,8 +136,6 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   -- | to talk about voevodsky's construction.
   module _ (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
     private
-      -- Could just open this module and rename stuff accordingly, but as
-      -- documentation I will put in the type-annotations here.
       module E = Equivalence (Monoidal≃Kleisli ℂ)
 
       Monoidal→Kleisli : M.Monad → K.Monad

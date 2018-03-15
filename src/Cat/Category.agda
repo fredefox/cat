@@ -144,6 +144,12 @@ module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 
     Univalent : Set (ℓa ⊔ ℓb)
     Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
+    -- Alternative formulation of univalence which is easier to prove in the
+    -- case of the functor category.
+    --
+    --     ∀ A → isContr (Σ[ X ∈ Object ] iso A X)
+
+    -- future work ideas: compile to CAM
 
 -- | The mere proposition of being a category.
 --

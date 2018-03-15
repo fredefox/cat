@@ -7,22 +7,20 @@ open import Data.Product
 open import Function using (_∘_)
 
 open import Cubical hiding (_≃_ ; inverse)
-open import Cubical.Equivalence
-  renaming
-    ( _≅_ to _A≅_ )
-  using
-    (_≃_ ; con ; AreInverses)
-open import Cubical.Univalence
+open import Cubical.Univalence using (univalence ; con ; _≃_)
 open import Cubical.GradLemma
 
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
 open import Cat.Wishlist
+open import Cat.Equivalence as Eqv using (module NoEta)
+
+module Equivalence = NoEta.Equivalence′
+module Eeq = NoEta
 
 module _ (ℓ : Level) where
   private
-    open import Cubical.Univalence
     open import Cubical.NType.Properties
     open import Cubical.Universe
 
@@ -54,7 +52,7 @@ module _ (ℓ : Level) where
         toIsomorphism : A ≃ B → hA ≅ hB
         toIsomorphism e = obverse , inverse , verso-recto , recto-verso
           where
-          open _≃_ e
+          open Equivalence e
 
         fromIsomorphism : hA ≅ hB → A ≃ B
         fromIsomorphism iso = con obverse (gradLemma obverse inverse recto-verso verso-recto)
@@ -73,8 +71,8 @@ module _ (ℓ : Level) where
           recto-verso b i = proj₂ areInverses i b
 
       private
-        univIso : (A ≡ B) A≅ (A ≃ B)
-        univIso = _≃_.toIsomorphism univalence
+        univIso : (A ≡ B) Eqv.≅ (A ≃ B)
+        univIso = Eeq.toIsomorphism univalence
         obverse' : A ≡ B → A ≃ B
         obverse' = proj₁ univIso
         inverse' : A ≃ B → A ≡ B
@@ -84,31 +82,31 @@ module _ (ℓ : Level) where
         dropP eq i = proj₁ (eq i)
         -- Add proof of being a set to both sides of a set-theoretic equivalence
         -- returning a category-theoretic equivalence.
-        addE : A A≅ B → hA ≅ hB
+        addE : A Eqv.≅ B → hA ≅ hB
         addE eqv = proj₁ eqv , (proj₁ (proj₂ eqv)) , asPair
           where
           areeqv = proj₂ (proj₂ eqv)
           asPair =
-            let module Inv = AreInverses areeqv
+            let module Inv = Eqv.AreInverses areeqv
             in Inv.verso-recto , Inv.recto-verso
 
         obverse : hA ≡ hB → hA ≅ hB
-        obverse = addE ∘ _≃_.toIsomorphism ∘ obverse' ∘ dropP
+        obverse = addE ∘ Eeq.toIsomorphism ∘ obverse' ∘ dropP
 
         -- Drop proof of being a set form both sides of a category-theoretic
         -- equivalence returning a set-theoretic equivalence.
-        dropE : hA ≅ hB → A A≅ B
+        dropE : hA ≅ hB → A Eqv.≅ B
         dropE eqv = obv , inv , asAreInverses
           where
           obv = proj₁ eqv
           inv = proj₁ (proj₂ eqv)
           areEq = proj₂ (proj₂ eqv)
-          asAreInverses : AreInverses A B obv inv
+          asAreInverses : Eqv.AreInverses obv inv
           asAreInverses = record { verso-recto = proj₁ areEq ; recto-verso = proj₂ areEq }
 
-        -- Dunno if this is a thing.
-        isoToEquiv : A A≅ B → A ≃ B
-        isoToEquiv = {!!}
+        isoToEquiv : A Eqv.≅ B → A ≃ B
+        isoToEquiv = Eeq.fromIsomorphism
+
         -- Add proof of being a set to both sides of an equality.
         addP : A ≡ B → hA ≡ hB
         addP p = lemSig (λ X → propPi λ x → propPi (λ y → propIsProp)) hA hB p
@@ -121,23 +119,23 @@ module _ (ℓ : Level) where
         --   )
         -- I can just open them but I wanna be able to see the type annotations.
         verso-recto' : inverse' ∘ obverse' ≡ Function.id
-        verso-recto' = AreInverses.verso-recto (proj₂ (proj₂ univIso))
+        verso-recto' = Eqv.AreInverses.verso-recto (proj₂ (proj₂ univIso))
         recto-verso' : obverse' ∘ inverse' ≡ Function.id
-        recto-verso' = AreInverses.recto-verso (proj₂ (proj₂ univIso))
+        recto-verso' = Eqv.AreInverses.recto-verso (proj₂ (proj₂ univIso))
         verso-recto : (iso : hA ≅ hB) → obverse (inverse iso) ≡ iso
         verso-recto iso = begin
           obverse (inverse iso) ≡⟨⟩
-          ( addE ∘ _≃_.toIsomorphism
+          ( addE ∘ Eeq.toIsomorphism
           ∘ obverse' ∘ dropP ∘ addP
           ∘ inverse' ∘ isoToEquiv
           ∘ dropE) iso
             ≡⟨⟩
-          ( addE ∘ _≃_.toIsomorphism
+          ( addE ∘ Eeq.toIsomorphism
           ∘ obverse'
           ∘ inverse' ∘ isoToEquiv
           ∘ dropE) iso
             ≡⟨ {!!} ⟩ -- obverse' inverse' are inverses
-          ( addE ∘ _≃_.toIsomorphism ∘ isoToEquiv ∘ dropE) iso
+          ( addE ∘ Eeq.toIsomorphism ∘ isoToEquiv ∘ dropE) iso
             ≡⟨ {!!} ⟩ -- should be easy to prove
                       -- _≃_.toIsomorphism ∘ isoToEquiv ≡ id
           (addE ∘ dropE) iso
