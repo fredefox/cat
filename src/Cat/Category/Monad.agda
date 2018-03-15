@@ -210,5 +210,10 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     eqv : isEquiv M.Monad K.Monad forth
     eqv = gradLemma forth back fortheq backeq
 
+  open import Cat.Equivalence
+
+  Monoidal≅Kleisli : M.Monad ≅ K.Monad
+  Monoidal≅Kleisli = forth , (back , (record { verso-recto = funExt backeq ; recto-verso = funExt fortheq }))
+
   Monoidal≃Kleisli : M.Monad ≃ K.Monad
   Monoidal≃Kleisli = forth , eqv
