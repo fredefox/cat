@@ -8,7 +8,7 @@ open import Function using (_∘_)
 
 -- open import Cubical using (funExt ; refl ; isSet ; isProp ; _≡_ ; isEquiv ; sym ; trans ; _[_≡_] ; I ; Path ; PathP)
 open import Cubical hiding (_≃_)
-open import Cubical.Univalence using (univalence ; con ; _≃_ ; idtoeqv)
+open import Cubical.Univalence using (univalence ; con ; _≃_ ; idtoeqv ; ua)
 open import Cubical.GradLemma
 
 open import Cat.Category
@@ -26,6 +26,13 @@ sym≃ : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} → A ≃ B → B ≃ A
 sym≃ = Equivalence.symmetry
 
 infixl 10 _⊙_
+
+inv-coe : {ℓ : Level} {A B : Set ℓ} {a : A}
+  → (p : A ≡ B) → coe (sym p) (coe p a) ≡ a
+inv-coe = {!!}
+inv-coe' : {ℓ : Level} {A B : Set ℓ} {a : A}
+  → (p : B ≡ A) → coe p (coe (sym p) a) ≡ a
+inv-coe' = {!!}
 
 module _ (ℓ : Level) where
   private
@@ -89,11 +96,73 @@ module _ (ℓ : Level) where
           res : x ≡ y
           res i = 1eq i , 2eq i
     module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
-      postulate
-        lem2 : ((x : A) → isProp (P x)) → (p q : Σ A P)
-          → (p ≡ q) ≃ (proj₁ p ≡ proj₁ q)
-        lem3 : {Q : A → Set ℓb} → ((x : A) → P x ≃ Q x)
-          → Σ A P ≃ Σ A Q
+      lem2 : ((x : A) → isProp (P x)) → (p q : Σ A P)
+        → (p ≡ q) ≃ (proj₁ p ≡ proj₁ q)
+      lem2 pA p q = Eeq.fromIsomorphism iso
+        where
+        f : p ≡ q → proj₁ p ≡ proj₁ q
+        f e i = proj₁ (e i)
+        g : proj₁ p ≡ proj₁ q → p ≡ q
+        g = lemSig pA p q
+        ve-re : (e : p ≡ q) → (g ∘ f) e ≡ e
+        -- QUESTION Why does `h` not satisfy the constraint here?
+        ve-re e i j = qq0 j , {!h!}
+          where
+          -- qq : ? [ proj₂ ((g ∘ f) e) ≡ proj₂ e ]
+          qq0 : proj₁ p ≡ proj₁ q
+          qq0 i = proj₁ (e i)
+          qq : (λ i → P (qq0 i)) [ proj₂ p ≡ proj₂ q ]
+          qq = lemPropF pA qq0
+          h : P (qq0 j)
+          h = qq j
+        re-ve : (e : proj₁ p ≡ proj₁ q) → (f ∘ g) e ≡ e
+        re-ve e = refl
+        inv : AreInverses f g
+        inv = record
+          { verso-recto = funExt ve-re
+          ; recto-verso = funExt re-ve
+          }
+        iso : (p ≡ q) Eqv.≅ (proj₁ p ≡ proj₁ q)
+        iso = f , g , inv
+
+      lem3 : {Q : A → Set ℓb} → ((a : A) → P a ≃ Q a)
+        → Σ A P ≃ Σ A Q
+      lem3 {Q} eA = res
+        where
+        P→Q : ∀ {a} → P a ≡ Q a
+        P→Q = ua (eA _)
+        Q→P : ∀ {a} → Q a ≡ P a
+        Q→P = sym P→Q
+        f : Σ A P → Σ A Q
+        f (a , pA) = a , coe P→Q pA
+        g : Σ A Q → Σ A P
+        g (a , qA) = a , coe Q→P qA
+        ve-re : (x : Σ A P) → (g ∘ f) x ≡ x
+        ve-re x i = proj₁ x , eq i
+          where
+          eq : proj₂ ((g ∘ f) x) ≡ proj₂ x
+          eq = begin
+            proj₂ ((g ∘ f) x) ≡⟨⟩
+            coe Q→P (proj₂ (f x))        ≡⟨⟩
+            coe Q→P (coe P→Q (proj₂ x))  ≡⟨ inv-coe P→Q ⟩
+            proj₂ x ∎
+        re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
+        re-ve x i = proj₁ x , eq i
+          where
+          eq = begin
+            proj₂ ((f ∘ g) x)                 ≡⟨⟩
+            coe P→Q (coe Q→P (proj₂ x))       ≡⟨⟩
+            coe P→Q (coe (sym P→Q) (proj₂ x)) ≡⟨ inv-coe' P→Q ⟩
+            proj₂ x                           ∎
+        inv : AreInverses f g
+        inv = record
+          { verso-recto = funExt ve-re
+          ; recto-verso = funExt re-ve
+          }
+        iso : Σ A P Eqv.≅ Σ A Q
+        iso = f , g , inv
+        res : Σ A P ≃ Σ A Q
+        res = Eeq.fromIsomorphism iso
 
     module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
       postulate
@@ -136,7 +205,7 @@ module _ (ℓ : Level) where
       res = _≃_.isEqv t
     module _ {hA hB : hSet {ℓ}} where
       univalent : isEquiv (hA ≡ hB) (hA ≅ hB) (id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)
-      univalent = let k = _≃_.isEqv (sym≃ conclusion) in {!!}
+      univalent = let k = _≃_.isEqv (sym≃ conclusion) in {!k!}
 
     SetsIsCategory : IsCategory SetsRaw
     IsCategory.isAssociative SetsIsCategory = refl
