@@ -6,18 +6,22 @@ open import Agda.Primitive
 open import Data.Product
 open import Function using (_∘_)
 
-open import Cubical hiding (_≃_ ; inverse)
-open import Cubical.Univalence using (univalence ; con ; _≃_)
+-- open import Cubical using (funExt ; refl ; isSet ; isProp ; _≡_ ; isEquiv ; sym ; trans ; _[_≡_] ; I ; Path ; PathP)
+open import Cubical hiding (_≃_)
+open import Cubical.Univalence using (univalence ; con ; _≃_ ; idtoeqv)
 open import Cubical.GradLemma
 
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
 open import Cat.Wishlist
-open import Cat.Equivalence as Eqv using (module NoEta)
+open import Cat.Equivalence as Eqv renaming (module NoEta to Eeq) using (AreInverses)
 
-module Equivalence = NoEta.Equivalence′
-module Eeq = NoEta
+module Equivalence = Eeq.Equivalence′
+postulate
+  _⊙_ : {ℓa ℓb ℓc : Level} {A : Set ℓa} {B : Set ℓb} {C : Set ℓc} → (A ≃ B) → (B ≃ C) → A ≃ C
+  sym≃ : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} → A ≃ B → B ≃ A
+infixl 10 _⊙_
 
 module _ (ℓ : Level) where
   private
@@ -25,7 +29,7 @@ module _ (ℓ : Level) where
     open import Cubical.Universe
 
     SetsRaw : RawCategory (lsuc ℓ) ℓ
-    RawCategory.Object SetsRaw = hSet
+    RawCategory.Object SetsRaw = hSet {ℓ}
     RawCategory.Arrow  SetsRaw (T , _) (U , _) = T → U
     RawCategory.𝟙      SetsRaw = Function.id
     RawCategory._∘_    SetsRaw = Function._∘′_
@@ -40,125 +44,95 @@ module _ (ℓ : Level) where
     arrowsAreSets : ArrowsAreSets
     arrowsAreSets {B = (_ , s)} = setPi λ _ → s
 
+    isIso = Eqv.Isomorphism
+    module _ {hA hB : hSet {ℓ}} where
+      open Σ hA renaming (proj₁ to A ; proj₂ to sA)
+      open Σ hB renaming (proj₁ to B ; proj₂ to sB)
+      lem1 : (f : A → B) → isSet A → isSet B → isProp (isIso f)
+      lem1 f sA sB = res
+        where
+        module _ (x y : isIso f) where
+          module x = Σ x renaming (proj₁ to inverse ; proj₂ to areInverses)
+          module y = Σ y renaming (proj₁ to inverse ; proj₂ to areInverses)
+          module xA = AreInverses x.areInverses
+          module yA = AreInverses y.areInverses
+          -- I had a lot of difficulty using the corresponding proof where
+          -- AreInverses is defined. This is sadly a bit anti-modular. The
+          -- reason for my troubles is probably related to the type of objects
+          -- being hSet's rather than sets.
+          p : ∀ {f} g → isProp (AreInverses {A = A} {B} f g)
+          p {f} g xx yy i = record
+            { verso-recto = ve-re
+            ; recto-verso = re-ve
+            }
+            where
+            module xxA = AreInverses xx
+            module yyA = AreInverses yy
+            ve-re : g ∘ f ≡ Function.id
+            ve-re = arrowsAreSets {A = hA} {B = hA} _ _ xxA.verso-recto yyA.verso-recto i
+            re-ve : f ∘ g ≡ Function.id
+            re-ve = arrowsAreSets {A = hB} {B = hB} _ _ xxA.recto-verso yyA.recto-verso i
+          1eq : x.inverse ≡ y.inverse
+          1eq = begin
+            x.inverse                   ≡⟨⟩
+            x.inverse ∘ Function.id     ≡⟨ cong (λ φ → x.inverse ∘ φ) (sym yA.recto-verso) ⟩
+            x.inverse ∘ (f ∘ y.inverse) ≡⟨⟩
+            (x.inverse ∘ f) ∘ y.inverse ≡⟨ cong (λ φ → φ ∘ y.inverse) xA.verso-recto ⟩
+            Function.id ∘ y.inverse     ≡⟨⟩
+            y.inverse                   ∎
+          2eq : (λ i → AreInverses f (1eq i)) [ x.areInverses ≡ y.areInverses ]
+          2eq = lemPropF p 1eq
+          res : x ≡ y
+          res i = 1eq i , 2eq i
+    module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
+      postulate
+        lem2 : ((x : A) → isProp (P x)) → (p q : Σ A P)
+          → (p ≡ q) ≃ (proj₁ p ≡ proj₁ q)
+        lem3 : {Q : A → Set ℓb} → ((x : A) → P x ≃ Q x)
+          → Σ A P ≃ Σ A Q
+
+    module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
+      postulate
+        lem4 : isSet A → isSet B → (f : A → B)
+          → isEquiv A B f ≃ isIso f
+
     module _ {hA hB : Object} where
       private
         A = proj₁ hA
-        isSetA : isSet A
-        isSetA = proj₂ hA
+        sA = proj₂ hA
         B = proj₁ hB
-        isSetB : isSet B
-        isSetB = proj₂ hB
+        sB = proj₂ hB
 
-        toIsomorphism : A ≃ B → hA ≅ hB
-        toIsomorphism e = obverse , inverse , verso-recto , recto-verso
+      postulate
+        -- lem3 and the equivalence from lem4
+        step0 : Σ (A → B) isIso ≃ Σ (A → B) (isEquiv A B)
+        -- univalence
+        step1 : Σ (A → B) (isEquiv A B) ≃ (A ≡ B)
+        -- lem2 with propIsSet
+        step2 : (A ≡ B) ≃ (hA ≡ hB)
+      -- Go from an isomorphism on sets to an isomorphism on homotopic sets
+      trivial? : (hA ≅ hB) ≃ Σ (A → B) isIso
+      trivial? = sym≃ (Eeq.fromIsomorphism res)
+        where
+        fwd : Σ (A → B) isIso → hA ≅ hB
+        fwd (f , g , inv) = f , g , inv.toPair
           where
-          open Equivalence e
-
-        fromIsomorphism : hA ≅ hB → A ≃ B
-        fromIsomorphism iso = con obverse (gradLemma obverse inverse recto-verso verso-recto)
-          where
-          obverse : A → B
-          obverse = proj₁ iso
-          inverse : B → A
-          inverse = proj₁ (proj₂ iso)
-          -- FIXME IsInverseOf should change name to AreInverses and the
-          -- ordering should be swapped.
-          areInverses : IsInverseOf {A = hA} {hB} obverse inverse
-          areInverses = proj₂ (proj₂ iso)
-          verso-recto : ∀ a → (inverse ∘ obverse) a ≡ a
-          verso-recto a i = proj₁ areInverses i a
-          recto-verso : ∀ b → (obverse Function.∘ inverse) b ≡ b
-          recto-verso b i = proj₂ areInverses i b
-
-      private
-        univIso : (A ≡ B) Eqv.≅ (A ≃ B)
-        univIso = Eeq.toIsomorphism univalence
-        obverse' : A ≡ B → A ≃ B
-        obverse' = proj₁ univIso
-        inverse' : A ≃ B → A ≡ B
-        inverse' = proj₁ (proj₂ univIso)
-        -- Drop proof of being a set from both sides of an equality.
-        dropP : hA ≡ hB → A ≡ B
-        dropP eq i = proj₁ (eq i)
-        -- Add proof of being a set to both sides of a set-theoretic equivalence
-        -- returning a category-theoretic equivalence.
-        addE : A Eqv.≅ B → hA ≅ hB
-        addE eqv = proj₁ eqv , (proj₁ (proj₂ eqv)) , asPair
-          where
-          areeqv = proj₂ (proj₂ eqv)
-          asPair =
-            let module Inv = Eqv.AreInverses areeqv
-            in Inv.verso-recto , Inv.recto-verso
-
-        obverse : hA ≡ hB → hA ≅ hB
-        obverse = addE ∘ Eeq.toIsomorphism ∘ obverse' ∘ dropP
-
-        -- Drop proof of being a set form both sides of a category-theoretic
-        -- equivalence returning a set-theoretic equivalence.
-        dropE : hA ≅ hB → A Eqv.≅ B
-        dropE eqv = obv , inv , asAreInverses
-          where
-          obv = proj₁ eqv
-          inv = proj₁ (proj₂ eqv)
-          areEq = proj₂ (proj₂ eqv)
-          asAreInverses : Eqv.AreInverses obv inv
-          asAreInverses = record { verso-recto = proj₁ areEq ; recto-verso = proj₂ areEq }
-
-        isoToEquiv : A Eqv.≅ B → A ≃ B
-        isoToEquiv = Eeq.fromIsomorphism
-
-        -- Add proof of being a set to both sides of an equality.
-        addP : A ≡ B → hA ≡ hB
-        addP p = lemSig (λ X → propPi λ x → propPi (λ y → propIsProp)) hA hB p
-        inverse : hA ≅ hB → hA ≡ hB
-        inverse = addP ∘ inverse' ∘ isoToEquiv ∘ dropE
-
-        -- open AreInverses (proj₂ (proj₂ univIso)) renaming
-        --   ( verso-recto to verso-recto'
-        --   ; recto-verso to recto-verso'
-        --   )
-        -- I can just open them but I wanna be able to see the type annotations.
-        verso-recto' : inverse' ∘ obverse' ≡ Function.id
-        verso-recto' = Eqv.AreInverses.verso-recto (proj₂ (proj₂ univIso))
-        recto-verso' : obverse' ∘ inverse' ≡ Function.id
-        recto-verso' = Eqv.AreInverses.recto-verso (proj₂ (proj₂ univIso))
-        verso-recto : (iso : hA ≅ hB) → obverse (inverse iso) ≡ iso
-        verso-recto iso = begin
-          obverse (inverse iso) ≡⟨⟩
-          ( addE ∘ Eeq.toIsomorphism
-          ∘ obverse' ∘ dropP ∘ addP
-          ∘ inverse' ∘ isoToEquiv
-          ∘ dropE) iso
-            ≡⟨⟩
-          ( addE ∘ Eeq.toIsomorphism
-          ∘ obverse'
-          ∘ inverse' ∘ isoToEquiv
-          ∘ dropE) iso
-            ≡⟨ {!!} ⟩ -- obverse' inverse' are inverses
-          ( addE ∘ Eeq.toIsomorphism ∘ isoToEquiv ∘ dropE) iso
-            ≡⟨ {!!} ⟩ -- should be easy to prove
-                      -- _≃_.toIsomorphism ∘ isoToEquiv ≡ id
-          (addE ∘ dropE) iso
-            ≡⟨⟩
-          iso ∎
-
-        -- Similar to above.
-        recto-verso : (eq : hA ≡ hB) → inverse (obverse eq) ≡ eq
-        recto-verso eq = begin
-          inverse (obverse eq) ≡⟨ {!!} ⟩
-          eq ∎
-
-        -- Use the fact that being an h-level is a mere proposition.
-        -- This is almost provable using `Wishlist.isSetIsProp` - although
-        -- this creates homogenous paths.
-        isSetEq : (p : A ≡ B) → (λ i → isSet (p i)) [ isSetA ≡ isSetB ]
-        isSetEq = {!!}
-
-        res : hA ≡ hB
-        proj₁ (res i) = {!!}
-        proj₂ (res i) = isSetEq {!!} i
+          module inv = AreInverses inv
+        bwd : hA ≅ hB → Σ (A → B) isIso
+        bwd (f , g , x , y) = f , g , record { verso-recto = x ; recto-verso = y }
+        res : Σ (A → B) isIso Eqv.≅ (hA ≅ hB)
+        res = fwd , bwd , record { verso-recto = refl ; recto-verso = refl }
+      conclusion : (hA ≅ hB) ≃ (hA ≡ hB)
+      conclusion = trivial? ⊙ step0 ⊙ step1 ⊙ step2
+      t : (hA ≡ hB) ≃ (hA ≅ hB)
+      t = sym≃ conclusion
+      -- TODO Is the morphism `(_≃_.eqv conclusion)` the same as
+      -- `(id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)` ?
+      res : isEquiv (hA ≡ hB) (hA ≅ hB) (_≃_.eqv t)
+      res = _≃_.isEqv t
+    module _ {hA hB : hSet {ℓ}} where
       univalent : isEquiv (hA ≡ hB) (hA ≅ hB) (id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)
-      univalent = {!gradLemma obverse inverse verso-recto recto-verso!}
+      univalent = let k = _≃_.isEqv (sym≃ conclusion) in {!!}
 
     SetsIsCategory : IsCategory SetsRaw
     IsCategory.isAssociative SetsIsCategory = refl

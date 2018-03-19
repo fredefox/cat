@@ -21,12 +21,29 @@ module _ {ℓa ℓb : Level} where
       obverse = f
       reverse = g
       inverse = reverse
+      toPair : Σ _ _
+      toPair = verso-recto , recto-verso
 
     Isomorphism : (f : A → B) → Set _
     Isomorphism f = Σ (B → A) λ g → AreInverses f g
 
   _≅_ : Set ℓa → Set ℓb → Set _
   A ≅ B = Σ (A → B) Isomorphism
+
+module _ {ℓ : Level} {A B : Set ℓ} {f : A → B}
+  (g : B → A) (s : {A B : Set ℓ} → isSet (A → B)) where
+
+  propAreInverses : isProp (AreInverses {A = A} {B} f g)
+  propAreInverses x y i = record
+    { verso-recto = ve-re
+    ; recto-verso = re-ve
+    }
+    where
+    open AreInverses
+    ve-re : g ∘ f ≡ idFun A
+    ve-re = s (g ∘ f) (idFun A) (verso-recto x) (verso-recto y) i
+    re-ve : f ∘ g ≡ idFun B
+    re-ve = s (f ∘ g) (idFun B) (recto-verso x) (recto-verso y) i
 
 -- In HoTT they generalize an equivalence to have the following 3 properties:
 module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
@@ -130,54 +147,18 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
 module NoEta {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
   open import Cubical.PathPrelude renaming (_≃_ to _≃η_)
   open import Cubical.Univalence using (_≃_)
+
+  doEta : A ≃ B → A ≃η B
+  doEta (_≃_.con eqv isEqv) = eqv , isEqv
+
+  deEta : A ≃η B → A ≃ B
+  deEta (eqv , isEqv) = _≃_.con eqv isEqv
+
   module Equivalence′ (e : A ≃ B) where
-    private
-      doEta : A ≃ B → A ≃η B
-      doEta = {!!}
-
-      deEta : A ≃η B → A ≃ B
-      deEta = {!!}
-
-      e′ = doEta e
-
-      module E = Equivalence e′
-    open E hiding (toIsomorphism ; fromIsomorphism ; _~_) public
+    open Equivalence (doEta e) hiding (toIsomorphism ; fromIsomorphism ; _~_) public
 
   fromIsomorphism : A ≅ B → A ≃ B
   fromIsomorphism (f , iso) = _≃_.con f (Equiv≃.fromIso _ _ iso)
 
   toIsomorphism : A ≃ B → A ≅ B
   toIsomorphism (_≃_.con f eqv) = f , Equiv≃.toIso _ _ eqv
-  -- private
-  --   module Equiv′ (e : A ≃ B) where
-  --     open _≃_ e renaming (eqv to obverse)
-
-  --     private
-  --       inverse : B → A
-  --       inverse b = fst (fst (isEqv b))
-
-  --     -- We can extract an isomorphism from an equivalence.
-  --     --
-  --     -- One way to do it would be to use univalence and coersion - but there's
-  --     -- probably a more straight-forward way that does not require breaking the
-  --     -- dependency graph between this module and Cubical.Univalence
-  --     areInverses : AreInverses obverse inverse
-  --     areInverses = record
-  --       { verso-recto = verso-recto
-  --       ; recto-verso = recto-verso
-  --       }
-  --       where
-  --       postulate
-  --         verso-recto : inverse ∘ obverse ≡ idFun A
-  --         recto-verso : obverse ∘ inverse ≡ idFun B
-
-  --     toIsomorphism : A ≅ B
-  --     toIsomorphism = obverse , (inverse , areInverses)
-
-  --     open AreInverses areInverses
-
-  --     equiv≃ : Equiv A B (isEquiv A B)
-  --     equiv≃ = {!!}
-
-  -- -- A wrapper around Univalence.≃
-  -- module Equiv≃′ = Equiv {!!}
