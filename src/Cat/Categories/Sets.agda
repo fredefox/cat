@@ -18,9 +18,13 @@ open import Cat.Wishlist
 open import Cat.Equivalence as Eqv renaming (module NoEta to Eeq) using (AreInverses)
 
 module Equivalence = Eeq.Equivalence′
-postulate
-  _⊙_ : {ℓa ℓb ℓc : Level} {A : Set ℓa} {B : Set ℓb} {C : Set ℓc} → (A ≃ B) → (B ≃ C) → A ≃ C
-  sym≃ : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} → A ≃ B → B ≃ A
+
+_⊙_ : {ℓa ℓb ℓc : Level} {A : Set ℓa} {B : Set ℓb} {C : Set ℓc} → (A ≃ B) → (B ≃ C) → A ≃ C
+eqA ⊙ eqB = Equivalence.compose eqA eqB
+
+sym≃ : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} → A ≃ B → B ≃ A
+sym≃ = Equivalence.symmetry
+
 infixl 10 _⊙_
 
 module _ (ℓ : Level) where

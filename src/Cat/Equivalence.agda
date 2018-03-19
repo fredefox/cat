@@ -144,7 +144,48 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
 
     open AreInverses (snd iso) public
 
-module NoEta {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
+    composeIso : {ℓc : Level} {C : Set ℓc} → (B ≅ C) → A ≅ C
+    composeIso {C = C} (g , g' , iso-g) = g ∘ obverse , inverse ∘ g' , inv
+      where
+      module iso-g = AreInverses iso-g
+      inv : AreInverses (g ∘ obverse) (inverse ∘ g')
+      AreInverses.verso-recto inv = begin
+        (inverse ∘ g') ∘ (g ∘ obverse)   ≡⟨⟩
+        (inverse ∘ (g' ∘ g) ∘ obverse)
+          ≡⟨ cong (λ φ → φ ∘ obverse) (cong (λ φ → inverse ∘ φ) iso-g.verso-recto) ⟩
+        (inverse ∘ idFun B ∘ obverse)    ≡⟨⟩
+        (inverse ∘ obverse)              ≡⟨ verso-recto ⟩
+        idFun A ∎
+      AreInverses.recto-verso inv = begin
+        g ∘ obverse ∘ inverse ∘ g'
+          ≡⟨ cong (λ φ → φ ∘ g') (cong (λ φ → g ∘ φ) recto-verso) ⟩
+        g ∘ idFun B ∘ g' ≡⟨⟩
+        g ∘ g'           ≡⟨ iso-g.recto-verso ⟩
+        idFun C ∎
+
+    compose : {ℓc : Level} {C : Set ℓc} → (B ≃ C) → A ≃ C
+    compose {C = C} e = A≃C.fromIsomorphism is
+      where
+      module B≃C = Equiv≃ B C
+      module A≃C = Equiv≃ A C
+      is : A ≅ C
+      is = composeIso (B≃C.toIsomorphism e)
+
+    symmetryIso : B ≅ A
+    symmetryIso
+      = inverse
+      , obverse
+      , record
+        { verso-recto = recto-verso
+        ; recto-verso = verso-recto
+        }
+
+    symmetry : B ≃ A
+    symmetry = B≃A.fromIsomorphism symmetryIso
+      where
+      module B≃A = Equiv≃ B A
+
+module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
   open import Cubical.PathPrelude renaming (_≃_ to _≃η_)
   open import Cubical.Univalence using (_≃_)
 
@@ -154,8 +195,20 @@ module NoEta {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
   deEta : A ≃η B → A ≃ B
   deEta (eqv , isEqv) = _≃_.con eqv isEqv
 
+module NoEta {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
+  open import Cubical.PathPrelude renaming (_≃_ to _≃η_)
+  open import Cubical.Univalence using (_≃_)
+
   module Equivalence′ (e : A ≃ B) where
-    open Equivalence (doEta e) hiding (toIsomorphism ; fromIsomorphism ; _~_) public
+    open Equivalence (doEta e) hiding
+      ( toIsomorphism ; fromIsomorphism ; _~_
+      ; compose ; symmetryIso ; symmetry ) public
+
+    compose : {ℓc : Level} {C : Set ℓc} → (B ≃ C) → A ≃ C
+    compose ee = deEta (Equivalence.compose (doEta e) (doEta ee))
+
+    symmetry : B ≃ A
+    symmetry = deEta (Equivalence.symmetry (doEta e))
 
   fromIsomorphism : A ≅ B → A ≃ B
   fromIsomorphism (f , iso) = _≃_.con f (Equiv≃.fromIso _ _ iso)
