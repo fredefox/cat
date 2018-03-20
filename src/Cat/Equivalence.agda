@@ -58,6 +58,23 @@ module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
     _~_ : Set ℓa → Set ℓb → Set _
     A ~ B = Σ _ iseqv
 
+    inverse-from-to-iso : ∀ {f} (x : _) → (fromIso {f} ∘ toIso {f}) x ≡ x
+    inverse-from-to-iso x = begin
+      (fromIso ∘ toIso) x ≡⟨⟩
+      fromIso (toIso x)   ≡⟨ propIsEquiv _ (fromIso (toIso x)) x ⟩
+      x ∎
+
+    -- `toIso` is abstract - so I probably can't close this proof.
+    -- inverse-to-from-iso : ∀ {f} → toIso {f} ∘ fromIso {f} ≡ idFun _
+    -- inverse-to-from-iso = funExt (λ x → begin
+    --   (toIso ∘ fromIso) x ≡⟨⟩
+    --   toIso (fromIso x)   ≡⟨ cong toIso (propIsEquiv _ (fromIso x) y) ⟩
+    --   toIso y             ≡⟨ {!!} ⟩
+    --   x ∎)
+    --   where
+    --   y : iseqv _
+    --   y = {!!}
+
     fromIsomorphism : A ≅ B → A ~ B
     fromIsomorphism (f , iso) = f , fromIso iso
 
@@ -130,7 +147,26 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
       where
       import Cubical.NType.Properties as P
 
-  module Equiv≃ = Equiv ≃isEquiv
+  module Equiv≃ where
+    open Equiv ≃isEquiv public
+    inverse-to-from-iso : ∀ {f} (x : _) → (toIso {f} ∘ fromIso {f}) x ≡ x
+    inverse-to-from-iso {f} x = begin
+      (toIso ∘ fromIso) x ≡⟨⟩
+      toIso (fromIso x)   ≡⟨ cong toIso (propIsEquiv _ (fromIso x) y) ⟩
+      toIso y             ≡⟨ py ⟩
+      x ∎
+      where
+      helper : (x : Isomorphism _) → Σ _ λ y → toIso y ≡ x
+      helper (f~ , inv) = y , py
+        where
+        module inv = AreInverses inv
+        y  : isEquiv _ _ f
+        y  = {!!}
+        py : toIso y ≡ (f~ , inv)
+        py = {!!}
+      y : isEquiv _ _ _
+      y  = fst (helper x)
+      py = snd (helper x)
 
 module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
   open Cubical.PathPrelude using (_≃_)
@@ -209,6 +245,12 @@ module NoEta {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
 
     symmetry : B ≃ A
     symmetry = deEta (Equivalence.symmetry (doEta e))
+
+  -- fromIso      : {f : A → B} → Isomorphism f → isEquiv f
+  -- fromIso = ?
+
+  -- toIso        : {f : A → B} → isEquiv f → Isomorphism f
+  -- toIso = ?
 
   fromIsomorphism : A ≅ B → A ≃ B
   fromIsomorphism (f , iso) = _≃_.con f (Equiv≃.fromIso _ _ iso)

@@ -15,7 +15,7 @@ open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
 open import Cat.Wishlist
-open import Cat.Equivalence as Eqv renaming (module NoEta to Eeq) using (AreInverses)
+open import Cat.Equivalence as Eqv renaming (module NoEta to Eeq) using (AreInverses ; module Equiv≃)
 
 module Equivalence = Eeq.Equivalence′
 
@@ -27,12 +27,33 @@ sym≃ = Equivalence.symmetry
 
 infixl 10 _⊙_
 
-inv-coe : {ℓ : Level} {A B : Set ℓ} {a : A}
-  → (p : A ≡ B) → coe (sym p) (coe p a) ≡ a
-inv-coe = {!!}
-inv-coe' : {ℓ : Level} {A B : Set ℓ} {a : A}
-  → (p : B ≡ A) → coe p (coe (sym p) a) ≡ a
-inv-coe' = {!!}
+module _ {ℓ : Level} {A : Set ℓ} {a : A} where
+  id-coe : coe refl a ≡ a
+  id-coe = begin
+    coe refl a ≡⟨ {!!} ⟩
+    a ∎
+
+module _ {ℓ : Level} {A B : Set ℓ} {a : A} where
+  inv-coe : (p : A ≡ B) → coe (sym p) (coe p a) ≡ a
+  inv-coe p =
+    let
+      D : (y : Set ℓ) → _ ≡ y → Set _
+      D _ q = coe (sym q) (coe q a) ≡ a
+      d : D A refl
+      d = begin
+        coe (sym refl) (coe refl a) ≡⟨⟩
+        coe refl (coe refl a)       ≡⟨ id-coe ⟩
+        coe refl a                  ≡⟨ id-coe ⟩
+        a ∎
+    in pathJ D d B p
+  inv-coe' : (p : B ≡ A) → coe p (coe (sym p) a) ≡ a
+  inv-coe' p =
+    let
+      D : (y : Set ℓ) → _ ≡ y → Set _
+      D _ q = coe (sym q) (coe q a) ≡ a
+      k : coe p (coe (sym p) a) ≡ a
+      k = pathJ D (trans id-coe id-coe) B (sym p)
+    in k
 
 module _ (ℓ : Level) where
   private
@@ -125,8 +146,8 @@ module _ (ℓ : Level) where
         iso : (p ≡ q) Eqv.≅ (proj₁ p ≡ proj₁ q)
         iso = f , g , inv
 
-      lem3 : {Q : A → Set ℓb} → ((a : A) → P a ≃ Q a)
-        → Σ A P ≃ Σ A Q
+      lem3 : {Q : A → Set ℓb}
+        → ((a : A) → P a ≃ Q a) → Σ A P ≃ Σ A Q
       lem3 {Q} eA = res
         where
         P→Q : ∀ {a} → P a ≡ Q a
@@ -165,9 +186,25 @@ module _ (ℓ : Level) where
         res = Eeq.fromIsomorphism iso
 
     module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
-      postulate
-        lem4 : isSet A → isSet B → (f : A → B)
-          → isEquiv A B f ≃ isIso f
+      lem4 : isSet A → isSet B → (f : A → B)
+        → isEquiv A B f ≃ isIso f
+      lem4 sA sB f =
+        let
+          obv : isEquiv A B f → isIso f
+          obv = Equiv≃.toIso A B
+          inv : isIso f → isEquiv A B f
+          inv = Equiv≃.fromIso A B
+          re-ve : (x : isEquiv A B f) → (inv ∘ obv) x ≡ x
+          re-ve = Equiv≃.inverse-from-to-iso A B
+          ve-re : (x : isIso f)       → (obv ∘ inv) x ≡ x
+          ve-re = Equiv≃.inverse-to-from-iso A B
+          iso : isEquiv A B f Eqv.≅ isIso f
+          iso = obv , inv ,
+            record
+              { verso-recto = funExt re-ve
+              ; recto-verso = funExt ve-re
+              }
+        in Eeq.fromIsomorphism iso
 
     module _ {hA hB : Object} where
       private
@@ -176,13 +213,24 @@ module _ (ℓ : Level) where
         B = proj₁ hB
         sB = proj₂ hB
 
-      postulate
-        -- lem3 and the equivalence from lem4
-        step0 : Σ (A → B) isIso ≃ Σ (A → B) (isEquiv A B)
-        -- univalence
-        step1 : Σ (A → B) (isEquiv A B) ≃ (A ≡ B)
-        -- lem2 with propIsSet
-        step2 : (A ≡ B) ≃ (hA ≡ hB)
+
+      -- lem3 and the equivalence from lem4
+      step0 : Σ (A → B) isIso ≃ Σ (A → B) (isEquiv A B)
+      step0 = lem3 (λ f → sym≃ (lem4 sA sB f))
+      -- univalence
+      step1 : Σ (A → B) (isEquiv A B) ≃ (A ≡ B)
+      step1 =
+        let
+          h : (A ≃ B) ≃ (A ≡ B)
+          h = sym≃ (univalence {A = A} {B})
+          k : Σ _ (isEquiv (A ≃ B) (A ≡ B))
+          k = Eqv.doEta h
+        in {!!}
+
+      -- lem2 with propIsSet
+      step2 : (A ≡ B) ≃ (hA ≡ hB)
+      step2 = sym≃ (lem2 (λ A → isSetIsProp) hA hB)
+
       -- Go from an isomorphism on sets to an isomorphism on homotopic sets
       trivial? : (hA ≅ hB) ≃ Σ (A → B) isIso
       trivial? = sym≃ (Eeq.fromIsomorphism res)
