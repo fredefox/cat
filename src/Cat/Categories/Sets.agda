@@ -10,6 +10,7 @@ open import Function using (_∘_)
 open import Cubical hiding (_≃_)
 open import Cubical.Univalence using (univalence ; con ; _≃_ ; idtoeqv ; ua)
 open import Cubical.GradLemma
+open import Cubical.NType.Properties
 
 open import Cat.Category
 open import Cat.Category.Functor
@@ -59,8 +60,7 @@ module _ {ℓ : Level} {A B : Set ℓ} {a : A} where
 
 module _ (ℓ : Level) where
   private
-    open import Cubical.NType.Properties
-    open import Cubical.Universe
+    open import Cubical.Universe using (hSet) public
 
     SetsRaw : RawCategory (lsuc ℓ) ℓ
     RawCategory.Object SetsRaw = hSet {ℓ}

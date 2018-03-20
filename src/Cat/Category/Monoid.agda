@@ -19,7 +19,7 @@ module _ (ℓa ℓb : Level) where
     --
     -- Since it doesn't we'll make the following (definitionally equivalent) ad-hoc definition.
     _×_ : ∀ {ℓa ℓb} → Category ℓa ℓb → Category ℓa ℓb → Category ℓa ℓb
-    ℂ × 𝔻 = Cat.CatProduct.obj ℂ 𝔻
+    ℂ × 𝔻 = Cat.CatProduct.object ℂ 𝔻
 
   record RawMonoidalCategory : Set ℓ where
     field

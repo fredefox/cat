@@ -2,61 +2,77 @@
 module Cat.Categories.Free where
 
 open import Agda.Primitive
-open import Cubical hiding (Path ; isSet ; empty)
+open import Relation.Binary
+
+open import Cubical hiding (Path ; empty)
 open import Data.Product
 
 open import Cat.Category
 
-data Path {ℓ ℓ' : Level} {A : Set ℓ} (R : A → A → Set ℓ') : (a b : A) → Set (ℓ ⊔ ℓ') where
-  empty : {a : A} → Path R a a
-  cons : {a b c : A} → R b c → Path R a b → Path R a c
+module _ {ℓ : Level} {A : Set ℓ} {ℓr : Level} where
+  data Path (R : Rel A ℓr) : (a b : A) → Set (ℓ ⊔ ℓr) where
+    empty : {a : A}                          → Path R a a
+    cons  : {a b c : A} → R b c → Path R a b → Path R a c
 
-concatenate _++_ : ∀ {ℓ ℓ'} {A : Set ℓ} {a b c : A} {R : A → A → Set ℓ'} → Path R b c → Path R a b → Path R a c
-concatenate empty p = p
-concatenate (cons x q) p = cons x (concatenate q p)
-_++_ = concatenate
+  module _ {R : Rel A ℓr} where
+    concatenate : {a b c : A} → Path R b c → Path R a b → Path R a c
+    concatenate empty p = p
+    concatenate (cons x q) p = cons x (concatenate q p)
+    _++_ : {a b c : A} → Path R b c → Path R a b → Path R a c
+    a ++ b = concatenate a b
 
-singleton : ∀ {ℓ} {𝓤 : Set ℓ} {ℓr} {R : 𝓤 → 𝓤 → Set ℓr} {A B : 𝓤} → R A B → Path R A B
-singleton f = cons f empty
+    singleton : {a b : A} → R a b → Path R a b
+    singleton f = cons f empty
 
-module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
+module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     module ℂ = Category ℂ
-    open Category ℂ
 
-    p-isAssociative : {A B C D : Object} {r : Path Arrow A B} {q : Path Arrow B C} {p : Path Arrow C D}
+    RawFree : RawCategory ℓa (ℓa ⊔ ℓb)
+    RawCategory.Object RawFree = ℂ.Object
+    RawCategory.Arrow  RawFree = Path ℂ.Arrow
+    RawCategory.𝟙      RawFree = empty
+    RawCategory._∘_    RawFree = concatenate
+
+    open RawCategory RawFree
+    open Univalence  RawFree
+
+
+    isAssociative : {A B C D : ℂ.Object} {r : Path ℂ.Arrow A B} {q : Path ℂ.Arrow B C} {p : Path ℂ.Arrow C D}
       → p ++ (q ++ r) ≡ (p ++ q) ++ r
-    p-isAssociative {r = r} {q} {empty} = refl
-    p-isAssociative {A} {B} {C} {D} {r = r} {q} {cons x p} = begin
+    isAssociative {r = r} {q} {empty} = refl
+    isAssociative {A} {B} {C} {D} {r = r} {q} {cons x p} = begin
       cons x p ++ (q ++ r)   ≡⟨ cong (cons x) lem ⟩
       cons x ((p ++ q) ++ r) ≡⟨⟩
       (cons x p ++ q) ++ r ∎
       where
-        lem : p ++ (q ++ r) ≡ ((p ++ q) ++ r)
-        lem = p-isAssociative {r = r} {q} {p}
+      lem : p ++ (q ++ r) ≡ ((p ++ q) ++ r)
+      lem = isAssociative {r = r} {q} {p}
 
-    ident-r : ∀ {A} {B} {p : Path Arrow A B} → concatenate p empty ≡ p
+    ident-r : ∀ {A} {B} {p : Path ℂ.Arrow A B} → concatenate p empty ≡ p
     ident-r {p = empty} = refl
     ident-r {p = cons x p} = cong (cons x) ident-r
 
-    ident-l : ∀ {A} {B} {p : Path Arrow A B} → concatenate empty p ≡ p
+    ident-l : ∀ {A} {B} {p : Path ℂ.Arrow A B} → concatenate empty p ≡ p
     ident-l = refl
 
-    module _ {A B : Object} where
-      isSet : Cubical.isSet (Path Arrow A B)
-      isSet a b p q = {!!}
+    isIdentity : IsIdentity 𝟙
+    isIdentity = ident-r , ident-l
 
-  RawFree : RawCategory ℓ (ℓ ⊔ ℓ')
-  RawFree = record
-    { Object = Object
-    ; Arrow = Path Arrow
-    ; 𝟙 = empty
-    ; _∘_ = concatenate
-    }
-  RawIsCategoryFree : IsCategory RawFree
-  RawIsCategoryFree = record
-    { isAssociative = λ { {f = f} {g} {h} → p-isAssociative {r = f} {g} {h}}
-    ; isIdentity = ident-r , ident-l
-    ; arrowsAreSets = {!!}
-    ; univalent = {!!}
-    }
+    module _ {A B : ℂ.Object} where
+      arrowsAreSets : Cubical.isSet (Path ℂ.Arrow A B)
+      arrowsAreSets a b p q = {!!}
+
+      eqv : isEquiv (A ≡ B) (A ≅ B) (id-to-iso isIdentity A B)
+      eqv = {!!}
+    univalent : Univalent isIdentity
+    univalent = eqv
+
+    isCategory : IsCategory RawFree
+    IsCategory.isAssociative isCategory {f = f} {g} {h} = isAssociative {r = f} {g} {h}
+    IsCategory.isIdentity    isCategory = isIdentity
+    IsCategory.arrowsAreSets isCategory = arrowsAreSets
+    IsCategory.univalent     isCategory = univalent
+
+  Free : Category _ _
+  Free = record { raw = RawFree ; isCategory = isCategory }
