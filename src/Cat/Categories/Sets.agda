@@ -221,17 +221,25 @@ module _ (ℓ : Level) where
       step0 = lem3 (λ f → sym≃ (lem4 sA sB f))
       -- univalence
       step1 : Σ (A → B) (isEquiv A B) ≃ (A ≡ B)
-      step1 =
-        let
+      step1 = hh ⊙ h
+        where
           h : (A ≃ B) ≃ (A ≡ B)
           h = sym≃ (univalence {A = A} {B})
-          k : Σ _ (isEquiv (A ≃ B) (A ≡ B))
-          k = Eqv.doEta h
+          obv : Σ (A → B) (isEquiv A B) → A ≃ B
+          obv = Eqv.deEta
+          inv : A ≃ B → Σ (A → B) (isEquiv A B)
+          inv = Eqv.doEta
+          re-ve : (x : _) → (inv ∘ obv) x ≡ x
+          re-ve x = refl
+          -- Because _≃_ does not have eta equality!
+          ve-re : (x : _) → (obv ∘ inv) x ≡ x
+          ve-re (con eqv isEqv) i = con eqv isEqv
+          areInv : AreInverses obv inv
+          areInv = record { verso-recto = funExt re-ve ; recto-verso = funExt ve-re }
           eqv : Σ (A → B) (isEquiv A B) Eqv.≅ (A ≃ B)
-          eqv = {!!} , {!!} , {!!}
+          eqv = obv , inv , areInv
           hh : Σ (A → B) (isEquiv A B) ≃ (A ≃ B)
           hh = Eeq.fromIsomorphism eqv
-        in hh ⊙ h
 
       -- lem2 with propIsSet
       step2 : (A ≡ B) ≃ (hA ≡ hB)
