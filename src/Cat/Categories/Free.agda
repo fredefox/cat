@@ -35,8 +35,6 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     RawCategory._∘_    RawFree = concatenate
 
     open RawCategory RawFree
-    open Univalence  RawFree
-
 
     isAssociative : {A B C D : ℂ.Object} {r : Path ℂ.Arrow A B} {q : Path ℂ.Arrow B C} {p : Path ℂ.Arrow C D}
       → p ++ (q ++ r) ≡ (p ++ q) ++ r
@@ -59,13 +57,16 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     isIdentity : IsIdentity 𝟙
     isIdentity = ident-r , ident-l
 
+    open Univalence isIdentity
+
     module _ {A B : ℂ.Object} where
       arrowsAreSets : Cubical.isSet (Path ℂ.Arrow A B)
       arrowsAreSets a b p q = {!!}
 
-      eqv : isEquiv (A ≡ B) (A ≅ B) (id-to-iso isIdentity A B)
+      eqv : isEquiv (A ≡ B) (A ≅ B) (Univalence.id-to-iso isIdentity A B)
       eqv = {!!}
-    univalent : Univalent isIdentity
+
+    univalent : Univalent
     univalent = eqv
 
     isCategory : IsCategory RawFree

@@ -67,7 +67,8 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
     }
 
   open RawCategory RawFun
-  open Univalence  RawFun
+  open Univalence (λ {A} {B} {f} → isIdentity {A} {B} {f})
+
   module _ {A B : Functor ℂ 𝔻} where
     module A = Functor A
     module B = Functor B
@@ -145,10 +146,10 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
     re-ve : (x : A ≡ B) → reverse (obverse x) ≡ x
     re-ve = {!!}
 
-    done : isEquiv (A ≡ B) (A ≅ B) (id-to-iso (λ { {A} {B} → isIdentity {A} {B}}) A B)
+    done : isEquiv (A ≡ B) (A ≅ B) (Univalence.id-to-iso (λ { {A} {B} → isIdentity {A} {B}}) A B)
     done = {!gradLemma obverse reverse ve-re re-ve!}
 
-  univalent : Univalent (λ{ {A} {B} → isIdentity {A} {B}})
+  univalent : Univalent
   univalent = done
 
   instance

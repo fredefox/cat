@@ -97,7 +97,8 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
     isIdentity
       = Σ≡ (fst ℂ.isIdentity) (fst 𝔻.isIdentity)
       , Σ≡ (snd ℂ.isIdentity) (snd 𝔻.isIdentity)
-    postulate univalent : Univalence.Univalent rawProduct isIdentity
+
+    postulate univalent : Univalence.Univalent isIdentity
     instance
       isCategory : IsCategory rawProduct
       IsCategory.isAssociative isCategory = Σ≡ ℂ.isAssociative 𝔻.isAssociative

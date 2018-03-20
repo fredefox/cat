@@ -129,12 +129,8 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   Terminal : Set (ℓa ⊔ ℓb)
   Terminal = Σ Object IsTerminal
 
--- | Univalence is indexed by a raw category as well as an identity proof.
---
--- FIXME Put this in `RawCategory` and index it on the witness to `isIdentity`.
-module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
-  open RawCategory ℂ
-  module _ (isIdentity : IsIdentity 𝟙) where
+  -- | Univalence is indexed by a raw category as well as an identity proof.
+  module Univalence (isIdentity : IsIdentity 𝟙) where
     idIso : (A : Object) → A ≅ A
     idIso A = 𝟙 , (𝟙 , isIdentity)
 
@@ -162,12 +158,13 @@ module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 -- [HoTT].
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   open RawCategory ℂ public
-  open Univalence  ℂ public
   field
     isAssociative : IsAssociative
     isIdentity    : IsIdentity 𝟙
     arrowsAreSets : ArrowsAreSets
-    univalent     : Univalent isIdentity
+  open Univalence isIdentity public
+  field
+    univalent     : Univalent
 
   -- Some common lemmas about categories.
   module _ {A B : Object} {X : Object} (f : Arrow A B) where
@@ -243,7 +240,7 @@ module Propositionality {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
               𝟙 ∘ g'       ≡⟨ snd isIdentity ⟩
               g'           ∎
 
-    propUnivalent : isProp (Univalent isIdentity)
+    propUnivalent : isProp Univalent
     propUnivalent a b i = propPi (λ iso → propHasLevel ⟨-2⟩) a b i
 
   private
@@ -251,7 +248,7 @@ module Propositionality {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       module IC = IsCategory
       module X = IsCategory x
       module Y = IsCategory y
-      open Univalence ℂ
+      open Univalence
       -- In a few places I use the result of propositionality of the various
       -- projections of `IsCategory` - I've arbitrarily chosed to use this
       -- result from `x : IsCategory C`. I don't know which (if any) possibly
@@ -336,21 +333,22 @@ module Opposite {ℓa ℓb : Level} where
       RawCategory._∘_    opRaw = Function.flip ℂ._∘_
 
       open RawCategory opRaw
-      open Univalence  opRaw
 
       isIdentity : IsIdentity 𝟙
       isIdentity = swap ℂ.isIdentity
 
+      open Univalence isIdentity
+
       module _ {A B : ℂ.Object} where
         univalent : isEquiv (A ≡ B) (A ≅ B)
-          (id-to-iso (swap ℂ.isIdentity) A B)
+          (Univalence.id-to-iso (swap ℂ.isIdentity) A B)
         fst (univalent iso) = flipFiber (fst (ℂ.univalent (flipIso iso)))
           where
             flipIso : A ≅ B → B ℂ.≅ A
             flipIso (f , f~ , iso) = f , f~ , swap iso
             flipFiber
-              : fiber (ℂ.id-to-iso ℂ.isIdentity B A) (flipIso iso)
-              → fiber (  id-to-iso   isIdentity A B)          iso
+              : fiber (ℂ.id-to-iso B A) (flipIso iso)
+              → fiber (  id-to-iso A B)          iso
             flipFiber (eq , eqIso) = sym eq , {!!}
         snd (univalent iso) = {!!}
 

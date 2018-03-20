@@ -69,11 +69,12 @@ module _ (ℓ : Level) where
     RawCategory._∘_    SetsRaw = Function._∘′_
 
     open RawCategory SetsRaw hiding (_∘_)
-    open Univalence  SetsRaw
 
     isIdentity : IsIdentity Function.id
     proj₁ isIdentity = funExt λ _ → refl
     proj₂ isIdentity = funExt λ _ → refl
+
+    open Univalence (λ {A} {B} {f} → isIdentity {A} {B} {f})
 
     arrowsAreSets : ArrowsAreSets
     arrowsAreSets {B = (_ , s)} = setPi λ _ → s
@@ -266,7 +267,7 @@ module _ (ℓ : Level) where
       res : isEquiv (hA ≡ hB) (hA ≅ hB) (_≃_.eqv t)
       res = _≃_.isEqv t
     module _ {hA hB : hSet {ℓ}} where
-      univalent : isEquiv (hA ≡ hB) (hA ≅ hB) (id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)
+      univalent : isEquiv (hA ≡ hB) (hA ≅ hB) (Univalence.id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)
       univalent = let k = _≃_.isEqv (sym≃ conclusion) in {!k!}
 
     SetsIsCategory : IsCategory SetsRaw
