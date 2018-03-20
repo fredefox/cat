@@ -28,21 +28,12 @@ sym≃ = Equivalence.symmetry
 infixl 10 _⊙_
 
 module _ {ℓ : Level} {A : Set ℓ} {a : A} where
-  -- "This follows from the propositional equiality for `J`" - Vezzosi.
   id-coe : coe refl a ≡ a
   id-coe = begin
     coe refl a                 ≡⟨⟩
-    -- pathJprop : pathJ _ refl ≡ d
-    pathJ (λ y x → A) scary A refl ≡⟨ pathJprop {x = scary} (λ y x → A) scary ⟩
-    scary ≡⟨ {!!} ⟩
-    -- pathJ (λ y x → A) scary A refl ≡⟨ pathJprop {A = A} (λ y x → A) scary ⟩
-    -- scary ≡⟨ {!!} ⟩
-
-    -- pathJ (λ y _ → B _ → B y) (λ x → x) _ p ≡⟨ {!!} ⟩
+    pathJ (λ y x → A) _ A refl ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
+    _ ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
     a ∎
-    where
-    scary : A
-    scary = (primComp (λ j → A) i0 (λ j → p[ a ] i0 (~ j)) a)
 
 module _ {ℓ : Level} {A B : Set ℓ} {a : A} where
   inv-coe : (p : A ≡ B) → coe (sym p) (coe p a) ≡ a
