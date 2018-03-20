@@ -28,8 +28,11 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
   private
     𝓢 = Sets ℓ
     open Fun (opposite ℂ) 𝓢
-    presheaf = Cat.Categories.Sets.presheaf ℂ
+
     module ℂ = Category ℂ
+
+    presheaf : ℂ.Object → Presheaf ℂ
+    presheaf = Cat.Categories.Sets.presheaf ℂ
 
     module _ {A B : ℂ.Object} (f : ℂ [ A , B ]) where
       fmap : Transformation (presheaf A) (presheaf B)

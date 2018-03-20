@@ -69,54 +69,55 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
   open RawCategory RawFun
   open Univalence (λ {A} {B} {f} → isIdentity {A} {B} {f})
 
-  module _ {A B : Functor ℂ 𝔻} where
-    module A = Functor A
-    module B = Functor B
-    module _ (p : A ≡ B) where
-      omapP : A.omap ≡ B.omap
-      omapP i = Functor.omap (p i)
+  private
+    module _ {A B : Functor ℂ 𝔻} where
+      module A = Functor A
+      module B = Functor B
+      module _ (p : A ≡ B) where
+        omapP : A.omap ≡ B.omap
+        omapP i = Functor.omap (p i)
 
-      coerceAB : ∀ {X} → 𝔻 [ A.omap X , A.omap X ] ≡ 𝔻 [ A.omap X , B.omap X ]
-      coerceAB {X} = cong (λ φ → 𝔻 [ A.omap X , φ X ]) omapP
+        coerceAB : ∀ {X} → 𝔻 [ A.omap X , A.omap X ] ≡ 𝔻 [ A.omap X , B.omap X ]
+        coerceAB {X} = cong (λ φ → 𝔻 [ A.omap X , φ X ]) omapP
 
-      -- The transformation will be the identity on 𝔻. Such an arrow has the
-      -- type `A.omap A → A.omap A`. Which we can coerce to have the type
-      -- `A.omap → B.omap` since `A` and `B` are equal.
-      coe𝟙 : Transformation A B
-      coe𝟙 X = coe coerceAB 𝔻.𝟙
+        -- The transformation will be the identity on 𝔻. Such an arrow has the
+        -- type `A.omap A → A.omap A`. Which we can coerce to have the type
+        -- `A.omap → B.omap` since `A` and `B` are equal.
+        coe𝟙 : Transformation A B
+        coe𝟙 X = coe coerceAB 𝔻.𝟙
 
-      module _ {a b : ℂ.Object} (f : ℂ [ a , b ]) where
-        nat' : 𝔻 [ coe𝟙 b ∘ A.fmap f ] ≡ 𝔻 [ B.fmap f ∘ coe𝟙 a ]
-        nat' = begin
-          (𝔻 [ coe𝟙 b ∘ A.fmap f ]) ≡⟨ {!!} ⟩
-          (𝔻 [ B.fmap f ∘ coe𝟙 a ]) ∎
+        module _ {a b : ℂ.Object} (f : ℂ [ a , b ]) where
+          nat' : 𝔻 [ coe𝟙 b ∘ A.fmap f ] ≡ 𝔻 [ B.fmap f ∘ coe𝟙 a ]
+          nat' = begin
+            (𝔻 [ coe𝟙 b ∘ A.fmap f ]) ≡⟨ {!!} ⟩
+            (𝔻 [ B.fmap f ∘ coe𝟙 a ]) ∎
 
-      transs : (i : I) → Transformation A (p i)
-      transs = {!!}
+        transs : (i : I) → Transformation A (p i)
+        transs = {!!}
 
-      natt : (i : I) → Natural A (p i) {!!}
-      natt = {!!}
+        natt : (i : I) → Natural A (p i) {!!}
+        natt = {!!}
 
-      t : Natural A B coe𝟙
-      t = coe c (identityNatural A)
-        where
-        c : Natural A A (identityTrans A) ≡ Natural A B coe𝟙
-        c = begin
-          Natural A A (identityTrans A) ≡⟨ (λ x → {!natt ?!}) ⟩
-          Natural A B coe𝟙 ∎
-        -- cong (λ φ → {!Natural A A (identityTrans A)!}) {!!}
+        t : Natural A B coe𝟙
+        t = coe c (identityNatural A)
+          where
+          c : Natural A A (identityTrans A) ≡ Natural A B coe𝟙
+          c = begin
+            Natural A A (identityTrans A) ≡⟨ (λ x → {!natt ?!}) ⟩
+            Natural A B coe𝟙 ∎
+          -- cong (λ φ → {!Natural A A (identityTrans A)!}) {!!}
 
-      k : Natural A A (identityTrans A) → Natural A B coe𝟙
-      k n {a} {b} f = res
-        where
-        res : (𝔻 [ coe𝟙 b ∘ A.fmap f ]) ≡ (𝔻 [ B.fmap f ∘ coe𝟙 a ])
-        res = {!!}
+        k : Natural A A (identityTrans A) → Natural A B coe𝟙
+        k n {a} {b} f = res
+          where
+          res : (𝔻 [ coe𝟙 b ∘ A.fmap f ]) ≡ (𝔻 [ B.fmap f ∘ coe𝟙 a ])
+          res = {!!}
 
-      nat : Natural A B coe𝟙
-      nat = nat'
+        nat : Natural A B coe𝟙
+        nat = nat'
 
-      fromEq : NaturalTransformation A B
-      fromEq = coe𝟙 , nat
+        fromEq : NaturalTransformation A B
+        fromEq = coe𝟙 , nat
 
   module _ {A B : Functor ℂ 𝔻} where
     obverse : A ≡ B → A ≅ B

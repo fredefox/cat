@@ -328,6 +328,8 @@ module _ {ℓ : Level} where
     SetsHasProducts = record { product = product }
 
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+  open Category ℂ
+
   -- Covariant Presheaf
   Representable : Set (ℓa ⊔ lsuc ℓb)
   Representable = Functor ℂ (𝓢𝓮𝓽 ℓb)
@@ -335,8 +337,6 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   -- Contravariant Presheaf
   Presheaf : Set (ℓa ⊔ lsuc ℓb)
   Presheaf = Functor (opposite ℂ) (𝓢𝓮𝓽 ℓb)
-
-  open Category ℂ
 
   -- The "co-yoneda" embedding.
   representable : Category.Object ℂ → Representable
