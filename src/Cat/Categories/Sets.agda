@@ -28,10 +28,21 @@ sym≃ = Equivalence.symmetry
 infixl 10 _⊙_
 
 module _ {ℓ : Level} {A : Set ℓ} {a : A} where
+  -- "This follows from the propositional equiality for `J`" - Vezzosi.
   id-coe : coe refl a ≡ a
   id-coe = begin
-    coe refl a ≡⟨ {!!} ⟩
+    coe refl a                 ≡⟨⟩
+    -- pathJprop : pathJ _ refl ≡ d
+    pathJ (λ y x → A) scary A refl ≡⟨ pathJprop {x = scary} (λ y x → A) scary ⟩
+    scary ≡⟨ {!!} ⟩
+    -- pathJ (λ y x → A) scary A refl ≡⟨ pathJprop {A = A} (λ y x → A) scary ⟩
+    -- scary ≡⟨ {!!} ⟩
+
+    -- pathJ (λ y _ → B _ → B y) (λ x → x) _ p ≡⟨ {!!} ⟩
     a ∎
+    where
+    scary : A
+    scary = (primComp (λ j → A) i0 (λ j → p[ a ] i0 (~ j)) a)
 
 module _ {ℓ : Level} {A B : Set ℓ} {a : A} where
   inv-coe : (p : A ≡ B) → coe (sym p) (coe p a) ≡ a
@@ -225,7 +236,11 @@ module _ (ℓ : Level) where
           h = sym≃ (univalence {A = A} {B})
           k : Σ _ (isEquiv (A ≃ B) (A ≡ B))
           k = Eqv.doEta h
-        in {!!}
+          eqv : Σ (A → B) (isEquiv A B) Eqv.≅ (A ≃ B)
+          eqv = {!!} , {!!} , {!!}
+          hh : Σ (A → B) (isEquiv A B) ≃ (A ≃ B)
+          hh = Eeq.fromIsomorphism eqv
+        in hh ⊙ h
 
       -- lem2 with propIsSet
       step2 : (A ≡ B) ≃ (hA ≡ hB)
