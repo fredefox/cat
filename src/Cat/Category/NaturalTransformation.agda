@@ -113,8 +113,11 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
       lem : (λ _ → Natural F G θ) [ (λ f → θNat f) ≡ (λ f → θNat' f) ]
       lem = λ i f → 𝔻.arrowsAreSets _ _ (θNat f) (θNat' f) i
 
-    naturalTransformationIsSet : isSet (NaturalTransformation F G)
-    naturalTransformationIsSet = sigPresSet transformationIsSet
-      λ θ → ntypeCommulative
+    naturalIsSet : (θ : Transformation F G) → isSet (Natural F G θ)
+    naturalIsSet θ =
+      ntypeCommulative
       (s≤s {n = Nat.suc Nat.zero} z≤n)
       (naturalIsProp θ)
+
+    naturalTransformationIsSet : isSet (NaturalTransformation F G)
+    naturalTransformationIsSet = sigPresSet transformationIsSet naturalIsSet
