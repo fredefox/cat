@@ -1,8 +1,6 @@
 module Cat.Category.Exponential where
 
-open import Agda.Primitive
-open import Data.Product hiding (_×_)
-open import Cubical
+open import Cat.Prelude hiding (_×_)
 
 open import Cat.Category
 open import Cat.Category.Product

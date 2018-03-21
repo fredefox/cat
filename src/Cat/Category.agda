@@ -28,35 +28,13 @@
 
 module Cat.Category where
 
-open import Agda.Primitive
-open import Data.Unit.Base
-open import Data.Product renaming
+open import Cat.Prelude
+  renaming
   ( proj₁ to fst
   ; proj₂ to snd
-  ; ∃! to ∃!≈
   )
-open import Data.Empty
+
 import      Function
-
-open import Cubical
-open import Cubical.NType
-open import Cubical.NType.Properties
-
-open import Cat.Wishlist
-
------------------
--- * Utilities --
------------------
-
--- | Unique existensials.
-∃! : ∀ {a b} {A : Set a}
-  → (A → Set b) → Set (a ⊔ b)
-∃! = ∃!≈ _≡_
-
-∃!-syntax : ∀ {a b} {A : Set a} → (A → Set b) → Set (a ⊔ b)
-∃!-syntax = ∃
-
-syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
 -----------------
 -- * Categories --
@@ -148,6 +126,12 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     --     ∀ A → isContr (Σ[ X ∈ Object ] iso A X)
 
     -- future work ideas: compile to CAM
+    Univalent' : Set _
+    Univalent' = ∀ A → isContr (Σ[ X ∈ Object ] A ≅ X)
+
+    module _ (univalent' : Univalent') where
+      univalent'→univalent : Univalent
+      univalent'→univalent = {!!}
 
 -- | The mere proposition of being a category.
 --
@@ -229,7 +213,6 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
       isoIsProp a@(g , η , ε) a'@(g' , η' , ε') =
         lemSig (λ g → propIsInverseOf) a a' geq
           where
-            open Cubical.NType.Properties
             geq : g ≡ g'
             geq = begin
               g            ≡⟨ sym rightIdentity ⟩

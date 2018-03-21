@@ -3,8 +3,7 @@
 
 module Cat.Categories.Cat where
 
-open import Agda.Primitive
-open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
+open import Cat.Prelude renaming (proj₁ to fst ; proj₂ to snd)
 
 open import Cubical
 open import Cubical.Sigma
@@ -14,6 +13,7 @@ open import Cat.Category.Functor
 open import Cat.Category.Product
 open import Cat.Category.Exponential hiding (_×_ ; product)
 open import Cat.Category.NaturalTransformation
+open import Cat.Categories.Fun
 
 open import Cat.Equality
 open Equality.Data.Product
@@ -182,8 +182,6 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
 -- it is therefory also cartesian closed.
 module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
   private
-    open Data.Product
-    open import Cat.Categories.Fun
     module ℂ = Category ℂ
     module 𝔻 = Category 𝔻
     Categoryℓ = Category ℓ ℓ
@@ -217,7 +215,7 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
   module _ {c : Functor ℂ 𝔻 × ℂ.Object} where
     open Σ c renaming (proj₁ to F ; proj₂ to C)
 
-    ident : fmap {c} {c} (NT.identity F , ℂ.𝟙 {A = proj₂ c}) ≡ 𝔻.𝟙
+    ident : fmap {c} {c} (NT.identity F , ℂ.𝟙 {A = snd c}) ≡ 𝔻.𝟙
     ident = begin
       fmap {c} {c} (Category.𝟙 (object ⊗ ℂ) {c})        ≡⟨⟩
       fmap {c} {c} (idN F , ℂ.𝟙)               ≡⟨⟩

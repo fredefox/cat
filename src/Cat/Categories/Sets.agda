@@ -2,15 +2,13 @@
 {-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Categories.Sets where
 
-open import Agda.Primitive
-open import Data.Product
+open import Cat.Prelude hiding (_≃_)
+import Data.Product
+
 open import Function using (_∘_)
 
--- open import Cubical using (funExt ; refl ; isSet ; isProp ; _≡_ ; isEquiv ; sym ; trans ; _[_≡_] ; I ; Path ; PathP)
 open import Cubical hiding (_≃_)
 open import Cubical.Univalence using (univalence ; con ; _≃_ ; idtoeqv ; ua)
-open import Cubical.GradLemma
-open import Cubical.NType.Properties
 
 open import Cat.Category
 open import Cat.Category.Functor
@@ -260,9 +258,39 @@ module _ (ℓ : Level) where
       -- `(id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)` ?
       res : isEquiv (hA ≡ hB) (hA ≅ hB) (_≃_.eqv t)
       res = _≃_.isEqv t
+      thr : (hA ≡ hB) ≃ (hA ≅ hB)
+      thr = con _ res
+      -- p : _ → (hX : Object) → Path (hA ≅ hB) (hA ≡ hB)
+      -- p = ?
+      -- p hA X i0 = hA ~ X
+      -- p hA X i1 = Path Obj hA X
+
+      -- From Thierry:
+      --
+      -- -Any- equality proof of
+      --
+      -- Id (Obj C) c0 c1
+      --
+      -- and
+      --
+      -- iso c0 c1
+      --
+      -- is enough to ensure univalence.
+      -- This is because this implies that
+      --
+      -- Sigma (x : Obj C) is c0 x
+      --
+      -- is contractible, which implies univalence.
+
+    univalent' : ∀ hA → isContr (Σ[ hB ∈ Object ] hA ≅ hB)
+    univalent' hA = {!!} , {!!}
+
     module _ {hA hB : hSet {ℓ}} where
+
+      -- Thierry: `thr0` implies univalence.
       univalent : isEquiv (hA ≡ hB) (hA ≅ hB) (Univalence.id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)
-      univalent = let k = _≃_.isEqv (sym≃ conclusion) in {!k!}
+      univalent = univalent'→univalent univalent'
+      -- let k = _≃_.isEqv (sym≃ conclusion) in {! k!}
 
     SetsIsCategory : IsCategory SetsRaw
     IsCategory.isAssociative SetsIsCategory = refl

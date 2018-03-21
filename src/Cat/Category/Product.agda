@@ -1,11 +1,8 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 module Cat.Category.Product where
 
-open import Agda.Primitive
-open import Cubical
-open import Cubical.NType.Properties using (lemPropF)
-
-open import Data.Product as P hiding (_×_ ; proj₁ ; proj₂)
+open import Cat.Prelude hiding (_×_ ; proj₁ ; proj₂)
+import Data.Product as P
 
 open import Cat.Category
 
