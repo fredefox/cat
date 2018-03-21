@@ -287,39 +287,35 @@ module _ {ℓ : Level} where
     open Category 𝓢
     open import Cubical.Sigma
 
-    module _ (0A 0B : Object) where
+    module _ (hA hB : Object) where
+      open Σ hA renaming (proj₁ to A ; proj₂ to sA)
+      open Σ hB renaming (proj₁ to B ; proj₂ to sB)
+
       private
-        A : Set ℓ
-        A = proj₁ 0A
-        sA : isSet A
-        sA = proj₂ 0A
-        B : Set ℓ
-        B = proj₁ 0B
-        sB : isSet B
-        sB = proj₂ 0B
-        0A×0B : Object
-        0A×0B = (A × B) , sigPresSet sA λ _ → sB
+        productObject : Object
+        productObject = (A × B) , sigPresSet sA λ _ → sB
 
         module _ {X A B : Set ℓ} (f : X → A) (g : X → B) where
           _&&&_ : (X → A × B)
           _&&&_ x = f x , g x
-        module _ {0X : Object} where
-          X = proj₁ 0X
-          module _ (f : X → A ) (g : X → B) where
-            lem : proj₁ Function.∘′ (f &&& g) ≡ f × proj₂ Function.∘′ (f &&& g) ≡ g
-            proj₁ lem = refl
-            proj₂ lem = refl
 
-        rawProduct : RawProduct 𝓢 0A 0B
-        RawProduct.object rawProduct = 0A×0B
+        module _ (hX : Object) where
+          open Σ hX renaming (proj₁ to X)
+          module _ (f : X → A ) (g : X → B) where
+            ump : proj₁ Function.∘′ (f &&& g) ≡ f × proj₂ Function.∘′ (f &&& g) ≡ g
+            proj₁ ump = refl
+            proj₂ ump = refl
+
+        rawProduct : RawProduct 𝓢 hA hB
+        RawProduct.object rawProduct = productObject
         RawProduct.proj₁  rawProduct = Data.Product.proj₁
         RawProduct.proj₂  rawProduct = Data.Product.proj₂
 
         isProduct : IsProduct 𝓢 _ _ rawProduct
-        IsProduct.ump isProduct {X = X} f g
-          = (f &&& g) , lem {0X = X} f g
+        IsProduct.ump isProduct {X = hX} f g
+          = (f &&& g) , ump hX f g
 
-      product : Product 𝓢 0A 0B
+      product : Product 𝓢 hA hB
       Product.raw       product = rawProduct
       Product.isProduct product = isProduct
 
@@ -346,7 +342,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       ; fmap = ℂ [_∘_]
       }
     ; isFunctor = record
-      { isIdentity = funExt λ _ → proj₂ isIdentity
+      { isIdentity     = funExt λ _ → leftIdentity
       ; isDistributive = funExt λ x → sym isAssociative
       }
     }
@@ -359,7 +355,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       ; fmap = λ f g → ℂ [ g ∘ f ]
     }
     ; isFunctor = record
-      { isIdentity = funExt λ x → proj₁ isIdentity
+      { isIdentity     = funExt λ x → rightIdentity
       ; isDistributive = funExt λ x → isAssociative
       }
     }

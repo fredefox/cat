@@ -124,7 +124,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
             bind (f >>> (pure >>> bind 𝟙))
               ≡⟨ cong (λ φ → bind (f >>> φ)) (isNatural _) ⟩
             bind (f >>> 𝟙)
-              ≡⟨ cong bind (proj₂ ℂ.isIdentity) ⟩
+              ≡⟨ cong bind ℂ.leftIdentity ⟩
             bind f ∎
 
       forthRawEq : forthRaw (backRaw m) ≡ K.Monad.raw m
@@ -155,7 +155,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
           KM.bind 𝟙              ≡⟨⟩
           bind 𝟙                 ≡⟨⟩
           joinT X ∘ Rfmap 𝟙      ≡⟨ cong (λ φ → _ ∘ φ) R.isIdentity ⟩
-          joinT X ∘ 𝟙            ≡⟨ proj₁ ℂ.isIdentity ⟩
+          joinT X ∘ 𝟙            ≡⟨ ℂ.rightIdentity ⟩
           joinT X                ∎
 
         fmapEq : ∀ {A B} → KM.fmap {A} {B} ≡ Rfmap
@@ -167,7 +167,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
           Rfmap (f >>> pureT B) >>> joinT B        ≡⟨ cong (λ φ → φ >>> joinT B) R.isDistributive ⟩
           Rfmap f >>> Rfmap (pureT B) >>> joinT B  ≡⟨ ℂ.isAssociative ⟩
           joinT B ∘ Rfmap (pureT B) ∘ Rfmap f      ≡⟨ cong (λ φ → φ ∘ Rfmap f) (proj₂ isInverse) ⟩
-          𝟙 ∘ Rfmap f                              ≡⟨ proj₂ ℂ.isIdentity ⟩
+          𝟙 ∘ Rfmap f                              ≡⟨ ℂ.leftIdentity ⟩
           Rfmap f                                  ∎
           )
 
@@ -192,7 +192,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         M.RawMonad.joinT (backRaw (forth m)) X ≡⟨⟩
         KM.join ≡⟨⟩
         joinT X ∘ Rfmap 𝟙 ≡⟨ cong (λ φ → joinT X ∘ φ) R.isIdentity ⟩
-        joinT X ∘ 𝟙 ≡⟨ proj₁ ℂ.isIdentity ⟩
+        joinT X ∘ 𝟙 ≡⟨ ℂ.rightIdentity ⟩
         joinT X ∎)
 
       joinNTEq : (λ i → NaturalTransformation F[ Req i ∘ Req i ] (Req i))

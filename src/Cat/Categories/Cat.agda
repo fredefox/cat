@@ -47,7 +47,7 @@ module _ (ℓ ℓ' : Level) where
     isAssociative : IsAssociative
     isAssociative {f = F} {G} {H} = assc {F = F} {G = G} {H = H}
     ident : IsIdentity identity
-    ident = ident-r , ident-l
+    ident = ident-l , ident-r
 
   -- NB! `ArrowsAreSets RawCat` is *not* provable. The type of functors,
   -- however, form a groupoid! Therefore there is no (1-)category of
@@ -241,10 +241,10 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
 
     ident : fmap {c} {c} (NT.identity F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
     ident = begin
-      fmap {c} {c} (𝟙 (object ⊗ ℂ) {c})    ≡⟨⟩
-      fmap {c} {c} (idN F , 𝟙 ℂ)             ≡⟨⟩
+      fmap {c} {c} (𝟙 (object ⊗ ℂ) {c})        ≡⟨⟩
+      fmap {c} {c} (idN F , 𝟙 ℂ)               ≡⟨⟩
       𝔻 [ identityTrans F C ∘ F.fmap (𝟙 ℂ)]    ≡⟨⟩
-      𝔻 [ 𝟙 𝔻 ∘ F.fmap (𝟙 ℂ)]                  ≡⟨ proj₂ 𝔻.isIdentity ⟩
+      𝔻 [ 𝟙 𝔻 ∘ F.fmap (𝟙 ℂ)]                  ≡⟨ 𝔻.leftIdentity ⟩
       F.fmap (𝟙 ℂ)                             ≡⟨ F.isIdentity ⟩
       𝟙 𝔻                                       ∎
       where

@@ -75,8 +75,8 @@ record IsMonad (raw : RawMonad) : Set ℓ where
     joinT Y ∘ (R.fmap f ∘ pureT X)   ≡⟨ cong (λ φ → joinT Y ∘ φ) (sym (pureN f)) ⟩
     joinT Y ∘ (pureT (R.omap Y) ∘ f) ≡⟨ ℂ.isAssociative ⟩
     joinT Y ∘ pureT (R.omap Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (proj₁ isInverse) ⟩
-    𝟙 ∘ f                     ≡⟨ proj₂ ℂ.isIdentity ⟩
-    f                         ∎
+    𝟙 ∘ f                            ≡⟨ ℂ.leftIdentity ⟩
+    f                                ∎
 
   isDistributive : IsDistributive
   isDistributive {X} {Y} {Z} g f = sym aux

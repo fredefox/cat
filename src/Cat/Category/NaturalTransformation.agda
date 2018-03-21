@@ -72,8 +72,8 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
   identityNatural : (F : Functor ℂ 𝔻) → Natural F F (identityTrans F)
   identityNatural F {A = A} {B = B} f = begin
     𝔻 [ identityTrans F B ∘ F→ f ]  ≡⟨⟩
-    𝔻 [ 𝟙 𝔻 ∘  F→ f ]              ≡⟨ proj₂ 𝔻.isIdentity ⟩
-    F→ f                            ≡⟨ sym (proj₁ 𝔻.isIdentity) ⟩
+    𝔻 [ 𝟙 𝔻 ∘  F→ f ]              ≡⟨ 𝔻.leftIdentity ⟩
+    F→ f                            ≡⟨ sym 𝔻.rightIdentity ⟩
     𝔻 [ F→ f ∘ 𝟙 𝔻 ]               ≡⟨⟩
     𝔻 [ F→ f ∘ identityTrans F A ]  ∎
     where

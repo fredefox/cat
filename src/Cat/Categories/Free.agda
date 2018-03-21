@@ -55,7 +55,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     ident-l = refl
 
     isIdentity : IsIdentity 𝟙
-    isIdentity = ident-r , ident-l
+    isIdentity = ident-l , ident-r
 
     open Univalence isIdentity
 

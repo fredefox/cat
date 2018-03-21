@@ -96,7 +96,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
   IsIdentity : ({A : Object} → Arrow A A) → Set (ℓa ⊔ ℓb)
   IsIdentity id = {A B : Object} {f : Arrow A B}
-    → f ∘ id ≡ f × id ∘ f ≡ f
+    → id ∘ f ≡ f × f ∘ id ≡ f
 
   ArrowsAreSets : Set (ℓa ⊔ ℓb)
   ArrowsAreSets = ∀ {A B : Object} → isSet (Arrow A B)
@@ -166,29 +166,37 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   field
     univalent     : Univalent
 
+  leftIdentity : {A B : Object} {f : Arrow A B} → 𝟙 ∘ f ≡ f
+  leftIdentity {A} {B} {f} = fst (isIdentity {A = A} {B} {f})
+  -- leftIdentity {A} {B} {f} = snd (isIdentity {A = A} {B} {f})
+
+  rightIdentity : {A B : Object} {f : Arrow A B} → f ∘ 𝟙 ≡ f
+  rightIdentity {A} {B} {f} = snd (isIdentity {A = A} {B} {f})
+  -- rightIdentity {A} {B} {f} = fst (isIdentity {A = A} {B} {f})
+
   -- Some common lemmas about categories.
   module _ {A B : Object} {X : Object} (f : Arrow A B) where
     iso-is-epi : Isomorphism f → Epimorphism {X = X} f
     iso-is-epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
-      g₀              ≡⟨ sym (fst isIdentity) ⟩
+      g₀              ≡⟨ sym rightIdentity ⟩
       g₀ ∘ 𝟙          ≡⟨ cong (_∘_ g₀) (sym right-inv) ⟩
       g₀ ∘ (f ∘ f-)   ≡⟨ isAssociative ⟩
       (g₀ ∘ f) ∘ f-   ≡⟨ cong (λ φ → φ ∘ f-) eq ⟩
       (g₁ ∘ f) ∘ f-   ≡⟨ sym isAssociative ⟩
       g₁ ∘ (f ∘ f-)   ≡⟨ cong (_∘_ g₁) right-inv ⟩
-      g₁ ∘ 𝟙          ≡⟨ fst isIdentity ⟩
+      g₁ ∘ 𝟙          ≡⟨ rightIdentity ⟩
       g₁              ∎
 
     iso-is-mono : Isomorphism f → Monomorphism {X = X} f
     iso-is-mono (f- , (left-inv , right-inv)) g₀ g₁ eq =
       begin
-      g₀            ≡⟨ sym (snd isIdentity) ⟩
+      g₀            ≡⟨ sym leftIdentity ⟩
       𝟙 ∘ g₀        ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
       (f- ∘ f) ∘ g₀ ≡⟨ sym isAssociative ⟩
       f- ∘ (f ∘ g₀) ≡⟨ cong (_∘_ f-) eq ⟩
       f- ∘ (f ∘ g₁) ≡⟨ isAssociative ⟩
       (f- ∘ f) ∘ g₁ ≡⟨ cong (λ φ → φ ∘ g₁) left-inv ⟩
-      𝟙 ∘ g₁        ≡⟨ snd isIdentity ⟩
+      𝟙 ∘ g₁        ≡⟨ leftIdentity ⟩
       g₁            ∎
 
     iso-is-epi-mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
@@ -201,7 +209,7 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
 module Propositionality {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   open RawCategory ℂ
   module _ (ℂ : IsCategory ℂ) where
-    open IsCategory ℂ using (isAssociative ; arrowsAreSets ; isIdentity ; Univalent)
+    open IsCategory ℂ using (isAssociative ; arrowsAreSets ; Univalent ; leftIdentity ; rightIdentity)
     open import Cubical.NType
     open import Cubical.NType.Properties
 
@@ -233,11 +241,11 @@ module Propositionality {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
             open Cubical.NType.Properties
             geq : g ≡ g'
             geq = begin
-              g            ≡⟨ sym (fst isIdentity) ⟩
+              g            ≡⟨ sym rightIdentity ⟩
               g ∘ 𝟙        ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
               g ∘ (f ∘ g') ≡⟨ isAssociative ⟩
               (g ∘ f) ∘ g' ≡⟨ cong (λ φ → φ ∘ g') η ⟩
-              𝟙 ∘ g'       ≡⟨ snd isIdentity ⟩
+              𝟙 ∘ g'       ≡⟨ leftIdentity ⟩
               g'           ∎
 
     propUnivalent : isProp Univalent

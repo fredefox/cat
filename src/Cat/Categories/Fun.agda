@@ -45,18 +45,18 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
       eq-r : ∀ C → (𝔻 [ f' C ∘ identityTrans A C ]) ≡ f' C
       eq-r C = begin
         𝔻 [ f' C ∘ identityTrans A C ] ≡⟨⟩
-        𝔻 [ f' C ∘ 𝔻.𝟙 ]  ≡⟨ proj₁ 𝔻.isIdentity ⟩
+        𝔻 [ f' C ∘ 𝔻.𝟙 ]  ≡⟨ 𝔻.rightIdentity ⟩
         f' C ∎
       eq-l : ∀ C → (𝔻 [ identityTrans B C ∘ f' C ]) ≡ f' C
-      eq-l C = proj₂ 𝔻.isIdentity
+      eq-l C = 𝔻.leftIdentity
       ident-r : (NT[_∘_] {A} {A} {B} f (NT.identity A)) ≡ f
       ident-r = lemSig allNatural _ _ (funExt eq-r)
       ident-l : (NT[_∘_] {A} {B} {B} (NT.identity B) f) ≡ f
       ident-l = lemSig allNatural _ _ (funExt eq-l)
       isIdentity
-        : (NT[_∘_] {A} {A} {B} f (NT.identity A)) ≡ f
-        × (NT[_∘_] {A} {B} {B} (NT.identity B) f) ≡ f
-      isIdentity = ident-r , ident-l
+        : (NT[_∘_] {A} {B} {B} (NT.identity B) f) ≡ f
+        × (NT[_∘_] {A} {A} {B} f (NT.identity A)) ≡ f
+      isIdentity = ident-l , ident-r
   -- Functor categories. Objects are functors, arrows are natural transformations.
   RawFun : RawCategory (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') (ℓc ⊔ ℓc' ⊔ ℓd')
   RawFun = record

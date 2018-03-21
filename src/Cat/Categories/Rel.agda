@@ -76,9 +76,9 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
         ≃ (a , b) ∈ S
       equi = backwards Cubical.FromStdLib., isequiv
 
-    ident-l : (Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
+    ident-r : (Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
       ≡ (a , b) ∈ S
-    ident-l = equivToPath equi
+    ident-r = equivToPath equi
 
   module _ where
     private
@@ -110,9 +110,9 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
         ≃ ab ∈ S
       equi = backwards Cubical.FromStdLib., isequiv
 
-    ident-r : (Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
+    ident-l : (Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
       ≡ ab ∈ S
-    ident-r = equivToPath equi
+    ident-l = equivToPath equi
 
 module _ {A B C D : Set} {S : Subset (A × B)} {R : Subset (B × C)} {Q : Subset (C × D)} (ad : A × D) where
   private

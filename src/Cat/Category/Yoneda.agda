@@ -54,7 +54,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
     isIdentity {c} = lemSig (naturalIsProp {F = presheaf c} {presheaf c}) _ _ eq
       where
       eq : (λ C x → ℂ [ ℂ.𝟙 ∘ x ]) ≡ identityTrans (presheaf c)
-      eq = funExt λ A → funExt λ B → proj₂ ℂ.isIdentity
+      eq = funExt λ A → funExt λ B → ℂ.leftIdentity
 
     isDistributive : IsDistributive
     isDistributive {A} {B} {C} {f = f} {g}
