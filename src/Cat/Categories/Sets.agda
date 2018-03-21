@@ -147,26 +147,47 @@ module _ (ℓ : Level) where
         Q→P : ∀ {a} → Q a ≡ P a
         Q→P = sym P→Q
         f : Σ A P → Σ A Q
-        f (a , pA) = a , coe P→Q pA
+        f (a , pA) = a , _≃_.eqv (eA a) pA
         g : Σ A Q → Σ A P
-        g (a , qA) = a , coe Q→P qA
+        g (a , qA) = a , g' qA
+          where
+          module E = Equivalence (eA a)
+          k : Eqv.Isomorphism _
+          k = E.toIso (_≃_.isEqv (eA a))
+          open Σ k renaming (proj₁ to g')
         ve-re : (x : Σ A P) → (g ∘ f) x ≡ x
         ve-re x i = proj₁ x , eq i
           where
           eq : proj₂ ((g ∘ f) x) ≡ proj₂ x
           eq = begin
             proj₂ ((g ∘ f) x) ≡⟨⟩
-            coe Q→P (proj₂ (f x))        ≡⟨⟩
-            coe Q→P (coe P→Q (proj₂ x))  ≡⟨ inv-coe P→Q ⟩
-            proj₂ x ∎
+            proj₂ (g (f (a , pA))) ≡⟨⟩
+            g' (_≃_.eqv (eA a) pA) ≡⟨ lem ⟩
+            pA ∎
+            where
+            open Σ x renaming (proj₁ to a ; proj₂ to pA)
+            module E = Equivalence (eA a)
+            k : Eqv.Isomorphism _
+            k = E.toIso (_≃_.isEqv (eA a))
+            open Σ k renaming (proj₁ to g' ; proj₂ to inv)
+            module A = AreInverses inv
+            -- anti-funExt
+            lem : (g' ∘ (_≃_.eqv (eA a))) pA ≡ pA
+            lem i = A.verso-recto i pA
         re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
         re-ve x i = proj₁ x , eq i
           where
+          open Σ x renaming (proj₁ to a ; proj₂ to qA)
           eq = begin
             proj₂ ((f ∘ g) x)                 ≡⟨⟩
-            coe P→Q (coe Q→P (proj₂ x))       ≡⟨⟩
-            coe P→Q (coe (sym P→Q) (proj₂ x)) ≡⟨ inv-coe' P→Q ⟩
-            proj₂ x                           ∎
+            _≃_.eqv (eA a) (g' qA)            ≡⟨ (λ i → A.recto-verso i qA) ⟩
+            qA                                ∎
+            where
+            module E = Equivalence (eA a)
+            k : Eqv.Isomorphism _
+            k = E.toIso (_≃_.isEqv (eA a))
+            open Σ k renaming (proj₁ to g' ; proj₂ to inv)
+            module A = AreInverses inv
         inv : AreInverses f g
         inv = record
           { verso-recto = funExt ve-re
@@ -279,15 +300,11 @@ module _ (ℓ : Level) where
       --
       -- is contractible, which implies univalence.
 
-    univalent' : ∀ hA → isContr (Σ[ hB ∈ Object ] hA ≅ hB)
-    univalent' hA = {!!} , {!!}
+    univalent[Contr] : ∀ hA → isContr (Σ[ hB ∈ Object ] hA ≅ hB)
+    univalent[Contr] hA = {!!} , {!!}
 
-    module _ {hA hB : hSet ℓ} where
-
-      -- Thierry: `thr0` implies univalence.
-      univalent : isEquiv (hA ≡ hB) (hA ≅ hB) (Univalence.id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)
-      univalent = univalent'→univalent univalent'
-      -- let k = _≃_.isEqv (sym≃ conclusion) in {! k!}
+    univalent : Univalent
+    univalent = from[Contr] univalent[Contr]
 
     SetsIsCategory : IsCategory SetsRaw
     IsCategory.isAssociative SetsIsCategory = refl

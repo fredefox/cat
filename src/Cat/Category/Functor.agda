@@ -78,8 +78,8 @@ EndoFunctor : ∀ {ℓa ℓb} (ℂ : Category ℓa ℓb) → Set _
 EndoFunctor ℂ = Functor ℂ ℂ
 
 module _
-    {ℓa ℓb : Level}
-    {ℂ 𝔻 : Category ℓa ℓb}
+    {ℓc ℓc' ℓd ℓd' : Level}
+    {ℂ : Category ℓc ℓc'} {𝔻 : Category ℓd ℓd'}
     (F : RawFunctor ℂ 𝔻)
     where
   private
@@ -96,8 +96,7 @@ module _
 
 -- Alternate version of above where `F` is indexed by an interval
 module _
-    {ℓa ℓb : Level}
-    {ℂ 𝔻 : Category ℓa ℓb}
+    {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Category ℓd ℓd'}
     {F : I → RawFunctor ℂ 𝔻}
     where
   private
@@ -109,7 +108,7 @@ module _
   IsFunctorIsProp' isF0 isF1 = lemPropF {B = IsFunctor ℂ 𝔻}
     (\ F → propIsFunctor F) (\ i → F i)
 
-module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
+module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Category ℓd ℓd'} where
   open Functor
   Functor≡ : {F G : Functor ℂ 𝔻}
     → Functor.raw F ≡ Functor.raw G

@@ -120,18 +120,16 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
     Univalent : Set (ℓa ⊔ ℓb)
     Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
-    -- Alternative formulation of univalence which is easier to prove in the
-    -- case of the functor category.
+
+    -- | Equivalent formulation of univalence.
+    Univalent[Contr] : Set _
+    Univalent[Contr] = ∀ A → isContr (Σ[ X ∈ Object ] A ≅ X)
+
+    -- From: Thierry Coquand <Thierry.Coquand@cse.gu.se>
+    -- Date: Wed, Mar 21, 2018 at 3:12 PM
     --
-    --     ∀ A → isContr (Σ[ X ∈ Object ] iso A X)
-
-    -- future work ideas: compile to CAM
-    Univalent' : Set _
-    Univalent' = ∀ A → isContr (Σ[ X ∈ Object ] A ≅ X)
-
-    module _ (univalent' : Univalent') where
-      univalent'→univalent : Univalent
-      univalent'→univalent = {!!}
+    -- This is not so straight-forward so you can assume it
+    postulate from[Contr] : Univalent[Contr] → Univalent
 
 -- | The mere proposition of being a category.
 --
@@ -207,6 +205,24 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
         hh : snd x ≡ snd y
         hh = arrowsAreSets _ _ (snd x) (snd y)
       in h i , hh i
+
+    module _ {A B : Object} {p q : A ≅ B} where
+      open Σ p       renaming (proj₁ to pf)
+      open Σ (snd p) renaming (proj₁ to pg ; proj₂ to pAreInv)
+      open Σ q       renaming (proj₁ to qf)
+      open Σ (snd q) renaming (proj₁ to qg ; proj₂ to qAreInv)
+      module _ (a : pf ≡ qf) (b : pg ≡ qg) where
+        private
+          open import Cubical.Sigma
+          open import Cubical.NType.Properties
+          -- Problem: How do I apply lempPropF twice?
+          cc : (λ i → IsInverseOf (a i) pg) [ pAreInv ≡ _ ]
+          cc = lemPropF (λ x → propIsInverseOf {A} {B} {x}) a
+          c : (λ i → IsInverseOf (a i) (b i)) [ pAreInv ≡ qAreInv ]
+          c = lemPropF (λ x → propIsInverseOf {A} {B} {{!!}}) {!cc!}
+
+        ≅-equality : p ≡ q
+        ≅-equality i = a i , b i , c i
 
     module _ {A B : Object} {f : Arrow A B} where
       isoIsProp : isProp (Isomorphism f)

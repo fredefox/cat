@@ -8,7 +8,7 @@ open import Cat.Category
 
 module _ (ℓa ℓb : Level) where
   private
-    Object = Σ[ hA ∈ hSet {ℓa} ] (proj₁ hA → hSet {ℓb})
+    Object = Σ[ hA ∈ hSet ℓa ] (proj₁ hA → hSet ℓb)
     Arr : Object → Object → Set (ℓa ⊔ ℓb)
     Arr ((A , _) , B) ((A' , _) , B') = Σ[ f ∈ (A → A') ] ({x : A} → proj₁ (B x) → proj₁ (B' (f x)))
     𝟙 : {A : Object} → Arr A A
