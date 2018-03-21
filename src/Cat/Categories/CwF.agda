@@ -1,14 +1,10 @@
 module Cat.Categories.CwF where
 
-open import Agda.Primitive
-open import Data.Product
+open import Cat.Prelude
 
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Categories.Fam
-
-open Category
-open Functor
 
 module _ {ℓa ℓb : Level} where
   record CwF : Set (lsuc (ℓa ⊔ ℓb)) where
@@ -16,21 +12,22 @@ module _ {ℓa ℓb : Level} where
     field
       -- "A base category"
       ℂ : Category ℓa ℓb
+    module ℂ = Category ℂ
     -- It's objects are called contexts
-    Contexts = Object ℂ
+    Contexts = ℂ.Object
     -- It's arrows are called substitutions
-    Substitutions = Arrow ℂ
+    Substitutions = ℂ.Arrow
     field
       -- A functor T
       T : Functor (opposite ℂ) (Fam ℓa ℓb)
       -- Empty context
-      [] : Terminal ℂ
+      [] : ℂ.Terminal
     private
       module T = Functor T
-    Type : (Γ : Object ℂ) → Set ℓa
+    Type : (Γ : ℂ.Object) → Set ℓa
     Type Γ = proj₁ (proj₁ (T.omap Γ))
 
-    module _ {Γ : Object ℂ} {A : Type Γ} where
+    module _ {Γ : ℂ.Object} {A : Type Γ} where
 
       -- module _ {A B : Object ℂ} {γ : ℂ [ A , B ]} where
       --   k : Σ (proj₁ (omap T B) → proj₁ (omap T A))
@@ -46,7 +43,7 @@ module _ {ℓa ℓb : Level} where
 
       record ContextComprehension : Set (ℓa ⊔ ℓb) where
         field
-          Γ&A : Object ℂ
+          Γ&A : ℂ.Object
           proj1 : ℂ [ Γ&A , Γ ]
           -- proj2 : ????
 

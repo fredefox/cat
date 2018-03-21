@@ -1,11 +1,9 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 module Cat.Categories.Free where
 
-open import Agda.Primitive
-open import Relation.Binary
+open import Cat.Prelude hiding (Path ; empty)
 
-open import Cubical hiding (Path ; empty)
-open import Data.Product
+open import Relation.Binary
 
 open import Cat.Category
 
@@ -60,7 +58,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     open Univalence isIdentity
 
     module _ {A B : ℂ.Object} where
-      arrowsAreSets : Cubical.isSet (Path ℂ.Arrow A B)
+      arrowsAreSets : isSet (Path ℂ.Arrow A B)
       arrowsAreSets a b p q = {!!}
 
       eqv : isEquiv (A ≡ B) (A ≅ B) (Univalence.id-to-iso isIdentity A B)

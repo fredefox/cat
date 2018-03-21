@@ -1,12 +1,8 @@
 {-# OPTIONS --cubical --allow-unsolved-metas #-}
 module Cat.Categories.Rel where
 
-open import Cubical
-open import Cubical.GradLemma
-open import Agda.Primitive
-open import Data.Product renaming (proj₁ to fst ; proj₂ to snd)
+open import Cat.Prelude renaming (proj₁ to fst ; proj₂ to snd)
 open import Function
-import Cubical.FromStdLib
 
 open import Cat.Category
 
@@ -74,7 +70,7 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
 
       equi : (Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
         ≃ (a , b) ∈ S
-      equi = backwards Cubical.FromStdLib., isequiv
+      equi = backwards , isequiv
 
     ident-r : (Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
       ≡ (a , b) ∈ S
@@ -108,7 +104,7 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
 
       equi : (Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
         ≃ ab ∈ S
-      equi = backwards Cubical.FromStdLib., isequiv
+      equi = backwards , isequiv
 
     ident-l : (Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
       ≡ ab ∈ S
@@ -146,7 +142,7 @@ module _ {A B C D : Set} {S : Subset (A × B)} {R : Subset (B × C)} {Q : Subset
 
     equi : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
       ≃ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
-    equi = fwd Cubical.FromStdLib., isequiv
+    equi = fwd , isequiv
 
     -- isAssociativec : Q + (R + S) ≡ (Q + R) + S
   is-isAssociative : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)

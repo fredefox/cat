@@ -4,14 +4,8 @@ This module provides construction 2.3 in [voe]
 {-# OPTIONS --cubical --allow-unsolved-metas --caching #-}
 module Cat.Category.Monad.Voevodsky where
 
-open import Agda.Primitive
-
-open import Data.Product
-open import Function using (_∘_ ; _$_)
-
-open import Cubical
-open import Cubical.NType.Properties using (lemPropF ; lemSig ;  lemSigP)
-open import Cubical.GradLemma        using (gradLemma)
+open import Cat.Prelude
+open import Function
 
 open import Cat.Category
 open import Cat.Category.Functor as F

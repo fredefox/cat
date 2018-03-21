@@ -19,14 +19,11 @@
 -- * A composition operator.
 {-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Category.NaturalTransformation where
-open import Agda.Primitive
-open import Data.Product
+
+open import Cat.Prelude
+
 open import Data.Nat using (_≤_ ; z≤n ; s≤s)
 module Nat = Data.Nat
-
-open import Cubical
-open import Cubical.Sigma
-open import Cubical.NType.Properties
 
 open import Cat.Category
 open import Cat.Category.Functor hiding (identity)

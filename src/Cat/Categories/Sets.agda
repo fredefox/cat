@@ -7,7 +7,6 @@ import Data.Product
 
 open import Function using (_∘_)
 
-open import Cubical hiding (_≃_)
 open import Cubical.Univalence using (univalence ; con ; _≃_ ; idtoeqv ; ua)
 
 open import Cat.Category

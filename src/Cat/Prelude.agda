@@ -24,7 +24,7 @@ open import Cubical.NType.Properties
     ( lemPropF ; lemSig ;  lemSigP ; isSetIsProp
     ; propPi ; propHasLevel ; setPi ; propSet)
   public
-open import Cubical.Sigma using (setSig) public
+open import Cubical.Sigma using (setSig ; sigPresSet) public
 open import Cubical.Universe using (hSet) public
 
 -----------------

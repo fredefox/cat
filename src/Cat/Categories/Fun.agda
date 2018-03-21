@@ -1,13 +1,7 @@
 {-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Categories.Fun where
 
-open import Agda.Primitive
-open import Data.Product
-
-
-open import Cubical
-open import Cubical.GradLemma
-open import Cubical.NType.Properties
+open import Cat.Prelude
 
 open import Cat.Category
 open import Cat.Category.Functor hiding (identity)
