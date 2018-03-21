@@ -18,8 +18,6 @@ open import Cat.Category.NaturalTransformation
 open import Cat.Equality
 open Equality.Data.Product
 
-open Category using (Object ; 𝟙)
-
 -- The category of categories
 module _ (ℓ ℓ' : Level) where
   private
@@ -35,19 +33,18 @@ module _ (ℓ ℓ' : Level) where
       ident-l = Functor≡ refl
 
   RawCat : RawCategory (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
-  RawCat =
-    record
-      { Object = Category ℓ ℓ'
-      ; Arrow = Functor
-      ; 𝟙 = identity
-      ; _∘_ = F[_∘_]
-      }
+  RawCategory.Object RawCat = Category ℓ ℓ'
+  RawCategory.Arrow  RawCat = Functor
+  RawCategory.𝟙      RawCat = identity
+  RawCategory._∘_    RawCat = F[_∘_]
+
   private
     open RawCategory RawCat
     isAssociative : IsAssociative
     isAssociative {f = F} {G} {H} = assc {F = F} {G = G} {H = H}
-    ident : IsIdentity identity
-    ident = ident-l , ident-r
+
+    isIdentity : IsIdentity identity
+    isIdentity = ident-l , ident-r
 
   -- NB! `ArrowsAreSets RawCat` is *not* provable. The type of functors,
   -- however, form a groupoid! Therefore there is no (1-)category of
@@ -55,7 +52,7 @@ module _ (ℓ ℓ' : Level) where
   --
   -- Because of this there is no category of categories.
   Cat : (unprovable : IsCategory RawCat) → Category (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
-  Category.raw        (Cat _) = RawCat
+  Category.raw        (Cat _)          = RawCat
   Category.isCategory (Cat unprovable) = unprovable
 
 -- | In the following we will pretend there is a category of categories when
@@ -72,28 +69,31 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
     module ℂ = Category ℂ
     module 𝔻 = Category 𝔻
 
-    Obj = Object ℂ × Object 𝔻
-    Arr  : Obj → Obj → Set ℓ'
-    Arr (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
-    𝟙' : {o : Obj} → Arr o o
-    𝟙' = 𝟙 ℂ , 𝟙 𝔻
-    _∘_ :
-      {a b c : Obj} →
-      Arr b c →
-      Arr a b →
-      Arr a c
-    _∘_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → ℂ [ bc∈C ∘ ab∈C ] , 𝔻 [ bc∈D ∘ ab∈D ]}
+    module _ where
+      private
+        Obj = ℂ.Object × 𝔻.Object
+        Arr  : Obj → Obj → Set ℓ'
+        Arr (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
+        𝟙 : {o : Obj} → Arr o o
+        𝟙 = ℂ.𝟙 , 𝔻.𝟙
+        _∘_ :
+          {a b c : Obj} →
+          Arr b c →
+          Arr a b →
+          Arr a c
+        _∘_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → ℂ [ bc∈C ∘ ab∈C ] , 𝔻 [ bc∈D ∘ ab∈D ]}
 
-    rawProduct : RawCategory ℓ ℓ'
-    RawCategory.Object rawProduct = Obj
-    RawCategory.Arrow  rawProduct = Arr
-    RawCategory.𝟙      rawProduct = 𝟙'
-    RawCategory._∘_    rawProduct = _∘_
-    open RawCategory   rawProduct
+      rawProduct : RawCategory ℓ ℓ'
+      RawCategory.Object rawProduct = Obj
+      RawCategory.Arrow  rawProduct = Arr
+      RawCategory.𝟙      rawProduct = 𝟙
+      RawCategory._∘_    rawProduct = _∘_
+
+    open RawCategory rawProduct
 
     arrowsAreSets : ArrowsAreSets
     arrowsAreSets = setSig {sA = ℂ.arrowsAreSets} {sB = λ x → 𝔻.arrowsAreSets}
-    isIdentity : IsIdentity 𝟙'
+    isIdentity : IsIdentity 𝟙
     isIdentity
       = Σ≡ (fst ℂ.isIdentity) (fst 𝔻.isIdentity)
       , Σ≡ (snd ℂ.isIdentity) (snd 𝔻.isIdentity)
@@ -189,102 +189,65 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
     Categoryℓ = Category ℓ ℓ
     open Fun ℂ 𝔻 renaming (identity to idN)
 
-    omap : Functor ℂ 𝔻 × Object ℂ → Object 𝔻
+    omap : Functor ℂ 𝔻 × ℂ.Object → 𝔻.Object
     omap (F , A) = Functor.omap F A
 
   -- The exponential object
   object : Categoryℓ
   object = Fun
 
-  module _ {dom cod : Functor ℂ 𝔻 × Object ℂ} where
+  module _ {dom cod : Functor ℂ 𝔻 × ℂ.Object} where
+    open Σ dom renaming (proj₁ to F ; proj₂ to A)
+    open Σ cod renaming (proj₁ to G ; proj₂ to B)
     private
-      F : Functor ℂ 𝔻
-      F = proj₁ dom
-      A : Object ℂ
-      A = proj₂ dom
-
-      G : Functor ℂ 𝔻
-      G = proj₁ cod
-      B : Object ℂ
-      B = proj₂ cod
-
       module F = Functor F
       module G = Functor G
 
     fmap : (pobj : NaturalTransformation F G × ℂ [ A , B ])
       → 𝔻 [ F.omap A , G.omap B ]
-    fmap ((θ , θNat) , f) = result
-      where
-        θA : 𝔻 [ F.omap A , G.omap A ]
-        θA = θ A
-        θB : 𝔻 [ F.omap B , G.omap B ]
-        θB = θ B
-        F→f : 𝔻 [ F.omap A , F.omap B ]
-        F→f = F.fmap f
-        G→f : 𝔻 [ G.omap A , G.omap B ]
-        G→f = G.fmap f
-        l : 𝔻 [ F.omap A , G.omap B ]
-        l = 𝔻 [ θB ∘ F.fmap f ]
-        r : 𝔻 [ F.omap A , G.omap B ]
-        r = 𝔻 [ G.fmap f ∘ θA ]
-        result : 𝔻 [ F.omap A , G.omap B ]
-        result = l
+    fmap ((θ , θNat) , f) = 𝔻 [ θ B ∘ F.fmap f ]
+    -- Alternatively:
+    --
+    --   fmap ((θ , θNat) , f) = 𝔻 [ G.fmap f ∘ θ A ]
+    --
+    -- Since they are equal by naturality of θ.
 
   open CatProduct renaming (object to _⊗_) using ()
 
-  module _ {c : Functor ℂ 𝔻 × Object ℂ} where
-    private
-      F : Functor ℂ 𝔻
-      F = proj₁ c
-      C : Object ℂ
-      C = proj₂ c
+  module _ {c : Functor ℂ 𝔻 × ℂ.Object} where
+    open Σ c renaming (proj₁ to F ; proj₂ to C)
 
-    ident : fmap {c} {c} (NT.identity F , 𝟙 ℂ {A = proj₂ c}) ≡ 𝟙 𝔻
+    ident : fmap {c} {c} (NT.identity F , ℂ.𝟙 {A = proj₂ c}) ≡ 𝔻.𝟙
     ident = begin
-      fmap {c} {c} (𝟙 (object ⊗ ℂ) {c})        ≡⟨⟩
-      fmap {c} {c} (idN F , 𝟙 ℂ)               ≡⟨⟩
-      𝔻 [ identityTrans F C ∘ F.fmap (𝟙 ℂ)]    ≡⟨⟩
-      𝔻 [ 𝟙 𝔻 ∘ F.fmap (𝟙 ℂ)]                  ≡⟨ 𝔻.leftIdentity ⟩
-      F.fmap (𝟙 ℂ)                             ≡⟨ F.isIdentity ⟩
-      𝟙 𝔻                                       ∎
+      fmap {c} {c} (Category.𝟙 (object ⊗ ℂ) {c})        ≡⟨⟩
+      fmap {c} {c} (idN F , ℂ.𝟙)               ≡⟨⟩
+      𝔻 [ identityTrans F C ∘ F.fmap ℂ.𝟙 ]    ≡⟨⟩
+      𝔻 [ 𝔻.𝟙 ∘ F.fmap ℂ.𝟙 ]                  ≡⟨ 𝔻.leftIdentity ⟩
+      F.fmap ℂ.𝟙                               ≡⟨ F.isIdentity ⟩
+      𝔻.𝟙                                       ∎
       where
         module F = Functor F
 
-  module _ {F×A G×B H×C : Functor ℂ 𝔻 × Object ℂ} where
+  module _ {F×A G×B H×C : Functor ℂ 𝔻 × ℂ.Object} where
+    open Σ F×A renaming (proj₁ to F ; proj₂ to A)
+    open Σ G×B renaming (proj₁ to G ; proj₂ to B)
+    open Σ H×C renaming (proj₁ to H ; proj₂ to C)
     private
-      F = F×A .proj₁
-      A = F×A .proj₂
-      G = G×B .proj₁
-      B = G×B .proj₂
-      H = H×C .proj₁
-      C = H×C .proj₂
       module F = Functor F
       module G = Functor G
       module H = Functor H
 
     module _
-      -- NaturalTransformation F G × ℂ .Arrow A B
       {θ×f : NaturalTransformation F G × ℂ [ A , B ]}
       {η×g : NaturalTransformation G H × ℂ [ B , C ]} where
+      open Σ θ×f renaming (proj₁ to θNT ; proj₂ to f)
+      open Σ θNT renaming (proj₁ to θ   ; proj₂ to θNat)
+      open Σ η×g renaming (proj₁ to ηNT ; proj₂ to g)
+      open Σ ηNT renaming (proj₁ to η   ; proj₂ to ηNat)
       private
-        θ : Transformation F G
-        θ = proj₁ (proj₁ θ×f)
-        θNat : Natural F G θ
-        θNat = proj₂ (proj₁ θ×f)
-        f : ℂ [ A , B ]
-        f = proj₂ θ×f
-        η : Transformation G H
-        η = proj₁ (proj₁ η×g)
-        ηNat : Natural G H η
-        ηNat = proj₂ (proj₁ η×g)
-        g : ℂ [ B , C ]
-        g = proj₂ η×g
-
         ηθNT : NaturalTransformation F H
-        ηθNT = Category._∘_ Fun {F} {G} {H} (η , ηNat) (θ , θNat)
-
-        ηθ = proj₁ ηθNT
-        ηθNat = proj₂ ηθNT
+        ηθNT = NT[_∘_] {F} {G} {H} ηNT θNT
+      open Σ ηθNT renaming (proj₁ to ηθ   ; proj₂ to ηθNat)
 
       isDistributive :
           𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ F.fmap ( ℂ [ g ∘ f ] ) ]
