@@ -36,9 +36,11 @@ open import Data.Product renaming
   ; ∃! to ∃!≈
   )
 open import Data.Empty
-import Function
+import      Function
+
 open import Cubical
-open import Cubical.NType.Properties using ( propIsEquiv ; lemPropF )
+open import Cubical.NType
+open import Cubical.NType.Properties
 
 open import Cat.Wishlist
 
@@ -168,11 +170,9 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
 
   leftIdentity : {A B : Object} {f : Arrow A B} → 𝟙 ∘ f ≡ f
   leftIdentity {A} {B} {f} = fst (isIdentity {A = A} {B} {f})
-  -- leftIdentity {A} {B} {f} = snd (isIdentity {A = A} {B} {f})
 
   rightIdentity : {A B : Object} {f : Arrow A B} → f ∘ 𝟙 ≡ f
   rightIdentity {A} {B} {f} = snd (isIdentity {A = A} {B} {f})
-  -- rightIdentity {A} {B} {f} = fst (isIdentity {A = A} {B} {f})
 
   -- Some common lemmas about categories.
   module _ {A B : Object} {X : Object} (f : Arrow A B) where
@@ -188,7 +188,7 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
       g₁              ∎
 
     iso-is-mono : Isomorphism f → Monomorphism {X = X} f
-    iso-is-mono (f- , (left-inv , right-inv)) g₀ g₁ eq =
+    iso-is-mono (f- , left-inv , right-inv) g₀ g₁ eq =
       begin
       g₀            ≡⟨ sym leftIdentity ⟩
       𝟙 ∘ g₀        ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
@@ -202,17 +202,8 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
     iso-is-epi-mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
     iso-is-epi-mono iso = iso-is-epi iso , iso-is-mono iso
 
--- | Propositionality of being a category
---
--- Proves that all projections of `IsCategory` are mere propositions as well as
--- `IsCategory` itself being a mere proposition.
-module Propositionality {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
-  open RawCategory ℂ
-  module _ (ℂ : IsCategory ℂ) where
-    open IsCategory ℂ using (isAssociative ; arrowsAreSets ; Univalent ; leftIdentity ; rightIdentity)
-    open import Cubical.NType
-    open import Cubical.NType.Properties
-
+  -- | All projections are propositions.
+  module Propositionality where
     propIsAssociative : isProp IsAssociative
     propIsAssociative x y i = arrowsAreSets _ _ x y i
 
@@ -251,18 +242,22 @@ module Propositionality {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
     propUnivalent : isProp Univalent
     propUnivalent a b i = propPi (λ iso → propHasLevel ⟨-2⟩) a b i
 
+-- | Propositionality of being a category
+module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
+  open RawCategory ℂ
+  open Univalence
   private
     module _ (x y : IsCategory ℂ) where
-      module IC = IsCategory
       module X = IsCategory x
       module Y = IsCategory y
-      open Univalence
       -- In a few places I use the result of propositionality of the various
-      -- projections of `IsCategory` - I've arbitrarily chosed to use this
+      -- projections of `IsCategory` - Here I arbitrarily chose to use this
       -- result from `x : IsCategory C`. I don't know which (if any) possibly
       -- adverse effects this may have.
+      module Prop = X.Propositionality
+
       isIdentity : (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ Y.isIdentity ]
-      isIdentity = propIsIdentity x X.isIdentity Y.isIdentity
+      isIdentity = Prop.propIsIdentity X.isIdentity Y.isIdentity
       U : ∀ {a : IsIdentity 𝟙}
         → (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ a ]
         → (b : Univalent a)
@@ -275,16 +270,16 @@ module Propositionality {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       P y eq = ∀ (univ : Univalent y) → U eq univ
       p : ∀ (b' : Univalent X.isIdentity)
         → (λ _ → Univalent X.isIdentity) [ X.univalent ≡ b' ]
-      p univ = propUnivalent x X.univalent univ
+      p univ = Prop.propUnivalent X.univalent univ
       helper : P Y.isIdentity isIdentity
       helper = pathJ P p Y.isIdentity isIdentity
       eqUni : U isIdentity Y.univalent
       eqUni = helper Y.univalent
       done : x ≡ y
-      IC.isAssociative (done i) = propIsAssociative x X.isAssociative Y.isAssociative i
-      IC.isIdentity    (done i) = isIdentity i
-      IC.arrowsAreSets (done i) = propArrowIsSet x X.arrowsAreSets Y.arrowsAreSets i
-      IC.univalent     (done i) = eqUni i
+      IsCategory.isAssociative (done i) = Prop.propIsAssociative X.isAssociative Y.isAssociative i
+      IsCategory.isIdentity    (done i) = isIdentity i
+      IsCategory.arrowsAreSets (done i) = Prop.propArrowIsSet X.arrowsAreSets Y.arrowsAreSets i
+      IsCategory.univalent     (done i) = eqUni i
 
   propIsCategory : isProp (IsCategory ℂ)
   propIsCategory = done
@@ -309,7 +304,7 @@ module _ {ℓa ℓb : Level} {ℂ 𝔻 : Category ℓa ℓb} where
   module _ (rawEq : ℂ.raw ≡ 𝔻.raw) where
     private
       isCategoryEq : (λ i → IsCategory (rawEq i)) [ ℂ.isCategory ≡ 𝔻.isCategory ]
-      isCategoryEq = lemPropF Propositionality.propIsCategory rawEq
+      isCategoryEq = lemPropF propIsCategory rawEq
 
     Category≡ : ℂ ≡ 𝔻
     Category≡ i = record

@@ -7,7 +7,7 @@ open import Cubical.NType.Properties using (lemPropF)
 
 open import Data.Product as P hiding (_×_ ; proj₁ ; proj₂)
 
-open import Cat.Category hiding (module Propositionality)
+open import Cat.Category
 
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
