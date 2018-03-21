@@ -59,10 +59,8 @@ module _ {ℓ : Level} {A B : Set ℓ} {a : A} where
 
 module _ (ℓ : Level) where
   private
-    open import Cubical.Universe using (hSet) public
-
     SetsRaw : RawCategory (lsuc ℓ) ℓ
-    RawCategory.Object SetsRaw = hSet {ℓ}
+    RawCategory.Object SetsRaw = hSet ℓ
     RawCategory.Arrow  SetsRaw (T , _) (U , _) = T → U
     RawCategory.𝟙      SetsRaw = Function.id
     RawCategory._∘_    SetsRaw = Function._∘′_
@@ -79,7 +77,7 @@ module _ (ℓ : Level) where
     arrowsAreSets {B = (_ , s)} = setPi λ _ → s
 
     isIso = Eqv.Isomorphism
-    module _ {hA hB : hSet {ℓ}} where
+    module _ {hA hB : hSet ℓ} where
       open Σ hA renaming (proj₁ to A ; proj₂ to sA)
       open Σ hB renaming (proj₁ to B ; proj₂ to sB)
       lem1 : (f : A → B) → isSet A → isSet B → isProp (isIso f)
@@ -284,7 +282,7 @@ module _ (ℓ : Level) where
     univalent' : ∀ hA → isContr (Σ[ hB ∈ Object ] hA ≅ hB)
     univalent' hA = {!!} , {!!}
 
-    module _ {hA hB : hSet {ℓ}} where
+    module _ {hA hB : hSet ℓ} where
 
       -- Thierry: `thr0` implies univalence.
       univalent : isEquiv (hA ≡ hB) (hA ≅ hB) (Univalence.id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)

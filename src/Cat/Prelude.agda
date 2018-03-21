@@ -17,7 +17,7 @@ open import Cubical.GradLemma
   using (gradLemma)
   public
 open import Cubical.NType
-  using (⟨-2⟩)
+  using (⟨-2⟩ ; ⟨-1⟩ ; ⟨0⟩ ; TLevel ; HasLevel)
   public
 open import Cubical.NType.Properties
   using
@@ -25,7 +25,18 @@ open import Cubical.NType.Properties
     ; propPi ; propHasLevel ; setPi ; propSet)
   public
 open import Cubical.Sigma using (setSig ; sigPresSet) public
-open import Cubical.Universe using (hSet) public
+
+module _ (ℓ : Level) where
+  -- FIXME Ask if we can push upstream.
+  -- A redefinition of `Cubical.Universe` with an explicit parameter
+  _-type : TLevel → Set (lsuc ℓ)
+  n -type = Σ (Set ℓ) (HasLevel n)
+
+  hSet : Set (lsuc ℓ)
+  hSet = ⟨0⟩ -type
+
+  Prop : Set (lsuc ℓ)
+  Prop = ⟨-1⟩ -type
 
 -----------------
 -- * Utilities --
