@@ -1,17 +1,10 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 module Cat.Categories.Fam where
 
-open import Agda.Primitive
-open import Data.Product
+open import Cat.Prelude
 import Function
 
-open import Cubical
-open import Cubical.Universe
-
 open import Cat.Category
-open import Cat.Equality
-
-open Equality.Data.Product
 
 module _ (ℓa ℓb : Level) where
   private

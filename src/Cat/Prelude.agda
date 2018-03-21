@@ -24,6 +24,8 @@ open import Cubical.NType.Properties
     ( lemPropF ; lemSig ;  lemSigP ; isSetIsProp
     ; propPi ; propHasLevel ; setPi ; propSet)
   public
+open import Cubical.Sigma using (setSig) public
+open import Cubical.Universe using (hSet) public
 
 -----------------
 -- * Utilities --
@@ -38,3 +40,11 @@ open import Cubical.NType.Properties
 ∃!-syntax = ∃
 
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
+
+module _ {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb} {a b : Σ A B}
+  (proj₁≡ : (λ _ → A)            [ proj₁ a ≡ proj₁ b ])
+  (proj₂≡ : (λ i → B (proj₁≡ i)) [ proj₂ a ≡ proj₂ b ]) where
+
+  Σ≡ : a ≡ b
+  proj₁ (Σ≡ i) = proj₁≡ i
+  proj₂ (Σ≡ i) = proj₂≡ i

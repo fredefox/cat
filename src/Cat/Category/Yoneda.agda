@@ -2,14 +2,10 @@
 
 module Cat.Category.Yoneda where
 
-open import Agda.Primitive
-open import Data.Product
-open import Cubical
-open import Cubical.NType.Properties
+open import Cat.Prelude
 
 open import Cat.Category
 open import Cat.Category.Functor
-open import Cat.Equality
 
 open import Cat.Categories.Fun
 open import Cat.Categories.Sets hiding (presheaf)

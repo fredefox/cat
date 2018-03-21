@@ -5,18 +5,12 @@ module Cat.Categories.Cat where
 
 open import Cat.Prelude renaming (proj₁ to fst ; proj₂ to snd)
 
-open import Cubical
-open import Cubical.Sigma
-
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
 open import Cat.Category.Exponential hiding (_×_ ; product)
 open import Cat.Category.NaturalTransformation
 open import Cat.Categories.Fun
-
-open import Cat.Equality
-open Equality.Data.Product
 
 -- The category of categories
 module _ (ℓ ℓ' : Level) where
