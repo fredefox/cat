@@ -151,9 +151,8 @@ module _ (ℓ : Level) where
         g : Σ A Q → Σ A P
         g (a , qA) = a , g' qA
           where
-          module E = Equivalence (eA a)
           k : Eqv.Isomorphism _
-          k = E.toIso (_≃_.isEqv (eA a))
+          k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
           open Σ k renaming (proj₁ to g')
         ve-re : (x : Σ A P) → (g ∘ f) x ≡ x
         ve-re x i = proj₁ x , eq i
@@ -166,9 +165,8 @@ module _ (ℓ : Level) where
             pA ∎
             where
             open Σ x renaming (proj₁ to a ; proj₂ to pA)
-            module E = Equivalence (eA a)
             k : Eqv.Isomorphism _
-            k = E.toIso (_≃_.isEqv (eA a))
+            k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
             open Σ k renaming (proj₁ to g' ; proj₂ to inv)
             module A = AreInverses inv
             -- anti-funExt
@@ -183,9 +181,8 @@ module _ (ℓ : Level) where
             _≃_.eqv (eA a) (g' qA)            ≡⟨ (λ i → A.recto-verso i qA) ⟩
             qA                                ∎
             where
-            module E = Equivalence (eA a)
             k : Eqv.Isomorphism _
-            k = E.toIso (_≃_.isEqv (eA a))
+            k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
             open Σ k renaming (proj₁ to g' ; proj₂ to inv)
             module A = AreInverses inv
         inv : AreInverses f g
