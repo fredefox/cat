@@ -126,24 +126,16 @@ module _ (ℓ : Level) where
         → (p ≡ q) ≃ (proj₁ p ≡ proj₁ q)
       lem2 pA p q = fromIsomorphism iso
         where
-        f : p ≡ q → proj₁ p ≡ proj₁ q
+        f : ∀ {p q} → p ≡ q → proj₁ p ≡ proj₁ q
         f e i = proj₁ (e i)
-        g : proj₁ p ≡ proj₁ q → p ≡ q
-        g = lemSig pA p q
+        g : ∀ {p q} → proj₁ p ≡ proj₁ q → p ≡ q
+        g {p} {q} = lemSig pA p q
         ve-re : (e : p ≡ q) → (g ∘ f) e ≡ e
-        -- QUESTION Why does `h` not satisfy the constraint here?
-        ve-re e i j = qq0 j , {!h!}
-          where
-          -- qq : ? [ proj₂ ((g ∘ f) e) ≡ proj₂ e ]
-          qq0 : proj₁ p ≡ proj₁ q
-          qq0 i = proj₁ (e i)
-          qq : (λ i → P (qq0 i)) [ proj₂ p ≡ proj₂ q ]
-          qq = lemPropF pA qq0
-          h : P (qq0 j)
-          h = qq j
-        re-ve : (e : proj₁ p ≡ proj₁ q) → (f ∘ g) e ≡ e
+        ve-re = pathJ (\ q (e : p ≡ q) → (g ∘ f) e ≡ e)
+                  (\ i j → p .proj₁ , propSet (pA (p .proj₁)) (p .proj₂) (p .proj₂) (λ i → (g {p} {p} ∘ f) (λ i₁ → p) i .proj₂) (λ i → p .proj₂) i j ) q
+        re-ve : (e : proj₁ p ≡ proj₁ q) → (f {p} {q} ∘ g {p} {q}) e ≡ e
         re-ve e = refl
-        inv : AreInverses f g
+        inv : AreInverses (f {p} {q}) (g {p} {q})
         inv = record
           { verso-recto = funExt ve-re
           ; recto-verso = funExt re-ve
