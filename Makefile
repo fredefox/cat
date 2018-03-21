@@ -2,4 +2,4 @@ build: src/**.agda
 	agda src/Cat.agda
 
 clean:
-	rm src/**/*.agdai
+	find src -name "*.agdai" -type f -delete

@@ -16,9 +16,11 @@ open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
 open import Cat.Wishlist
-open import Cat.Equivalence as Eqv renaming (module NoEta to Eeq) using (AreInverses ; module Equiv≃)
+open import Cat.Equivalence as Eqv using (AreInverses ; module Equiv≃ ; module NoEta)
 
-module Equivalence = Eeq.Equivalence′
+open NoEta
+
+module Equivalence = Equivalence′
 
 _⊙_ : {ℓa ℓb ℓc : Level} {A : Set ℓa} {B : Set ℓb} {C : Set ℓc} → (A ≃ B) → (B ≃ C) → A ≃ C
 eqA ⊙ eqB = Equivalence.compose eqA eqB
@@ -122,7 +124,7 @@ module _ (ℓ : Level) where
     module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
       lem2 : ((x : A) → isProp (P x)) → (p q : Σ A P)
         → (p ≡ q) ≃ (proj₁ p ≡ proj₁ q)
-      lem2 pA p q = Eeq.fromIsomorphism iso
+      lem2 pA p q = fromIsomorphism iso
         where
         f : p ≡ q → proj₁ p ≡ proj₁ q
         f e i = proj₁ (e i)
@@ -186,7 +188,7 @@ module _ (ℓ : Level) where
         iso : Σ A P Eqv.≅ Σ A Q
         iso = f , g , inv
         res : Σ A P ≃ Σ A Q
-        res = Eeq.fromIsomorphism iso
+        res = fromIsomorphism iso
 
     module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
       lem4 : isSet A → isSet B → (f : A → B)
@@ -207,7 +209,7 @@ module _ (ℓ : Level) where
               { verso-recto = funExt re-ve
               ; recto-verso = funExt ve-re
               }
-        in Eeq.fromIsomorphism iso
+        in fromIsomorphism iso
 
     module _ {hA hB : Object} where
       private
@@ -240,7 +242,7 @@ module _ (ℓ : Level) where
           eqv : Σ (A → B) (isEquiv A B) Eqv.≅ (A ≃ B)
           eqv = obv , inv , areInv
           hh : Σ (A → B) (isEquiv A B) ≃ (A ≃ B)
-          hh = Eeq.fromIsomorphism eqv
+          hh = fromIsomorphism eqv
 
       -- lem2 with propIsSet
       step2 : (A ≡ B) ≃ (hA ≡ hB)
@@ -248,7 +250,7 @@ module _ (ℓ : Level) where
 
       -- Go from an isomorphism on sets to an isomorphism on homotopic sets
       trivial? : (hA ≅ hB) ≃ Σ (A → B) isIso
-      trivial? = sym≃ (Eeq.fromIsomorphism res)
+      trivial? = sym≃ (fromIsomorphism res)
         where
         fwd : Σ (A → B) isIso → hA ≅ hB
         fwd (f , g , inv) = f , g , inv.toPair
