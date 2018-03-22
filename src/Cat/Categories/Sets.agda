@@ -265,85 +265,23 @@ module _ (ℓ : Level) where
       conclusion = trivial? ⊙ step0 ⊙ step1 ⊙ step2
       thierry : (hA ≡ hB) ≃ (hA ≅ hB)
       thierry = sym≃ conclusion
-      -- TODO Is the morphism `(_≃_.eqv conclusion)` the same as
-      -- `(id-to-iso (λ {A} {B} → isIdentity {A} {B}) hA hB)` ?
-      res : isEquiv (hA ≡ hB) (hA ≅ hB) _
-      res = _≃_.isEqv thierry
-      thr : (hA ≡ hB) ≃ (hA ≅ hB)
-      thr = con _ res
-      -- p : _ → (hX : Object) → Path (hA ≅ hB) (hA ≡ hB)
-      -- p = ?
-      -- p hA X i0 = hA ~ X
-      -- p hA X i1 = Path Obj hA X
-
-      -- From Thierry:
-      --
-      -- -Any- equality proof of
-      --
-      -- Id (Obj C) c0 c1
-      --
-      -- and
-      --
-      -- iso c0 c1
-      --
-      -- is enough to ensure univalence.
-      -- This is because this implies that
-      --
-      -- Sigma (x : Obj C) is c0 x
-      --
-      -- is contractible, which implies univalence.
 
     module _ (hA : Object) where
       open Σ hA renaming (proj₁ to A)
 
-      center : Σ[ hB ∈ Object ] (hA ≅ hB)
-      center = hA , idIso hA
-      open Σ center renaming ({-proj₁ to hA ;-} proj₂ to isoA) using ()
+      eq1 : (Σ[ hB ∈ Object ] hA ≅ hB) ≡ (Σ[ hB ∈ Object ] hA ≡ hB)
+      eq1 = ua (lem3 (\ hB → sym≃ thierry))
 
-      module _ (y : Σ[ hC ∈ Object ] (hA ≅ hC)) where
-        open Σ y renaming (proj₁ to hC ; proj₂ to hA≅hC)
-        open Σ hC renaming (proj₁ to C)
+      univalent[Contr] : isContr (Σ[ hB ∈ Object ] hA ≅ hB)
+      univalent[Contr] = subst {P = isContr} (sym eq1) tres
+        where
+        module _ (y : Σ[ hB ∈ Object ] hA ≡ hB) where
+          open Σ y renaming (proj₁ to hB ; proj₂ to hA≡hB)
+          qres : (hA , refl) ≡ (hB , hA≡hB)
+          qres = contrSingl hA≡hB
 
-        open Σ hA≅hC  renaming (proj₁ to obv ; proj₂ to iso)
-        open Σ iso    renaming (proj₁ to inv ; proj₂ to areInv)
-
-        -- Idea:
-        -- Have : hA ≅ hC
-        -- Can I then construct `A Eqv.≅ C`
-        -- Cuz then it follows from univalence
-        A≡C : A ≡ C
-        A≡C = ua s
-          where
-          s0 : A Eqv.≅ C
-          s0 = obv , inv , Eqv.toAreInverses areInv
-          s : A ≃ C
-          s = fromIsomorphism s0
-
-        pObj : hA ≡ hC
-        pObj = lemSig (λ _ → isSetIsProp) hA hC A≡C
-
-        abstract
-          isoEq
-            : (λ i → Σ (A → proj₁ (pObj i)) (Isomorphism {A = hA} {pObj i}))
-            [ idIso hA ≡ hA≅hC ]
-          isoEq = {!!}
-            where
-            d : ∀ iso → (λ _ → Σ (A → A) (Isomorphism {A = hA} {hA}))
-              [ idIso hA ≡ iso ]
-            d iso = {!!}
-
-        isContractible : (hA , idIso hA) ≡ (hC , hA≅hC)
-        isContractible = Σ≡ pObj {!isoEq!}
-        -- isContractible = lemSig prop≅ center y pObj
-
-      -- univalent[Contr] : isContr (Σ[ hB ∈ Object ] hA ≅ hB)
-      -- univalent[Contr] = center , isContractible
-
-    eq1 : ∀ hA → (Σ[ hB ∈ Object ] hA ≅ hB) ≡ (Σ[ hB ∈ Object ] hA ≡ hB)
-    eq1 hA = ua (lem3 (\ hB → sym≃ thr))
-
-    univalent[Contr] : ∀ hA → isContr (Σ[ hB ∈ Object ] hA ≅ hB)
-    univalent[Contr] hA = subst {P = isContr} (sym (eq1 hA)) {!!}
+        tres : isContr (Σ[ hB ∈ Object ] hA ≡ hB)
+        tres = (hA , refl) , qres
 
     univalent : Univalent
     univalent = from[Contr] univalent[Contr]
