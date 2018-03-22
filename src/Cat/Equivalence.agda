@@ -27,6 +27,16 @@ module _ {ℓa ℓb : Level} where
     Isomorphism : (f : A → B) → Set _
     Isomorphism f = Σ (B → A) λ g → AreInverses f g
 
+    module _ {f : A → B} {g : B → A}
+        (inv : (g ∘ f) ≡ idFun A
+             × (f ∘ g) ≡ idFun B) where
+      open Σ inv renaming (fst to ve-re ; snd to re-ve)
+      toAreInverses : AreInverses f g
+      toAreInverses = record
+        { verso-recto = ve-re
+        ; recto-verso = re-ve
+        }
+
   _≅_ : Set ℓa → Set ℓb → Set _
   A ≅ B = Σ (A → B) Isomorphism
 
