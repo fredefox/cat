@@ -1,6 +1,25 @@
 Changelog
 =========
 
+Version 1.4.1
+-------------
+Defines a module to work with equivalence providing a way to go between
+equivalences and quasi-inverses (in the parlance of HoTT).
+
+Finishes the proof that the category of homotopy-sets are univalent.
+
+Defines a custom "prelude" module that wraps the `cubical` library and provides
+a few utilities.
+
+Reorders Category.isIdentity such that the left projection is left identity.
+
+Include some text for the half-time report.
+
+Renames IsProduct.isProduct to IsProduct.ump to avoid ambiguity in some
+circumstances.
+
+[WIP]: Adds some stuff about propositionality for products.
+
 Version 1.4.0
 -------------
 Adds documentation to a number of modules.

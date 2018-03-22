@@ -1,21 +1,14 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 module Cat.Categories.Fam where
 
-open import Agda.Primitive
-open import Data.Product
+open import Cat.Prelude
 import Function
 
-open import Cubical
-open import Cubical.Universe
-
 open import Cat.Category
-open import Cat.Equality
-
-open Equality.Data.Product
 
 module _ (ℓa ℓb : Level) where
   private
-    Object = Σ[ hA ∈ hSet {ℓa} ] (proj₁ hA → hSet {ℓb})
+    Object = Σ[ hA ∈ hSet ℓa ] (proj₁ hA → hSet ℓb)
     Arr : Object → Object → Set (ℓa ⊔ ℓb)
     Arr ((A , _) , B) ((A' , _) , B') = Σ[ f ∈ (A → A') ] ({x : A} → proj₁ (B x) → proj₁ (B' (f x)))
     𝟙 : {A : Object} → Arr A A

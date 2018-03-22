@@ -1,21 +1,18 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 module Cat.Categories.Cube where
 
+open import Cat.Prelude
 open import Level
 open import Data.Bool hiding (T)
 open import Data.Sum hiding ([_,_])
 open import Data.Unit
 open import Data.Empty
-open import Data.Product
-open import Cubical
 open import Function
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
 
 open import Cat.Category
 open import Cat.Category.Functor
-open import Cat.Equality
-open Equality.Data.Product
 
 -- See chapter 1 for a discussion on how presheaf categories are CwF's.
 

@@ -4,11 +4,7 @@ The Kleisli formulation of monads
 {-# OPTIONS --cubical --allow-unsolved-metas #-}
 open import Agda.Primitive
 
-open import Data.Product
-
-open import Cubical
-open import Cubical.NType.Properties using (lemPropF ; lemSig ;  lemSigP)
-open import Cubical.GradLemma        using (gradLemma)
+open import Cat.Prelude
 
 open import Cat.Category
 open import Cat.Category.Functor as F
@@ -104,7 +100,7 @@ record IsMonad (raw : RawMonad) : Set ℓ where
 
     isFunctorR : IsFunctor ℂ ℂ rawR
     IsFunctor.isIdentity isFunctorR = begin
-      bind (pure ∘ 𝟙) ≡⟨ cong bind (proj₁ ℂ.isIdentity) ⟩
+      bind (pure ∘ 𝟙) ≡⟨ cong bind (ℂ.rightIdentity) ⟩
       bind pure       ≡⟨ isIdentity ⟩
       𝟙               ∎
 
@@ -156,9 +152,9 @@ record IsMonad (raw : RawMonad) : Set ℓ where
       bind (bind (f >>> pure) >>> (pure >>> bind 𝟙))
         ≡⟨ cong (λ φ → bind (bind (f >>> pure) >>> φ)) (isNatural _) ⟩
       bind (bind (f >>> pure) >>> 𝟙)
-        ≡⟨ cong bind (proj₂ ℂ.isIdentity) ⟩
+        ≡⟨ cong bind ℂ.leftIdentity ⟩
       bind (bind (f >>> pure))
-        ≡⟨ cong bind (sym (proj₁ ℂ.isIdentity)) ⟩
+        ≡⟨ cong bind (sym ℂ.rightIdentity) ⟩
       bind (𝟙 >>> bind (f >>> pure)) ≡⟨⟩
       bind (𝟙 >=> (f >>> pure))
         ≡⟨ sym (isDistributive _ _) ⟩
@@ -186,10 +182,10 @@ record IsMonad (raw : RawMonad) : Set ℓ where
     bind (join >>> (pure >>> bind 𝟙))
       ≡⟨ cong (λ φ → bind (join >>> φ)) (isNatural _) ⟩
     bind (join >>> 𝟙)
-      ≡⟨ cong bind (proj₂ ℂ.isIdentity) ⟩
+      ≡⟨ cong bind ℂ.leftIdentity ⟩
     bind join           ≡⟨⟩
     bind (bind 𝟙)
-      ≡⟨ cong bind (sym (proj₁ ℂ.isIdentity)) ⟩
+      ≡⟨ cong bind (sym ℂ.rightIdentity) ⟩
     bind (𝟙 >>> bind 𝟙) ≡⟨⟩
     bind (𝟙 >=> 𝟙)      ≡⟨ sym (isDistributive _ _) ⟩
     bind 𝟙 >>> bind 𝟙   ≡⟨⟩
@@ -212,7 +208,7 @@ record IsMonad (raw : RawMonad) : Set ℓ where
       bind (pure >>> (pure >>> bind 𝟙))
         ≡⟨ cong (λ φ → bind (pure >>> φ)) (isNatural _) ⟩
       bind (pure >>> 𝟙)
-        ≡⟨ cong bind (proj₂ ℂ.isIdentity) ⟩
+        ≡⟨ cong bind ℂ.leftIdentity ⟩
       bind pure ≡⟨ isIdentity ⟩
       𝟙 ∎
 

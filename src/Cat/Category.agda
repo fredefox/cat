@@ -28,37 +28,17 @@
 
 module Cat.Category where
 
-open import Agda.Primitive
-open import Data.Unit.Base
-open import Data.Product renaming
+open import Cat.Prelude
+  renaming
   ( proj₁ to fst
   ; proj₂ to snd
-  ; ∃! to ∃!≈
   )
-open import Data.Empty
-import Function
-open import Cubical
-open import Cubical.NType.Properties using ( propIsEquiv ; lemPropF )
 
-open import Cat.Wishlist
+import      Function
 
------------------
--- * Utilities --
------------------
-
--- | Unique existensials.
-∃! : ∀ {a b} {A : Set a}
-  → (A → Set b) → Set (a ⊔ b)
-∃! = ∃!≈ _≡_
-
-∃!-syntax : ∀ {a b} {A : Set a} → (A → Set b) → Set (a ⊔ b)
-∃!-syntax = ∃
-
-syntax ∃!-syntax (λ x → B) = ∃![ x ] B
-
------------------
+------------------
 -- * Categories --
------------------
+------------------
 
 -- | Raw categories
 --
@@ -96,7 +76,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
   IsIdentity : ({A : Object} → Arrow A A) → Set (ℓa ⊔ ℓb)
   IsIdentity id = {A B : Object} {f : Arrow A B}
-    → f ∘ id ≡ f × id ∘ f ≡ f
+    → id ∘ f ≡ f × f ∘ id ≡ f
 
   ArrowsAreSets : Set (ℓa ⊔ ℓb)
   ArrowsAreSets = ∀ {A B : Object} → isSet (Arrow A B)
@@ -129,21 +109,33 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   Terminal : Set (ℓa ⊔ ℓb)
   Terminal = Σ Object IsTerminal
 
--- | Univalence is indexed by a raw category as well as an identity proof.
---
--- FIXME Put this in `RawCategory` and index it on the witness to `isIdentity`.
-module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
-  open RawCategory ℂ
-  module _ (isIdentity : IsIdentity 𝟙) where
+  -- | Univalence is indexed by a raw category as well as an identity proof.
+  module Univalence (isIdentity : IsIdentity 𝟙) where
+    -- | The identity isomorphism
     idIso : (A : Object) → A ≅ A
     idIso A = 𝟙 , (𝟙 , isIdentity)
 
-    -- Lemma 9.1.4 in [HoTT]
+    -- | Extract an isomorphism from an equality
+    --
+    -- [HoTT §9.1.4]
     id-to-iso : (A B : Object) → A ≡ B → A ≅ B
     id-to-iso A B eq = transp (\ i → A ≅ eq i) (idIso A)
 
     Univalent : Set (ℓa ⊔ ℓb)
     Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
+
+    -- A perhaps more readable version of univalence:
+    Univalent≃ = {A B : Object} → (A ≡ B) ≃ (A ≅ B)
+
+    -- | Equivalent formulation of univalence.
+    Univalent[Contr] : Set _
+    Univalent[Contr] = ∀ A → isContr (Σ[ X ∈ Object ] A ≅ X)
+
+    -- From: Thierry Coquand <Thierry.Coquand@cse.gu.se>
+    -- Date: Wed, Mar 21, 2018 at 3:12 PM
+    --
+    -- This is not so straight-forward so you can assume it
+    postulate from[Contr] : Univalent[Contr] → Univalent
 
 -- | The mere proposition of being a category.
 --
@@ -156,52 +148,59 @@ module Univalence {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 -- [HoTT].
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   open RawCategory ℂ public
-  open Univalence  ℂ public
   field
     isAssociative : IsAssociative
     isIdentity    : IsIdentity 𝟙
     arrowsAreSets : ArrowsAreSets
-    univalent     : Univalent isIdentity
+  open Univalence isIdentity public
+  field
+    univalent     : Univalent
 
-  -- Some common lemmas about categories.
+  leftIdentity : {A B : Object} {f : Arrow A B} → 𝟙 ∘ f ≡ f
+  leftIdentity {A} {B} {f} = fst (isIdentity {A = A} {B} {f})
+
+  rightIdentity : {A B : Object} {f : Arrow A B} → f ∘ 𝟙 ≡ f
+  rightIdentity {A} {B} {f} = snd (isIdentity {A = A} {B} {f})
+
+  ------------
+  -- Lemmas --
+  ------------
+
+  -- | Relation between iso- epi- and mono- morphisms.
   module _ {A B : Object} {X : Object} (f : Arrow A B) where
-    iso-is-epi : Isomorphism f → Epimorphism {X = X} f
-    iso-is-epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
-      g₀              ≡⟨ sym (fst isIdentity) ⟩
+    iso→epi : Isomorphism f → Epimorphism {X = X} f
+    iso→epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
+      g₀              ≡⟨ sym rightIdentity ⟩
       g₀ ∘ 𝟙          ≡⟨ cong (_∘_ g₀) (sym right-inv) ⟩
       g₀ ∘ (f ∘ f-)   ≡⟨ isAssociative ⟩
       (g₀ ∘ f) ∘ f-   ≡⟨ cong (λ φ → φ ∘ f-) eq ⟩
       (g₁ ∘ f) ∘ f-   ≡⟨ sym isAssociative ⟩
       g₁ ∘ (f ∘ f-)   ≡⟨ cong (_∘_ g₁) right-inv ⟩
-      g₁ ∘ 𝟙          ≡⟨ fst isIdentity ⟩
+      g₁ ∘ 𝟙          ≡⟨ rightIdentity ⟩
       g₁              ∎
 
-    iso-is-mono : Isomorphism f → Monomorphism {X = X} f
-    iso-is-mono (f- , (left-inv , right-inv)) g₀ g₁ eq =
+    iso→mono : Isomorphism f → Monomorphism {X = X} f
+    iso→mono (f- , left-inv , right-inv) g₀ g₁ eq =
       begin
-      g₀            ≡⟨ sym (snd isIdentity) ⟩
+      g₀            ≡⟨ sym leftIdentity ⟩
       𝟙 ∘ g₀        ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
       (f- ∘ f) ∘ g₀ ≡⟨ sym isAssociative ⟩
       f- ∘ (f ∘ g₀) ≡⟨ cong (_∘_ f-) eq ⟩
       f- ∘ (f ∘ g₁) ≡⟨ isAssociative ⟩
       (f- ∘ f) ∘ g₁ ≡⟨ cong (λ φ → φ ∘ g₁) left-inv ⟩
-      𝟙 ∘ g₁        ≡⟨ snd isIdentity ⟩
+      𝟙 ∘ g₁        ≡⟨ leftIdentity ⟩
       g₁            ∎
 
-    iso-is-epi-mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
-    iso-is-epi-mono iso = iso-is-epi iso , iso-is-mono iso
+    iso→epi×mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
+    iso→epi×mono iso = iso→epi iso , iso→mono iso
 
--- | Propositionality of being a category
---
--- Proves that all projections of `IsCategory` are mere propositions as well as
--- `IsCategory` itself being a mere proposition.
-module Propositionality {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
-  open RawCategory ℂ
-  module _ (ℂ : IsCategory ℂ) where
-    open IsCategory ℂ using (isAssociative ; arrowsAreSets ; isIdentity ; Univalent)
-    open import Cubical.NType
-    open import Cubical.NType.Properties
+  -- | The formulation of univalence expressed with _≃_ is trivially admissable -
+  -- just "forget" the equivalence.
+  univalent≃ : Univalent≃
+  univalent≃ = _ , univalent
 
+  -- | All projections are propositions.
+  module Propositionality where
     propIsAssociative : isProp IsAssociative
     propIsAssociative x y i = arrowsAreSets _ _ x y i
 
@@ -227,31 +226,34 @@ module Propositionality {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       isoIsProp a@(g , η , ε) a'@(g' , η' , ε') =
         lemSig (λ g → propIsInverseOf) a a' geq
           where
-            open Cubical.NType.Properties
             geq : g ≡ g'
             geq = begin
-              g            ≡⟨ sym (fst isIdentity) ⟩
+              g            ≡⟨ sym rightIdentity ⟩
               g ∘ 𝟙        ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
               g ∘ (f ∘ g') ≡⟨ isAssociative ⟩
               (g ∘ f) ∘ g' ≡⟨ cong (λ φ → φ ∘ g') η ⟩
-              𝟙 ∘ g'       ≡⟨ snd isIdentity ⟩
+              𝟙 ∘ g'       ≡⟨ leftIdentity ⟩
               g'           ∎
 
-    propUnivalent : isProp (Univalent isIdentity)
-    propUnivalent a b i = propPi (λ iso → propHasLevel ⟨-2⟩) a b i
+    propUnivalent : isProp Univalent
+    propUnivalent a b i = propPi (λ iso → propIsContr) a b i
 
+-- | Propositionality of being a category
+module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
+  open RawCategory ℂ
+  open Univalence
   private
     module _ (x y : IsCategory ℂ) where
-      module IC = IsCategory
       module X = IsCategory x
       module Y = IsCategory y
-      open Univalence ℂ
       -- In a few places I use the result of propositionality of the various
-      -- projections of `IsCategory` - I've arbitrarily chosed to use this
+      -- projections of `IsCategory` - Here I arbitrarily chose to use this
       -- result from `x : IsCategory C`. I don't know which (if any) possibly
       -- adverse effects this may have.
+      module Prop = X.Propositionality
+
       isIdentity : (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ Y.isIdentity ]
-      isIdentity = propIsIdentity x X.isIdentity Y.isIdentity
+      isIdentity = Prop.propIsIdentity X.isIdentity Y.isIdentity
       U : ∀ {a : IsIdentity 𝟙}
         → (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ a ]
         → (b : Univalent a)
@@ -264,16 +266,16 @@ module Propositionality {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       P y eq = ∀ (univ : Univalent y) → U eq univ
       p : ∀ (b' : Univalent X.isIdentity)
         → (λ _ → Univalent X.isIdentity) [ X.univalent ≡ b' ]
-      p univ = propUnivalent x X.univalent univ
+      p univ = Prop.propUnivalent X.univalent univ
       helper : P Y.isIdentity isIdentity
       helper = pathJ P p Y.isIdentity isIdentity
       eqUni : U isIdentity Y.univalent
       eqUni = helper Y.univalent
       done : x ≡ y
-      IC.isAssociative (done i) = propIsAssociative x X.isAssociative Y.isAssociative i
-      IC.isIdentity    (done i) = isIdentity i
-      IC.arrowsAreSets (done i) = propArrowIsSet x X.arrowsAreSets Y.arrowsAreSets i
-      IC.univalent     (done i) = eqUni i
+      IsCategory.isAssociative (done i) = Prop.propIsAssociative X.isAssociative Y.isAssociative i
+      IsCategory.isIdentity    (done i) = isIdentity i
+      IsCategory.arrowsAreSets (done i) = Prop.propArrowIsSet X.arrowsAreSets Y.arrowsAreSets i
+      IsCategory.univalent     (done i) = eqUni i
 
   propIsCategory : isProp (IsCategory ℂ)
   propIsCategory = done
@@ -298,7 +300,7 @@ module _ {ℓa ℓb : Level} {ℂ 𝔻 : Category ℓa ℓb} where
   module _ (rawEq : ℂ.raw ≡ 𝔻.raw) where
     private
       isCategoryEq : (λ i → IsCategory (rawEq i)) [ ℂ.isCategory ≡ 𝔻.isCategory ]
-      isCategoryEq = lemPropF Propositionality.propIsCategory rawEq
+      isCategoryEq = lemPropF propIsCategory rawEq
 
     Category≡ : ℂ ≡ 𝔻
     Category≡ i = record
@@ -330,21 +332,22 @@ module Opposite {ℓa ℓb : Level} where
       RawCategory._∘_    opRaw = Function.flip ℂ._∘_
 
       open RawCategory opRaw
-      open Univalence  opRaw
 
       isIdentity : IsIdentity 𝟙
       isIdentity = swap ℂ.isIdentity
 
+      open Univalence isIdentity
+
       module _ {A B : ℂ.Object} where
         univalent : isEquiv (A ≡ B) (A ≅ B)
-          (id-to-iso (swap ℂ.isIdentity) A B)
+          (Univalence.id-to-iso (swap ℂ.isIdentity) A B)
         fst (univalent iso) = flipFiber (fst (ℂ.univalent (flipIso iso)))
           where
             flipIso : A ≅ B → B ℂ.≅ A
             flipIso (f , f~ , iso) = f , f~ , swap iso
             flipFiber
-              : fiber (ℂ.id-to-iso ℂ.isIdentity B A) (flipIso iso)
-              → fiber (  id-to-iso   isIdentity A B)          iso
+              : fiber (ℂ.id-to-iso B A) (flipIso iso)
+              → fiber (  id-to-iso A B)          iso
             flipFiber (eq , eqIso) = sym eq , {!!}
         snd (univalent iso) = {!!}
 

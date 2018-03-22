@@ -20,23 +20,19 @@ The monoidal representation is exposed by default from this module.
 {-# OPTIONS --cubical --allow-unsolved-metas #-}
 module Cat.Category.Monad where
 
-open import Agda.Primitive
-
-open import Data.Product
-
-open import Cubical
-open import Cubical.NType.Properties using (lemPropF ; lemSig ;  lemSigP)
-open import Cubical.GradLemma        using (gradLemma)
-
+open import Cat.Prelude
 open import Cat.Category
 open import Cat.Category.Functor as F
 open import Cat.Category.NaturalTransformation
-open import Cat.Category.Monad.Monoidal as Monoidal public
-open import Cat.Category.Monad.Kleisli  as Kleisli
+import Cat.Category.Monad.Monoidal
+import Cat.Category.Monad.Kleisli
 open import Cat.Categories.Fun
 
+module Monoidal = Cat.Category.Monad.Monoidal
+module Kleisli = Cat.Category.Monad.Kleisli
+
 -- | The monoidal- and kleisli presentation of monads are equivalent.
-module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
+module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
     module ℂ = Category ℂ
     open ℂ using (Object ; Arrow ; 𝟙 ; _∘_ ; _>>>_)
@@ -121,7 +117,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
             bind (f >>> (pure >>> bind 𝟙))
               ≡⟨ cong (λ φ → bind (f >>> φ)) (isNatural _) ⟩
             bind (f >>> 𝟙)
-              ≡⟨ cong bind (proj₂ ℂ.isIdentity) ⟩
+              ≡⟨ cong bind ℂ.leftIdentity ⟩
             bind f ∎
 
       forthRawEq : forthRaw (backRaw m) ≡ K.Monad.raw m
@@ -152,7 +148,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
           KM.bind 𝟙              ≡⟨⟩
           bind 𝟙                 ≡⟨⟩
           joinT X ∘ Rfmap 𝟙      ≡⟨ cong (λ φ → _ ∘ φ) R.isIdentity ⟩
-          joinT X ∘ 𝟙            ≡⟨ proj₁ ℂ.isIdentity ⟩
+          joinT X ∘ 𝟙            ≡⟨ ℂ.rightIdentity ⟩
           joinT X                ∎
 
         fmapEq : ∀ {A B} → KM.fmap {A} {B} ≡ Rfmap
@@ -164,7 +160,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
           Rfmap (f >>> pureT B) >>> joinT B        ≡⟨ cong (λ φ → φ >>> joinT B) R.isDistributive ⟩
           Rfmap f >>> Rfmap (pureT B) >>> joinT B  ≡⟨ ℂ.isAssociative ⟩
           joinT B ∘ Rfmap (pureT B) ∘ Rfmap f      ≡⟨ cong (λ φ → φ ∘ Rfmap f) (proj₂ isInverse) ⟩
-          𝟙 ∘ Rfmap f                              ≡⟨ proj₂ ℂ.isIdentity ⟩
+          𝟙 ∘ Rfmap f                              ≡⟨ ℂ.leftIdentity ⟩
           Rfmap f                                  ∎
           )
 
@@ -189,7 +185,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
         M.RawMonad.joinT (backRaw (forth m)) X ≡⟨⟩
         KM.join ≡⟨⟩
         joinT X ∘ Rfmap 𝟙 ≡⟨ cong (λ φ → joinT X ∘ φ) R.isIdentity ⟩
-        joinT X ∘ 𝟙 ≡⟨ proj₁ ℂ.isIdentity ⟩
+        joinT X ∘ 𝟙 ≡⟨ ℂ.rightIdentity ⟩
         joinT X ∎)
 
       joinNTEq : (λ i → NaturalTransformation F[ Req i ∘ Req i ] (Req i))
@@ -206,6 +202,11 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} where
 
     eqv : isEquiv M.Monad K.Monad forth
     eqv = gradLemma forth back fortheq backeq
+
+  open import Cat.Equivalence
+
+  Monoidal≅Kleisli : M.Monad ≅ K.Monad
+  Monoidal≅Kleisli = forth , (back , (record { verso-recto = funExt backeq ; recto-verso = funExt fortheq }))
 
   Monoidal≃Kleisli : M.Monad ≃ K.Monad
   Monoidal≃Kleisli = forth , eqv

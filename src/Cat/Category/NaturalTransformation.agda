@@ -19,14 +19,11 @@
 -- * A composition operator.
 {-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Category.NaturalTransformation where
-open import Agda.Primitive
-open import Data.Product
+
+open import Cat.Prelude
+
 open import Data.Nat using (_≤_ ; z≤n ; s≤s)
 module Nat = Data.Nat
-
-open import Cubical
-open import Cubical.Sigma
-open import Cubical.NType.Properties
 
 open import Cat.Category
 open import Cat.Category.Functor hiding (identity)
@@ -72,8 +69,8 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
   identityNatural : (F : Functor ℂ 𝔻) → Natural F F (identityTrans F)
   identityNatural F {A = A} {B = B} f = begin
     𝔻 [ identityTrans F B ∘ F→ f ]  ≡⟨⟩
-    𝔻 [ 𝟙 𝔻 ∘  F→ f ]              ≡⟨ proj₂ 𝔻.isIdentity ⟩
-    F→ f                            ≡⟨ sym (proj₁ 𝔻.isIdentity) ⟩
+    𝔻 [ 𝟙 𝔻 ∘  F→ f ]              ≡⟨ 𝔻.leftIdentity ⟩
+    F→ f                            ≡⟨ sym 𝔻.rightIdentity ⟩
     𝔻 [ F→ f ∘ 𝟙 𝔻 ]               ≡⟨⟩
     𝔻 [ F→ f ∘ identityTrans F A ]  ∎
     where
@@ -113,8 +110,11 @@ module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
       lem : (λ _ → Natural F G θ) [ (λ f → θNat f) ≡ (λ f → θNat' f) ]
       lem = λ i f → 𝔻.arrowsAreSets _ _ (θNat f) (θNat' f) i
 
-    naturalTransformationIsSet : isSet (NaturalTransformation F G)
-    naturalTransformationIsSet = sigPresSet transformationIsSet
-      λ θ → ntypeCommulative
+    naturalIsSet : (θ : Transformation F G) → isSet (Natural F G θ)
+    naturalIsSet θ =
+      ntypeCommulative
       (s≤s {n = Nat.suc Nat.zero} z≤n)
       (naturalIsProp θ)
+
+    naturalTransformationIsSet : isSet (NaturalTransformation F G)
+    naturalTransformationIsSet = sigPresSet transformationIsSet naturalIsSet

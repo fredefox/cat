@@ -4,22 +4,15 @@ This module provides construction 2.3 in [voe]
 {-# OPTIONS --cubical --allow-unsolved-metas --caching #-}
 module Cat.Category.Monad.Voevodsky where
 
-open import Agda.Primitive
-
-open import Data.Product
-
-open import Cubical
-open import Cubical.NType.Properties using (lemPropF ; lemSig ;  lemSigP)
-open import Cubical.GradLemma        using (gradLemma)
+open import Cat.Prelude
+open import Function
 
 open import Cat.Category
 open import Cat.Category.Functor as F
 open import Cat.Category.NaturalTransformation
-open import Cat.Category.Monad using (Monoidal≃Kleisli)
-import Cat.Category.Monad.Monoidal as Monoidal
-import Cat.Category.Monad.Kleisli  as Kleisli
+open import Cat.Category.Monad
 open import Cat.Categories.Fun
-open import Function using (_∘′_)
+open import Cat.Equivalence
 
 module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   private
@@ -27,11 +20,10 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     module ℂ = Category ℂ
     open ℂ using (Object ; Arrow)
     open NaturalTransformation ℂ ℂ
-    open import Function using (_∘_ ; _$_)
     module M = Monoidal ℂ
     module K = Kleisli  ℂ
 
-  module §2-3 (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
+  module §2-3 (omap : Object → Object) (pure : {X : Object} → Arrow X (omap X)) where
     record §1 : Set ℓ where
       open M
 
@@ -134,13 +126,23 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     ; isMnd = K.Monad.isMonad m
     }
 
+  -- | In the following we seek to transform the equivalence `Monoidal≃Kleisli`
+  -- | to talk about voevodsky's construction.
   module _ (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
     private
+      module E = AreInverses (Monoidal≅Kleisli ℂ .proj₂ .proj₂)
+
       Monoidal→Kleisli : M.Monad → K.Monad
-      Monoidal→Kleisli = proj₁ Monoidal≃Kleisli
+      Monoidal→Kleisli = E.obverse
 
       Kleisli→Monoidal : K.Monad → M.Monad
-      Kleisli→Monoidal = inverse Monoidal≃Kleisli
+      Kleisli→Monoidal = E.reverse
+
+      ve-re : Kleisli→Monoidal ∘ Monoidal→Kleisli ≡ Function.id
+      ve-re = E.verso-recto
+
+      re-ve : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
+      re-ve = E.recto-verso
 
       forth : §2-3.§1 omap pure → §2-3.§2 omap pure
       forth = §2-fromMonad ∘ Monoidal→Kleisli ∘ §2-3.§1.toMonad
@@ -163,7 +165,7 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ∘ Monoidal→Kleisli
         ∘ Kleisli→Monoidal
         ∘ §2-3.§2.toMonad
-        ) m ≡⟨ u ⟩
+        ) m ≡⟨ cong (λ φ → φ m) t ⟩
         -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
         -- I should be able to prove this using congruence and `lem` below.
         ( §2-fromMonad
@@ -174,23 +176,18 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
         where
-        lem : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
-        lem = {!!} -- verso-recto Monoidal≃Kleisli
         t' : ((Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad {omap} {pure})
           ≡ §2-3.§2.toMonad
-        t' = cong (\ φ → φ ∘ §2-3.§2.toMonad) lem
-        cong-d : ∀ {ℓ} {A : Set ℓ} {ℓ'} {B : A → Set ℓ'} {x y : A} → (f : (x : A) → B x) → (eq : x ≡ y) → PathP (\ i → B (eq i)) (f x) (f y)
+        cong-d : ∀ {ℓ} {A : Set ℓ} {ℓ'} {B : A → Set ℓ'} {x y : A}
+          → (f : (x : A) → B x) → (eq : x ≡ y) → PathP (\ i → B (eq i)) (f x) (f y)
         cong-d f p = λ i → f (p i)
+        t' = cong (\ φ → φ ∘ §2-3.§2.toMonad) re-ve
         t : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad {omap} {pure})
           ≡ (§2-fromMonad ∘ §2-3.§2.toMonad)
         t = cong-d (\ f → §2-fromMonad ∘ f) t'
         u : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad) m
           ≡ (§2-fromMonad ∘ §2-3.§2.toMonad) m
-        u = cong (\ f → f m) t
-{-
-(K.RawMonad.omap (K.Monad.raw (?0 ℂ omap pure m i (§2-3.§2.toMonad m))) x) = (omap x) : Object
-(K.RawMonad.pure (K.Monad.raw (?0 ℂ omap pure m x (§2-3.§2.toMonad x)))) = pure : Arrow X (_350 ℂ omap pure m x x X)
--}
+        u = cong (\ φ → φ m) t
 
       backEq : ∀ m → (back ∘ forth) m ≡ m
       backEq m = begin
@@ -212,7 +209,10 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
         m ∎
         where
-        t = {!!} -- cong (λ φ → voe-2-3-1-fromMonad ∘ φ ∘ voe-2-3.voe-2-3-1.toMonad) (recto-verso Monoidal≃Kleisli)
+        t : §1-fromMonad ∘ Kleisli→Monoidal ∘ Monoidal→Kleisli ∘ §2-3.§1.toMonad
+          ≡ §1-fromMonad ∘ §2-3.§1.toMonad
+        -- Why does `re-ve` not satisfy this goal?
+        t i m = §1-fromMonad (ve-re i (§2-3.§1.toMonad m))
 
       voe-isEquiv : isEquiv (§2-3.§1 omap pure) (§2-3.§2 omap pure) forth
       voe-isEquiv = gradLemma forth back forthEq backEq

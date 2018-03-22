@@ -2,8 +2,10 @@
 module Cat.Category.Functor where
 
 open import Agda.Primitive
-open import Cubical
 open import Function
+
+open import Cubical
+open import Cubical.NType.Properties using (lemPropF)
 
 open import Cat.Category
 
@@ -72,14 +74,12 @@ module _ {ℓc ℓc' ℓd ℓd'}
 
     open IsFunctor isFunctor public
 
-open Functor
-
 EndoFunctor : ∀ {ℓa ℓb} (ℂ : Category ℓa ℓb) → Set _
 EndoFunctor ℂ = Functor ℂ ℂ
 
 module _
-    {ℓa ℓb : Level}
-    {ℂ 𝔻 : Category ℓa ℓb}
+    {ℓc ℓc' ℓd ℓd' : Level}
+    {ℂ : Category ℓc ℓc'} {𝔻 : Category ℓd ℓd'}
     (F : RawFunctor ℂ 𝔻)
     where
   private
@@ -87,7 +87,7 @@ module _
 
   propIsFunctor : isProp (IsFunctor _ _ F)
   propIsFunctor isF0 isF1 i = record
-    { isIdentity = 𝔻.arrowsAreSets _ _ isF0.isIdentity isF1.isIdentity i
+    { isIdentity     = 𝔻.arrowsAreSets _ _ isF0.isIdentity     isF1.isIdentity     i
     ; isDistributive = 𝔻.arrowsAreSets _ _ isF0.isDistributive isF1.isDistributive i
     }
     where
@@ -96,8 +96,7 @@ module _
 
 -- Alternate version of above where `F` is indexed by an interval
 module _
-    {ℓa ℓb : Level}
-    {ℂ 𝔻 : Category ℓa ℓb}
+    {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Category ℓd ℓd'}
     {F : I → RawFunctor ℂ 𝔻}
     where
   private
@@ -108,15 +107,14 @@ module _
   IsFunctorIsProp' : IsProp' λ i → IsFunctor _ _ (F i)
   IsFunctorIsProp' isF0 isF1 = lemPropF {B = IsFunctor ℂ 𝔻}
     (\ F → propIsFunctor F) (\ i → F i)
-    where
-      open import Cubical.NType.Properties using (lemPropF)
 
-module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
+module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Category ℓd ℓd'} where
+  open Functor
   Functor≡ : {F G : Functor ℂ 𝔻}
-    → raw F ≡ raw G
+    → Functor.raw F ≡ Functor.raw G
     → F ≡ G
-  raw       (Functor≡ eq i) = eq i
-  isFunctor (Functor≡ {F} {G} eq i)
+  Functor.raw       (Functor≡ eq i) = eq i
+  Functor.isFunctor (Functor≡ {F} {G} eq i)
     = res i
     where
     res : (λ i →  IsFunctor ℂ 𝔻 (eq i)) [ isFunctor F ≡ isFunctor G ]
@@ -124,35 +122,37 @@ module _ {ℓ ℓ' : Level} {ℂ 𝔻 : Category ℓ ℓ'} where
 
 module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : Functor A B) where
   private
-    F* = omap F
-    F→ = fmap F
-    G* = omap G
-    G→ = fmap G
+    module F = Functor F
+    module G = Functor G
     module _ {a0 a1 a2 : Object A} {α0 : A [ a0 , a1 ]} {α1 : A [ a1 , a2 ]} where
-
-      dist : (F→ ∘ G→) (A [ α1 ∘ α0 ]) ≡ C [ (F→ ∘ G→) α1 ∘ (F→ ∘ G→) α0 ]
+      dist : (F.fmap ∘ G.fmap) (A [ α1 ∘ α0 ]) ≡ C [ (F.fmap ∘ G.fmap) α1 ∘ (F.fmap ∘ G.fmap) α0 ]
       dist = begin
-        (F→ ∘ G→) (A [ α1 ∘ α0 ])         ≡⟨ refl ⟩
-        F→ (G→ (A [ α1 ∘ α0 ]))           ≡⟨ cong F→ (isDistributive G) ⟩
-        F→ (B [ G→ α1 ∘ G→ α0 ])          ≡⟨ isDistributive F ⟩
-        C [ (F→ ∘ G→) α1 ∘ (F→ ∘ G→) α0 ] ∎
+        (F.fmap ∘ G.fmap) (A [ α1 ∘ α0 ])
+          ≡⟨ refl ⟩
+        F.fmap (G.fmap (A [ α1 ∘ α0 ]))
+          ≡⟨ cong F.fmap G.isDistributive ⟩
+        F.fmap (B [ G.fmap α1 ∘ G.fmap α0 ])
+          ≡⟨ F.isDistributive ⟩
+        C [ (F.fmap ∘ G.fmap) α1 ∘ (F.fmap ∘ G.fmap) α0 ]
+          ∎
 
-    _∘fr_ : RawFunctor A C
-    RawFunctor.omap _∘fr_ = F* ∘ G*
-    RawFunctor.fmap _∘fr_ = F→ ∘ G→
-    instance
-      isFunctor' : IsFunctor A C _∘fr_
-      isFunctor' = record
-        { isIdentity = begin
-          (F→ ∘ G→) (𝟙 A) ≡⟨ refl ⟩
-          F→ (G→ (𝟙 A))   ≡⟨ cong F→ (isIdentity G)⟩
-          F→ (𝟙 B)        ≡⟨ isIdentity F ⟩
-          𝟙 C             ∎
-        ; isDistributive = dist
-        }
+    raw : RawFunctor A C
+    RawFunctor.omap raw = F.omap ∘ G.omap
+    RawFunctor.fmap raw = F.fmap ∘ G.fmap
+
+    isFunctor : IsFunctor A C raw
+    isFunctor = record
+      { isIdentity = begin
+        (F.fmap ∘ G.fmap) (𝟙 A) ≡⟨ refl ⟩
+        F.fmap (G.fmap (𝟙 A))   ≡⟨ cong F.fmap (G.isIdentity)⟩
+        F.fmap (𝟙 B)            ≡⟨ F.isIdentity ⟩
+        𝟙 C                     ∎
+      ; isDistributive = dist
+      }
 
   F[_∘_] : Functor A C
-  raw F[_∘_] = _∘fr_
+  Functor.raw       F[_∘_] = raw
+  Functor.isFunctor F[_∘_] = isFunctor
 
 -- The identity functor
 identity : ∀ {ℓ ℓ'} → {C : Category ℓ ℓ'} → Functor C C
