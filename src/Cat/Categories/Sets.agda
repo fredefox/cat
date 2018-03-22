@@ -203,7 +203,7 @@ module _ (ℓ : Level) where
           re-ve : (x : isEquiv A B f) → (inv ∘ obv) x ≡ x
           re-ve = Equiv≃.inverse-from-to-iso A B
           ve-re : (x : isIso f)       → (obv ∘ inv) x ≡ x
-          ve-re = Equiv≃.inverse-to-from-iso A B
+          ve-re = Equiv≃.inverse-to-from-iso A B sA sB
           iso : isEquiv A B f Eqv.≅ isIso f
           iso = obv , inv ,
             record
@@ -213,12 +213,8 @@ module _ (ℓ : Level) where
         in fromIsomorphism iso
 
     module _ {hA hB : Object} where
-      private
-        A = proj₁ hA
-        sA = proj₂ hA
-        B = proj₁ hB
-        sB = proj₂ hB
-
+      open Σ hA renaming (proj₁ to A ; proj₂ to sA)
+      open Σ hB renaming (proj₁ to B ; proj₂ to sB)
 
       -- lem3 and the equivalence from lem4
       step0 : Σ (A → B) isIso ≃ Σ (A → B) (isEquiv A B)

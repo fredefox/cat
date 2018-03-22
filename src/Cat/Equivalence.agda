@@ -75,15 +75,54 @@ module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
       x ∎
 
     -- `toIso` is abstract - so I probably can't close this proof.
-    -- inverse-to-from-iso : ∀ {f} → toIso {f} ∘ fromIso {f} ≡ idFun _
-    -- inverse-to-from-iso = funExt (λ x → begin
-    --   (toIso ∘ fromIso) x ≡⟨⟩
-    --   toIso (fromIso x)   ≡⟨ cong toIso (propIsEquiv _ (fromIso x) y) ⟩
-    --   toIso y             ≡⟨ {!!} ⟩
-    --   x ∎)
-    --   where
-    --   y : iseqv _
-    --   y = {!!}
+    module _ (sA : isSet A) (sB : isSet B) where
+      module _ {f : A → B} (iso : Isomorphism f) where
+        module _ (iso-x iso-y : Isomorphism f) where
+          open Σ iso-x renaming (fst to x ; snd to inv-x)
+          open Σ iso-y renaming (fst to y ; snd to inv-y)
+          module inv-x = AreInverses inv-x
+          module inv-y = AreInverses inv-y
+
+          fx≡fy : x ≡ y
+          fx≡fy = begin
+            x             ≡⟨ cong (λ φ → x ∘ φ) (sym inv-y.recto-verso) ⟩
+            x ∘ (f ∘ y)   ≡⟨⟩
+            (x ∘ f) ∘ y   ≡⟨ cong (λ φ → φ ∘ y) inv-x.verso-recto ⟩
+            y ∎
+
+          open import Cat.Prelude
+
+          propInv : ∀ g → isProp (AreInverses f g)
+          propInv g t u i = record { verso-recto = a i ; recto-verso = b i }
+            where
+            module t = AreInverses t
+            module u = AreInverses u
+            a : t.verso-recto ≡ u.verso-recto
+            a i = h
+              where
+              hh : ∀ a → (g ∘ f) a ≡ a
+              hh a = sA ((g ∘ f) a) a (λ i → t.verso-recto i a) (λ i → u.verso-recto i a) i
+              h : g ∘ f ≡ idFun A
+              h i a = hh a i
+            b : t.recto-verso ≡ u.recto-verso
+            b i = h
+              where
+              hh : ∀ b → (f ∘ g) b ≡ b
+              hh b = sB _ _ (λ i → t.recto-verso i b) (λ i → u.recto-verso i b) i
+              h : f ∘ g ≡ idFun B
+              h i b = hh b i
+
+          inx≡iny : (λ i → AreInverses f (fx≡fy i)) [ inv-x ≡ inv-y ]
+          inx≡iny = lemPropF propInv fx≡fy
+
+          propIso : iso-x ≡ iso-y
+          propIso i = fx≡fy i , inx≡iny i
+
+        inverse-to-from-iso : (toIso {f} ∘ fromIso {f}) iso ≡ iso
+        inverse-to-from-iso = begin
+          (toIso ∘ fromIso) iso ≡⟨⟩
+          toIso (fromIso iso)   ≡⟨ propIso _ _ ⟩
+          iso ∎
 
     fromIsomorphism : A ≅ B → A ~ B
     fromIsomorphism (f , iso) = f , fromIso iso
@@ -159,20 +198,6 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
 
   module Equiv≃ where
     open Equiv ≃isEquiv public
-    inverse-to-from-iso : ∀ {f} (x : _) → (toIso {f} ∘ fromIso {f}) x ≡ x
-    inverse-to-from-iso {f} x = begin
-      (toIso ∘ fromIso) x ≡⟨⟩
-      toIso (fromIso x)   ≡⟨ cong toIso (propIsEquiv _ (fromIso x) y) ⟩
-      toIso y             ≡⟨ py ⟩
-      x ∎
-      where
-      open Σ x renaming (fst to f~ ; snd to inv)
-      module inv = AreInverses inv
-      y  : isEquiv _ _ f
-      y  = {!!}
-      open Σ (toIso y) renaming (fst to f~' ; snd to inv')
-      py : toIso y ≡ (f~ , inv)
-      py = {!!}
 
 module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
   open Cubical.PathPrelude using (_≃_)
