@@ -138,14 +138,10 @@ module _ (ℓ : Level) where
         iso : (p ≡ q) Eqv.≅ (proj₁ p ≡ proj₁ q)
         iso = f , g , inv
 
-      lem3 : {Q : A → Set ℓb}
+      lem3 : ∀ {ℓc} {Q : A → Set (ℓc ⊔ ℓb)}
         → ((a : A) → P a ≃ Q a) → Σ A P ≃ Σ A Q
-      lem3 {Q} eA = res
+      lem3 {Q = Q} eA = res
         where
-        P→Q : ∀ {a} → P a ≡ Q a
-        P→Q = ua (eA _)
-        Q→P : ∀ {a} → Q a ≡ P a
-        Q→P = sym P→Q
         f : Σ A P → Σ A Q
         f (a , pA) = a , _≃_.eqv (eA a) pA
         g : Σ A Q → Σ A P
@@ -226,7 +222,7 @@ module _ (ℓ : Level) where
 
       -- lem3 and the equivalence from lem4
       step0 : Σ (A → B) isIso ≃ Σ (A → B) (isEquiv A B)
-      step0 = lem3 (λ f → sym≃ (lem4 sA sB f))
+      step0 = lem3 {ℓc = lzero} (λ f → sym≃ (lem4 sA sB f))
       -- univalence
       step1 : Σ (A → B) (isEquiv A B) ≃ (A ≡ B)
       step1 = hh ⊙ h
@@ -297,8 +293,11 @@ module _ (ℓ : Level) where
       --
       -- is contractible, which implies univalence.
 
+    eq1 : ∀ hA → (Σ[ hB ∈ Object ] hA ≅ hB) ≡ (Σ[ hB ∈ Object ] hA ≡ hB)
+    eq1 hA = (ua (lem3 (\ hB → sym≃ thr)))
+
     univalent[Contr] : ∀ hA → isContr (Σ[ hB ∈ Object ] hA ≅ hB)
-    univalent[Contr] hA = {!!} , {!!}
+    univalent[Contr] hA = subst {P = isContr} (sym (eq1 hA)) {!!}
 
     univalent : Univalent
     univalent = from[Contr] univalent[Contr]
