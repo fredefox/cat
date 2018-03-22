@@ -166,17 +166,13 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
       toIso y             ≡⟨ py ⟩
       x ∎
       where
-      helper : (x : Isomorphism _) → Σ _ λ y → toIso y ≡ x
-      helper (f~ , inv) = y , py
-        where
-        module inv = AreInverses inv
-        y  : isEquiv _ _ f
-        y  = {!!}
-        py : toIso y ≡ (f~ , inv)
-        py = {!!}
-      y : isEquiv _ _ _
-      y  = fst (helper x)
-      py = snd (helper x)
+      open Σ x renaming (fst to f~ ; snd to inv)
+      module inv = AreInverses inv
+      y  : isEquiv _ _ f
+      y  = {!!}
+      open Σ (toIso y) renaming (fst to f~' ; snd to inv')
+      py : toIso y ≡ (f~ , inv)
+      py = {!!}
 
 module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
   open Cubical.PathPrelude using (_≃_)
