@@ -219,6 +219,7 @@ module _ (ℓ : Level) where
       -- lem3 and the equivalence from lem4
       step0 : Σ (A → B) isIso ≃ Σ (A → B) (isEquiv A B)
       step0 = lem3 {ℓc = lzero} (λ f → sym≃ (lem4 sA sB f))
+
       -- univalence
       step1 : Σ (A → B) (isEquiv A B) ≃ (A ≡ B)
       step1 = hh ⊙ h
@@ -246,7 +247,7 @@ module _ (ℓ : Level) where
       step2 = sym≃ (lem2 (λ A → isSetIsProp) hA hB)
 
       -- Go from an isomorphism on sets to an isomorphism on homotopic sets
-      trivial? : (hA ≅ hB) ≃ Σ (A → B) isIso
+      trivial? : (hA ≅ hB) ≃ (A Eqv.≅ B)
       trivial? = sym≃ (fromIsomorphism res)
         where
         fwd : Σ (A → B) isIso → hA ≅ hB
@@ -257,16 +258,18 @@ module _ (ℓ : Level) where
         bwd (f , g , x , y) = f , g , record { verso-recto = x ; recto-verso = y }
         res : Σ (A → B) isIso Eqv.≅ (hA ≅ hB)
         res = fwd , bwd , record { verso-recto = refl ; recto-verso = refl }
+
       conclusion : (hA ≅ hB) ≃ (hA ≡ hB)
       conclusion = trivial? ⊙ step0 ⊙ step1 ⊙ step2
-      thierry : (hA ≡ hB) ≃ (hA ≅ hB)
-      thierry = sym≃ conclusion
+
+      univ≃ : (hA ≅ hB) ≃ (hA ≡ hB)
+      univ≃ = trivial? ⊙ step0 ⊙ step1 ⊙ step2
 
     module _ (hA : Object) where
       open Σ hA renaming (proj₁ to A)
 
       eq1 : (Σ[ hB ∈ Object ] hA ≅ hB) ≡ (Σ[ hB ∈ Object ] hA ≡ hB)
-      eq1 = ua (lem3 (\ hB → sym≃ thierry))
+      eq1 = ua (lem3 (\ hB → univ≃))
 
       univalent[Contr] : isContr (Σ[ hB ∈ Object ] hA ≅ hB)
       univalent[Contr] = subst {P = isContr} (sym eq1) tres

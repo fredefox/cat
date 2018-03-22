@@ -24,6 +24,10 @@ open import Cubical.NType.Properties
     ( lemPropF ; lemSig ;  lemSigP ; isSetIsProp
     ; propPi ; propHasLevel ; setPi ; propSet)
   public
+
+propIsContr : {ℓ : Level} → {A : Set ℓ} → isProp (isContr A)
+propIsContr = propHasLevel ⟨-2⟩
+
 open import Cubical.Sigma using (setSig ; sigPresSet) public
 
 module _ (ℓ : Level) where

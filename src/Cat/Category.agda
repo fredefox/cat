@@ -36,9 +36,9 @@ open import Cat.Prelude
 
 import      Function
 
------------------
+------------------
 -- * Categories --
------------------
+------------------
 
 -- | Raw categories
 --
@@ -111,15 +111,21 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
   -- | Univalence is indexed by a raw category as well as an identity proof.
   module Univalence (isIdentity : IsIdentity 𝟙) where
+    -- | The identity isomorphism
     idIso : (A : Object) → A ≅ A
     idIso A = 𝟙 , (𝟙 , isIdentity)
 
-    -- Lemma 9.1.4 in [HoTT]
+    -- | Extract an isomorphism from an equality
+    --
+    -- [HoTT §9.1.4]
     id-to-iso : (A B : Object) → A ≡ B → A ≅ B
     id-to-iso A B eq = transp (\ i → A ≅ eq i) (idIso A)
 
     Univalent : Set (ℓa ⊔ ℓb)
     Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
+
+    -- A perhaps more readable version of univalence:
+    Univalent≃ = {A B : Object} → (A ≡ B) ≃ (A ≅ B)
 
     -- | Equivalent formulation of univalence.
     Univalent[Contr] : Set _
@@ -156,10 +162,14 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   rightIdentity : {A B : Object} {f : Arrow A B} → f ∘ 𝟙 ≡ f
   rightIdentity {A} {B} {f} = snd (isIdentity {A = A} {B} {f})
 
-  -- Some common lemmas about categories.
+  ------------
+  -- Lemmas --
+  ------------
+
+  -- | Relation between iso- epi- and mono- morphisms.
   module _ {A B : Object} {X : Object} (f : Arrow A B) where
-    iso-is-epi : Isomorphism f → Epimorphism {X = X} f
-    iso-is-epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
+    iso→epi : Isomorphism f → Epimorphism {X = X} f
+    iso→epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
       g₀              ≡⟨ sym rightIdentity ⟩
       g₀ ∘ 𝟙          ≡⟨ cong (_∘_ g₀) (sym right-inv) ⟩
       g₀ ∘ (f ∘ f-)   ≡⟨ isAssociative ⟩
@@ -169,8 +179,8 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
       g₁ ∘ 𝟙          ≡⟨ rightIdentity ⟩
       g₁              ∎
 
-    iso-is-mono : Isomorphism f → Monomorphism {X = X} f
-    iso-is-mono (f- , left-inv , right-inv) g₀ g₁ eq =
+    iso→mono : Isomorphism f → Monomorphism {X = X} f
+    iso→mono (f- , left-inv , right-inv) g₀ g₁ eq =
       begin
       g₀            ≡⟨ sym leftIdentity ⟩
       𝟙 ∘ g₀        ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
@@ -181,8 +191,13 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
       𝟙 ∘ g₁        ≡⟨ leftIdentity ⟩
       g₁            ∎
 
-    iso-is-epi-mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
-    iso-is-epi-mono iso = iso-is-epi iso , iso-is-mono iso
+    iso→epi×mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
+    iso→epi×mono iso = iso→epi iso , iso→mono iso
+
+  -- | The formulation of univalence expressed with _≃_ is trivially admissable -
+  -- just "forget" the equivalence.
+  univalent≃ : Univalent≃
+  univalent≃ = _ , univalent
 
   -- | All projections are propositions.
   module Propositionality where
@@ -206,24 +221,6 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
         hh = arrowsAreSets _ _ (snd x) (snd y)
       in h i , hh i
 
-    module _ {A B : Object} {p q : A ≅ B} where
-      open Σ p       renaming (proj₁ to pf)
-      open Σ (snd p) renaming (proj₁ to pg ; proj₂ to pAreInv)
-      open Σ q       renaming (proj₁ to qf)
-      open Σ (snd q) renaming (proj₁ to qg ; proj₂ to qAreInv)
-      module _ (a : pf ≡ qf) (b : pg ≡ qg) where
-        private
-          open import Cubical.Sigma
-          open import Cubical.NType.Properties
-          -- Problem: How do I apply lempPropF twice?
-          cc : (λ i → IsInverseOf (a i) pg) [ pAreInv ≡ _ ]
-          cc = lemPropF (λ x → propIsInverseOf {A} {B} {x}) a
-          c : (λ i → IsInverseOf (a i) (b i)) [ pAreInv ≡ qAreInv ]
-          c = lemPropF (λ x → propIsInverseOf {A} {B} {{!!}}) {!cc!}
-
-        ≅-equality : p ≡ q
-        ≅-equality i = a i , b i , c i
-
     module _ {A B : Object} {f : Arrow A B} where
       isoIsProp : isProp (Isomorphism f)
       isoIsProp a@(g , η , ε) a'@(g' , η' , ε') =
@@ -239,7 +236,7 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
               g'           ∎
 
     propUnivalent : isProp Univalent
-    propUnivalent a b i = propPi (λ iso → propHasLevel ⟨-2⟩) a b i
+    propUnivalent a b i = propPi (λ iso → propIsContr) a b i
 
 -- | Propositionality of being a category
 module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
