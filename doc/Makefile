@@ -3,7 +3,7 @@
 # Originally from : http://tex.stackexchange.com/a/40759
 #
 # Change only the variable below to the name of the main tex file.
-PROJNAME=proposal
+PROJNAME=univalent-categories
 
 # You want latexmk to *always* run, because make does not have all the info.
 # Also, include non-file targets in .PHONY so they are run regardless of any
@@ -36,8 +36,8 @@ all: $(PROJNAME).pdf
 # -interactive=nonstopmode keeps the pdflatex backend from stopping at a
 # missing file reference and interactively asking you for an alternative.
 
-$(PROJNAME).pdf: $(PROJNAME).tex
-	latexmk -pdf -pdflatex="pdflatex -interactive=nonstopmode" -use-make $<
+$(PROJNAME).pdf: main.tex
+	latexmk -jobname=$(PROJNAME) -pdf -pdflatex="pdflatex -interactive=nonstopmode" -use-make $<
 
 cleanall:
 	latexmk -C

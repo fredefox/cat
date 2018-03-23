@@ -1,0 +1,52 @@
+\documentclass{article}
+
+
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{natbib}
+\usepackage[hidelinks]{hyperref}
+
+\usepackage{graphicx}
+
+\usepackage{parskip}
+\usepackage{multicol}
+\usepackage{amsmath,amssymb}
+\usepackage[toc,page]{appendix}
+\usepackage{xspace}
+
+% \setlength{\parskip}{10pt}
+
+% \usepackage{tikz}
+% \usetikzlibrary{arrows, decorations.markings}
+
+% \usepackage{chngcntr}
+% \counterwithout{figure}{section}
+
+\usepackage{chalmerstitle}
+\input{macros.tex}
+
+\title{Category Theory and Cubical Type Theory}
+\author{Frederik Hanghøj Iversen}
+\authoremail{hanghj@student.chalmers.se}
+\supervisor{Thierry Coquand}
+\supervisoremail{coquand@chalmers.se}
+\cosupervisor{Andrea Vezzosi}
+\cosupervisoremail{vezzosi@chalmers.se}
+\institution{Chalmers University of Technology}
+
+\begin{document}
+
+\maketitle
+
+\input{proposal.tex}
+
+\bibliographystyle{plainnat}
+\nocite{cubical-demo}
+\nocite{coquand-2013}
+\bibliography{refs}
+\begin{appendices}
+\input{planning.tex}
+\input{halftime.tex}
+\end{appendices}
+\end{document}
