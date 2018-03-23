@@ -9,17 +9,17 @@ open import Function
 
 open import Cat.Category
 open import Cat.Category.Functor as F
-open import Cat.Category.NaturalTransformation
+import Cat.Category.NaturalTransformation
 open import Cat.Category.Monad
 open import Cat.Categories.Fun
 open import Cat.Equivalence
 
 module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+  open Cat.Category.NaturalTransformation ℂ ℂ
   private
     ℓ = ℓa ⊔ ℓb
     module ℂ = Category ℂ
     open ℂ using (Object ; Arrow)
-    open NaturalTransformation ℂ ℂ
     module M = Monoidal ℂ
     module K = Kleisli  ℂ
 

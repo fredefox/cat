@@ -23,7 +23,7 @@ module Cat.Category.Monad where
 open import Cat.Prelude
 open import Cat.Category
 open import Cat.Category.Functor as F
-open import Cat.Category.NaturalTransformation
+import Cat.Category.NaturalTransformation
 import Cat.Category.Monad.Monoidal
 import Cat.Category.Monad.Kleisli
 open import Cat.Categories.Fun
@@ -33,6 +33,7 @@ module Kleisli = Cat.Category.Monad.Kleisli
 
 -- | The monoidal- and kleisli presentation of monads are equivalent.
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+  open Cat.Category.NaturalTransformation ℂ ℂ
   private
     module ℂ = Category ℂ
     open ℂ using (Object ; Arrow ; 𝟙 ; _∘_ ; _>>>_)
@@ -170,8 +171,6 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
       Req : M.RawMonad.R (backRaw (forth m)) ≡ R
       Req = Functor≡ rawEq
-
-      open NaturalTransformation ℂ ℂ
 
       pureTEq : M.RawMonad.pureT (backRaw (forth m)) ≡ pureT
       pureTEq = funExt (λ X → refl)

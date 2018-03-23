@@ -8,7 +8,6 @@ open import Cat.Prelude
 
 open import Cat.Category
 open import Cat.Category.Functor as F
-open import Cat.Category.NaturalTransformation
 open import Cat.Categories.Fun
 
 module Cat.Category.Monad.Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
@@ -18,7 +17,7 @@ private
   ℓ = ℓa ⊔ ℓb
 
 open Category ℂ using (Object ; Arrow ; 𝟙 ; _∘_)
-open NaturalTransformation ℂ ℂ
+open import Cat.Category.NaturalTransformation ℂ ℂ
 record RawMonad : Set ℓ where
   field
     R      : EndoFunctor ℂ

@@ -6,8 +6,11 @@ open import Cat.Prelude
 
 open import Cat.Category
 open import Cat.Category.Functor
+open import Cat.Category.NaturalTransformation
+  renaming (module Properties to F)
+  using ()
 
-open import Cat.Categories.Fun
+open import Cat.Categories.Fun using (module Fun)
 open import Cat.Categories.Sets hiding (presheaf)
 
 -- There is no (small) category of categories. So we won't use _⇑_ from
@@ -47,10 +50,11 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
     open RawFunctor rawYoneda hiding (fmap)
 
     isIdentity : IsIdentity
-    isIdentity {c} = lemSig (naturalIsProp {F = presheaf c} {presheaf c}) _ _ eq
+    isIdentity {c} = lemSig prp _ _ eq
       where
       eq : (λ C x → ℂ [ ℂ.𝟙 ∘ x ]) ≡ identityTrans (presheaf c)
       eq = funExt λ A → funExt λ B → ℂ.leftIdentity
+      prp = F.naturalIsProp _ _ {F = presheaf c} {presheaf c}
 
     isDistributive : IsDistributive
     isDistributive {A} {B} {C} {f = f} {g}

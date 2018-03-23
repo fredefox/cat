@@ -8,11 +8,11 @@ open import Cat.Prelude
 
 open import Cat.Category
 open import Cat.Category.Functor as F
-open import Cat.Category.NaturalTransformation
 open import Cat.Categories.Fun
 
 -- "A monad in the Kleisli form" [voe]
 module Cat.Category.Monad.Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+open import Cat.Category.NaturalTransformation ℂ ℂ hiding (propIsNatural)
 private
   ℓ = ℓa ⊔ ℓb
   module ℂ = Category ℂ
@@ -116,8 +116,6 @@ record IsMonad (raw : RawMonad) : Set ℓ where
   Functor.isFunctor R = isFunctorR
 
   private
-    open NaturalTransformation ℂ ℂ
-
     R⁰ : EndoFunctor ℂ
     R⁰ = Functors.identity
     R² : EndoFunctor ℂ

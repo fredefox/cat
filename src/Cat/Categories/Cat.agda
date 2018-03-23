@@ -9,7 +9,7 @@ open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
 open import Cat.Category.Exponential hiding (_×_ ; product)
-open import Cat.Category.NaturalTransformation
+import Cat.Category.NaturalTransformation
 open import Cat.Categories.Fun
 
 -- The category of categories
@@ -155,6 +155,9 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
 -- | The category of categories have expoentntials - and because it has products
 -- it is therefory also cartesian closed.
 module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
+  open Cat.Category.NaturalTransformation ℂ 𝔻
+    renaming (identity to identityNT)
+    using ()
   private
     module ℂ = Category ℂ
     module 𝔻 = Category 𝔻
@@ -189,7 +192,7 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
   module _ {c : Functor ℂ 𝔻 × ℂ.Object} where
     open Σ c renaming (proj₁ to F ; proj₂ to C)
 
-    ident : fmap {c} {c} (NT.identity F , ℂ.𝟙 {A = snd c}) ≡ 𝔻.𝟙
+    ident : fmap {c} {c} (identityNT F , ℂ.𝟙 {A = snd c}) ≡ 𝔻.𝟙
     ident = begin
       fmap {c} {c} (Category.𝟙 (object ⊗ ℂ) {c})        ≡⟨⟩
       fmap {c} {c} (idN F , ℂ.𝟙)               ≡⟨⟩
