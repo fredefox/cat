@@ -4,7 +4,7 @@ module Cat.Categories.Fun where
 open import Cat.Prelude
 
 open import Cat.Category
-open import Cat.Category.Functor hiding (identity)
+open import Cat.Category.Functor
 open import Cat.Category.NaturalTransformation
 
 module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
@@ -14,20 +14,18 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
     module ℂ = Category ℂ
     module 𝔻 = Category 𝔻
   private
-    module _ {A B C D : Functor ℂ 𝔻} {θ' : NaturalTransformation A B}
-      {η' : NaturalTransformation B C} {ζ' : NaturalTransformation C D} where
-      θ = proj₁ θ'
-      η = proj₁ η'
-      ζ = proj₁ ζ'
-      θNat = proj₂ θ'
-      ηNat = proj₂ η'
-      ζNat = proj₂ ζ'
-      L : NaturalTransformation A D
-      L = (NT[_∘_] {A} {C} {D} ζ' (NT[_∘_] {A} {B} {C} η' θ'))
-      R : NaturalTransformation A D
-      R = (NT[_∘_] {A} {B} {D} (NT[_∘_] {B} {C} {D} ζ' η') θ')
-      _g⊕f_ = NT[_∘_] {A} {B} {C}
-      _h⊕g_ = NT[_∘_] {B} {C} {D}
+    module _ {A B C D : Functor ℂ 𝔻} {θNT : NaturalTransformation A B}
+      {ηNT : NaturalTransformation B C} {ζNT : NaturalTransformation C D} where
+      open Σ θNT renaming (proj₁ to θ ; proj₂ to θNat)
+      open Σ ηNT renaming (proj₁ to η ; proj₂ to ηNat)
+      open Σ ζNT renaming (proj₁ to ζ ; proj₂ to ζNat)
+      private
+        L : NaturalTransformation A D
+        L = (NT[_∘_] {A} {C} {D} ζNT (NT[_∘_] {A} {B} {C} ηNT θNT))
+        R : NaturalTransformation A D
+        R = (NT[_∘_] {A} {B} {D} (NT[_∘_] {B} {C} {D} ζNT ηNT) θNT)
+        _g⊕f_ = NT[_∘_] {A} {B} {C}
+        _h⊕g_ = NT[_∘_] {B} {C} {D}
       isAssociative : L ≡ R
       isAssociative = lemSig (naturalIsProp {F = A} {D})
         L R (funExt (λ x → 𝔻.isAssociative))
@@ -62,6 +60,71 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
 
   open RawCategory RawFun
   open Univalence (λ {A} {B} {f} → isIdentity {A} {B} {f})
+  private
+    module _ (F : Functor ℂ 𝔻) where
+      center : Σ[ G ∈ Object ] (F ≅ G)
+      center = F , id-to-iso F F refl
+
+      open Σ center renaming (proj₂ to isoF)
+
+      module _ (cG : Σ[ G ∈ Object ] (F ≅ G)) where
+        open Σ cG     renaming (proj₁ to G   ; proj₂ to isoG)
+        module G = Functor G
+        open Σ isoG   renaming (proj₁ to θNT ; proj₂ to invθNT)
+        open Σ invθNT renaming (proj₁ to ηNT ; proj₂ to areInv)
+        open Σ θNT    renaming (proj₁ to θ   ; proj₂ to θN)
+        open Σ ηNT    renaming (proj₁ to η   ; proj₂ to ηN)
+        open Σ areInv renaming (proj₁ to ve-re ; proj₂ to re-ve)
+
+        -- f ~ Transformation G G
+        -- f : (X : ℂ.Object) → 𝔻 [ G.omap X , G.omap X ]
+        -- f X = T[ θ ∘ η ] X
+        -- g = T[ η ∘ θ ] {!!}
+
+        ntF : NaturalTransformation F F
+        ntF = 𝟙 {A = F}
+
+        ntG : NaturalTransformation G G
+        ntG = 𝟙 {A = G}
+
+        idFunctor = Functors.identity
+
+        -- Dunno if this is the way to go, but if I can construct a an inverse of
+        -- G that is also inverse of F (possibly by being propositionally equal to
+        -- another functor F~)
+        postulate
+          G~ : Functor 𝔻 ℂ
+        F~ : Functor 𝔻 ℂ
+        F~ = G~
+        postulate
+          prop0 : F[ G~ ∘ G  ] ≡ idFunctor
+          prop1 : F[ F  ∘ G~ ] ≡ idFunctor
+
+        lem : F[ F  ∘ F~ ] ≡ idFunctor
+        lem = begin
+          F[ F  ∘ F~ ] ≡⟨⟩
+          F[ F  ∘ G~ ] ≡⟨ prop1 ⟩
+          idFunctor ∎
+
+        open import Cubical.Univalence
+        p0 : F ≡ G
+        p0 = begin
+          F                              ≡⟨ sym Functors.rightIdentity ⟩
+          F[ F           ∘ idFunctor ]   ≡⟨ cong (λ φ → F[ F ∘ φ ]) (sym prop0) ⟩
+          F[ F           ∘ F[ G~ ∘ G ] ] ≡⟨ Functors.isAssociative {F = G} {G = G~} {H = F} ⟩
+          F[ F[ F ∘ G~ ] ∘ G ]           ≡⟨⟩
+          F[ F[ F ∘ F~ ] ∘ G ]           ≡⟨ cong (λ φ → F[ φ ∘ G ]) lem ⟩
+          F[ idFunctor   ∘ G ]           ≡⟨ Functors.leftIdentity ⟩
+          G ∎
+
+        p1 : (λ i → Σ (Arrow F (p0 i)) (Isomorphism {A = F} {B = p0 i})) [ isoF ≡ isoG ]
+        p1 = {!!}
+
+        isContractible : (F , isoF) ≡ (G , isoG)
+        isContractible i = p0 i , p1 i
+
+      univalent[Contr] : isContr (Σ[ G ∈ Object ] (F ≅ G))
+      univalent[Contr] = center , isContractible
 
   private
     module _ {A B : Functor ℂ 𝔻} where

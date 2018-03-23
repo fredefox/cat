@@ -119,7 +119,7 @@ record IsMonad (raw : RawMonad) : Set ℓ where
     open NaturalTransformation ℂ ℂ
 
     R⁰ : EndoFunctor ℂ
-    R⁰ = F.identity
+    R⁰ = Functors.identity
     R² : EndoFunctor ℂ
     R² = F[ R ∘ R ]
     module R  = Functor R

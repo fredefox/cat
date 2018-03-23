@@ -50,9 +50,9 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       pureT X = pure {X}
 
       field
-        pureN : Natural F.identity R pureT
+        pureN : Natural Functors.identity R pureT
 
-      pureNT : NaturalTransformation F.identity R
+      pureNT : NaturalTransformation Functors.identity R
       pureNT = pureT , pureN
 
       joinT : (A : Object) → ℂ [ omap (omap A) , omap A ]

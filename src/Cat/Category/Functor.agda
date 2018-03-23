@@ -1,7 +1,7 @@
 {-# OPTIONS --cubical #-}
 module Cat.Category.Functor where
 
-open import Agda.Primitive
+open import Cat.Prelude
 open import Function
 
 open import Cubical
@@ -9,31 +9,31 @@ open import Cubical.NType.Properties using (lemPropF)
 
 open import Cat.Category
 
-open Category hiding (_∘_ ; raw ; IsIdentity)
-
 module _ {ℓc ℓc' ℓd ℓd'}
     (ℂ : Category ℓc ℓc')
     (𝔻 : Category ℓd ℓd')
     where
 
   private
+    module ℂ = Category ℂ
+    module 𝔻 = Category 𝔻
     ℓ = ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd'
     𝓤 = Set ℓ
 
-  Omap = Object ℂ → Object 𝔻
+  Omap = ℂ.Object → 𝔻.Object
   Fmap : Omap → Set _
   Fmap omap = ∀ {A B}
     → ℂ [ A , B ] → 𝔻 [ omap A , omap B ]
   record RawFunctor : 𝓤 where
     field
-      omap : Object ℂ → Object 𝔻
+      omap : ℂ.Object → 𝔻.Object
       fmap : ∀ {A B} → ℂ [ A , B ] → 𝔻 [ omap A , omap B ]
 
     IsIdentity : Set _
-    IsIdentity = {A : Object ℂ} → fmap (𝟙 ℂ {A}) ≡ 𝟙 𝔻 {omap A}
+    IsIdentity = {A : ℂ.Object} → fmap (ℂ.𝟙 {A}) ≡ 𝔻.𝟙 {omap A}
 
     IsDistributive : Set _
-    IsDistributive = {A B C : Object ℂ} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
+    IsDistributive = {A B C : ℂ.Object} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
       → fmap (ℂ [ g ∘ f ]) ≡ 𝔻 [ fmap g ∘ fmap f ]
 
   -- | Equality principle for raw functors
@@ -120,11 +120,18 @@ module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Cat
     res : (λ i →  IsFunctor ℂ 𝔻 (eq i)) [ isFunctor F ≡ isFunctor G ]
     res = IsFunctorIsProp' (isFunctor F) (isFunctor G)
 
-module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : Functor A B) where
+module _ {ℓ0 ℓ1 ℓ2 ℓ3 ℓ4 ℓ5 : Level}
+  {A : Category ℓ0 ℓ1}
+  {B : Category ℓ2 ℓ3}
+  {C : Category ℓ4 ℓ5}
+  (F : Functor B C) (G : Functor A B) where
   private
+    module A = Category A
+    module B = Category B
+    module C = Category C
     module F = Functor F
     module G = Functor G
-    module _ {a0 a1 a2 : Object A} {α0 : A [ a0 , a1 ]} {α1 : A [ a1 , a2 ]} where
+    module _ {a0 a1 a2 : A.Object} {α0 : A [ a0 , a1 ]} {α1 : A [ a1 , a2 ]} where
       dist : (F.fmap ∘ G.fmap) (A [ α1 ∘ α0 ]) ≡ C [ (F.fmap ∘ G.fmap) α1 ∘ (F.fmap ∘ G.fmap) α0 ]
       dist = begin
         (F.fmap ∘ G.fmap) (A [ α1 ∘ α0 ])
@@ -143,10 +150,10 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
     isFunctor : IsFunctor A C raw
     isFunctor = record
       { isIdentity = begin
-        (F.fmap ∘ G.fmap) (𝟙 A) ≡⟨ refl ⟩
-        F.fmap (G.fmap (𝟙 A))   ≡⟨ cong F.fmap (G.isIdentity)⟩
-        F.fmap (𝟙 B)            ≡⟨ F.isIdentity ⟩
-        𝟙 C                     ∎
+        (F.fmap ∘ G.fmap) A.𝟙   ≡⟨ refl ⟩
+        F.fmap (G.fmap A.𝟙)     ≡⟨ cong F.fmap (G.isIdentity)⟩
+        F.fmap B.𝟙              ≡⟨ F.isIdentity ⟩
+        C.𝟙                     ∎
       ; isDistributive = dist
       }
 
@@ -154,15 +161,42 @@ module _ {ℓ ℓ' : Level} {A B C : Category ℓ ℓ'} (F : Functor B C) (G : F
   Functor.raw       F[_∘_] = raw
   Functor.isFunctor F[_∘_] = isFunctor
 
--- The identity functor
-identity : ∀ {ℓ ℓ'} → {C : Category ℓ ℓ'} → Functor C C
-identity = record
-  { raw = record
-    { omap = λ x → x
-    ; fmap = λ x → x
-    }
-  ; isFunctor = record
-    { isIdentity = refl
-    ; isDistributive = refl
-    }
-  }
+-- | The identity functor
+module Functors where
+  module _ {ℓc ℓcc : Level} {ℂ : Category ℓc ℓcc} where
+    private
+      raw : RawFunctor ℂ ℂ
+      RawFunctor.omap raw = Function.id
+      RawFunctor.fmap raw = Function.id
+
+      isFunctor : IsFunctor ℂ ℂ raw
+      IsFunctor.isIdentity     isFunctor = refl
+      IsFunctor.isDistributive isFunctor = refl
+
+    identity : Functor ℂ ℂ
+    Functor.raw       identity = raw
+    Functor.isFunctor identity = isFunctor
+
+  module _
+    {ℓa ℓaa ℓb ℓbb ℓc ℓcc ℓd ℓdd : Level}
+    {𝔸 : Category ℓa ℓaa}
+    {𝔹 : Category ℓb ℓbb}
+    {ℂ : Category ℓc ℓcc}
+    {𝔻 : Category ℓd ℓdd}
+    {F : Functor 𝔸 𝔹} {G : Functor 𝔹 ℂ} {H : Functor ℂ 𝔻} where
+    isAssociative : F[ H ∘ F[ G ∘ F ] ] ≡ F[ F[ H ∘ G ] ∘ F ]
+    isAssociative = Functor≡ refl
+
+  module _
+    {ℓc ℓcc ℓd ℓdd : Level}
+    {ℂ : Category ℓc ℓcc}
+    {𝔻 : Category ℓd ℓdd}
+    {F : Functor ℂ 𝔻} where
+    leftIdentity : F[ identity ∘ F ] ≡ F
+    leftIdentity = Functor≡ refl
+
+    rightIdentity : F[ F ∘ identity ] ≡ F
+    rightIdentity = Functor≡ refl
+
+    isIdentity : F[ identity ∘ F ] ≡ F × F[ F ∘ identity ] ≡ F
+    isIdentity = leftIdentity , rightIdentity

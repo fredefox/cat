@@ -176,9 +176,9 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       pureTEq : M.RawMonad.pureT (backRaw (forth m)) ≡ pureT
       pureTEq = funExt (λ X → refl)
 
-      pureNTEq : (λ i → NaturalTransformation F.identity (Req i))
+      pureNTEq : (λ i → NaturalTransformation Functors.identity (Req i))
         [ M.RawMonad.pureNT (backRaw (forth m)) ≡ pureNT ]
-      pureNTEq = lemSigP (λ i → propIsNatural F.identity (Req i)) _ _ pureTEq
+      pureNTEq = lemSigP (λ i → propIsNatural Functors.identity (Req i)) _ _ pureTEq
 
       joinTEq : M.RawMonad.joinT (backRaw (forth m)) ≡ joinT
       joinTEq = funExt (λ X → begin

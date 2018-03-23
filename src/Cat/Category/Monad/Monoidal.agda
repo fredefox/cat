@@ -22,14 +22,14 @@ open NaturalTransformation ℂ ℂ
 record RawMonad : Set ℓ where
   field
     R      : EndoFunctor ℂ
-    pureNT : NaturalTransformation F.identity R
+    pureNT : NaturalTransformation Functors.identity R
     joinNT : NaturalTransformation F[ R ∘ R ] R
 
   -- Note that `pureT` and `joinT` differs from their definition in the
   -- kleisli formulation only by having an explicit parameter.
-  pureT : Transformation F.identity R
+  pureT : Transformation Functors.identity R
   pureT = proj₁ pureNT
-  pureN : Natural F.identity R pureT
+  pureN : Natural Functors.identity R pureT
   pureN = proj₂ pureNT
 
   joinT : Transformation F[ R ∘ R ] R

@@ -14,31 +14,11 @@ open import Cat.Categories.Fun
 
 -- The category of categories
 module _ (ℓ ℓ' : Level) where
-  private
-    module _ {𝔸 𝔹 ℂ 𝔻 : Category ℓ ℓ'} {F : Functor 𝔸 𝔹} {G : Functor 𝔹 ℂ} {H : Functor ℂ 𝔻} where
-      assc : F[ H ∘ F[ G ∘ F ] ] ≡ F[ F[ H ∘ G ] ∘ F ]
-      assc = Functor≡ refl
-
-    module _ {ℂ 𝔻 : Category ℓ ℓ'} {F : Functor ℂ 𝔻} where
-      ident-r : F[ F ∘ identity ] ≡ F
-      ident-r = Functor≡ refl
-
-      ident-l : F[ identity ∘ F ] ≡ F
-      ident-l = Functor≡ refl
-
   RawCat : RawCategory (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
   RawCategory.Object RawCat = Category ℓ ℓ'
   RawCategory.Arrow  RawCat = Functor
-  RawCategory.𝟙      RawCat = identity
+  RawCategory.𝟙      RawCat = Functors.identity
   RawCategory._∘_    RawCat = F[_∘_]
-
-  private
-    open RawCategory RawCat
-    isAssociative : IsAssociative
-    isAssociative {f = F} {G} {H} = assc {F = F} {G = G} {H = H}
-
-    isIdentity : IsIdentity identity
-    isIdentity = ident-l , ident-r
 
   -- NB! `ArrowsAreSets RawCat` is *not* provable. The type of functors,
   -- however, form a groupoid! Therefore there is no (1-)category of
@@ -283,7 +263,7 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
         : Functor 𝔸 object → Functor ℂ ℂ
         → Functor (𝔸 ⊗ ℂ) (object ⊗ ℂ)
       transpose : Functor 𝔸 object
-      eq : F[ eval ∘ (parallelProduct transpose (identity {C = ℂ})) ] ≡ F
+      eq : F[ eval ∘ (parallelProduct transpose (Functors.identity {ℂ = ℂ})) ] ≡ F
       -- eq : F[ :eval: ∘ {!!} ] ≡ F
       -- eq : Catℓ [ :eval: ∘ (HasProducts._|×|_ hasProducts transpose (𝟙 Catℓ {o = ℂ})) ] ≡ F
       -- eq' : (Catℓ [ :eval: ∘

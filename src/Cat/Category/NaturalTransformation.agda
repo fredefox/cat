@@ -26,7 +26,7 @@ open import Data.Nat using (_≤_ ; z≤n ; s≤s)
 module Nat = Data.Nat
 
 open import Cat.Category
-open import Cat.Category.Functor hiding (identity)
+open import Cat.Category.Functor
 open import Cat.Wishlist
 
 module NaturalTransformation {ℓc ℓc' ℓd ℓd' : Level}
