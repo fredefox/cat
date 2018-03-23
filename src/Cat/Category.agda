@@ -113,7 +113,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   module Univalence (isIdentity : IsIdentity 𝟙) where
     -- | The identity isomorphism
     idIso : (A : Object) → A ≅ A
-    idIso A = 𝟙 , (𝟙 , isIdentity)
+    idIso A = 𝟙 , 𝟙 , isIdentity
 
     -- | Extract an isomorphism from an equality
     --
