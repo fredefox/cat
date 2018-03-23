@@ -72,12 +72,12 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         }
 
       field
-        isMnd : IsMonad rawMnd
+        isMonad : IsMonad rawMnd
 
       toMonad : Monad
       toMonad = record
         { raw     = rawMnd
-        ; isMonad = isMnd
+        ; isMonad = isMonad
         }
 
     record §2 : Set ℓ where
@@ -94,36 +94,30 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         }
 
       field
-        isMnd : IsMonad rawMnd
+        isMonad : IsMonad rawMnd
 
       toMonad : Monad
       toMonad = record
         { raw     = rawMnd
-        ; isMonad = isMnd
+        ; isMonad = isMonad
         }
 
   §1-fromMonad : (m : M.Monad) → §2-3.§1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
-  -- voe-2-3-1-fromMonad : (m : M.Monad) → voe.§2-3.§1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
   §1-fromMonad m = record
-    { fmap = Functor.fmap R
+    { fmap       = Functor.fmap R
     ; RisFunctor = Functor.isFunctor R
-    ; pureN = pureN
-    ; join = λ {X} → joinT X
-    ; joinN = joinN
-    ; isMnd = M.Monad.isMonad m
+    ; pureN      = pureN
+    ; join       = λ {X} → joinT X
+    ; joinN      = joinN
+    ; isMonad    = M.Monad.isMonad m
     }
     where
-    raw = M.Monad.raw m
-    R   = M.RawMonad.R raw
-    pureT = M.RawMonad.pureT raw
-    pureN = M.RawMonad.pureN raw
-    joinT = M.RawMonad.joinT raw
-    joinN = M.RawMonad.joinN raw
+    open M.Monad m
 
   §2-fromMonad : (m : K.Monad) → §2-3.§2 (K.Monad.omap m) (K.Monad.pure m)
   §2-fromMonad m = record
-    { bind  = K.Monad.bind    m
-    ; isMnd = K.Monad.isMonad m
+    { bind    = K.Monad.bind    m
+    ; isMonad = K.Monad.isMonad m
     }
 
   -- | In the following we seek to transform the equivalence `Monoidal≃Kleisli`
