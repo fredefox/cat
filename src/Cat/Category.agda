@@ -57,10 +57,10 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
   -- | Operations on data
 
-  domain : { a b : Object } → Arrow a b → Object
-  domain {a = a} _ = a
+  domain : {a b : Object} → Arrow a b → Object
+  domain {a} _ = a
 
-  codomain : { a b : Object } → Arrow a b → Object
+  codomain : {a b : Object} → Arrow a b → Object
   codomain {b = b} _ = b
 
   _>>>_ : {A B C : Object} → (Arrow A B) → (Arrow B C) → Arrow A C
@@ -92,10 +92,10 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
   module _ {A B : Object} where
     Epimorphism : {X : Object } → (f : Arrow A B) → Set ℓb
-    Epimorphism {X} f = ( g₀ g₁ : Arrow B X ) → g₀ ∘ f ≡ g₁ ∘ f → g₀ ≡ g₁
+    Epimorphism {X} f = (g₀ g₁ : Arrow B X) → g₀ ∘ f ≡ g₁ ∘ f → g₀ ≡ g₁
 
     Monomorphism : {X : Object} → (f : Arrow A B) → Set ℓb
-    Monomorphism {X} f = ( g₀ g₁ : Arrow X A ) → f ∘ g₀ ≡ f ∘ g₁ → g₀ ≡ g₁
+    Monomorphism {X} f = (g₀ g₁ : Arrow X A) → f ∘ g₀ ≡ f ∘ g₁ → g₀ ≡ g₁
 
   IsInitial  : Object → Set (ℓa ⊔ ℓb)
   IsInitial  I = {X : Object} → isContr (Arrow I X)
@@ -254,6 +254,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 
       isIdentity : (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ Y.isIdentity ]
       isIdentity = Prop.propIsIdentity X.isIdentity Y.isIdentity
+
       U : ∀ {a : IsIdentity 𝟙}
         → (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ a ]
         → (b : Univalent a)
@@ -339,17 +340,74 @@ module Opposite {ℓa ℓb : Level} where
       open Univalence isIdentity
 
       module _ {A B : ℂ.Object} where
+        open import Cat.Equivalence as Equivalence hiding (_≅_)
+        k : Equivalence.Isomorphism (ℂ.id-to-iso A B)
+        k = Equiv≃.toIso _ _ ℂ.univalent
+        open Σ k renaming (proj₁ to f ; proj₂ to inv)
+        open AreInverses inv
+
+        _⊙_ = Function._∘_
+        infixr 9 _⊙_
+
+        -- f    : A ℂ.≅ B → A ≡ B
+        flipDem : A ≅ B → A ℂ.≅ B
+        flipDem (f , g , inv) = g , f , inv
+
+        flopDem : A ℂ.≅ B → A ≅ B
+        flopDem (f , g , inv) = g , f , inv
+
+        flipInv : ∀ {x} → (flipDem ⊙ flopDem) x ≡ x
+        flipInv = refl
+
+        -- Shouldn't be necessary to use `arrowsAreSets` here, but we have it,
+        -- so why not?
+        lem : (p : A ≡ B) → id-to-iso A B p ≡ flopDem (ℂ.id-to-iso A B p)
+        lem p i = l≡r i
+          where
+          l = id-to-iso A B p
+          r = flopDem (ℂ.id-to-iso A B p)
+          open Σ l renaming (proj₁ to l-obv ; proj₂ to l-areInv)
+          open Σ l-areInv renaming (proj₁ to l-invs ; proj₂ to l-iso)
+          open Σ l-iso renaming (proj₁ to l-l ; proj₂ to l-r)
+          open Σ r renaming (proj₁ to r-obv ; proj₂ to r-areInv)
+          open Σ r-areInv renaming (proj₁ to r-invs ; proj₂ to r-iso)
+          open Σ r-iso renaming (proj₁ to r-l ; proj₂ to r-r)
+          l-obv≡r-obv : l-obv ≡ r-obv
+          l-obv≡r-obv = refl
+          l-invs≡r-invs : l-invs ≡ r-invs
+          l-invs≡r-invs = refl
+          l-l≡r-l : l-l ≡ r-l
+          l-l≡r-l = ℂ.arrowsAreSets _ _ l-l r-l
+          l-r≡r-r : l-r ≡ r-r
+          l-r≡r-r = ℂ.arrowsAreSets _ _ l-r r-r
+          l≡r : l ≡ r
+          l≡r i = l-obv≡r-obv i , l-invs≡r-invs i , l-l≡r-l i , l-r≡r-r i
+
+        ff : A ≅ B → A ≡ B
+        ff = f ⊙ flipDem
+
+        -- inv : AreInverses (ℂ.id-to-iso A B) f
+        invv : AreInverses (id-to-iso A B) ff
+        -- recto-verso : ℂ.id-to-iso A B ∘ f ≡ idFun (A ℂ.≅ B)
+        invv = record
+          { verso-recto = funExt (λ x → begin
+            (ff ⊙ id-to-iso A B) x                       ≡⟨⟩
+            (f  ⊙ flipDem ⊙ id-to-iso A B) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → f ⊙ flipDem ⊙ φ) (funExt lem)) ⟩
+            (f  ⊙ flipDem ⊙ flopDem ⊙ ℂ.id-to-iso A B) x ≡⟨⟩
+            (f  ⊙ ℂ.id-to-iso A B) x                     ≡⟨ (λ i → verso-recto i x) ⟩
+            x ∎)
+          ; recto-verso = funExt (λ x → begin
+            (id-to-iso A B ⊙ f ⊙ flipDem) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → φ ⊙ f ⊙ flipDem) (funExt lem)) ⟩
+            (flopDem ⊙ ℂ.id-to-iso A B ⊙ f ⊙ flipDem) x ≡⟨ cong (λ φ → φ x) (cong (λ φ → flopDem ⊙ φ ⊙ flipDem) recto-verso) ⟩
+            (flopDem ⊙ flipDem) x                       ≡⟨⟩
+            x ∎)
+          }
+
+        h : Equivalence.Isomorphism (id-to-iso A B)
+        h = ff , invv
         univalent : isEquiv (A ≡ B) (A ≅ B)
           (Univalence.id-to-iso (swap ℂ.isIdentity) A B)
-        fst (univalent iso) = flipFiber (fst (ℂ.univalent (flipIso iso)))
-          where
-            flipIso : A ≅ B → B ℂ.≅ A
-            flipIso (f , f~ , iso) = f , f~ , swap iso
-            flipFiber
-              : fiber (ℂ.id-to-iso B A) (flipIso iso)
-              → fiber (  id-to-iso A B)          iso
-            flipFiber (eq , eqIso) = sym eq , {!!}
-        snd (univalent iso) = {!!}
+        univalent = Equiv≃.fromIso _ _ h
 
       isCategory : IsCategory opRaw
       IsCategory.isAssociative isCategory = sym ℂ.isAssociative
