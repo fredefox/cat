@@ -238,6 +238,37 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
     propUnivalent : isProp Univalent
     propUnivalent a b i = propPi (λ iso → propIsContr) a b i
 
+    propIsTerminal : ∀ T → isProp (IsTerminal T)
+    propIsTerminal T x y i {X} = res X i
+      where
+      module _ (X : Object) where
+        open Σ (x {X}) renaming (proj₁ to fx ; proj₂ to cx)
+        open Σ (y {X}) renaming (proj₁ to fy ; proj₂ to cy)
+        fp : fx ≡ fy
+        fp = cx fy
+        prop : (x : Arrow X T) → isProp (∀ f → x ≡ f)
+        prop x = propPi (λ y → arrowsAreSets x y)
+        cp : (λ i → ∀ f → fp i ≡ f) [ cx ≡ cy ]
+        cp = lemPropF prop fp
+        res : (fx , cx) ≡ (fy , cy)
+        res i = fp i , cp i
+
+    -- Merely the dual of the above statement.
+    propIsInitial : ∀ I → isProp (IsInitial I)
+    propIsInitial I x y i {X} = res X i
+      where
+      module _ (X : Object) where
+        open Σ (x {X}) renaming (proj₁ to fx ; proj₂ to cx)
+        open Σ (y {X}) renaming (proj₁ to fy ; proj₂ to cy)
+        fp : fx ≡ fy
+        fp = cx fy
+        prop : (x : Arrow I X) → isProp (∀ f → x ≡ f)
+        prop x = propPi (λ y → arrowsAreSets x y)
+        cp : (λ i → ∀ f → fp i ≡ f) [ cx ≡ cy ]
+        cp = lemPropF prop fp
+        res : (fx , cx) ≡ (fy , cy)
+        res i = fp i , cp i
+
 -- | Propositionality of being a category
 module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   open RawCategory ℂ

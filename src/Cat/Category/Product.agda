@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Category.Product where
 
 open import Cat.Prelude hiding (_×_ ; proj₁ ; proj₂)
@@ -118,3 +118,118 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object �
 
   propHasProducts : isProp (HasProducts ℂ)
   propHasProducts = propHasProducts'
+
+module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
+  (let module ℂ = Category ℂ) {A B : ℂ.Object} (p : Product ℂ A B) where
+
+  -- open Product p hiding (raw)
+  open import Data.Product
+
+  raw : RawCategory _ _
+  raw = record
+    { Object = Σ[ X ∈ ℂ.Object ] ℂ.Arrow X A × ℂ.Arrow X B
+    ; Arrow = λ{ (A , _) (B , _) → ℂ.Arrow A B}
+    ; 𝟙 = λ{ {A , _} → ℂ.𝟙 {A}}
+    ; _∘_ = ℂ._∘_
+    }
+
+  open RawCategory raw
+  open Univalence ℂ.isIdentity
+  open import Cat.Equivalence hiding (_≅_)
+
+  k : {A B : ℂ.Object} → isEquiv (A ≡ B) (A ℂ.≅ B) (ℂ.id-to-iso A B)
+  k = ℂ.univalent
+
+  module _ {X' Y' : Σ[ X ∈ ℂ.Object ] (ℂ [ X , A ] × ℂ [ X , B ])} where
+    open Σ X' renaming (proj₁ to X) using ()
+    open Σ (proj₂ X') renaming (proj₁ to Xxa ; proj₂ to Xxb)
+    open Σ Y' renaming (proj₁ to Y) using ()
+    open Σ (proj₂ Y') renaming (proj₁ to Yxa ; proj₂ to Yxb)
+    module _ (p : X ≡ Y) where
+      D : ∀ y → X ≡ y → Set _
+      D y q = ∀ b → (λ i → ℂ [ q i , A ]) [ Xxa ≡ b ]
+      -- Not sure this is actually provable - but if it were it might involve
+      -- something like the ump of the product -- in which case perhaps the
+      -- objects of the category I'm constructing should not merely be the
+      -- data-part of the product but also the laws.
+
+      -- d : D X refl
+      d : ∀ b → (λ i → ℂ [ X , A ]) [ Xxa ≡ b ]
+      d b = {!!}
+      kk : D Y p
+      kk = pathJ D d Y p
+      a : (λ i → ℂ [ p i , A ]) [ Xxa ≡ Yxa ]
+      a = kk Yxa
+      b : (λ i → ℂ [ p i , B ]) [ Xxb ≡ Yxb ]
+      b = {!!}
+      f : X' ≡ Y'
+      f i = p i , a i , b i
+
+    module _ (p : X' ≡ Y') where
+      g : X ≡ Y
+      g i = proj₁ (p i)
+
+    step0 : (X' ≡ Y') ≃ (X ≡ Y)
+    step0 = Equiv≃.fromIsomorphism _ _ (g , f , record { verso-recto = {!refl!} ; recto-verso = refl})
+
+    step1 : (X ≡ Y) ≃ X ℂ.≅ Y
+    step1 = ℂ.univalent≃
+
+    -- Just a reminder
+    step1-5 : (X' ≅ Y') ≡ (X ℂ.≅ Y)
+    step1-5 = refl
+
+    step2 : (X' ≡ Y') ≃ (X ℂ.≅ Y)
+    step2 = Equivalence.compose step0 step1
+
+    univalent : isEquiv (X' ≡ Y') (X ℂ.≅ Y) (id-to-iso X' Y')
+    univalent = proj₂ step2
+
+  isCategory : IsCategory raw
+  isCategory = record
+    { isAssociative = ℂ.isAssociative
+    ; isIdentity = ℂ.isIdentity
+    ; arrowsAreSets = ℂ.arrowsAreSets
+    ; univalent = univalent
+    }
+
+  category : Category _ _
+  category = record
+    { raw = raw
+    ; isCategory = isCategory
+    }
+
+  open Category category hiding (IsTerminal ; Object)
+
+  -- Essential turns `p : Product ℂ A B` into a triple
+  productObject : Object
+  productObject = Product.object p , Product.proj₁ p , Product.proj₂ p
+
+  productObjectIsTerminal : IsTerminal productObject
+  productObjectIsTerminal = {!!}
+
+  proppp : isProp (IsTerminal productObject)
+  proppp = Propositionality.propIsTerminal productObject
+
+module Try1 {ℓa ℓb : Level} (A B : Set) where
+  open import Data.Product
+  raw : RawCategory _ _
+  raw = record
+    { Object = Σ[ X ∈ Set ] (X → A) × (X → B)
+    ; Arrow = λ{ (X0 , f0 , g0) (X1 , f1 , g1) → X0 → X1}
+    ; 𝟙 = λ x → x
+    ; _∘_ = λ x x₁ x₂ → x (x₁ x₂)
+    }
+
+  open RawCategory raw
+
+  isCategory : IsCategory raw
+  isCategory = record
+    { isAssociative = refl
+    ; isIdentity = refl , refl
+    ; arrowsAreSets = {!!}
+    ; univalent = {!!}
+    }
+
+  t : IsTerminal ((A × B) , proj₁ , proj₂)
+  t = {!!}
