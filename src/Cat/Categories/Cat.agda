@@ -126,7 +126,17 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
       isUniq = isUniqL , isUniqR
 
     isProduct : ∃![ x ] (F[ proj₁ ∘ x ] ≡ x₁ × F[ proj₂ ∘ x ] ≡ x₂)
-    isProduct = x , isUniq
+    isProduct = x , isUniq , uq
+      where
+      module _ {y : Functor X object} (eq : F[ proj₁ ∘ y ] ≡ x₁ × F[ proj₂ ∘ y ] ≡ x₂) where
+        omapEq : Functor.omap x ≡ Functor.omap y
+        omapEq = {!!}
+        -- fmapEq : (λ i → {!{A B : ?} → Arrow A B → 𝔻 [ ? A , ? B ]!}) [ Functor.fmap x ≡ Functor.fmap y ]
+        -- fmapEq = {!!}
+        rawEq : Functor.raw x ≡ Functor.raw y
+        rawEq = {!!}
+        uq : x ≡ y
+        uq = Functor≡ rawEq
 
 module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
   private

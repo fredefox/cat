@@ -52,7 +52,7 @@ module _ (ℓ : Level) where
 ∃! = ∃!≈ _≡_
 
 ∃!-syntax : ∀ {a b} {A : Set a} → (A → Set b) → Set (a ⊔ b)
-∃!-syntax = ∃
+∃!-syntax = ∃!
 
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 

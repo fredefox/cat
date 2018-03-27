@@ -328,7 +328,19 @@ module _ {ℓ : Level} where
 
         isProduct : IsProduct 𝓢 _ _ rawProduct
         IsProduct.ump isProduct {X = hX} f g
-          = (f &&& g) , ump hX f g
+          = f &&& g , ump hX f g , λ eq → funExt (umpUniq eq)
+          where
+          open Σ hX renaming (proj₁ to X) using ()
+          module _ {y : X → A × B} (eq : proj₁ Function.∘′ y ≡ f × proj₂ Function.∘′ y ≡ g) (x : X) where
+            p1 : proj₁ ((f &&& g) x) ≡ proj₁ (y x)
+            p1 = begin
+              proj₁ ((f &&& g) x) ≡⟨⟩
+              f x ≡⟨ (λ i → sym (proj₁ eq) i x) ⟩
+              proj₁ (y x) ∎
+            p2 : proj₂ ((f &&& g) x) ≡ proj₂ (y x)
+            p2 = λ i → sym (proj₂ eq) i x
+            umpUniq : (f &&& g) x ≡ y x
+            umpUniq i = p1 i , p2 i
 
       product : Product 𝓢 hA hB
       Product.raw       product = rawProduct
