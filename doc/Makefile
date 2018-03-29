@@ -16,7 +16,7 @@ MAIN=main.tex
 all: $(PROJNAME).pdf
 
 preview: $(MAIN)
-	latexmk -pvc -jobname=$(PROJNAME) -pdf -pdflatex="pdflatex -interactive=nonstopmode" $<
+	latexmk -pvc -jobname=$(PROJNAME) -pdf -xelatex $<
 
 # CUSTOM BUILD RULES
 
@@ -41,7 +41,7 @@ preview: $(MAIN)
 # missing file reference and interactively asking you for an alternative.
 
 $(PROJNAME).pdf: $(MAIN)
-	latexmk -jobname=$(PROJNAME) -pdf -pdflatex="pdflatex -interactive=nonstopmode" -use-make $<
+	latexmk -jobname=$(PROJNAME) -pdf -xelatex -use-make $<
 
 cleanall:
 	latexmk -C
