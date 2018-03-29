@@ -255,7 +255,35 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
 
     -- this needs the univalence of the category
     propTerminal : isProp Terminal
-    propTerminal = {!!}
+    propTerminal Xt Yt = res
+      where
+      open Σ Xt renaming (proj₁ to X ; proj₂ to Xit)
+      open Σ Yt renaming (proj₁ to Y ; proj₂ to Yit)
+      open Σ (Xit {Y}) renaming (proj₁ to Y→X) using ()
+      open Σ (Yit {X}) renaming (proj₁ to X→Y) using ()
+      open import Cat.Equivalence hiding (_≅_)
+      -- Need to show `left` and `right`, what we know is that the arrows are
+      -- unique. Well, I know that if I compose these two arrows they must give
+      -- the identity, since also the identity is the unique such arrow (by X
+      -- and Y both being terminal objects.)
+      Xprop : isProp (Arrow X X)
+      Xprop f g = trans (sym (snd Xit f)) (snd Xit g)
+      Yprop : isProp (Arrow Y Y)
+      Yprop f g = trans (sym (snd Yit f)) (snd Yit g)
+      left : Y→X ∘ X→Y ≡ 𝟙
+      left = Xprop _ _
+      right : X→Y ∘ Y→X ≡ 𝟙
+      right = Yprop _ _
+      iso : X ≅ Y
+      iso = X→Y , Y→X , left , right
+      fromIso : X ≅ Y → X ≡ Y
+      fromIso = fst (Equiv≃.toIso (X ≡ Y) (X ≅ Y) univalent)
+      p0 : X ≡ Y
+      p0 = fromIso iso
+      p1 : (λ i → IsTerminal (p0 i)) [ Xit ≡ Yit ]
+      p1 = lemPropF propIsTerminal p0
+      res : Xt ≡ Yt
+      res i = p0 i , p1 i
 
     -- Merely the dual of the above statement.
     propIsInitial : ∀ I → isProp (IsInitial I)
