@@ -253,6 +253,10 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
         res : (fx , cx) ≡ (fy , cy)
         res i = fp i , cp i
 
+    -- this needs the univalence of the category
+    propTerminal : isProp Terminal
+    propTerminal = {!!}
+
     -- Merely the dual of the above statement.
     propIsInitial : ∀ I → isProp (IsInitial I)
     propIsInitial I x y i {X} = res X i
@@ -268,6 +272,9 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
         cp = lemPropF prop fp
         res : (fx , cx) ≡ (fy , cy)
         res i = fp i , cp i
+
+    propInitial : isProp Initial
+    propInitial = {!!}
 
 -- | Propositionality of being a category
 module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
