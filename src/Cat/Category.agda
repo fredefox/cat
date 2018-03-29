@@ -253,7 +253,11 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
         res : (fx , cx) ≡ (fy , cy)
         res i = fp i , cp i
 
-    -- this needs the univalence of the category
+    -- | Terminal objects are propositional - a.k.a uniqueness of terminal
+    -- | objects.
+    --
+    -- Having two terminal objects induces an isomorphism between them - and
+    -- because of univalence this is equivalent to equality.
     propTerminal : isProp Terminal
     propTerminal Xt Yt = res
       where
@@ -302,7 +306,36 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
         res i = fp i , cp i
 
     propInitial : isProp Initial
-    propInitial = {!!}
+    propInitial Xi Yi = {!!}
+      where
+      open Σ Xi renaming (proj₁ to X ; proj₂ to Xii)
+      open Σ Yi renaming (proj₁ to Y ; proj₂ to Yii)
+      open Σ (Xii {Y}) renaming (proj₁ to Y→X) using ()
+      open Σ (Yii {X}) renaming (proj₁ to X→Y) using ()
+      open import Cat.Equivalence hiding (_≅_)
+      -- Need to show `left` and `right`, what we know is that the arrows are
+      -- unique. Well, I know that if I compose these two arrows they must give
+      -- the identity, since also the identity is the unique such arrow (by X
+      -- and Y both being terminal objects.)
+      Xprop : isProp (Arrow X X)
+      Xprop f g = trans (sym (snd Xii f)) (snd Xii g)
+      Yprop : isProp (Arrow Y Y)
+      Yprop f g = trans (sym (snd Yii f)) (snd Yii g)
+      left : Y→X ∘ X→Y ≡ 𝟙
+      left = Yprop _ _
+      right : X→Y ∘ Y→X ≡ 𝟙
+      right = Xprop _ _
+      iso : X ≅ Y
+      iso = Y→X , X→Y , right , left
+      fromIso : X ≅ Y → X ≡ Y
+      fromIso = fst (Equiv≃.toIso (X ≡ Y) (X ≅ Y) univalent)
+      p0 : X ≡ Y
+      p0 = fromIso iso
+      p1 : (λ i → IsInitial (p0 i)) [ Xii ≡ Yii ]
+      p1 = lemPropF propIsInitial p0
+      res : Xi ≡ Yi
+      res i = p0 i , p1 i
+
 
 -- | Propositionality of being a category
 module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
