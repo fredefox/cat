@@ -121,205 +121,215 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object �
   propHasProducts = propHasProducts'
 
 module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
-  (let module ℂ = Category ℂ) {A B : ℂ.Object} (p : Product ℂ A B) where
+  (let module ℂ = Category ℂ) {A B : ℂ.Object} where
 
-  -- open Product p hiding (raw)
   open import Data.Product
 
-  raw : RawCategory _ _
-  raw = record
-    { Object = Σ[ X ∈ ℂ.Object ] ℂ.Arrow X A × ℂ.Arrow X B
-    ; Arrow = λ{ (X , xa , xb) (Y , ya , yb)
-      → Σ[ xy ∈ ℂ.Arrow X Y ]
-        ( ℂ [ ya ∘ xy ] ≡ xa)
-        × ℂ [ yb ∘ xy ] ≡ xb
+  module _ where
+    raw : RawCategory _ _
+    raw = record
+      { Object = Σ[ X ∈ ℂ.Object ] ℂ.Arrow X A × ℂ.Arrow X B
+      ; Arrow = λ{ (X , xa , xb) (Y , ya , yb)
+        → Σ[ xy ∈ ℂ.Arrow X Y ]
+          ( ℂ [ ya ∘ xy ] ≡ xa)
+          × ℂ [ yb ∘ xy ] ≡ xb
+          }
+      ; 𝟙 = λ{ {A , f , g} → ℂ.𝟙 {A} , ℂ.rightIdentity , ℂ.rightIdentity}
+      ; _∘_ = λ { {A , a0 , a1} {B , b0 , b1} {C , c0 , c1} (f , f0 , f1) (g , g0 , g1)
+        → (f ℂ.∘ g)
+          , (begin
+              ℂ [ c0 ∘ ℂ [ f ∘ g ] ] ≡⟨ ℂ.isAssociative ⟩
+              ℂ [ ℂ [ c0 ∘ f ] ∘ g ] ≡⟨ cong (λ φ → ℂ [ φ ∘ g ]) f0 ⟩
+              ℂ [ b0 ∘ g ] ≡⟨ g0 ⟩
+              a0 ∎
+            )
+          , (begin
+             ℂ [ c1 ∘ ℂ [ f ∘ g ] ] ≡⟨ ℂ.isAssociative ⟩
+             ℂ [ ℂ [ c1 ∘ f ] ∘ g ] ≡⟨ cong (λ φ → ℂ [ φ ∘ g ]) f1 ⟩
+             ℂ [ b1 ∘ g ] ≡⟨ g1 ⟩
+              a1 ∎
+            )
         }
-    ; 𝟙 = λ{ {A , f , g} → ℂ.𝟙 {A} , ℂ.rightIdentity , ℂ.rightIdentity}
-    ; _∘_ = λ { {A , a0 , a1} {B , b0 , b1} {C , c0 , c1} (f , f0 , f1) (g , g0 , g1)
-      → (f ℂ.∘ g)
-        , (begin
-            ℂ [ c0 ∘ ℂ [ f ∘ g ] ] ≡⟨ ℂ.isAssociative ⟩
-            ℂ [ ℂ [ c0 ∘ f ] ∘ g ] ≡⟨ cong (λ φ → ℂ [ φ ∘ g ]) f0 ⟩
-            ℂ [ b0 ∘ g ] ≡⟨ g0 ⟩
-            a0 ∎
-          )
-        , (begin
-           ℂ [ c1 ∘ ℂ [ f ∘ g ] ] ≡⟨ ℂ.isAssociative ⟩
-           ℂ [ ℂ [ c1 ∘ f ] ∘ g ] ≡⟨ cong (λ φ → ℂ [ φ ∘ g ]) f1 ⟩
-           ℂ [ b1 ∘ g ] ≡⟨ g1 ⟩
-            a1 ∎
-          )
       }
-    }
 
-  open RawCategory raw
+    open RawCategory raw
 
-  isAssocitaive : IsAssociative
-  isAssocitaive {A , a0 , a1} {B , _} {C , c0 , c1} {D , d0 , d1} {ff@(f , f0 , f1)} {gg@(g , g0 , g1)} {hh@(h , h0 , h1)} i
-    = s0 i , rl i , rr i
-    where
-    l = hh ∘ (gg ∘ ff)
-    r = hh ∘ gg ∘ ff
-    -- s0 : h ℂ.∘ (g ℂ.∘ f) ≡ h ℂ.∘ g ℂ.∘ f
-    s0 : proj₁ l ≡ proj₁ r
-    s0 = ℂ.isAssociative {f = f} {g} {h}
-    prop0 : ∀ a → isProp (ℂ [ d0 ∘ a ] ≡ a0)
-    prop0 a = ℂ.arrowsAreSets (ℂ [ d0 ∘ a ]) a0
-    rl : (λ i → (ℂ [ d0 ∘ s0 i ]) ≡ a0) [ proj₁ (proj₂ l) ≡ proj₁ (proj₂ r) ]
-    rl = lemPropF prop0 s0
-    prop1 : ∀ a → isProp ((ℂ [ d1 ∘ a ]) ≡ a1)
-    prop1 a = ℂ.arrowsAreSets _ _
-    rr : (λ i → (ℂ [ d1 ∘ s0 i ]) ≡ a1) [ proj₂ (proj₂ l) ≡ proj₂ (proj₂ r) ]
-    rr = lemPropF prop1 s0
-
-  isIdentity : IsIdentity 𝟙
-  isIdentity {AA@(A , a0 , a1)} {BB@(B , b0 , b1)} {f , f0 , f1} = leftIdentity , rightIdentity
-    where
-    leftIdentity : 𝟙 ∘ (f , f0 , f1) ≡ (f , f0 , f1)
-    leftIdentity i = l i , rl i , rr i
+    isAssocitaive : IsAssociative
+    isAssocitaive
+      {A , a0 , a1}
+      {B , b0 , b1}
+      {C , c0 , c1}
+      {D , d0 , d1}
+      {ff@(f , f0 , f1)}
+      {gg@(g , g0 , g1)}
+      {hh@(h , h0 , h1)}
+      i
+      = s0 i , rl i , rr i
       where
-      L = 𝟙 ∘ (f , f0 , f1)
-      R : Arrow AA BB
-      R = f , f0 , f1
-      l : proj₁ L ≡ proj₁ R
-      l = ℂ.leftIdentity
-      prop0 : ∀ a → isProp ((ℂ [ b0 ∘ a ]) ≡ a0)
-      prop0 a = ℂ.arrowsAreSets _ _
-      rl : (λ i → (ℂ [ b0 ∘ l i ]) ≡ a0) [ proj₁ (proj₂ L) ≡ proj₁ (proj₂ R) ]
-      rl = lemPropF prop0 l
-      prop1 : ∀ a → isProp (ℂ [ b1 ∘ a ] ≡ a1)
-      prop1 _ = ℂ.arrowsAreSets _ _
-      rr : (λ i → (ℂ [ b1 ∘ l i ]) ≡ a1) [ proj₂ (proj₂ L) ≡ proj₂ (proj₂ R) ]
-      rr = lemPropF prop1 l
-    rightIdentity : (f , f0 , f1) ∘ 𝟙 ≡ (f , f0 , f1)
-    rightIdentity i = l i , rl i , {!!}
+      l = hh ∘ (gg ∘ ff)
+      r = hh ∘ gg ∘ ff
+      -- s0 : h ℂ.∘ (g ℂ.∘ f) ≡ h ℂ.∘ g ℂ.∘ f
+      s0 : proj₁ l ≡ proj₁ r
+      s0 = ℂ.isAssociative {f = f} {g} {h}
+      prop0 : ∀ a → isProp (ℂ [ d0 ∘ a ] ≡ a0)
+      prop0 a = ℂ.arrowsAreSets (ℂ [ d0 ∘ a ]) a0
+      rl : (λ i → (ℂ [ d0 ∘ s0 i ]) ≡ a0) [ proj₁ (proj₂ l) ≡ proj₁ (proj₂ r) ]
+      rl = lemPropF prop0 s0
+      prop1 : ∀ a → isProp ((ℂ [ d1 ∘ a ]) ≡ a1)
+      prop1 a = ℂ.arrowsAreSets _ _
+      rr : (λ i → (ℂ [ d1 ∘ s0 i ]) ≡ a1) [ proj₂ (proj₂ l) ≡ proj₂ (proj₂ r) ]
+      rr = lemPropF prop1 s0
+
+    isIdentity : IsIdentity 𝟙
+    isIdentity {AA@(A , a0 , a1)} {BB@(B , b0 , b1)} {f , f0 , f1} = leftIdentity , rightIdentity
       where
-      L = (f , f0 , f1) ∘ 𝟙
-      R : Arrow AA BB
-      R = (f , f0 , f1)
-      l : ℂ [ f ∘ ℂ.𝟙 ] ≡ f
-      l = ℂ.rightIdentity
-      prop0 : ∀ a → isProp ((ℂ [ b0 ∘ a ]) ≡ a0)
-      prop0 _ = ℂ.arrowsAreSets _ _
-      rl : (λ i → (ℂ [ b0 ∘ l i ]) ≡ a0) [ proj₁ (proj₂ L) ≡ proj₁ (proj₂ R) ]
-      rl = lemPropF prop0 l
-      prop1 : ∀ a → isProp ((ℂ [ b1 ∘ a ]) ≡ a1)
-      prop1 _ = ℂ.arrowsAreSets _ _
-      rr : (λ i → (ℂ [ b1 ∘ l i ]) ≡ a1) [ proj₂ (proj₂ L) ≡ proj₂ (proj₂ R) ]
-      rr = lemPropF prop1 l
+      leftIdentity : 𝟙 ∘ (f , f0 , f1) ≡ (f , f0 , f1)
+      leftIdentity i = l i , rl i , rr i
+        where
+        L = 𝟙 ∘ (f , f0 , f1)
+        R : Arrow AA BB
+        R = f , f0 , f1
+        l : proj₁ L ≡ proj₁ R
+        l = ℂ.leftIdentity
+        prop0 : ∀ a → isProp ((ℂ [ b0 ∘ a ]) ≡ a0)
+        prop0 a = ℂ.arrowsAreSets _ _
+        rl : (λ i → (ℂ [ b0 ∘ l i ]) ≡ a0) [ proj₁ (proj₂ L) ≡ proj₁ (proj₂ R) ]
+        rl = lemPropF prop0 l
+        prop1 : ∀ a → isProp (ℂ [ b1 ∘ a ] ≡ a1)
+        prop1 _ = ℂ.arrowsAreSets _ _
+        rr : (λ i → (ℂ [ b1 ∘ l i ]) ≡ a1) [ proj₂ (proj₂ L) ≡ proj₂ (proj₂ R) ]
+        rr = lemPropF prop1 l
+      rightIdentity : (f , f0 , f1) ∘ 𝟙 ≡ (f , f0 , f1)
+      rightIdentity i = l i , rl i , rr i
+        where
+        L = (f , f0 , f1) ∘ 𝟙
+        R : Arrow AA BB
+        R = (f , f0 , f1)
+        l : ℂ [ f ∘ ℂ.𝟙 ] ≡ f
+        l = ℂ.rightIdentity
+        prop0 : ∀ a → isProp ((ℂ [ b0 ∘ a ]) ≡ a0)
+        prop0 _ = ℂ.arrowsAreSets _ _
+        rl : (λ i → (ℂ [ b0 ∘ l i ]) ≡ a0) [ proj₁ (proj₂ L) ≡ proj₁ (proj₂ R) ]
+        rl = lemPropF prop0 l
+        prop1 : ∀ a → isProp ((ℂ [ b1 ∘ a ]) ≡ a1)
+        prop1 _ = ℂ.arrowsAreSets _ _
+        rr : (λ i → (ℂ [ b1 ∘ l i ]) ≡ a1) [ proj₂ (proj₂ L) ≡ proj₂ (proj₂ R) ]
+        rr = lemPropF prop1 l
 
-  cat : IsCategory raw
-  cat = record
-    { isAssociative = isAssocitaive
-    ; isIdentity    = isIdentity
-    ; arrowsAreSets = {!!}
-    ; univalent     = {!!}
-    }
+    arrowsAreSets : ArrowsAreSets
+    arrowsAreSets {X , x0 , x1} {Y , y0 , y1} (f , f0 , f1) (g , g0 , g1) p q = {!!}
+      where
+      prop : ∀ {X Y} (x y : ℂ.Arrow X Y) → isProp (x ≡ y)
+      prop = ℂ.arrowsAreSets
+      a0 a1 : f ≡ g
+      a0 i = proj₁ (p i)
+      a1 i = proj₁ (q i)
+      a : a0 ≡ a1
+      a = ℂ.arrowsAreSets _ _ a0 a1
+      res : p ≡ q
+      res i j = a i j , {!b i j!} , {!!}
+        where
+        -- b0 b1 : (λ j → (ℂ [ y0 ∘ a i j ]) ≡ x0) [ f0 ≡ g0 ]
+        -- b0 = lemPropF (λ x → prop (ℂ [ y0 ∘ x ]) x0) (a i)
+        -- b1 = lemPropF (λ x → prop (ℂ [ y0 ∘ x ]) x0) (a i)
+        b0 : (λ j → (ℂ [ y0 ∘ a0 j ]) ≡ x0) [ f0 ≡ g0 ]
+        b0 = lemPropF (λ x → prop (ℂ [ y0 ∘ x ]) x0) a0
+        b1 : (λ j → (ℂ [ y0 ∘ a1 j ]) ≡ x0) [ f0 ≡ g0 ]
+        b1 = lemPropF (λ x → prop (ℂ [ y0 ∘ x ]) x0) a1
+        -- b : b0 ≡ b1
+        -- b = {!!}
 
-  module cat = IsCategory cat
+    isCat : IsCategory raw
+    isCat = record
+      { isAssociative = isAssocitaive
+      ; isIdentity    = isIdentity
+      ; arrowsAreSets = arrowsAreSets
+      ; univalent     = {!!}
+      }
 
-  lemma :  Terminal ≃ Product ℂ A B
-  lemma = {!!}
+    cat : Category _ _
+    cat = record
+      { raw = raw
+      ; isCategory = isCat
+      }
+
+  open Category cat
+
+  open import Cat.Equivalence
+
+  lemma : Terminal ≃ Product ℂ A B
+  lemma = Equiv≃.fromIsomorphism Terminal (Product ℂ A B) (f , g , inv)
+    where
+    f : Terminal → Product ℂ A B
+    f ((X , x0 , x1) , uniq) = p
+      where
+      rawP : RawProduct ℂ A B
+      rawP = record
+        { object = X
+        ; proj₁ = x0
+        ; proj₂ = x1
+        }
+      -- open RawProduct rawP renaming (proj₁ to x0 ; proj₂ to x1)
+      module _ {Y : ℂ.Object} (p0 : ℂ [ Y , A ]) (p1 : ℂ [ Y , B ]) where
+        uy : isContr (Arrow (Y , p0 , p1) (X , x0 , x1))
+        uy = uniq {Y , p0 , p1}
+        open Σ uy renaming (proj₁ to Y→X ; proj₂ to contractible)
+        open Σ Y→X renaming (proj₁ to p0×p1 ; proj₂ to cond)
+        ump : ∃![ f×g ] (ℂ [ x0 ∘ f×g ] ≡ p0 P.× ℂ [ x1 ∘ f×g ] ≡ p1)
+        ump = p0×p1 , cond , λ {y} x → let k = contractible (y , x) in λ i → proj₁ (k i)
+      isP : IsProduct ℂ A B rawP
+      isP = record { ump = ump }
+      p : Product ℂ A B
+      p = record
+        { raw = rawP
+        ; isProduct = isP
+        }
+    g : Product ℂ A B → Terminal
+    g p = o , t
+      where
+      module p = Product p
+      module isp = IsProduct p.isProduct
+      o : Object
+      o = p.object , p.proj₁ , p.proj₂
+      module _ {Xx : Object} where
+        open Σ Xx renaming (proj₁ to X ; proj₂ to x)
+        ℂXo : ℂ [ X , isp.object ]
+        ℂXo = isp._P[_×_] (proj₁ x) (proj₂ x)
+        ump = p.ump (proj₁ x) (proj₂ x)
+        Xoo = proj₁ (proj₂ ump)
+        Xo : Arrow Xx o
+        Xo = ℂXo , Xoo
+        contractible : ∀ y → Xo ≡ y
+        contractible (y , yy) = res
+          where
+          k : ℂXo ≡ y
+          k = proj₂ (proj₂ ump) (yy)
+          prp : ∀ a → isProp
+            ( (ℂ [ p.proj₁ ∘ a ] ≡ proj₁ x)
+            × (ℂ [ p.proj₂ ∘ a ] ≡ proj₂ x)
+            )
+          prp ab ac ad i
+            = ℂ.arrowsAreSets _ _ (proj₁ ac) (proj₁ ad) i
+            , ℂ.arrowsAreSets _ _ (proj₂ ac) (proj₂ ad) i
+          h :
+            ( λ i
+              → ℂ [ p.proj₁ ∘ k i ] ≡ proj₁ x
+              × ℂ [ p.proj₂ ∘ k i ] ≡ proj₂ x
+            ) [ Xoo ≡ yy ]
+          h = lemPropF prp k
+          res : (ℂXo , Xoo) ≡ (y , yy)
+          res i = k i , h i
+      t : IsTerminal o
+      t {Xx} = Xo , contractible
+    ve-re : ∀ x → g (f x) ≡ x
+    ve-re x = Propositionality.propTerminal _ _
+    re-ve : ∀ x → f (g x) ≡ x
+    re-ve x = {!!}
+    inv : AreInverses f g
+    inv = record
+      { verso-recto = funExt ve-re
+      ; recto-verso = funExt re-ve
+      }
 
   thm : isProp (Product ℂ A B)
-  thm = equivPreservesNType {n = ⟨-1⟩} lemma cat.Propositionality.propTerminal
-
---   open Univalence ℂ.isIdentity
---   open import Cat.Equivalence hiding (_≅_)
-
---   k : {A B : ℂ.Object} → isEquiv (A ≡ B) (A ℂ.≅ B) (ℂ.id-to-iso A B)
---   k = ℂ.univalent
-
---   module _ {X' Y' : Σ[ X ∈ ℂ.Object ] (ℂ [ X , A ] × ℂ [ X , B ])} where
---     open Σ X' renaming (proj₁ to X) using ()
---     open Σ (proj₂ X') renaming (proj₁ to Xxa ; proj₂ to Xxb)
---     open Σ Y' renaming (proj₁ to Y) using ()
---     open Σ (proj₂ Y') renaming (proj₁ to Yxa ; proj₂ to Yxb)
---     module _ (p : X ≡ Y) where
---       D : ∀ y → X ≡ y → Set _
---       D y q = ∀ b → (λ i → ℂ [ q i , A ]) [ Xxa ≡ b ]
---       -- Not sure this is actually provable - but if it were it might involve
---       -- something like the ump of the product -- in which case perhaps the
---       -- objects of the category I'm constructing should not merely be the
---       -- data-part of the product but also the laws.
-
---       -- d : D X refl
---       d : ∀ b → (λ i → ℂ [ X , A ]) [ Xxa ≡ b ]
---       d b = {!!}
---       kk : D Y p
---       kk = pathJ D d Y p
---       a : (λ i → ℂ [ p i , A ]) [ Xxa ≡ Yxa ]
---       a = kk Yxa
---       b : (λ i → ℂ [ p i , B ]) [ Xxb ≡ Yxb ]
---       b = {!!}
---       f : X' ≡ Y'
---       f i = p i , a i , b i
-
---     module _ (p : X' ≡ Y') where
---       g : X ≡ Y
---       g i = proj₁ (p i)
-
---     step0 : (X' ≡ Y') ≃ (X ≡ Y)
---     step0 = Equiv≃.fromIsomorphism _ _ (g , f , record { verso-recto = {!refl!} ; recto-verso = refl})
-
---     step1 : (X ≡ Y) ≃ X ℂ.≅ Y
---     step1 = ℂ.univalent≃
-
---     -- Just a reminder
---     step1-5 : (X' ≅ Y') ≡ (X ℂ.≅ Y)
---     step1-5 = refl
-
---     step2 : (X' ≡ Y') ≃ (X ℂ.≅ Y)
---     step2 = Equivalence.compose step0 step1
-
---     univalent : isEquiv (X' ≡ Y') (X ℂ.≅ Y) (id-to-iso X' Y')
---     univalent = proj₂ step2
-
---   isCategory : IsCategory raw
---   isCategory = record
---     { isAssociative = ℂ.isAssociative
---     ; isIdentity = ℂ.isIdentity
---     ; arrowsAreSets = ℂ.arrowsAreSets
---     ; univalent = univalent
---     }
-
---   category : Category _ _
---   category = record
---     { raw = raw
---     ; isCategory = isCategory
---     }
-
---   open Category category hiding (IsTerminal ; Object)
-
---   -- Essential turns `p : Product ℂ A B` into a triple
---   productObject : Object
---   productObject = Product.object p , Product.proj₁ p , Product.proj₂ p
-
---   productObjectIsTerminal : IsTerminal productObject
---   productObjectIsTerminal = {!!}
-
---   proppp : isProp (IsTerminal productObject)
---   proppp = Propositionality.propIsTerminal productObject
-
--- module Try1 {ℓa ℓb : Level} (A B : Set) where
---   open import Data.Product
---   raw : RawCategory _ _
---   raw = record
---     { Object = Σ[ X ∈ Set ] (X → A) × (X → B)
---     ; Arrow = λ{ (X0 , f0 , g0) (X1 , f1 , g1) → X0 → X1}
---     ; 𝟙 = λ x → x
---     ; _∘_ = λ x x₁ x₂ → x (x₁ x₂)
---     }
-
---   open RawCategory raw
-
---   isCategory : IsCategory raw
---   isCategory = record
---     { isAssociative = refl
---     ; isIdentity = refl , refl
---     ; arrowsAreSets = {!!}
---     ; univalent = {!!}
---     }
-
---   t : IsTerminal ((A × B) , proj₁ , proj₂)
---   t = {!!}
+  thm = equivPreservesNType {n = ⟨-1⟩} lemma Propositionality.propTerminal
