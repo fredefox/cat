@@ -7,22 +7,12 @@ Recent developments have, however, resulted in \nomen{Cubical Type Theory} (CTT)
 which permits a constructive proof of these two important notions.
 
 Furthermore an extension has been implemented for the proof assistant Agda
-(\cite{agda}) that allows us to work in such a ``cubical setting''. This project
-will be concerned with exploring the usefulness of this extension. As a
-case-study I will consider \nomen{category theory}. This will serve a dual
-purpose: First off category theory is a field where the notion of functional
-extensionality and univalence wil be particularly useful. Secondly, Category
-Theory gives rise to a \nomen{model} for CTT.
+(\cite{agda}, \cite{cubical-agda}) that allows us to work in such a ``cubical
+setting''. This thesis will explore the usefulness of this extension in the
+context of category theory.
 
-The project will consist of two parts: The first part will be concerned with
-formalizing concepts from category theory. The focus will be on formalizing
-parts that will be useful in the second part of the project: Showing that
-\nomen{Cubical Sets} give rise to a model of CTT.
-%
-\section{Problem}
-%
-In the following two subsections I present two examples that illustrate the
-limitation inherent in ITT and by extension to the expressiveness of Agda.
+In the following two sections I present two examples that illustrate some
+limitations inherent in ITT and -- by extension -- Agda.
 %
 \subsection{Functional extensionality}
 Consider the functions:
@@ -33,8 +23,8 @@ $f \defeq (n : \bN) \mapsto (0 + n : \bN)$
 $g \defeq (n : \bN) \mapsto (n + 0 : \bN)$
 \end{multicols}
 %
-$n + 0$ is definitionally equal to $n$. We call this \nomen{definitional
-equality} and write $n + 0 = n$ to assert this fact. We call it definitional
+$n + 0$ is \nomen{definitionally} equal to $n$ which we write as $n + 0 = n$.
+This is also called \nomen{judgmental} equality. We call it definitional
 equality because the \emph{equality} arises from the \emph{definition} of $+$
 which is:
 %
@@ -48,9 +38,9 @@ which is:
 Note that $0 + n$ is \emph{not} definitionally equal to $n$. $0 + n$ is in
 normal form. I.e.; there is no rule for $+$ whose left-hand-side matches this
 expression. We \emph{do}, however, have that they are \nomen{propositionally}
-equal. We write $n + 0 \equiv n$ to assert this fact. Propositional equality
-means that there is a proof that exhibits this relation. Since equality is a
-transitive relation we have that $n + 0 \equiv 0 + n$.
+equal which we write as $n + 0 \equiv n$. Propositional equality means that
+there is a proof that exhibits this relation. Since equality is a transitive
+relation we have that $n + 0 \equiv 0 + n$.
 
 Unfortunately we don't have $f \equiv g$.\footnote{Actually showing this is
 outside the scope of this text. Essentially it would involve giving a model
@@ -62,10 +52,9 @@ interested in; that they are equal for all inputs. We call this
 \nomen{pointwise equality}, where the \emph{points} of a function refers
 to it's arguments.
 
-In the context of category theory the principle of functional extensionality is
-for instance useful in the context of showing that representable functors are
-indeed functors. The representable functor for a category $\bC$ and a fixed
-object in $A \in \bC$ is defined to be:
+In the context of category theory functional extensionality is e.g. needed to
+show that representable functors are indeed functors. The representable functor
+for a category $\bC$ and a fixed object in $A \in \bC$ is defined to be:
 %
 \begin{align*}
 \fmap \defeq X \mapsto \Hom_{\bC}(A, X)
@@ -80,19 +69,8 @@ The proof obligation that this satisfies the identity law of functors
 %
 One needs functional extensionality to ``go under'' the function arrow and apply
 the (left) identity law of the underlying category to proove $\idFun \comp g
-\equiv g$ and thus closing the above proof.
+\equiv g$ and thus closing the.
 %
-\iffalse
-I also want to talk about:
-\begin{itemize}
-\item
-  Foundational systems
-\item
-  Theory vs. metatheory
-\item
-  Internal type theory
-\end{itemize}
-\fi
 \subsection{Equality of isomorphic types}
 %
 Let $\top$ denote the unit type -- a type with a single constructor. In the
@@ -106,22 +84,16 @@ $x$. A mathematician would immediately conclude $\{x \mid \phi\ x \land
 \psi\ x\} \equiv \{x \mid \phi\ x\}$ without thinking twice. Unfortunately such
 an identification can not be performed in ITT.
 
-More specifically; what we are interested in is a way of identifying types that
-are in a one-to-one correspondence. We say that such types are
-\nomen{isomorphic} and write $A \cong B$ to assert this.
-
-To prove two types isomorphic is to give an \nomen{isomorphism} between them.
-That is, a function $f : A \to B$ with an inverse $f^{-1} : B \to A$, i.e.:
-$f^{-1} \comp f \equiv id_A$. If such a function exist we say that $A$ and $B$
-are isomorphic and write $A \cong B$.
-
-Furthermore we want to \emph{identify} such isomorphic types. This, we get from
-the principle of univalence:\footnote{It's often referred to as the univalence
-axiom, but since it is not an axiom in this setting but rather a theorem I
-refer to this just as a `principle'.}
+More specifically; what we are interested in is a way of identifying
+\nomen{equivalent} types. I will return to the definition of equivalence later,
+but for now, it is sufficient to think of an equivalence as a one-to-one
+correspondence. We write $A \simeq B$ to assert that $A$ and $B$ are equivalent
+types. The principle of univalence says that:
 %
-$$(A \cong B) \cong (A \equiv B)$$
+$$\mathit{univalence} \tp (A \simeq B) \simeq (A \equiv B)$$
 %
+In particular this allows us to construct an equality from an equivalence $\mathit{ua} \tp
+(A \simeq B) \to (A \equiv B)$ and vice-versa.
 \subsection{Formalizing Category Theory}
 %
 The above examples serve to illustrate the limitation of Agda. One case where
@@ -130,109 +102,63 @@ Theory. At a glance category theory can be described as ``the mathematical study
 of (abstract) algebras of functions'' (\cite{awodey-2006}). So by that token
 functional extensionality is particularly useful for formulating Category
 Theory. In Category theory it is also common to identify isomorphic structures
-and this is exactly what we get from univalence.
+and this is exactly what we get from univalence. In fact we can formulate this
+requirement within our formulation of categories by requiring the
+\emph{categories} themselves to be univalent as we shall see.
 
-\subsection{Cubical model for Cubical Type Theory}
-%
-A model is a way of giving meaning to a formal system in a \emph{meta-theory}. A
-typical example of a model is that of sets as models for predicate logic. Thus
-set-theory becomes the meta-theory of the formal language of predicate logic.
-
-In the context of a given type theory and restricting ourselves to
-\emph{categorical} models a model will consist of mapping `things' from the
-type-theory (types, terms, contexts, context morphisms) to `things' in the
-meta-theory (objects, morphisms) in such a way that the axioms of the
-type-theory (typing-rules) are validated in the meta-theory. In
-\cite{dybjer-1995} the author describes a way of constructing such models for
-dependent type theory called \emph{Categories with Families} (CwFs).
-
-In \cite{bezem-2014} the authors devise a CwF for Cubical Type Theory. This
-project will study and formalize this model. Note that I will \emph{not} aim to
-formalize CTT itself and therefore also not give the formal translation between
-the type theory and the meta-theory. Instead the translation will be accounted
-for informally.
-
-The project will formalize CwF's. It will also define what pieces of data are
-needed for a model of CTT (without explicitly showing that it does in fact model
-CTT). It will then show that a CwF gives rise to such a model. Furthermore I
-will show that cubical sets are presheaf categories and that any presheaf
-category is itself a CwF. This is the precise way by which the project aims to
-provide a model of CTT. Note that this formalization specifcally does not
-mention the language of CTT itself. Only be referencing this previous work do we
-arrive at a model of CTT.
-%
 \section{Context}
 %
-In \cite{bezem-2014} a categorical model for cubical type theory is presented.
-In \cite{cohen-2016} a type-theory where univalence is expressible is presented.
-The categorical model in the previous reference serve as a model of this type
-theory. So these two ideas are closely related. Cubical type theory arose out of
-\nomen{Homotopy Type Theory} (\cite{hott-2013}) and is also of interest as a
-foundation of mathematics (\cite{voevodsky-2011}).
-
-An implementation of cubical type theory can be found as an extension to Agda.
-This is due to \citeauthor{cubical-agda}. This, of course, will be central to
-this thesis.
-
-The idea of formalizing Category Theory in proof assistants is not a new
-idea\footnote{There are a multitude of these available online. Just as first
-reference see this question on Math Overflow: \cite{mo-formalizations}}. The
-contribution of this thesis is to explore how working in a cubical setting will
-make it possible to prove more things and to reuse proofs.
+\begin{verbatim}
+Inspiration:
+* Awodey - formulation of categories
+* HoTT   - sketch of homotopy proofs
+\end{verbatim}
+The idea of formalizing Category Theory in proof assistants is not new. There
+are a multitude of these available online. Just as first reference see this
+question on Math Overflow: \cite{mo-formalizations}. Notably these two implementations of category theory in Agda:
+\begin{itemize}
+\item
+\url{https://github.com/copumpkin/categories} - setoid interpretation
+\item
+\url{https://github.com/pcapriotti/agda-categories} - homotopic setting with postulates
+\item
+\url{https://github.com/pcapriotti/agda-categories} - homotopic setting in coq
+\item
+\url{https://github.com/mortberg/cubicaltt} - homotopic setting in \texttt{cubicaltt}
+\end{itemize}
+The contribution of this
+thesis is to explore how working in a cubical setting will make it possible to
+prove more things and to reuse proofs.
 
 There are alternative approaches to working in a cubical setting where one can
 still have univalence and functional extensionality. One option is to postulate
 these as axioms. This approach, however, has other shortcomings, e.g.; you lose
-\nomen{canonicity} (\cite{huber-2016}). Canonicity means that any well-type
-term will (under evaluation) reduce to a \emph{canonical} form. For example for
-an integer $e : \bN$ it will be the case that $e$ is definitionally equal to $n$
-applications of $\mathit{suc}$ to $0$ for some $n$; $e = \mathit{suc}^n\ 0$.
-Without canonicity terms in the language can get ``stuck'' when they are
-evaluated.
+\nomen{canonicity} (\cite{huber-2016}). Canonicity means that any well-typed
+term evaluates to a \emph{canonical} form. For example for a closed term $e :
+\bN$ it will be the case that $e$ reduces to $n$ applications of $\mathit{suc}$
+to $0$ for some $n$; $e = \mathit{suc}^n\ 0$. Without canonicity terms in the
+language can get ``stuck'' -- meaning that they do not reduce to a canonical
+form.
 
 Another approach is to use the \emph{setoid interpretation} of type theory
-(\cite{hofmann-1995,huber-2016}). Types should additionally `carry around' an
-equivalence relation that should serve as propositional equality. This approach
-has other drawbacks; it does not satisfy all judgemental equalites of type
-theory and is cumbersome to work with in practice (\cite[p. 4]{huber-2016}).
-%
-\section{Goals and Challenges}
-%
-In summary, the aim of the project is to:
-%
-\begin{itemize}
-\item
-Formalize Category Theory in Cubical Agda
-\item
-Formalize Cubical Sets in Agda
-% \item
-% Formalize Cubical Type Theory in Agda
-\item
-Show that Cubical Sets are a model for Cubical Type Theory
-\end{itemize}
-%
-The formalization of category theory will focus on extracting the elements from
-Category Theory that we need in the latter part of the project. In doing so I'll
-be gaining experience with working with Cubical Agda. Equality proofs using
-cubical Agda can be tricky, so working with that will be a challenge in itself.
-Most of the proofs in the context of cubical models I will formalize are based
-on previous work. Those proofs, however, are not formalized in a proof
-assistant.
+(\cite{hofmann-1995,huber-2016}). With this approach one works with
+\nomen{extensionals sets} $(X, \sim)$, that is a type $X \tp \MCU$ and an
+equivalence relation $\sim$.
 
-One particular challenge in this context is that in a cubical setting there can
-be multiple distinct terms that inhabit a given equality proof.\footnote{This is
-in contrast with ITT where one \emph{can} have \nomen{Uniqueness of identity proofs}
-(\cite[p. 4]{huber-2016}).} This means that the choice for a given equality
-proof can influence later proofs that refer back to said proof. This is new and
-relatively unexplored territory.
-
-Another challenge is that Category Theory is something that I only know the
-basics of. So learning the necessary concepts from Category Theory will also be
-a goal and a challenge in itself.
-
-After this has been implemented it would also be possible to formalize Cubical
-Type Theory and formally show that Cubical Sets are a model of this. I do not
-intend to formally implement the language of dependent type theory in this
-project.
-
-The thesis shall conclude with a discussion about the benefits of Cubical Agda.
+Types should additionally `carry around' an equivalence relation that serve as
+propositional equality. This approach has other drawbacks; it does not satisfy
+all judgemental equalites of type theory, is cumbersome to work with in practice
+(\cite[p. 4]{huber-2016}) and makes equational proofs less reusable since
+equational proofs $a \sim_{X} b$ are inherently `local' to the extensional set
+$(X , \sim)$.
+%
+\section{The equality type}
+The usual definition of equality in Agda is an inductive data-type with a single
+constructor:
+%
+%% \VerbatimInput{../libs/main.tex}
+% \def\verbatim@font{xits}
+\begin{verbatim}
+data _≡_ {a} {A : Set a} (x : A) : A → Set a where
+  instance refl : x ≡ x
+\end{verbatim}
