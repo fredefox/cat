@@ -129,15 +129,92 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
   raw : RawCategory _ _
   raw = record
     { Object = Σ[ X ∈ ℂ.Object ] ℂ.Arrow X A × ℂ.Arrow X B
-    ; Arrow = λ{ (X , xa , xb) (Y , ya , yb) → Σ[ xy ∈ ℂ.Arrow X Y ] (ℂ [ ya ∘ xy ] ≡ xa) × (ℂ [ yb ∘ xy ] ≡ xb) }
-    ; 𝟙 = λ{ {A , _} → ℂ.𝟙 {A} , {!!}}
-    ; _∘_ = \ { (f , p) (g , q) → ℂ._∘_ f g , {!!} }
+    ; Arrow = λ{ (X , xa , xb) (Y , ya , yb)
+      → Σ[ xy ∈ ℂ.Arrow X Y ]
+        ( ℂ [ ya ∘ xy ] ≡ xa)
+        × ℂ [ yb ∘ xy ] ≡ xb
+        }
+    ; 𝟙 = λ{ {A , f , g} → ℂ.𝟙 {A} , ℂ.rightIdentity , ℂ.rightIdentity}
+    ; _∘_ = λ { {A , a0 , a1} {B , b0 , b1} {C , c0 , c1} (f , f0 , f1) (g , g0 , g1)
+      → (f ℂ.∘ g)
+        , (begin
+            ℂ [ c0 ∘ ℂ [ f ∘ g ] ] ≡⟨ ℂ.isAssociative ⟩
+            ℂ [ ℂ [ c0 ∘ f ] ∘ g ] ≡⟨ cong (λ φ → ℂ [ φ ∘ g ]) f0 ⟩
+            ℂ [ b0 ∘ g ] ≡⟨ g0 ⟩
+            a0 ∎
+          )
+        , (begin
+           ℂ [ c1 ∘ ℂ [ f ∘ g ] ] ≡⟨ ℂ.isAssociative ⟩
+           ℂ [ ℂ [ c1 ∘ f ] ∘ g ] ≡⟨ cong (λ φ → ℂ [ φ ∘ g ]) f1 ⟩
+           ℂ [ b1 ∘ g ] ≡⟨ g1 ⟩
+            a1 ∎
+          )
+      }
     }
 
   open RawCategory raw
 
+  isAssocitaive : IsAssociative
+  isAssocitaive {A , a0 , a1} {B , _} {C , c0 , c1} {D , d0 , d1} {ff@(f , f0 , f1)} {gg@(g , g0 , g1)} {hh@(h , h0 , h1)} i
+    = s0 i , rl i , rr i
+    where
+    l = hh ∘ (gg ∘ ff)
+    r = hh ∘ gg ∘ ff
+    -- s0 : h ℂ.∘ (g ℂ.∘ f) ≡ h ℂ.∘ g ℂ.∘ f
+    s0 : proj₁ l ≡ proj₁ r
+    s0 = ℂ.isAssociative {f = f} {g} {h}
+    prop0 : ∀ a → isProp (ℂ [ d0 ∘ a ] ≡ a0)
+    prop0 a = ℂ.arrowsAreSets (ℂ [ d0 ∘ a ]) a0
+    rl : (λ i → (ℂ [ d0 ∘ s0 i ]) ≡ a0) [ proj₁ (proj₂ l) ≡ proj₁ (proj₂ r) ]
+    rl = lemPropF prop0 s0
+    prop1 : ∀ a → isProp ((ℂ [ d1 ∘ a ]) ≡ a1)
+    prop1 a = ℂ.arrowsAreSets _ _
+    rr : (λ i → (ℂ [ d1 ∘ s0 i ]) ≡ a1) [ proj₂ (proj₂ l) ≡ proj₂ (proj₂ r) ]
+    rr = lemPropF prop1 s0
+
+  isIdentity : IsIdentity 𝟙
+  isIdentity {AA@(A , a0 , a1)} {BB@(B , b0 , b1)} {f , f0 , f1} = leftIdentity , rightIdentity
+    where
+    leftIdentity : 𝟙 ∘ (f , f0 , f1) ≡ (f , f0 , f1)
+    leftIdentity i = l i , rl i , rr i
+      where
+      L = 𝟙 ∘ (f , f0 , f1)
+      R : Arrow AA BB
+      R = f , f0 , f1
+      l : proj₁ L ≡ proj₁ R
+      l = ℂ.leftIdentity
+      prop0 : ∀ a → isProp ((ℂ [ b0 ∘ a ]) ≡ a0)
+      prop0 a = ℂ.arrowsAreSets _ _
+      rl : (λ i → (ℂ [ b0 ∘ l i ]) ≡ a0) [ proj₁ (proj₂ L) ≡ proj₁ (proj₂ R) ]
+      rl = lemPropF prop0 l
+      prop1 : ∀ a → isProp (ℂ [ b1 ∘ a ] ≡ a1)
+      prop1 _ = ℂ.arrowsAreSets _ _
+      rr : (λ i → (ℂ [ b1 ∘ l i ]) ≡ a1) [ proj₂ (proj₂ L) ≡ proj₂ (proj₂ R) ]
+      rr = lemPropF prop1 l
+    rightIdentity : (f , f0 , f1) ∘ 𝟙 ≡ (f , f0 , f1)
+    rightIdentity i = l i , rl i , {!!}
+      where
+      L = (f , f0 , f1) ∘ 𝟙
+      R : Arrow AA BB
+      R = (f , f0 , f1)
+      l : ℂ [ f ∘ ℂ.𝟙 ] ≡ f
+      l = ℂ.rightIdentity
+      prop0 : ∀ a → isProp ((ℂ [ b0 ∘ a ]) ≡ a0)
+      prop0 _ = ℂ.arrowsAreSets _ _
+      rl : (λ i → (ℂ [ b0 ∘ l i ]) ≡ a0) [ proj₁ (proj₂ L) ≡ proj₁ (proj₂ R) ]
+      rl = lemPropF prop0 l
+      prop1 : ∀ a → isProp ((ℂ [ b1 ∘ a ]) ≡ a1)
+      prop1 _ = ℂ.arrowsAreSets _ _
+      rr : (λ i → (ℂ [ b1 ∘ l i ]) ≡ a1) [ proj₂ (proj₂ L) ≡ proj₂ (proj₂ R) ]
+      rr = lemPropF prop1 l
+
   cat : IsCategory raw
-  cat = {!!}
+  cat = record
+    { isAssociative = isAssocitaive
+    ; isIdentity    = isIdentity
+    ; arrowsAreSets = {!!}
+    ; univalent     = {!!}
+    }
 
   module cat = IsCategory cat
 
