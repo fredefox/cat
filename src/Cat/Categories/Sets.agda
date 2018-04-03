@@ -60,10 +60,10 @@ module _ {ℓ : Level} {A B : Set ℓ} {a : A} where
 module _ (ℓ : Level) where
   private
     SetsRaw : RawCategory (lsuc ℓ) ℓ
-    RawCategory.Object SetsRaw = hSet ℓ
-    RawCategory.Arrow  SetsRaw (T , _) (U , _) = T → U
-    RawCategory.𝟙      SetsRaw = Function.id
-    RawCategory._∘_    SetsRaw = Function._∘′_
+    RawCategory.Object   SetsRaw = hSet ℓ
+    RawCategory.Arrow    SetsRaw (T , _) (U , _) = T → U
+    RawCategory.identity SetsRaw = Function.id
+    RawCategory._∘_      SetsRaw = Function._∘′_
 
     open RawCategory SetsRaw hiding (_∘_)
 

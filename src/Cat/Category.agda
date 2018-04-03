@@ -12,7 +12,7 @@
 --
 -- Data
 -- ----
--- 𝟙; the identity arrow
+-- identity; the identity arrow
 -- _∘_; function composition
 --
 -- Laws
@@ -48,10 +48,10 @@ import      Function
 record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   no-eta-equality
   field
-    Object : Set ℓa
-    Arrow  : Object → Object → Set ℓb
-    𝟙      : {A : Object} → Arrow A A
-    _∘_    : {A B C : Object} → Arrow B C → Arrow A B → Arrow A C
+    Object   : Set ℓa
+    Arrow    : Object → Object → Set ℓb
+    identity : {A : Object} → Arrow A A
+    _∘_      : {A B C : Object} → Arrow B C → Arrow A B → Arrow A C
 
   infixl 10 _∘_ _>>>_
 
@@ -82,7 +82,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   ArrowsAreSets = ∀ {A B : Object} → isSet (Arrow A B)
 
   IsInverseOf : ∀ {A B} → (Arrow A B) → (Arrow B A) → Set ℓb
-  IsInverseOf = λ f g → g ∘ f ≡ 𝟙 × f ∘ g ≡ 𝟙
+  IsInverseOf = λ f g → g ∘ f ≡ identity × f ∘ g ≡ identity
 
   Isomorphism : ∀ {A B} → (f : Arrow A B) → Set ℓb
   Isomorphism {A} {B} f = Σ[ g ∈ Arrow B A ] IsInverseOf f g
@@ -110,10 +110,10 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   Terminal = Σ Object IsTerminal
 
   -- | Univalence is indexed by a raw category as well as an identity proof.
-  module Univalence (isIdentity : IsIdentity 𝟙) where
+  module Univalence (isIdentity : IsIdentity identity) where
     -- | The identity isomorphism
     idIso : (A : Object) → A ≅ A
-    idIso A = 𝟙 , 𝟙 , isIdentity
+    idIso A = identity , identity , isIdentity
 
     -- | Extract an isomorphism from an equality
     --
@@ -150,16 +150,16 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   open RawCategory ℂ public
   field
     isAssociative : IsAssociative
-    isIdentity    : IsIdentity 𝟙
+    isIdentity    : IsIdentity identity
     arrowsAreSets : ArrowsAreSets
   open Univalence isIdentity public
   field
     univalent     : Univalent
 
-  leftIdentity : {A B : Object} {f : Arrow A B} → 𝟙 ∘ f ≡ f
+  leftIdentity : {A B : Object} {f : Arrow A B} → identity ∘ f ≡ f
   leftIdentity {A} {B} {f} = fst (isIdentity {A = A} {B} {f})
 
-  rightIdentity : {A B : Object} {f : Arrow A B} → f ∘ 𝟙 ≡ f
+  rightIdentity : {A B : Object} {f : Arrow A B} → f ∘ identity ≡ f
   rightIdentity {A} {B} {f} = snd (isIdentity {A = A} {B} {f})
 
   ------------
@@ -171,24 +171,24 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
     iso→epi : Isomorphism f → Epimorphism {X = X} f
     iso→epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
       g₀              ≡⟨ sym rightIdentity ⟩
-      g₀ ∘ 𝟙          ≡⟨ cong (_∘_ g₀) (sym right-inv) ⟩
+      g₀ ∘ identity   ≡⟨ cong (_∘_ g₀) (sym right-inv) ⟩
       g₀ ∘ (f ∘ f-)   ≡⟨ isAssociative ⟩
       (g₀ ∘ f) ∘ f-   ≡⟨ cong (λ φ → φ ∘ f-) eq ⟩
       (g₁ ∘ f) ∘ f-   ≡⟨ sym isAssociative ⟩
       g₁ ∘ (f ∘ f-)   ≡⟨ cong (_∘_ g₁) right-inv ⟩
-      g₁ ∘ 𝟙          ≡⟨ rightIdentity ⟩
+      g₁ ∘ identity   ≡⟨ rightIdentity ⟩
       g₁              ∎
 
     iso→mono : Isomorphism f → Monomorphism {X = X} f
     iso→mono (f- , left-inv , right-inv) g₀ g₁ eq =
       begin
       g₀            ≡⟨ sym leftIdentity ⟩
-      𝟙 ∘ g₀        ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
+      identity ∘ g₀ ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
       (f- ∘ f) ∘ g₀ ≡⟨ sym isAssociative ⟩
       f- ∘ (f ∘ g₀) ≡⟨ cong (_∘_ f-) eq ⟩
       f- ∘ (f ∘ g₁) ≡⟨ isAssociative ⟩
       (f- ∘ f) ∘ g₁ ≡⟨ cong (λ φ → φ ∘ g₁) left-inv ⟩
-      𝟙 ∘ g₁        ≡⟨ leftIdentity ⟩
+      identity ∘ g₁ ≡⟨ leftIdentity ⟩
       g₁            ∎
 
     iso→epi×mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
@@ -228,12 +228,12 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
           where
             geq : g ≡ g'
             geq = begin
-              g            ≡⟨ sym rightIdentity ⟩
-              g ∘ 𝟙        ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
-              g ∘ (f ∘ g') ≡⟨ isAssociative ⟩
-              (g ∘ f) ∘ g' ≡⟨ cong (λ φ → φ ∘ g') η ⟩
-              𝟙 ∘ g'       ≡⟨ leftIdentity ⟩
-              g'           ∎
+              g             ≡⟨ sym rightIdentity ⟩
+              g ∘ identity  ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
+              g ∘ (f ∘ g')  ≡⟨ isAssociative ⟩
+              (g ∘ f) ∘ g'  ≡⟨ cong (λ φ → φ ∘ g') η ⟩
+              identity ∘ g' ≡⟨ leftIdentity ⟩
+              g'            ∎
 
     propUnivalent : isProp Univalent
     propUnivalent a b i = propPi (λ iso → propIsContr) a b i
@@ -274,9 +274,9 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
       Xprop f g = trans (sym (snd Xit f)) (snd Xit g)
       Yprop : isProp (Arrow Y Y)
       Yprop f g = trans (sym (snd Yit f)) (snd Yit g)
-      left : Y→X ∘ X→Y ≡ 𝟙
+      left : Y→X ∘ X→Y ≡ identity
       left = Xprop _ _
-      right : X→Y ∘ Y→X ≡ 𝟙
+      right : X→Y ∘ Y→X ≡ identity
       right = Yprop _ _
       iso : X ≅ Y
       iso = X→Y , Y→X , left , right
@@ -321,9 +321,9 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
       Xprop f g = trans (sym (snd Xii f)) (snd Xii g)
       Yprop : isProp (Arrow Y Y)
       Yprop f g = trans (sym (snd Yii f)) (snd Yii g)
-      left : Y→X ∘ X→Y ≡ 𝟙
+      left : Y→X ∘ X→Y ≡ identity
       left = Yprop _ _
-      right : X→Y ∘ Y→X ≡ 𝟙
+      right : X→Y ∘ Y→X ≡ identity
       right = Xprop _ _
       iso : X ≅ Y
       iso = Y→X , X→Y , right , left
@@ -351,18 +351,18 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       -- adverse effects this may have.
       module Prop = X.Propositionality
 
-      isIdentity : (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ Y.isIdentity ]
+      isIdentity : (λ _ → IsIdentity identity) [ X.isIdentity ≡ Y.isIdentity ]
       isIdentity = Prop.propIsIdentity X.isIdentity Y.isIdentity
 
-      U : ∀ {a : IsIdentity 𝟙}
-        → (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ a ]
+      U : ∀ {a : IsIdentity identity}
+        → (λ _ → IsIdentity identity) [ X.isIdentity ≡ a ]
         → (b : Univalent a)
         → Set _
       U eqwal univ =
         (λ i → Univalent (eqwal i))
         [ X.univalent ≡ univ ]
-      P : (y : IsIdentity 𝟙)
-        → (λ _ → IsIdentity 𝟙) [ X.isIdentity ≡ y ] → Set _
+      P : (y : IsIdentity identity)
+        → (λ _ → IsIdentity identity) [ X.isIdentity ≡ y ] → Set _
       P y eq = ∀ (univ : Univalent y) → U eq univ
       p : ∀ (b' : Univalent X.isIdentity)
         → (λ _ → Univalent X.isIdentity) [ X.univalent ≡ b' ]
@@ -426,14 +426,14 @@ module Opposite {ℓa ℓb : Level} where
     private
       module ℂ = Category ℂ
       opRaw : RawCategory ℓa ℓb
-      RawCategory.Object opRaw = ℂ.Object
-      RawCategory.Arrow  opRaw = Function.flip ℂ.Arrow
-      RawCategory.𝟙      opRaw = ℂ.𝟙
-      RawCategory._∘_    opRaw = Function.flip ℂ._∘_
+      RawCategory.Object   opRaw = ℂ.Object
+      RawCategory.Arrow    opRaw = Function.flip ℂ.Arrow
+      RawCategory.identity opRaw = ℂ.identity
+      RawCategory._∘_      opRaw = Function.flip ℂ._∘_
 
       open RawCategory opRaw
 
-      isIdentity : IsIdentity 𝟙
+      isIdentity : IsIdentity identity
       isIdentity = swap ℂ.isIdentity
 
       open Univalence isIdentity
@@ -530,7 +530,7 @@ module Opposite {ℓa ℓb : Level} where
       rawInv : Category.raw (opposite (opposite ℂ)) ≡ raw
       RawCategory.Object   (rawInv _) = Object
       RawCategory.Arrow    (rawInv _) = Arrow
-      RawCategory.𝟙        (rawInv _) = 𝟙
+      RawCategory.identity (rawInv _) = identity
       RawCategory._∘_      (rawInv _) = _∘_
 
     oppositeIsInvolution : opposite (opposite ℂ) ≡ ℂ

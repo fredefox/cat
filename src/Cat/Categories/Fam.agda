@@ -11,9 +11,9 @@ module _ (ℓa ℓb : Level) where
     Object = Σ[ hA ∈ hSet ℓa ] (proj₁ hA → hSet ℓb)
     Arr : Object → Object → Set (ℓa ⊔ ℓb)
     Arr ((A , _) , B) ((A' , _) , B') = Σ[ f ∈ (A → A') ] ({x : A} → proj₁ (B x) → proj₁ (B' (f x)))
-    𝟙 : {A : Object} → Arr A A
-    proj₁ 𝟙 = λ x → x
-    proj₂ 𝟙 = λ b → b
+    identity : {A : Object} → Arr A A
+    proj₁ identity = λ x → x
+    proj₂ identity = λ b → b
     _∘_ : {a b c : Object} → Arr b c → Arr a b → Arr a c
     (g , g') ∘ (f , f') = g Function.∘ f , g' Function.∘ f'
 
@@ -21,16 +21,16 @@ module _ (ℓa ℓb : Level) where
     RawFam = record
       { Object = Object
       ; Arrow = Arr
-      ; 𝟙 = λ { {A} → 𝟙 {A = A}}
+      ; identity = λ { {A} → identity {A = A}}
       ; _∘_ = λ {a b c} → _∘_ {a} {b} {c}
       }
 
-    open RawCategory RawFam hiding (Object ; 𝟙)
+    open RawCategory RawFam hiding (Object ; identity)
 
     isAssociative : IsAssociative
     isAssociative = Σ≡ refl refl
 
-    isIdentity : IsIdentity λ { {A} → 𝟙 {A} }
+    isIdentity : IsIdentity λ { {A} → identity {A} }
     isIdentity = (Σ≡ refl refl) , Σ≡ refl refl
 
     open import Cubical.NType.Properties

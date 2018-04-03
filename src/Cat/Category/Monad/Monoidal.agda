@@ -16,8 +16,10 @@ module Cat.Category.Monad.Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb
 private
   ℓ = ℓa ⊔ ℓb
 
-open Category ℂ using (Object ; Arrow ; 𝟙 ; _∘_)
+open Category ℂ using (Object ; Arrow ; identity ; _∘_)
 open import Cat.Category.NaturalTransformation ℂ ℂ
+  using (NaturalTransformation ; Transformation ; Natural)
+
 record RawMonad : Set ℓ where
   field
     R      : EndoFunctor ℂ
@@ -47,8 +49,8 @@ record RawMonad : Set ℓ where
     → joinT X ∘ Rfmap (joinT X) ≡ joinT X ∘ joinT (Romap X)
   IsInverse : Set _
   IsInverse = {X : Object}
-    → joinT X ∘ pureT (Romap X) ≡ 𝟙
-    × joinT X ∘ Rfmap (pureT X) ≡ 𝟙
+    → joinT X ∘ pureT (Romap X) ≡ identity
+    × joinT X ∘ Rfmap (pureT X) ≡ identity
   IsNatural = ∀ {X Y} f → joinT Y ∘ Rfmap f ∘ pureT X ≡ f
   IsDistributive = ∀ {X Y Z} (g : Arrow Y (Romap Z)) (f : Arrow X (Romap Y))
     → joinT Z ∘ Rfmap g ∘ (joinT Y ∘ Rfmap f)
@@ -70,7 +72,7 @@ record IsMonad (raw : RawMonad) : Set ℓ where
     joinT Y ∘ (R.fmap f ∘ pureT X)   ≡⟨ cong (λ φ → joinT Y ∘ φ) (sym (pureN f)) ⟩
     joinT Y ∘ (pureT (R.omap Y) ∘ f) ≡⟨ ℂ.isAssociative ⟩
     joinT Y ∘ pureT (R.omap Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (proj₁ isInverse) ⟩
-    𝟙 ∘ f                            ≡⟨ ℂ.leftIdentity ⟩
+    identity ∘ f                     ≡⟨ ℂ.leftIdentity ⟩
     f                                ∎
 
   isDistributive : IsDistributive

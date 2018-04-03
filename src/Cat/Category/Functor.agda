@@ -30,7 +30,7 @@ module _ {ℓc ℓc' ℓd ℓd'}
       fmap : ∀ {A B} → ℂ [ A , B ] → 𝔻 [ omap A , omap B ]
 
     IsIdentity : Set _
-    IsIdentity = {A : ℂ.Object} → fmap (ℂ.𝟙 {A}) ≡ 𝔻.𝟙 {omap A}
+    IsIdentity = {A : ℂ.Object} → fmap (ℂ.identity {A}) ≡ 𝔻.identity {omap A}
 
     IsDistributive : Set _
     IsDistributive = {A B C : ℂ.Object} {f : ℂ [ A , B ]} {g : ℂ [ B , C ]}
@@ -150,10 +150,10 @@ module _ {ℓ0 ℓ1 ℓ2 ℓ3 ℓ4 ℓ5 : Level}
     isFunctor : IsFunctor A C raw
     isFunctor = record
       { isIdentity = begin
-        (F.fmap ∘ G.fmap) A.𝟙   ≡⟨ refl ⟩
-        F.fmap (G.fmap A.𝟙)     ≡⟨ cong F.fmap (G.isIdentity)⟩
-        F.fmap B.𝟙              ≡⟨ F.isIdentity ⟩
-        C.𝟙                     ∎
+        (F.fmap ∘ G.fmap) A.identity   ≡⟨ refl ⟩
+        F.fmap (G.fmap A.identity)     ≡⟨ cong F.fmap (G.isIdentity)⟩
+        F.fmap B.identity              ≡⟨ F.isIdentity ⟩
+        C.identity                     ∎
       ; isDistributive = dist
       }
 

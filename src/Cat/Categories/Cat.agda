@@ -15,10 +15,10 @@ open import Cat.Categories.Fun
 -- The category of categories
 module _ (ℓ ℓ' : Level) where
   RawCat : RawCategory (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
-  RawCategory.Object RawCat = Category ℓ ℓ'
-  RawCategory.Arrow  RawCat = Functor
-  RawCategory.𝟙      RawCat = Functors.identity
-  RawCategory._∘_    RawCat = F[_∘_]
+  RawCategory.Object   RawCat = Category ℓ ℓ'
+  RawCategory.Arrow    RawCat = Functor
+  RawCategory.identity RawCat = Functors.identity
+  RawCategory._∘_      RawCat = F[_∘_]
 
   -- NB! `ArrowsAreSets RawCat` is *not* provable. The type of functors,
   -- however, form a groupoid! Therefore there is no (1-)category of
@@ -48,8 +48,8 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
         Obj = ℂ.Object × 𝔻.Object
         Arr  : Obj → Obj → Set ℓ'
         Arr (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
-        𝟙 : {o : Obj} → Arr o o
-        𝟙 = ℂ.𝟙 , 𝔻.𝟙
+        identity : {o : Obj} → Arr o o
+        identity = ℂ.identity , 𝔻.identity
         _∘_ :
           {a b c : Obj} →
           Arr b c →
@@ -58,16 +58,16 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
         _∘_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → ℂ [ bc∈C ∘ ab∈C ] , 𝔻 [ bc∈D ∘ ab∈D ]}
 
       rawProduct : RawCategory ℓ ℓ'
-      RawCategory.Object rawProduct = Obj
-      RawCategory.Arrow  rawProduct = Arr
-      RawCategory.𝟙      rawProduct = 𝟙
-      RawCategory._∘_    rawProduct = _∘_
+      RawCategory.Object   rawProduct = Obj
+      RawCategory.Arrow    rawProduct = Arr
+      RawCategory.identity rawProduct = identity
+      RawCategory._∘_      rawProduct = _∘_
 
     open RawCategory rawProduct
 
     arrowsAreSets : ArrowsAreSets
     arrowsAreSets = setSig {sA = ℂ.arrowsAreSets} {sB = λ x → 𝔻.arrowsAreSets}
-    isIdentity : IsIdentity 𝟙
+    isIdentity : IsIdentity identity
     isIdentity
       = Σ≡ (fst ℂ.isIdentity) (fst 𝔻.isIdentity)
       , Σ≡ (snd ℂ.isIdentity) (snd 𝔻.isIdentity)
@@ -202,14 +202,14 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
   module _ {c : Functor ℂ 𝔻 × ℂ.Object} where
     open Σ c renaming (proj₁ to F ; proj₂ to C)
 
-    ident : fmap {c} {c} (identityNT F , ℂ.𝟙 {A = snd c}) ≡ 𝔻.𝟙
+    ident : fmap {c} {c} (identityNT F , ℂ.identity {A = snd c}) ≡ 𝔻.identity
     ident = begin
-      fmap {c} {c} (Category.𝟙 (object ⊗ ℂ) {c})        ≡⟨⟩
-      fmap {c} {c} (idN F , ℂ.𝟙)               ≡⟨⟩
-      𝔻 [ identityTrans F C ∘ F.fmap ℂ.𝟙 ]    ≡⟨⟩
-      𝔻 [ 𝔻.𝟙 ∘ F.fmap ℂ.𝟙 ]                  ≡⟨ 𝔻.leftIdentity ⟩
-      F.fmap ℂ.𝟙                               ≡⟨ F.isIdentity ⟩
-      𝔻.𝟙                                       ∎
+      fmap {c} {c} (Category.identity (object ⊗ ℂ) {c}) ≡⟨⟩
+      fmap {c} {c} (idN F , ℂ.identity)                 ≡⟨⟩
+      𝔻 [ identityTrans F C ∘ F.fmap ℂ.identity ]       ≡⟨⟩
+      𝔻 [ 𝔻.identity ∘ F.fmap ℂ.identity ]              ≡⟨ 𝔻.leftIdentity ⟩
+      F.fmap ℂ.identity                                 ≡⟨ F.isIdentity ⟩
+      𝔻.identity                                        ∎
       where
         module F = Functor F
 
@@ -278,16 +278,16 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
       transpose : Functor 𝔸 object
       eq : F[ eval ∘ (parallelProduct transpose (Functors.identity {ℂ = ℂ})) ] ≡ F
       -- eq : F[ :eval: ∘ {!!} ] ≡ F
-      -- eq : Catℓ [ :eval: ∘ (HasProducts._|×|_ hasProducts transpose (𝟙 Catℓ {o = ℂ})) ] ≡ F
+      -- eq : Catℓ [ :eval: ∘ (HasProducts._|×|_ hasProducts transpose (identity Catℓ {o = ℂ})) ] ≡ F
       -- eq' : (Catℓ [ :eval: ∘
       --   (record { product = product } HasProducts.|×| transpose)
-      --   (𝟙 Catℓ)
+      --   (identity Catℓ)
       --   ])
       --   ≡ F
 
     -- For some reason after `e8215b2c051062c6301abc9b3f6ec67106259758`
     -- `catTranspose` makes Agda hang. catTranspose : ∃![ F~ ] (Catℓ [
-    -- :eval: ∘ (parallelProduct F~ (𝟙 Catℓ {o = ℂ}))] ≡ F) catTranspose =
+    -- :eval: ∘ (parallelProduct F~ (identity Catℓ {o = ℂ}))] ≡ F) catTranspose =
     -- transpose , eq
 
 -- We don't care about filling out the holes below since they are anyways hidden

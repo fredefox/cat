@@ -12,11 +12,13 @@ open import Cat.Categories.Fun
 
 -- "A monad in the Kleisli form" [voe]
 module Cat.Category.Monad.Kleisli {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
-open import Cat.Category.NaturalTransformation ℂ ℂ hiding (propIsNatural)
+open import Cat.Category.NaturalTransformation ℂ ℂ
+  using (NaturalTransformation ; Transformation ; Natural)
+
 private
   ℓ = ℓa ⊔ ℓb
   module ℂ = Category ℂ
-  open ℂ using (Arrow ; 𝟙 ; Object ; _∘_ ; _>>>_)
+  open ℂ using (Arrow ; identity ; Object ; _∘_ ; _>>>_)
 
 -- | Data for a monad.
 --
@@ -40,7 +42,7 @@ record RawMonad : Set ℓ where
 
   -- | Flattening nested monads.
   join : {A : Object} → ℂ [ omap (omap A) , omap A ]
-  join = bind 𝟙
+  join = bind identity
 
   ------------------
   -- * Monad laws --
@@ -49,7 +51,7 @@ record RawMonad : Set ℓ where
   -- There may be better names than what I've chosen here.
 
   IsIdentity     = {X : Object}
-    → bind pure ≡ 𝟙 {omap X}
+    → bind pure ≡ identity {omap X}
   IsNatural      = {X Y : Object}   (f : ℂ [ X , omap Y ])
     → pure >>> (bind f) ≡ f
   IsDistributive = {X Y Z : Object} (g : ℂ [ Y , omap Z ]) (f : ℂ [ X , omap Y ])
@@ -67,7 +69,7 @@ record RawMonad : Set ℓ where
   IsNaturalForeign = {X : Object} → join {X} ∘ fmap join ≡ join ∘ join
 
   IsInverse : Set _
-  IsInverse = {X : Object} → join {X} ∘ pure ≡ 𝟙 × join {X} ∘ fmap pure ≡ 𝟙
+  IsInverse = {X : Object} → join {X} ∘ pure ≡ identity × join {X} ∘ fmap pure ≡ identity
 
 record IsMonad (raw : RawMonad) : Set ℓ where
   open RawMonad raw public
@@ -100,9 +102,9 @@ record IsMonad (raw : RawMonad) : Set ℓ where
 
     isFunctorR : IsFunctor ℂ ℂ rawR
     IsFunctor.isIdentity isFunctorR = begin
-      bind (pure ∘ 𝟙) ≡⟨ cong bind (ℂ.rightIdentity) ⟩
-      bind pure       ≡⟨ isIdentity ⟩
-      𝟙               ∎
+      bind (pure ∘ identity) ≡⟨ cong bind (ℂ.rightIdentity) ⟩
+      bind pure              ≡⟨ isIdentity ⟩
+      identity               ∎
 
     IsFunctor.isDistributive isFunctorR {f = f} {g} = begin
       bind (pure ∘ (g ∘ f))             ≡⟨⟩
@@ -137,29 +139,29 @@ record IsMonad (raw : RawMonad) : Set ℓ where
     joinN : Natural R² R joinT
     joinN f = begin
       join       ∘ R².fmap f  ≡⟨⟩
-      bind 𝟙     ∘ R².fmap f  ≡⟨⟩
-      R².fmap f >>> bind 𝟙    ≡⟨⟩
-      fmap (fmap f) >>> bind 𝟙 ≡⟨⟩
-      fmap (bind (f >>> pure)) >>> bind 𝟙          ≡⟨⟩
-      bind (bind (f >>> pure) >>> pure) >>> bind 𝟙
+      bind identity     ∘ R².fmap f  ≡⟨⟩
+      R².fmap f >>> bind identity    ≡⟨⟩
+      fmap (fmap f) >>> bind identity ≡⟨⟩
+      fmap (bind (f >>> pure)) >>> bind identity          ≡⟨⟩
+      bind (bind (f >>> pure) >>> pure) >>> bind identity
         ≡⟨ isDistributive _ _ ⟩
-      bind ((bind (f >>> pure) >>> pure) >=> 𝟙)
+      bind ((bind (f >>> pure) >>> pure) >=> identity)
         ≡⟨⟩
-      bind ((bind (f >>> pure) >>> pure) >>> bind 𝟙)
+      bind ((bind (f >>> pure) >>> pure) >>> bind identity)
         ≡⟨ cong bind ℂ.isAssociative ⟩
-      bind (bind (f >>> pure) >>> (pure >>> bind 𝟙))
+      bind (bind (f >>> pure) >>> (pure >>> bind identity))
         ≡⟨ cong (λ φ → bind (bind (f >>> pure) >>> φ)) (isNatural _) ⟩
-      bind (bind (f >>> pure) >>> 𝟙)
+      bind (bind (f >>> pure) >>> identity)
         ≡⟨ cong bind ℂ.leftIdentity ⟩
       bind (bind (f >>> pure))
         ≡⟨ cong bind (sym ℂ.rightIdentity) ⟩
-      bind (𝟙 >>> bind (f >>> pure)) ≡⟨⟩
-      bind (𝟙 >=> (f >>> pure))
+      bind (identity >>> bind (f >>> pure)) ≡⟨⟩
+      bind (identity >=> (f >>> pure))
         ≡⟨ sym (isDistributive _ _) ⟩
-      bind 𝟙     >>> bind (f >>> pure)    ≡⟨⟩
-      bind 𝟙     >>> fmap f    ≡⟨⟩
-      bind 𝟙     >>> R.fmap f ≡⟨⟩
-      R.fmap f  ∘ bind 𝟙      ≡⟨⟩
+      bind identity     >>> bind (f >>> pure)    ≡⟨⟩
+      bind identity     >>> fmap f    ≡⟨⟩
+      bind identity     >>> R.fmap f ≡⟨⟩
+      R.fmap f  ∘ bind identity      ≡⟨⟩
       R.fmap f  ∘ join        ∎
 
   pureNT : NaturalTransformation R⁰ R
@@ -173,20 +175,20 @@ record IsMonad (raw : RawMonad) : Set ℓ where
   isNaturalForeign : IsNaturalForeign
   isNaturalForeign = begin
     fmap join >>> join ≡⟨⟩
-    bind (join >>> pure) >>> bind 𝟙
+    bind (join >>> pure) >>> bind identity
       ≡⟨ isDistributive _ _ ⟩
-    bind ((join >>> pure) >>> bind 𝟙)
+    bind ((join >>> pure) >>> bind identity)
       ≡⟨ cong bind ℂ.isAssociative ⟩
-    bind (join >>> (pure >>> bind 𝟙))
+    bind (join >>> (pure >>> bind identity))
       ≡⟨ cong (λ φ → bind (join >>> φ)) (isNatural _) ⟩
-    bind (join >>> 𝟙)
+    bind (join >>> identity)
       ≡⟨ cong bind ℂ.leftIdentity ⟩
     bind join           ≡⟨⟩
-    bind (bind 𝟙)
+    bind (bind identity)
       ≡⟨ cong bind (sym ℂ.rightIdentity) ⟩
-    bind (𝟙 >>> bind 𝟙) ≡⟨⟩
-    bind (𝟙 >=> 𝟙)      ≡⟨ sym (isDistributive _ _) ⟩
-    bind 𝟙 >>> bind 𝟙   ≡⟨⟩
+    bind (identity >>> bind identity) ≡⟨⟩
+    bind (identity >=> identity)      ≡⟨ sym (isDistributive _ _) ⟩
+    bind identity >>> bind identity   ≡⟨⟩
     join >>> join       ∎
 
   isInverse : IsInverse
@@ -194,21 +196,21 @@ record IsMonad (raw : RawMonad) : Set ℓ where
     where
     inv-l = begin
       pure >>> join   ≡⟨⟩
-      pure >>> bind 𝟙 ≡⟨ isNatural _ ⟩
-      𝟙 ∎
+      pure >>> bind identity ≡⟨ isNatural _ ⟩
+      identity ∎
     inv-r = begin
       fmap pure >>> join ≡⟨⟩
-      bind (pure >>> pure) >>> bind 𝟙
+      bind (pure >>> pure) >>> bind identity
         ≡⟨ isDistributive _ _ ⟩
-      bind ((pure >>> pure) >=> 𝟙) ≡⟨⟩
-      bind ((pure >>> pure) >>> bind 𝟙)
+      bind ((pure >>> pure) >=> identity) ≡⟨⟩
+      bind ((pure >>> pure) >>> bind identity)
         ≡⟨ cong bind ℂ.isAssociative ⟩
-      bind (pure >>> (pure >>> bind 𝟙))
+      bind (pure >>> (pure >>> bind identity))
         ≡⟨ cong (λ φ → bind (pure >>> φ)) (isNatural _) ⟩
-      bind (pure >>> 𝟙)
+      bind (pure >>> identity)
         ≡⟨ cong bind ℂ.leftIdentity ⟩
       bind pure ≡⟨ isIdentity ⟩
-      𝟙 ∎
+      identity ∎
 
 record Monad : Set ℓ where
   field

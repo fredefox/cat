@@ -52,7 +52,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
     isIdentity : IsIdentity
     isIdentity {c} = lemSig prp _ _ eq
       where
-      eq : (λ C x → ℂ [ ℂ.𝟙 ∘ x ]) ≡ identityTrans (presheaf c)
+      eq : (λ C x → ℂ [ ℂ.identity ∘ x ]) ≡ identityTrans (presheaf c)
       eq = funExt λ A → funExt λ B → ℂ.leftIdentity
       prp = F.naturalIsProp _ _ {F = presheaf c} {presheaf c}
 

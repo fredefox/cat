@@ -1,28 +1,28 @@
-{-# OPTIONS --allow-unsolved-metas --cubical #-}
+{-# OPTIONS --allow-unsolved-metas --cubical --caching #-}
 module Cat.Categories.Fun where
 
 open import Cat.Prelude
 
 open import Cat.Category
 open import Cat.Category.Functor
+import Cat.Category.NaturalTransformation
+  as NaturalTransformation
 
 module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
-  import Cat.Category.NaturalTransformation ℂ 𝔻
-    as NaturalTransformation
-  open NaturalTransformation public hiding (module Properties)
-  open NaturalTransformation.Properties
+  open NaturalTransformation ℂ 𝔻 public hiding (module Properties)
+  open NaturalTransformation.Properties ℂ 𝔻
   private
     module ℂ = Category ℂ
     module 𝔻 = Category 𝔻
 
     -- Functor categories. Objects are functors, arrows are natural transformations.
     raw : RawCategory (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') (ℓc ⊔ ℓc' ⊔ ℓd')
-    RawCategory.Object raw = Functor ℂ 𝔻
-    RawCategory.Arrow  raw = NaturalTransformation
-    RawCategory.𝟙      raw {F} = identity F
-    RawCategory._∘_    raw {F} {G} {H} = NT[_∘_] {F} {G} {H}
+    RawCategory.Object   raw = Functor ℂ 𝔻
+    RawCategory.Arrow    raw = NaturalTransformation
+    RawCategory.identity raw {F} = identity F
+    RawCategory._∘_      raw {F} {G} {H} = NT[_∘_] {F} {G} {H}
 
-    open RawCategory raw
+    open RawCategory raw hiding (identity)
     open Univalence (λ {A} {B} {f} → isIdentity {F = A} {B} {f})
 
     module _ (F : Functor ℂ 𝔻) where
@@ -32,7 +32,7 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
       open Σ center renaming (proj₂ to isoF)
 
       module _ (cG : Σ[ G ∈ Object ] (F ≅ G)) where
-        open Σ cG     renaming (proj₁ to G   ; proj₂ to isoG)
+        open Σ cG renaming (proj₁ to G ; proj₂ to isoG)
         module G = Functor G
         open Σ isoG   renaming (proj₁ to θNT ; proj₂ to invθNT)
         open Σ invθNT renaming (proj₁ to ηNT ; proj₂ to areInv)
@@ -46,10 +46,10 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
         -- g = T[ η ∘ θ ] {!!}
 
         ntF : NaturalTransformation F F
-        ntF = 𝟙 {A = F}
+        ntF = identity F
 
         ntG : NaturalTransformation G G
-        ntG = 𝟙 {A = G}
+        ntG = identity G
 
         idFunctor = Functors.identity
 
@@ -103,14 +103,14 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
         -- The transformation will be the identity on 𝔻. Such an arrow has the
         -- type `A.omap A → A.omap A`. Which we can coerce to have the type
         -- `A.omap → B.omap` since `A` and `B` are equal.
-        coe𝟙 : Transformation A B
-        coe𝟙 X = coe coerceAB 𝔻.𝟙
+        coeidentity : Transformation A B
+        coeidentity X = coe coerceAB 𝔻.identity
 
         module _ {a b : ℂ.Object} (f : ℂ [ a , b ]) where
-          nat' : 𝔻 [ coe𝟙 b ∘ A.fmap f ] ≡ 𝔻 [ B.fmap f ∘ coe𝟙 a ]
+          nat' : 𝔻 [ coeidentity b ∘ A.fmap f ] ≡ 𝔻 [ B.fmap f ∘ coeidentity a ]
           nat' = begin
-            (𝔻 [ coe𝟙 b ∘ A.fmap f ]) ≡⟨ {!!} ⟩
-            (𝔻 [ B.fmap f ∘ coe𝟙 a ]) ∎
+            (𝔻 [ coeidentity b ∘ A.fmap f ]) ≡⟨ {!!} ⟩
+            (𝔻 [ B.fmap f ∘ coeidentity a ]) ∎
 
         transs : (i : I) → Transformation A (p i)
         transs = {!!}
@@ -118,26 +118,26 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
         natt : (i : I) → Natural A (p i) {!!}
         natt = {!!}
 
-        t : Natural A B coe𝟙
+        t : Natural A B coeidentity
         t = coe c (identityNatural A)
           where
-          c : Natural A A (identityTrans A) ≡ Natural A B coe𝟙
+          c : Natural A A (identityTrans A) ≡ Natural A B coeidentity
           c = begin
             Natural A A (identityTrans A) ≡⟨ (λ x → {!natt ?!}) ⟩
-            Natural A B coe𝟙 ∎
+            Natural A B coeidentity ∎
           -- cong (λ φ → {!Natural A A (identityTrans A)!}) {!!}
 
-        k : Natural A A (identityTrans A) → Natural A B coe𝟙
+        k : Natural A A (identityTrans A) → Natural A B coeidentity
         k n {a} {b} f = res
           where
-          res : (𝔻 [ coe𝟙 b ∘ A.fmap f ]) ≡ (𝔻 [ B.fmap f ∘ coe𝟙 a ])
+          res : (𝔻 [ coeidentity b ∘ A.fmap f ]) ≡ (𝔻 [ B.fmap f ∘ coeidentity a ])
           res = {!!}
 
-        nat : Natural A B coe𝟙
+        nat : Natural A B coeidentity
         nat = nat'
 
         fromEq : NaturalTransformation A B
-        fromEq = coe𝟙 , nat
+        fromEq = coeidentity , nat
 
     module _ {A B : Functor ℂ 𝔻} where
       obverse : A ≡ B → A ≅ B
@@ -147,9 +147,9 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
         ob = fromEq p
         re : Arrow B A
         re = fromEq (sym p)
-        vr : _∘_ {A = A} {B} {A} re ob ≡ 𝟙 {A}
+        vr : _∘_ {A = A} {B} {A} re ob ≡ identity A
         vr = {!!}
-        rv : _∘_ {A = B} {A} {B} ob re ≡ 𝟙 {B}
+        rv : _∘_ {A = B} {A} {B} ob re ≡ identity B
         rv = {!!}
         isInverse : IsInverseOf {A} {B} ob re
         isInverse = vr , rv
@@ -183,23 +183,42 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
   Category.raw        Fun = raw
   Category.isCategory Fun = isCategory
 
--- module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
---   private
---     open import Cat.Categories.Sets
---     open NaturalTransformation (opposite ℂ) (𝓢𝓮𝓽 ℓ')
+module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
+  private
+    open import Cat.Categories.Sets
+    open NaturalTransformation (opposite ℂ) (𝓢𝓮𝓽 ℓ')
+    module K = Fun (opposite ℂ) (𝓢𝓮𝓽 ℓ')
+    module F = Category K.Fun
 
---     -- Restrict the functors to Presheafs.
---     rawPresh : RawCategory (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')
---     rawPresh = record
---       { Object = Presheaf ℂ
---       ; Arrow = NaturalTransformation
---       ; 𝟙 = λ {F} → identity F
---       ; _∘_ = λ {F G H} → NT[_∘_] {F = F} {G = G} {H = H}
---       }
---     instance
---       isCategory : IsCategory rawPresh
---       isCategory = Fun.isCategory _ _
+    -- Restrict the functors to Presheafs.
+    raw : RawCategory (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')
+    raw = record
+      { Object = Presheaf ℂ
+      ; Arrow = NaturalTransformation
+      ; identity = λ {F} → identity F
+      ; _∘_ = λ {F G H} → NT[_∘_] {F = F} {G = G} {H = H}
+      }
 
---   Presh : Category (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')
---   Category.raw        Presh = rawPresh
---   Category.isCategory Presh = isCategory
+    isCategory : IsCategory raw
+    isCategory = record
+      { isAssociative =
+        λ{ {A} {B} {C} {D} {f} {g} {h}
+        → F.isAssociative {A} {B} {C} {D} {f} {g} {h}
+        }
+      ; isIdentity =
+        λ{ {A} {B} {f}
+        → F.isIdentity {A} {B} {f}
+        }
+      ; arrowsAreSets =
+        λ{ {A} {B}
+        → F.arrowsAreSets {A} {B}
+        }
+      ; univalent =
+        λ{ {A} {B}
+        → F.univalent {A} {B}
+        }
+      }
+
+  Presh : Category (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')
+  Category.raw        Presh = raw
+  Category.isCategory Presh = isCategory

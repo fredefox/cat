@@ -134,7 +134,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
           ( ℂ [ ya ∘ xy ] ≡ xa)
           × ℂ [ yb ∘ xy ] ≡ xb
           }
-      ; 𝟙 = λ{ {A , f , g} → ℂ.𝟙 {A} , ℂ.rightIdentity , ℂ.rightIdentity}
+      ; identity = λ{ {A , f , g} → ℂ.identity {A} , ℂ.rightIdentity , ℂ.rightIdentity}
       ; _∘_ = λ { {A , a0 , a1} {B , b0 , b1} {C , c0 , c1} (f , f0 , f1) (g , g0 , g1)
         → (f ℂ.∘ g)
           , (begin
@@ -169,24 +169,24 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       s0 = ℂ.isAssociative {f = f} {g} {h}
 
 
-    isIdentity : IsIdentity 𝟙
+    isIdentity : IsIdentity identity
     isIdentity {AA@(A , a0 , a1)} {BB@(B , b0 , b1)} {f , f0 , f1} = leftIdentity , rightIdentity
       where
-      leftIdentity : 𝟙 ∘ (f , f0 , f1) ≡ (f , f0 , f1)
+      leftIdentity : identity ∘ (f , f0 , f1) ≡ (f , f0 , f1)
       leftIdentity i = l i , lemPropF propEqs l {proj₂ L} {proj₂ R} i
         where
-        L = 𝟙 ∘ (f , f0 , f1)
+        L = identity ∘ (f , f0 , f1)
         R : Arrow AA BB
         R = f , f0 , f1
         l : proj₁ L ≡ proj₁ R
         l = ℂ.leftIdentity
-      rightIdentity : (f , f0 , f1) ∘ 𝟙 ≡ (f , f0 , f1)
+      rightIdentity : (f , f0 , f1) ∘ identity ≡ (f , f0 , f1)
       rightIdentity i = l i , lemPropF propEqs l {proj₂ L} {proj₂ R} i
         where
-        L = (f , f0 , f1) ∘ 𝟙
+        L = (f , f0 , f1) ∘ identity
         R : Arrow AA BB
         R = (f , f0 , f1)
-        l : ℂ [ f ∘ ℂ.𝟙 ] ≡ f
+        l : ℂ [ f ∘ ℂ.identity ] ≡ f
         l = ℂ.rightIdentity
 
     arrowsAreSets : ArrowsAreSets

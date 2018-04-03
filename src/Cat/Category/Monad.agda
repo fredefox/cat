@@ -33,10 +33,10 @@ module Kleisli = Cat.Category.Monad.Kleisli
 
 -- | The monoidal- and kleisli presentation of monads are equivalent.
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
-  open Cat.Category.NaturalTransformation ℂ ℂ
+  open Cat.Category.NaturalTransformation ℂ ℂ using (NaturalTransformation ; propIsNatural)
   private
     module ℂ = Category ℂ
-    open ℂ using (Object ; Arrow ; 𝟙 ; _∘_ ; _>>>_)
+    open ℂ using (Object ; Arrow ; identity ; _∘_ ; _>>>_)
     module M = Monoidal ℂ
     module K = Kleisli  ℂ
 
@@ -84,11 +84,11 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         inv-l = begin
           joinT X ∘ pureT (R.omap X) ≡⟨⟩
           join ∘ pure                 ≡⟨ proj₁ isInverse ⟩
-          𝟙                           ∎
+          identity                    ∎
         inv-r = begin
           joinT X ∘ R.fmap (pureT X) ≡⟨⟩
           join ∘ fmap pure            ≡⟨ proj₂ isInverse ⟩
-          𝟙                           ∎
+          identity                    ∎
 
     back : K.Monad → M.Monad
     Monoidal.Monad.raw     (back m) = backRaw     m
@@ -103,21 +103,21 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         bindEq {X} {Y} = begin
           K.RawMonad.bind (forthRaw (backRaw m)) ≡⟨⟩
           (λ f → join ∘ fmap f)                  ≡⟨⟩
-          (λ f → bind (f >>> pure) >>> bind 𝟙)   ≡⟨ funExt lem ⟩
+          (λ f → bind (f >>> pure) >>> bind identity)   ≡⟨ funExt lem ⟩
           (λ f → bind f)                         ≡⟨⟩
           bind                                   ∎
           where
           lem : (f : Arrow X (omap Y))
-            → bind (f >>> pure) >>> bind 𝟙
+            → bind (f >>> pure) >>> bind identity
             ≡ bind f
           lem f = begin
-            bind (f >>> pure) >>> bind 𝟙
+            bind (f >>> pure) >>> bind identity
               ≡⟨ isDistributive _ _ ⟩
-            bind ((f >>> pure) >>> bind 𝟙)
+            bind ((f >>> pure) >>> bind identity)
               ≡⟨ cong bind ℂ.isAssociative ⟩
-            bind (f >>> (pure >>> bind 𝟙))
+            bind (f >>> (pure >>> bind identity))
               ≡⟨ cong (λ φ → bind (f >>> φ)) (isNatural _) ⟩
-            bind (f >>> 𝟙)
+            bind (f >>> identity)
               ≡⟨ cong bind ℂ.leftIdentity ⟩
             bind f ∎
 
@@ -146,10 +146,10 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         joinEq : ∀ {X} → KM.join ≡ joinT X
         joinEq {X} = begin
           KM.join                ≡⟨⟩
-          KM.bind 𝟙              ≡⟨⟩
-          bind 𝟙                 ≡⟨⟩
-          joinT X ∘ Rfmap 𝟙      ≡⟨ cong (λ φ → _ ∘ φ) R.isIdentity ⟩
-          joinT X ∘ 𝟙            ≡⟨ ℂ.rightIdentity ⟩
+          KM.bind identity              ≡⟨⟩
+          bind identity                 ≡⟨⟩
+          joinT X ∘ Rfmap identity      ≡⟨ cong (λ φ → _ ∘ φ) R.isIdentity ⟩
+          joinT X ∘ identity            ≡⟨ ℂ.rightIdentity ⟩
           joinT X                ∎
 
         fmapEq : ∀ {A B} → KM.fmap {A} {B} ≡ Rfmap
@@ -161,7 +161,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
           Rfmap (f >>> pureT B) >>> joinT B        ≡⟨ cong (λ φ → φ >>> joinT B) R.isDistributive ⟩
           Rfmap f >>> Rfmap (pureT B) >>> joinT B  ≡⟨ ℂ.isAssociative ⟩
           joinT B ∘ Rfmap (pureT B) ∘ Rfmap f      ≡⟨ cong (λ φ → φ ∘ Rfmap f) (proj₂ isInverse) ⟩
-          𝟙 ∘ Rfmap f                              ≡⟨ ℂ.leftIdentity ⟩
+          identity ∘ Rfmap f                       ≡⟨ ℂ.leftIdentity ⟩
           Rfmap f                                  ∎
           )
 
@@ -183,8 +183,8 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       joinTEq = funExt (λ X → begin
         M.RawMonad.joinT (backRaw (forth m)) X ≡⟨⟩
         KM.join ≡⟨⟩
-        joinT X ∘ Rfmap 𝟙 ≡⟨ cong (λ φ → joinT X ∘ φ) R.isIdentity ⟩
-        joinT X ∘ 𝟙 ≡⟨ ℂ.rightIdentity ⟩
+        joinT X ∘ Rfmap identity ≡⟨ cong (λ φ → joinT X ∘ φ) R.isIdentity ⟩
+        joinT X ∘ identity ≡⟨ ℂ.rightIdentity ⟩
         joinT X ∎)
 
       joinNTEq : (λ i → NaturalTransformation F[ Req i ∘ Req i ] (Req i))

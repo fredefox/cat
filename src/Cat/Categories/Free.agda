@@ -27,10 +27,10 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     module ℂ = Category ℂ
 
     RawFree : RawCategory ℓa (ℓa ⊔ ℓb)
-    RawCategory.Object RawFree = ℂ.Object
-    RawCategory.Arrow  RawFree = Path ℂ.Arrow
-    RawCategory.𝟙      RawFree = empty
-    RawCategory._∘_    RawFree = concatenate
+    RawCategory.Object   RawFree = ℂ.Object
+    RawCategory.Arrow    RawFree = Path ℂ.Arrow
+    RawCategory.identity RawFree = empty
+    RawCategory._∘_      RawFree = concatenate
 
     open RawCategory RawFree
 
@@ -52,7 +52,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     ident-l : ∀ {A} {B} {p : Path ℂ.Arrow A B} → concatenate empty p ≡ p
     ident-l = refl
 
-    isIdentity : IsIdentity 𝟙
+    isIdentity : IsIdentity identity
     isIdentity = ident-l , ident-r
 
     open Univalence isIdentity

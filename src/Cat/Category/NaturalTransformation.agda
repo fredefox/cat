@@ -31,7 +31,7 @@ module Cat.Category.NaturalTransformation
   {ℓc ℓc' ℓd ℓd' : Level}
   (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
 
-open Category using (Object ; 𝟙)
+open Category using (Object)
 private
   module ℂ = Category ℂ
   module 𝔻 = Category 𝔻
@@ -63,14 +63,14 @@ module _ (F G : Functor ℂ 𝔻) where
   NaturalTransformation≡ eq = lemSig propIsNatural _ _ eq
 
 identityTrans : (F : Functor ℂ 𝔻) → Transformation F F
-identityTrans F C = 𝟙 𝔻
+identityTrans F C = 𝔻.identity
 
 identityNatural : (F : Functor ℂ 𝔻) → Natural F F (identityTrans F)
 identityNatural F {A = A} {B = B} f = begin
   𝔻 [ identityTrans F B ∘ F→ f ]  ≡⟨⟩
-  𝔻 [ 𝟙 𝔻 ∘  F→ f ]              ≡⟨ 𝔻.leftIdentity ⟩
+  𝔻 [ 𝔻.identity ∘  F→ f ]       ≡⟨ 𝔻.leftIdentity ⟩
   F→ f                            ≡⟨ sym 𝔻.rightIdentity ⟩
-  𝔻 [ F→ f ∘ 𝟙 𝔻 ]               ≡⟨⟩
+  𝔻 [ F→ f ∘ 𝔻.identity ]        ≡⟨⟩
   𝔻 [ F→ f ∘ identityTrans F A ]  ∎
   where
     module F = Functor F

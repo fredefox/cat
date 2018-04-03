@@ -67,7 +67,7 @@ module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
     Rawℂ : RawCategory ℓ ℓ -- ℓo (lsuc lzero ⊔ ℓo)
     Raw.Object Rawℂ = FiniteDecidableSubset
     Raw.Arrow Rawℂ = Hom
-    Raw.𝟙 Rawℂ {o} = inj₁ , λ { (i , ii) (j , jj) eq → Σ≡ eq {!refl!} }
+    Raw.identity Rawℂ {o} = inj₁ , λ { (i , ii) (j , jj) eq → Σ≡ eq {!refl!} }
     Raw._∘_ Rawℂ = {!!}
 
     postulate IsCategoryℂ : IsCategory Rawℂ
