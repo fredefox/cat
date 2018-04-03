@@ -69,8 +69,14 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object �
           module y = IsProduct y
 
         module _ {X : Object} (f : ℂ [ X , A ]) (g : ℂ [ X , B ]) where
+          module _ (f×g : Arrow X y.object) where
+            help : isProp (∀{y} → (ℂ [ y.proj₁ ∘ y ] ≡ f) P.× (ℂ [ y.proj₂ ∘ y ] ≡ g) → f×g ≡ y)
+            help = propPiImpl (λ _ → propPi (λ _ → arrowsAreSets _ _))
+
+          res = ∃-unique (x.ump f g) (y.ump f g)
+
           prodAux : x.ump f g ≡ y.ump f g
-          prodAux = {!!}
+          prodAux = lemSig ((λ f×g → propSig (propSig (arrowsAreSets _ _) λ _ → arrowsAreSets _ _) (λ _ → help f×g))) _ _ res
 
         propIsProduct' : x ≡ y
         propIsProduct' i = record { ump = λ f g → prodAux f g i }
@@ -83,42 +89,6 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object �
     where
     q : (λ i → IsProduct ℂ A B (p i)) [ Product.isProduct x ≡ Product.isProduct y ]
     q = lemPropF propIsProduct p
-
-module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object ℂ} where
-  open Category ℂ
-  private
-    module _ (x y : HasProducts ℂ) where
-      private
-        module x = HasProducts x
-        module y = HasProducts y
-      module _ (A B : Object) where
-        module pX = Product (x.product A B)
-        module pY = Product (y.product A B)
-        objEq : pX.object ≡ pY.object
-        objEq = {!!}
-        proj₁Eq : (λ i → ℂ [ objEq i , A ]) [ pX.proj₁ ≡ pY.proj₁ ]
-        proj₁Eq = {!!}
-        proj₂Eq : (λ i → ℂ [ objEq i , B ]) [ pX.proj₂ ≡ pY.proj₂ ]
-        proj₂Eq = {!!}
-        rawEq : pX.raw ≡ pY.raw
-        RawProduct.object (rawEq i) = objEq i
-        RawProduct.proj₁  (rawEq i) = {!!}
-        RawProduct.proj₂  (rawEq i) = {!!}
-
-        isEq : (λ i → IsProduct ℂ A B (rawEq i)) [ pX.isProduct ≡ pY.isProduct ]
-        isEq = {!!}
-
-        appEq : x.product A B ≡ y.product A B
-        appEq = Product≡ rawEq
-
-      productEq : x.product ≡ y.product
-      productEq i = λ A B → appEq A B i
-
-      propHasProducts' : x ≡ y
-      propHasProducts' i = record { product = productEq i }
-
-  propHasProducts : isProp (HasProducts ℂ)
-  propHasProducts = propHasProducts'
 
 module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
   (let module ℂ = Category ℂ) {A B : ℂ.Object} where
@@ -212,12 +182,17 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         -- b : b0 ≡ b1
         -- b = {!!}
 
+    open Univalence isIdentity
+
+    univalent : Univalent
+    univalent {A , a0 , a1} {B , b0 , b1} = {!!}
+
     isCat : IsCategory raw
     isCat = record
       { isAssociative = isAssocitaive
       ; isIdentity    = isIdentity
       ; arrowsAreSets = arrowsAreSets
-      ; univalent     = {!!}
+      ; univalent     = univalent
       }
 
     cat : Category _ _
@@ -296,13 +271,34 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       t {Xx} = Xo , contractible
     ve-re : ∀ x → g (f x) ≡ x
     ve-re x = Propositionality.propTerminal _ _
-    re-ve : ∀ x → f (g x) ≡ x
-    re-ve x = {!!}
+    re-ve : ∀ p → f (g p) ≡ p
+    re-ve p = Product≡ e
+      where
+      module p = Product p
+      -- RawProduct does not have eta-equality.
+      e : Product.raw (f (g p)) ≡ Product.raw p
+      RawProduct.object (e i) = p.object
+      RawProduct.proj₁ (e i) = p.proj₁
+      RawProduct.proj₂ (e i) = p.proj₂
     inv : AreInverses f g
     inv = record
       { verso-recto = funExt ve-re
       ; recto-verso = funExt re-ve
       }
 
-  thm : isProp (Product ℂ A B)
-  thm = equivPreservesNType {n = ⟨-1⟩} lemma Propositionality.propTerminal
+  propProduct : isProp (Product ℂ A B)
+  propProduct = equivPreservesNType {n = ⟨-1⟩} lemma Propositionality.propTerminal
+
+module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object ℂ} where
+  open Category ℂ
+  private
+    module _ (x y : HasProducts ℂ) where
+      private
+        module x = HasProducts x
+        module y = HasProducts y
+
+      productEq : x.product ≡ y.product
+      productEq = funExt λ A → funExt λ B → Try0.propProduct _ _
+
+  propHasProducts : isProp (HasProducts ℂ)
+  propHasProducts x y i = record { product = productEq x y i }

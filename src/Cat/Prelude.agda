@@ -56,6 +56,12 @@ module _ (ℓ : Level) where
 
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
+module _ {ℓa ℓb} {A : Set ℓa} {P : A → Set ℓb} (f g : ∃! P) where
+  open Σ (proj₂ f) renaming (proj₂ to u)
+
+  ∃-unique : proj₁ f ≡ proj₁ g
+  ∃-unique = u (proj₁ (proj₂ g))
+
 module _ {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb} {a b : Σ A B}
   (proj₁≡ : (λ _ → A)            [ proj₁ a ≡ proj₁ b ])
   (proj₂≡ : (λ i → B (proj₁≡ i)) [ proj₂ a ≡ proj₂ b ]) where
