@@ -160,36 +160,30 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         l = ℂ.rightIdentity
 
     arrowsAreSets : ArrowsAreSets
-    arrowsAreSets {X , x0 , x1} {Y , y0 , y1} (f , f0 , f1) (g , g0 , g1) p q = pq
-      where
-      -- prop : ∀ {X Y} (x y : ℂ.Arrow X Y) → isProp (x ≡ y)
-      -- prop = ℂ.arrowsAreSets
-      a0 a1 : f ≡ g
-      a0 i = proj₁ (p i)
-      a1 i = proj₁ (q i)
-      a : a0 ≡ a1
-      a = ℂ.arrowsAreSets _ _ a0 a1
-      module _ (i : I) where
-        r : f ≡ g
-        r = a i
-        module _ (j : I) where
-          prop0 : isProp (ℂ [ y0 ∘ r j ] ≡ x0)
-          prop0 = ℂ.arrowsAreSets _ _
-          prop1 : isProp (ℂ [ y1 ∘ r j ] ≡ x1)
-          prop1 = ℂ.arrowsAreSets _ _
-          prop : isProp (ℂ [ y0 ∘ r j ] ≡ x0 × ℂ [ y1 ∘ r j ] ≡ x1)
-          prop = propSig prop0 (λ _ → prop1)
-          helper : (b0 b1 : (ℂ [ y0 ∘ r j ]) ≡ x0 × (ℂ [ y1 ∘ r j ]) ≡ x1) → b0 ≡ b1
-          helper _ _ = lemPropF (λ _ → prop) p
-          b : (ℂ [ y0 ∘ r j ]) ≡ x0 × (ℂ [ y1 ∘ r j ]) ≡ x1
-          b = {!!}
-      pq : p ≡ q
-      pq i j = a i j , b i j
+    arrowsAreSets {X , x0 , x1} {Y , y0 , y1}
+      = sigPresNType {n = ⟨0⟩} ℂ.arrowsAreSets λ a → propSet (propEqs _)
 
     open Univalence isIdentity
 
     univalent : Univalent
-    univalent {A , a0 , a1} {B , b0 , b1} = {!!}
+    univalent {X , x} {Y , y} = {!res!}
+      where
+      open import Cat.Equivalence as E hiding (_≅_)
+      open import Cubical.Univalence
+      module _ (c : (X , x) ≅ (Y , y)) where
+      -- module _ (c : _ ≅ _) where
+        c0 : X ℂ.≅ Y
+        c0 = {!!}
+        f0 : X ≡ Y
+        f0 = ℂ.iso-to-id c0
+        f1 : PathP (λ i → ℂ.Arrow (f0 i) A × ℂ.Arrow (f0 i) B) x y
+        f1 = {!!}
+        f : (X , x) ≡ (Y , y)
+        f i = f0 i , f1 i
+      iso : E.Isomorphism (id-to-iso (X , x) (Y , y))
+      iso = f , record { verso-recto = {!!} ; recto-verso = {!!} }
+      res : isEquiv ((X , x) ≡ (Y , y)) ((X , x) ≅ (Y , y)) (id-to-iso (X , x) (Y , y))
+      res = Equiv≃.fromIso _ _ iso
 
     isCat : IsCategory raw
     isCat = record

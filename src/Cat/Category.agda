@@ -199,6 +199,12 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
   univalent≃ : Univalent≃
   univalent≃ = _ , univalent
 
+  module _ {A B : Object} where
+    open import Cat.Equivalence using (module Equiv≃)
+
+    iso-to-id : (A ≅ B) → (A ≡ B)
+    iso-to-id = fst (Equiv≃.toIso _ _ univalent)
+
   -- | All projections are propositions.
   module Propositionality where
     propIsAssociative : isProp IsAssociative

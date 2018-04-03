@@ -28,7 +28,7 @@ open import Cubical.NType.Properties
 propIsContr : {ℓ : Level} → {A : Set ℓ} → isProp (isContr A)
 propIsContr = propHasLevel ⟨-2⟩
 
-open import Cubical.Sigma using (setSig ; sigPresSet) public
+open import Cubical.Sigma using (setSig ; sigPresSet ; sigPresNType) public
 
 module _ (ℓ : Level) where
   -- FIXME Ask if we can push upstream.
