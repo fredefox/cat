@@ -172,16 +172,33 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       open import Cubical.Univalence
       module _ (c : (X , x) ≅ (Y , y)) where
       -- module _ (c : _ ≅ _) where
+        open Σ c renaming (proj₁ to f_c ; proj₂ to inv_c)
+        open Σ inv_c renaming (proj₁ to g_c ; proj₂ to ainv_c)
+        open Σ ainv_c renaming (proj₁ to left ; proj₂ to right)
         c0 : X ℂ.≅ Y
-        c0 = {!!}
+        c0 = proj₁ f_c , proj₁ g_c , (λ i → proj₁ (left i)) , (λ i → proj₁ (right i))
         f0 : X ≡ Y
         f0 = ℂ.iso-to-id c0
-        f1 : PathP (λ i → ℂ.Arrow (f0 i) A × ℂ.Arrow (f0 i) B) x y
-        f1 = {!!}
+        module _ {A : ℂ.Object} (α : ℂ.Arrow X A) where
+          coedom : ℂ.Arrow Y A
+          coedom = coe (λ i → ℂ.Arrow (f0 i) A) α
+        coex : ℂ.Arrow Y A × ℂ.Arrow Y B
+        coex = coe (λ i → ℂ.Arrow (f0 i) A × ℂ.Arrow (f0 i) B) x
+        f1 : PathP (λ i → ℂ.Arrow (f0 i) A × ℂ.Arrow (f0 i) B) x coex
+        f1 = {!sym!}
+        f2 : coex ≡ y
+        f2 = {!!}
         f : (X , x) ≡ (Y , y)
-        f i = f0 i , f1 i
+        f i = f0 i , {!f1 i!}
+      prp : isSet (ℂ.Object × ℂ.Arrow Y A × ℂ.Arrow Y B)
+      prp = setSig {sA = {!!}} {(λ _ → setSig {sA = ℂ.arrowsAreSets} {λ _ → ℂ.arrowsAreSets})}
+      ve-re : (p : (X , x) ≡ (Y , y)) → f (id-to-iso _ _ p) ≡ p
+      -- ve-re p i j = {!ℂ.arrowsAreSets!} , ℂ.arrowsAreSets _ _ (let k = proj₁ (proj₂ (p i)) in {!!}) {!!} {!!} {!!} , {!!}
+      ve-re p = let k = prp {!!} {!!} {!!} {!p!} in {!!}
+      re-ve : (iso : (X , x) ≅ (Y , y)) → id-to-iso _ _ (f iso) ≡ iso
+      re-ve = {!!}
       iso : E.Isomorphism (id-to-iso (X , x) (Y , y))
-      iso = f , record { verso-recto = {!!} ; recto-verso = {!!} }
+      iso = f , record { verso-recto = funExt ve-re ; recto-verso = funExt re-ve }
       res : isEquiv ((X , x) ≡ (Y , y)) ((X , x) ≅ (Y , y)) (id-to-iso (X , x) (Y , y))
       res = Equiv≃.fromIso _ _ iso
 
