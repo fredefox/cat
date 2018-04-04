@@ -137,8 +137,11 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
           -- It may be that we need something weaker than this, in that there
           -- may be some other lemmas available to us.
           -- For instance, `need0` should be available to us when we prove `need1`.
-          need0 : ∀ Y → A ≡ Y
-          need1 : (f : Arrow A A) → identity ≡ f
+          need0 : (s : Σ Object (A ≅_)) → (open Σ s renaming (proj₁ to Y) using ()) → A ≡ Y
+          need2 : (iso : A ≅ A)
+            → (open Σ iso   renaming (proj₁ to f  ; proj₂ to iso-f))
+            → (open Σ iso-f renaming (proj₁ to f~ ; proj₂ to areInv))
+            → (identity , identity) ≡ (f , f~)
 
         c : Σ Object (A ≅_)
         c = A , idIso A
@@ -146,7 +149,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
         module _ (y : Σ Object (A ≅_)) where
           open Σ y renaming (proj₁ to Y ; proj₂ to isoY)
           q : A ≡ Y
-          q = need0 Y
+          q = need0 y
 
           -- Some error with primComp
           isoAY : A ≅ Y
@@ -162,20 +165,23 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
               where
               open Σ A≅Y   renaming (proj₁ to f  ; proj₂ to iso-f)
               open Σ iso-f renaming (proj₁ to f~ ; proj₂ to areInv)
+              aaa : (identity , identity) ≡ (f , f~)
+              aaa = need2 A≅Y
               a0 : identity ≡ f
-              a0 = need1 f
+              a0 i = fst (aaa i)
               a1 : identity ≡ f~
-              a1 = need1 f~
+              a1 i = snd (aaa i)
               -- we do have this!
+              -- I just need to rearrange the proofs a bit.
               postulate
                 prop : ∀ {A B} (fg : Arrow A B × Arrow B A) → isProp (IsInverseOf (fst fg) (snd fg))
               a2 : PathP (λ i → IsInverseOf (a0 i) (a1 i)) isIdentity areInv
-              a2 = lemPropF prop λ i → a0 i , a1 i
+              a2 = lemPropF prop aaa
             d* : D Y q
             d* = pathJ D d Y q
 
           p : (A , idIso A) ≡ (Y , isoY)
-          p i = need0 Y i , lem i
+          p i = q i , lem i
 
         univ-lem : isContr (Σ Object (A ≅_))
         univ-lem = c , p
