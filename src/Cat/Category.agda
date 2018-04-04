@@ -132,16 +132,16 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     Univalent[Contr] = ∀ A → isContr (Σ[ X ∈ Object ] A ≅ X)
 
     private
-      module _ (A : Object) where
-        postulate
+      module _ (A : Object)
           -- It may be that we need something weaker than this, in that there
           -- may be some other lemmas available to us.
           -- For instance, `need0` should be available to us when we prove `need1`.
-          need0 : (s : Σ Object (A ≅_)) → (open Σ s renaming (proj₁ to Y) using ()) → A ≡ Y
-          need2 : (iso : A ≅ A)
+          (need0 : (s : Σ Object (A ≅_)) → (open Σ s renaming (proj₁ to Y) using ()) → A ≡ Y)
+          (need2 : (iso : A ≅ A)
             → (open Σ iso   renaming (proj₁ to f  ; proj₂ to iso-f))
             → (open Σ iso-f renaming (proj₁ to f~ ; proj₂ to areInv))
             → (identity , identity) ≡ (f , f~)
+          ) where
 
         c : Σ Object (A ≅_)
         c = A , idIso A
@@ -185,6 +185,12 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
         univ-lem : isContr (Σ Object (A ≅_))
         univ-lem = c , p
+
+    univalence-lemma
+      : (∀ {A} → (s : Σ Object (_≅_ A)) → A ≡ fst s)
+      → (∀ {A} → (iso : A ≅ A) → (identity , identity) ≡ (fst iso , fst (snd iso)))
+      → Univalent[Contr]
+    univalence-lemma s u A = univ-lem A s u
 
     -- From: Thierry Coquand <Thierry.Coquand@cse.gu.se>
     -- Date: Wed, Mar 21, 2018 at 3:12 PM

@@ -27,36 +27,6 @@ sym≃ = Equivalence.symmetry
 
 infixl 10 _⊙_
 
-module _ {ℓ : Level} {A : Set ℓ} {a : A} where
-  id-coe : coe refl a ≡ a
-  id-coe = begin
-    coe refl a                 ≡⟨⟩
-    pathJ (λ y x → A) _ A refl ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
-    _ ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
-    a ∎
-
-module _ {ℓ : Level} {A B : Set ℓ} {a : A} where
-  inv-coe : (p : A ≡ B) → coe (sym p) (coe p a) ≡ a
-  inv-coe p =
-    let
-      D : (y : Set ℓ) → _ ≡ y → Set _
-      D _ q = coe (sym q) (coe q a) ≡ a
-      d : D A refl
-      d = begin
-        coe (sym refl) (coe refl a) ≡⟨⟩
-        coe refl (coe refl a)       ≡⟨ id-coe ⟩
-        coe refl a                  ≡⟨ id-coe ⟩
-        a ∎
-    in pathJ D d B p
-  inv-coe' : (p : B ≡ A) → coe p (coe (sym p) a) ≡ a
-  inv-coe' p =
-    let
-      D : (y : Set ℓ) → _ ≡ y → Set _
-      D _ q = coe (sym q) (coe q a) ≡ a
-      k : coe p (coe (sym p) a) ≡ a
-      k = pathJ D (trans id-coe id-coe) B (sym p)
-    in k
-
 module _ (ℓ : Level) where
   private
     SetsRaw : RawCategory (lsuc ℓ) ℓ

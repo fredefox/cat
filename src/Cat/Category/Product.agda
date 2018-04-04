@@ -99,13 +99,13 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
     raw : RawCategory _ _
     raw = record
       { Object = Σ[ X ∈ ℂ.Object ] ℂ.Arrow X A × ℂ.Arrow X B
-      ; Arrow = λ{ (X , xa , xb) (Y , ya , yb)
-        → Σ[ xy ∈ ℂ.Arrow X Y ]
-          ( ℂ [ ya ∘ xy ] ≡ xa)
-          × ℂ [ yb ∘ xy ] ≡ xb
+      ; Arrow = λ{ (X , x0 , x1) (Y , y0 , y1)
+        → Σ[ f ∈ ℂ.Arrow X Y ]
+            ℂ [ y0 ∘ f ] ≡ x0
+          × ℂ [ y1 ∘ f ] ≡ x1
           }
-      ; identity = λ{ {A , f , g} → ℂ.identity {A} , ℂ.rightIdentity , ℂ.rightIdentity}
-      ; _∘_ = λ { {A , a0 , a1} {B , b0 , b1} {C , c0 , c1} (f , f0 , f1) (g , g0 , g1)
+      ; identity = λ{ {X , f , g} → ℂ.identity {X} , ℂ.rightIdentity , ℂ.rightIdentity}
+      ; _∘_ = λ { {_ , a0 , a1} {_ , b0 , b1} {_ , c0 , c1} (f , f0 , f1) (g , g0 , g1)
         → (f ℂ.∘ g)
           , (begin
               ℂ [ c0 ∘ ℂ [ f ∘ g ] ] ≡⟨ ℂ.isAssociative ⟩
@@ -164,6 +164,109 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       = sigPresNType {n = ⟨0⟩} ℂ.arrowsAreSets λ a → propSet (propEqs _)
 
     open Univalence isIdentity
+
+    module _ (A : Object) where
+      c : Σ Object (A ≅_)
+      c = A , {!!}
+      univalent[Contr] : isContr (Σ Object (A ≅_))
+      univalent[Contr] = {!!} , {!!}
+
+    univalent' : Univalent[Contr]
+    univalent' = univalence-lemma p q
+      where
+      module _ {𝕏 : Object} where
+        open Σ 𝕏    renaming (proj₁ to X ; proj₂ to x0x1)
+        open Σ x0x1 renaming (proj₁ to x0 ; proj₂ to x1)
+        -- x0 : X → A in ℂ
+        -- x1 : X → B in ℂ
+        module _ (𝕐-isoY : Σ Object (𝕏 ≅_)) where
+          open Σ 𝕐-isoY  renaming (proj₁ to 𝕐  ; proj₂ to isoY)
+          open Σ 𝕐       renaming (proj₁ to Y  ; proj₂ to y0y1)
+          open Σ y0y1    renaming (proj₁ to y0 ; proj₂ to y1)
+          open Σ isoY    renaming (proj₁ to 𝓯  ; proj₂ to iso-𝓯)
+          open Σ iso-𝓯   renaming (proj₁ to 𝓯~ ; proj₂ to inv-𝓯)
+          open Σ 𝓯       renaming (proj₁ to f  ; proj₂ to inv-f)
+          open Σ 𝓯~      renaming (proj₁ to f~ ; proj₂ to inv-f~)
+          open Σ inv-𝓯   renaming (proj₁ to left ; proj₂ to right)
+          -- y0 : Y → A in ℂ
+          -- y1 : Y → B in ℂ
+          -- f  : X → Y in ℂ
+          -- inv-f : ℂ [ y0 ∘ f ] ≡ x0 × ℂ [ y1 ∘ f ] ≡ x1
+          -- left  : 𝓯~ ∘ 𝓯  ≡ identity
+          -- left~ : 𝓯  ∘ 𝓯~ ≡ identity
+          isoℂ : X ℂ.≅ Y
+          isoℂ
+            = f
+            , f~
+            , ( begin
+                ℂ [ f~ ∘ f ] ≡⟨ (λ i → proj₁ (left i)) ⟩
+                ℂ.identity ∎
+              )
+            , ( begin
+                ℂ [ f ∘ f~ ] ≡⟨ (λ i → proj₁ (right i)) ⟩
+                ℂ.identity ∎
+              )
+          p0 : X ≡ Y
+          p0 = ℂ.iso-to-id isoℂ
+          -- I note `left2` and right2` here as a reminder.
+          left2 : PathP
+            (λ i → ℂ [ x0 ∘ proj₁ (left i) ] ≡ x0 × ℂ [ x1 ∘ proj₁ (left i) ] ≡ x1)
+            (proj₂ (𝓯~ ∘ 𝓯)) (proj₂ identity)
+          left2 i = proj₂ (left i)
+          right2 : PathP
+            (λ i → ℂ [ y0 ∘ proj₁ (right i) ] ≡ y0 × ℂ [ y1 ∘ proj₁ (right i) ] ≡ y1)
+            (proj₂ (𝓯 ∘ 𝓯~)) (proj₂ identity)
+          right2 i = proj₂ (right i)
+          -- My idea:
+          --
+          -- x0, x1 and y0 and y1 are product arrows as in the diagram
+          --
+          --     X
+          --   ↙  ↘
+          -- A  ⇣ ⇡  B
+          --   ↖  ↗
+          --     Y    (All hail unicode)
+          --
+          -- The dotted lines indicate the unique product arrows. Since they are
+          -- unique they necessarily be each others inverses. Alas, more than
+          -- this we must show that they are actually (heterogeneously)
+          -- identical as in `p1`:
+          p1 : PathP (λ i → ℂ.Arrow (p0 i) A × ℂ.Arrow (p0 i) B) x0x1 y0y1
+          p1 = {!!}
+            where
+            -- This, however, should probably somehow follow from them being
+            -- inverses on objects that are propositionally equal cf. `p0`.
+            helper : {A B : Object} {f : Arrow A B} {g : Arrow B A}
+              → IsInverseOf f g
+              → (p : A ≡ B)
+              → PathP (λ i → Arrow (p i) (p (~ i))) f g
+            helper = {!!}
+
+          p : (X , x0x1) ≡ (Y , y0y1)
+          p i = p0 i , {!!}
+        module _ (iso : 𝕏 ≅ 𝕏) where
+          open Σ iso renaming (proj₁ to 𝓯 ; proj₂ to inv-𝓯)
+          open Σ inv-𝓯 renaming (proj₁ to 𝓯~) using ()
+          open Σ 𝓯  renaming (proj₁ to f  ; proj₂ to inv-f)
+          open Σ 𝓯~ renaming (proj₁ to f~ ; proj₂ to inv-f~)
+          q0' : ℂ.identity ≡ f
+          q0' i = {!!}
+          prop : ∀ x → isProp (ℂ [ x0 ∘ x ] ≡ x0 × ℂ [ x1 ∘ x ] ≡ x1)
+          prop x = propSig
+            (      ℂ.arrowsAreSets (ℂ [ x0 ∘ x ]) x0)
+            (λ _ → ℂ.arrowsAreSets (ℂ [ x1 ∘ x ]) x1)
+          q0'' : PathP (λ i → ℂ [ x0 ∘ q0' i ] ≡ x0 × ℂ [ x1 ∘ q0' i ] ≡ x1) (proj₂ identity) inv-f
+          q0'' = lemPropF prop q0'
+          q0 : identity ≡ 𝓯
+          q0 i = q0' i , q0'' i
+          q1' : ℂ.identity ≡ f~
+          q1' = {!!}
+          q1'' : PathP (λ i → (ℂ [ x0 ∘ q1' i ]) ≡ x0 × (ℂ [ x1 ∘ q1' i ]) ≡ x1) (proj₂ identity) inv-f~
+          q1'' = lemPropF prop q1'
+          q1 : identity ≡ 𝓯~
+          q1 i = q1' i , {!!}
+          q : (identity , identity) ≡ (𝓯 , 𝓯~)
+          q i = q0 i , q1 i
 
     univalent : Univalent
     univalent {X , x} {Y , y} = {!res!}
