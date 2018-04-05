@@ -10,20 +10,28 @@ import Cat.Category.NaturalTransformation
 
 module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
   open NaturalTransformation ℂ 𝔻 public hiding (module Properties)
-  open NaturalTransformation.Properties ℂ 𝔻
   private
     module ℂ = Category ℂ
     module 𝔻 = Category 𝔻
 
-    -- Functor categories. Objects are functors, arrows are natural transformations.
-    raw : RawCategory (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') (ℓc ⊔ ℓc' ⊔ ℓd')
-    RawCategory.Object   raw = Functor ℂ 𝔻
-    RawCategory.Arrow    raw = NaturalTransformation
-    RawCategory.identity raw {F} = identity F
-    RawCategory._∘_      raw {F} {G} {H} = NT[_∘_] {F} {G} {H}
+    module _ where
+      -- Functor categories. Objects are functors, arrows are natural transformations.
+      raw : RawCategory (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') (ℓc ⊔ ℓc' ⊔ ℓd')
+      RawCategory.Object   raw = Functor ℂ 𝔻
+      RawCategory.Arrow    raw = NaturalTransformation
+      RawCategory.identity raw {F} = identity F
+      RawCategory._∘_      raw {F} {G} {H} = NT[_∘_] {F} {G} {H}
 
-    open RawCategory raw hiding (identity)
-    open Univalence (λ {A} {B} {f} → isIdentity {F = A} {B} {f})
+    module _ where
+      open RawCategory raw hiding (identity)
+      open NaturalTransformation.Properties ℂ 𝔻
+
+      isPreCategory : IsPreCategory raw
+      IsPreCategory.isAssociative isPreCategory {A} {B} {C} {D} = isAssociative {A} {B} {C} {D}
+      IsPreCategory.isIdentity    isPreCategory {A} {B} = isIdentity {A} {B}
+      IsPreCategory.arrowsAreSets isPreCategory {F} {G} = naturalTransformationIsSet {F} {G}
+
+    open IsPreCategory isPreCategory hiding (identity)
 
     module _ (F : Functor ℂ 𝔻) where
       center : Σ[ G ∈ Object ] (F ≅ G)
@@ -167,17 +175,15 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
       re-ve : (x : A ≡ B) → reverse (obverse x) ≡ x
       re-ve = {!!}
 
-      done : isEquiv (A ≡ B) (A ≅ B) (Univalence.id-to-iso (λ { {A} {B} → isIdentity {F = A} {B}}) A B)
+      done : isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
       done = {!gradLemma obverse reverse ve-re re-ve!}
 
-    -- univalent : Univalent
-    -- univalent = done
+    univalent : Univalent
+    univalent = {!done!}
 
     isCategory : IsCategory raw
-    IsCategory.isAssociative isCategory {A} {B} {C} {D} = isAssociative {A} {B} {C} {D}
-    IsCategory.isIdentity    isCategory {A} {B} = isIdentity {A} {B}
-    IsCategory.arrowsAreSets isCategory {F} {G} = naturalTransformationIsSet {F} {G}
-    IsCategory.univalent     isCategory = {!!}
+    IsCategory.isPreCategory isCategory = isPreCategory
+    IsCategory.univalent     isCategory = univalent
 
   Fun : Category (ℓc ⊔ ℓc' ⊔ ℓd ⊔ ℓd') (ℓc ⊔ ℓc' ⊔ ℓd')
   Category.raw        Fun = raw
@@ -199,26 +205,26 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
       ; _∘_ = λ {F G H} → NT[_∘_] {F = F} {G = G} {H = H}
       }
 
-    isCategory : IsCategory raw
-    isCategory = record
-      { isAssociative =
-        λ{ {A} {B} {C} {D} {f} {g} {h}
-        → F.isAssociative {A} {B} {C} {D} {f} {g} {h}
-        }
-      ; isIdentity =
-        λ{ {A} {B} {f}
-        → F.isIdentity {A} {B} {f}
-        }
-      ; arrowsAreSets =
-        λ{ {A} {B}
-        → F.arrowsAreSets {A} {B}
-        }
-      ; univalent =
-        λ{ {A} {B}
-        → F.univalent {A} {B}
-        }
-      }
+  --   isCategory : IsCategory raw
+  --   isCategory = record
+  --     { isAssociative =
+  --       λ{ {A} {B} {C} {D} {f} {g} {h}
+  --       → F.isAssociative {A} {B} {C} {D} {f} {g} {h}
+  --       }
+  --     ; isIdentity =
+  --       λ{ {A} {B} {f}
+  --       → F.isIdentity {A} {B} {f}
+  --       }
+  --     ; arrowsAreSets =
+  --       λ{ {A} {B}
+  --       → F.arrowsAreSets {A} {B}
+  --       }
+  --     ; univalent =
+  --       λ{ {A} {B}
+  --       → F.univalent {A} {B}
+  --       }
+  --     }
 
-  Presh : Category (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')
-  Category.raw        Presh = raw
-  Category.isCategory Presh = isCategory
+  -- Presh : Category (ℓ ⊔ lsuc ℓ') (ℓ ⊔ ℓ')
+  -- Category.raw        Presh = raw
+  -- Category.isCategory Presh = isCategory

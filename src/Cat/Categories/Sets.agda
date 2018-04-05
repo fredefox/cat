@@ -34,16 +34,23 @@ module _ (ℓ : Level) where
     RawCategory.identity SetsRaw = Function.id
     RawCategory._∘_      SetsRaw = Function._∘′_
 
-    open RawCategory SetsRaw hiding (_∘_)
+    module _ where
+      private
+        open RawCategory SetsRaw hiding (_∘_)
 
-    isIdentity : IsIdentity Function.id
-    fst isIdentity = funExt λ _ → refl
-    snd isIdentity = funExt λ _ → refl
+        isIdentity : IsIdentity Function.id
+        fst isIdentity = funExt λ _ → refl
+        snd isIdentity = funExt λ _ → refl
 
-    open Univalence (λ {A} {B} {f} → isIdentity {A} {B} {f})
+        arrowsAreSets : ArrowsAreSets
+        arrowsAreSets {B = (_ , s)} = setPi λ _ → s
 
-    arrowsAreSets : ArrowsAreSets
-    arrowsAreSets {B = (_ , s)} = setPi λ _ → s
+      isPreCat : IsPreCategory SetsRaw
+      IsPreCategory.isAssociative isPreCat         = refl
+      IsPreCategory.isIdentity    isPreCat {A} {B} = isIdentity    {A} {B}
+      IsPreCategory.arrowsAreSets isPreCat {A} {B} = arrowsAreSets {A} {B}
+
+    open IsPreCategory isPreCat hiding (_∘_)
 
     isIso = Eqv.Isomorphism
     module _ {hA hB : hSet ℓ} where
@@ -255,9 +262,7 @@ module _ (ℓ : Level) where
     univalent = from[Contr] univalent[Contr]
 
     SetsIsCategory : IsCategory SetsRaw
-    IsCategory.isAssociative SetsIsCategory = refl
-    IsCategory.isIdentity    SetsIsCategory {A} {B} = isIdentity    {A} {B}
-    IsCategory.arrowsAreSets SetsIsCategory {A} {B} = arrowsAreSets {A} {B}
+    IsCategory.isPreCategory SetsIsCategory = isPreCat
     IsCategory.univalent     SetsIsCategory = univalent
 
   𝓢𝓮𝓽 Sets : Category (lsuc ℓ) ℓ

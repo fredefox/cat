@@ -122,48 +122,54 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         }
       }
 
-    open RawCategory raw
+    module _ where
+      open RawCategory raw
 
-    propEqs : ∀ {X' : Object}{Y' : Object} (let X , xa , xb = X') (let Y , ya , yb = Y')
-              → (xy : ℂ.Arrow X Y) → isProp (ℂ [ ya ∘ xy ] ≡ xa × ℂ [ yb ∘ xy ] ≡ xb)
-    propEqs xs = propSig (ℂ.arrowsAreSets _ _) (\ _ → ℂ.arrowsAreSets _ _)
+      propEqs : ∀ {X' : Object}{Y' : Object} (let X , xa , xb = X') (let Y , ya , yb = Y')
+                → (xy : ℂ.Arrow X Y) → isProp (ℂ [ ya ∘ xy ] ≡ xa × ℂ [ yb ∘ xy ] ≡ xb)
+      propEqs xs = propSig (ℂ.arrowsAreSets _ _) (\ _ → ℂ.arrowsAreSets _ _)
 
-    isAssocitaive : IsAssociative
-    isAssocitaive {A'@(A , a0 , a1)} {B , _} {C , c0 , c1} {D'@(D , d0 , d1)} {ff@(f , f0 , f1)} {gg@(g , g0 , g1)} {hh@(h , h0 , h1)} i
-      = s0 i , lemPropF propEqs s0 {P.snd l} {P.snd r} i
-      where
-      l = hh ∘ (gg ∘ ff)
-      r = hh ∘ gg ∘ ff
-      -- s0 : h ℂ.∘ (g ℂ.∘ f) ≡ h ℂ.∘ g ℂ.∘ f
-      s0 : fst l ≡ fst r
-      s0 = ℂ.isAssociative {f = f} {g} {h}
-
-
-    isIdentity : IsIdentity identity
-    isIdentity {AA@(A , a0 , a1)} {BB@(B , b0 , b1)} {f , f0 , f1} = leftIdentity , rightIdentity
-      where
-      leftIdentity : identity ∘ (f , f0 , f1) ≡ (f , f0 , f1)
-      leftIdentity i = l i , lemPropF propEqs l {snd L} {snd R} i
+      isAssociative : IsAssociative
+      isAssociative {A'@(A , a0 , a1)} {B , _} {C , c0 , c1} {D'@(D , d0 , d1)} {ff@(f , f0 , f1)} {gg@(g , g0 , g1)} {hh@(h , h0 , h1)} i
+        = s0 i , lemPropF propEqs s0 {P.snd l} {P.snd r} i
         where
-        L = identity ∘ (f , f0 , f1)
-        R : Arrow AA BB
-        R = f , f0 , f1
-        l : fst L ≡ fst R
-        l = ℂ.leftIdentity
-      rightIdentity : (f , f0 , f1) ∘ identity ≡ (f , f0 , f1)
-      rightIdentity i = l i , lemPropF propEqs l {snd L} {snd R} i
+        l = hh ∘ (gg ∘ ff)
+        r = hh ∘ gg ∘ ff
+        -- s0 : h ℂ.∘ (g ℂ.∘ f) ≡ h ℂ.∘ g ℂ.∘ f
+        s0 : fst l ≡ fst r
+        s0 = ℂ.isAssociative {f = f} {g} {h}
+
+
+      isIdentity : IsIdentity identity
+      isIdentity {AA@(A , a0 , a1)} {BB@(B , b0 , b1)} {f , f0 , f1} = leftIdentity , rightIdentity
         where
-        L = (f , f0 , f1) ∘ identity
-        R : Arrow AA BB
-        R = (f , f0 , f1)
-        l : ℂ [ f ∘ ℂ.identity ] ≡ f
-        l = ℂ.rightIdentity
+        leftIdentity : identity ∘ (f , f0 , f1) ≡ (f , f0 , f1)
+        leftIdentity i = l i , lemPropF propEqs l {snd L} {snd R} i
+          where
+          L = identity ∘ (f , f0 , f1)
+          R : Arrow AA BB
+          R = f , f0 , f1
+          l : fst L ≡ fst R
+          l = ℂ.leftIdentity
+        rightIdentity : (f , f0 , f1) ∘ identity ≡ (f , f0 , f1)
+        rightIdentity i = l i , lemPropF propEqs l {snd L} {snd R} i
+          where
+          L = (f , f0 , f1) ∘ identity
+          R : Arrow AA BB
+          R = (f , f0 , f1)
+          l : ℂ [ f ∘ ℂ.identity ] ≡ f
+          l = ℂ.rightIdentity
 
-    arrowsAreSets : ArrowsAreSets
-    arrowsAreSets {X , x0 , x1} {Y , y0 , y1}
-      = sigPresNType {n = ⟨0⟩} ℂ.arrowsAreSets λ a → propSet (propEqs _)
+      arrowsAreSets : ArrowsAreSets
+      arrowsAreSets {X , x0 , x1} {Y , y0 , y1}
+        = sigPresNType {n = ⟨0⟩} ℂ.arrowsAreSets λ a → propSet (propEqs _)
 
-    open Univalence isIdentity
+      isPreCat : IsPreCategory raw
+      IsPreCategory.isAssociative isPreCat = isAssociative
+      IsPreCategory.isIdentity    isPreCat = isIdentity
+      IsPreCategory.arrowsAreSets isPreCat = arrowsAreSets
+
+    open IsPreCategory isPreCat
 
     -- module _ (X : Object) where
     --   center : Σ Object (X ≅_)
@@ -327,12 +333,8 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       res = Equiv≃.fromIso _ _ iso
 
     isCat : IsCategory raw
-    isCat = record
-      { isAssociative = isAssocitaive
-      ; isIdentity    = isIdentity
-      ; arrowsAreSets = arrowsAreSets
-      ; univalent     = univalent
-      }
+    IsCategory.isPreCategory isCat = isPreCat
+    IsCategory.univalent     isCat = univalent
 
     cat : Category _ _
     cat = record

@@ -35,29 +35,31 @@ module _ (ℓa ℓb : Level) where
 
     open import Cubical.NType.Properties
     open import Cubical.Sigma
-    instance
-      isCategory : IsCategory RawFam
-      isCategory = record
-        { isAssociative = λ {A} {B} {C} {D} {f} {g} {h} → isAssociative {A} {B} {C} {D} {f} {g} {h}
-        ; isIdentity = λ {A} {B} {f} → isIdentity {A} {B} {f = f}
-        ; arrowsAreSets = λ {
-          {((A , hA) , famA)}
-          {((B , hB) , famB)}
-            → setSig
-              {sA = setPi λ _ → hB}
-              {sB = λ f →
-                let
-                  helpr : isSet ((a : A) → fst (famA a) → fst (famB (f a)))
-                  helpr = setPi λ a → setPi λ _ → snd (famB (f a))
-                  -- It's almost like above, but where the first argument is
-                  -- implicit.
-                  res : isSet ({a : A} → fst (famA a) → fst (famB (f a)))
-                  res = {!!}
-                in res
-              }
-          }
-        ; univalent = {!!}
+
+    isPreCategory : IsPreCategory RawFam
+    IsPreCategory.isAssociative isPreCategory
+      {A} {B} {C} {D} {f} {g} {h} = isAssociative {A} {B} {C} {D} {f} {g} {h}
+    IsPreCategory.isIdentity isPreCategory
+      {A} {B} {f} = isIdentity {A} {B} {f = f}
+    IsPreCategory.arrowsAreSets isPreCategory
+      {(A , hA) , famA} {(B , hB) , famB}
+      = setSig
+        {sA = setPi λ _ → hB}
+        {sB = λ f →
+          let
+            helpr : isSet ((a : A) → fst (famA a) → fst (famB (f a)))
+            helpr = setPi λ a → setPi λ _ → snd (famB (f a))
+            -- It's almost like above, but where the first argument is
+            -- implicit.
+            res : isSet ({a : A} → fst (famA a) → fst (famB (f a)))
+            res = {!!}
+          in res
         }
+
+    isCategory : IsCategory RawFam
+    IsCategory.isPreCategory isCategory = isPreCategory
+    IsCategory.univalent     isCategory = {!!}
 
   Fam : Category (lsuc (ℓa ⊔ ℓb)) (ℓa ⊔ ℓb)
   Category.raw Fam = RawFam
+  Category.isCategory Fam = isCategory

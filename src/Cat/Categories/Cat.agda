@@ -72,16 +72,20 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
       = Σ≡ (fst ℂ.isIdentity) (fst 𝔻.isIdentity)
       , Σ≡ (snd ℂ.isIdentity) (snd 𝔻.isIdentity)
 
+    isPreCategory : IsPreCategory rawProduct
+    IsPreCategory.isAssociative isPreCategory = Σ≡ ℂ.isAssociative 𝔻.isAssociative
+    IsPreCategory.isIdentity    isPreCategory = isIdentity
+    IsPreCategory.arrowsAreSets isPreCategory = arrowsAreSets
+
     postulate univalent : Univalence.Univalent isIdentity
-    instance
-      isCategory : IsCategory rawProduct
-      IsCategory.isAssociative isCategory = Σ≡ ℂ.isAssociative 𝔻.isAssociative
-      IsCategory.isIdentity    isCategory = isIdentity
-      IsCategory.arrowsAreSets isCategory = arrowsAreSets
-      IsCategory.univalent     isCategory = univalent
+
+    isCategory : IsCategory rawProduct
+    IsCategory.isPreCategory isCategory = isPreCategory
+    IsCategory.univalent     isCategory = univalent
 
   object : Category ℓ ℓ'
   Category.raw object = rawProduct
+  Category.isCategory object = isCategory
 
   fstF : Functor object ℂ
   fstF = record

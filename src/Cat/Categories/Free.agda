@@ -61,6 +61,12 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       arrowsAreSets : isSet (Path ℂ.Arrow A B)
       arrowsAreSets a b p q = {!!}
 
+    isPreCategory : IsPreCategory RawFree
+    IsPreCategory.isAssociative isPreCategory {f = f} {g} {h} = isAssociative {r = f} {g} {h}
+    IsPreCategory.isIdentity    isPreCategory = isIdentity
+    IsPreCategory.arrowsAreSets isPreCategory = arrowsAreSets
+
+    module _ {A B : ℂ.Object} where
       eqv : isEquiv (A ≡ B) (A ≅ B) (Univalence.id-to-iso isIdentity A B)
       eqv = {!!}
 
@@ -68,9 +74,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     univalent = eqv
 
     isCategory : IsCategory RawFree
-    IsCategory.isAssociative isCategory {f = f} {g} {h} = isAssociative {r = f} {g} {h}
-    IsCategory.isIdentity    isCategory = isIdentity
-    IsCategory.arrowsAreSets isCategory = arrowsAreSets
+    IsCategory.isPreCategory isCategory = isPreCategory
     IsCategory.univalent     isCategory = univalent
 
   Free : Category _ _

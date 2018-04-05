@@ -203,15 +203,13 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 --
 -- Sans `univalent` this would be what is referred to as a pre-category in
 -- [HoTT].
-record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
+record IsPreCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   open RawCategory ℂ public
   field
     isAssociative : IsAssociative
     isIdentity    : IsIdentity identity
     arrowsAreSets : ArrowsAreSets
   open Univalence isIdentity public
-  field
-    univalent     : Univalent
 
   leftIdentity : {A B : Object} {f : Arrow A B} → identity ∘ f ≡ f
   leftIdentity {A} {B} {f} = fst (isIdentity {A = A} {B} {f})
@@ -251,6 +249,83 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
     iso→epi×mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
     iso→epi×mono iso = iso→epi iso , iso→mono iso
 
+  propIsAssociative : isProp IsAssociative
+  propIsAssociative x y i = arrowsAreSets _ _ x y i
+
+  propIsIdentity : ∀ {f : ∀ {A} → Arrow A A} → isProp (IsIdentity f)
+  propIsIdentity a b i
+    = arrowsAreSets _ _ (fst a) (fst b) i
+    , arrowsAreSets _ _ (snd a) (snd b) i
+
+  propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
+  propArrowIsSet a b i = isSetIsProp a b i
+
+  propIsInverseOf : ∀ {A B f g} → isProp (IsInverseOf {A} {B} f g)
+  propIsInverseOf x y = λ i →
+    let
+      h : fst x ≡ fst y
+      h = arrowsAreSets _ _ (fst x) (fst y)
+      hh : snd x ≡ snd y
+      hh = arrowsAreSets _ _ (snd x) (snd y)
+    in h i , hh i
+
+  module _ {A B : Object} {f : Arrow A B} where
+    isoIsProp : isProp (Isomorphism f)
+    isoIsProp a@(g , η , ε) a'@(g' , η' , ε') =
+      lemSig (λ g → propIsInverseOf) a a' geq
+        where
+          geq : g ≡ g'
+          geq = begin
+            g             ≡⟨ sym rightIdentity ⟩
+            g ∘ identity  ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
+            g ∘ (f ∘ g')  ≡⟨ isAssociative ⟩
+            (g ∘ f) ∘ g'  ≡⟨ cong (λ φ → φ ∘ g') η ⟩
+            identity ∘ g' ≡⟨ leftIdentity ⟩
+            g'            ∎
+
+  propIsInitial : ∀ I → isProp (IsInitial I)
+  propIsInitial I x y i {X} = res X i
+    where
+    module _ (X : Object) where
+      open Σ (x {X}) renaming (fst to fx ; snd to cx)
+      open Σ (y {X}) renaming (fst to fy ; snd to cy)
+      fp : fx ≡ fy
+      fp = cx fy
+      prop : (x : Arrow I X) → isProp (∀ f → x ≡ f)
+      prop x = propPi (λ y → arrowsAreSets x y)
+      cp : (λ i → ∀ f → fp i ≡ f) [ cx ≡ cy ]
+      cp = lemPropF prop fp
+      res : (fx , cx) ≡ (fy , cy)
+      res i = fp i , cp i
+
+  propIsTerminal : ∀ T → isProp (IsTerminal T)
+  propIsTerminal T x y i {X} = res X i
+    where
+    module _ (X : Object) where
+      open Σ (x {X}) renaming (fst to fx ; snd to cx)
+      open Σ (y {X}) renaming (fst to fy ; snd to cy)
+      fp : fx ≡ fy
+      fp = cx fy
+      prop : (x : Arrow X T) → isProp (∀ f → x ≡ f)
+      prop x = propPi (λ y → arrowsAreSets x y)
+      cp : (λ i → ∀ f → fp i ≡ f) [ cx ≡ cy ]
+      cp = lemPropF prop fp
+      res : (fx , cx) ≡ (fy , cy)
+      res i = fp i , cp i
+
+record PreCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
+  field
+    raw            : RawCategory ℓa ℓb
+    isPreCategory  : IsPreCategory raw
+  open IsPreCategory isPreCategory public
+
+record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
+  field
+    isPreCategory : IsPreCategory ℂ
+  open IsPreCategory isPreCategory public
+  field
+    univalent : Univalent
+
   -- | The formulation of univalence expressed with _≃_ is trivially admissable -
   -- just "forget" the equivalence.
   univalent≃ : Univalent≃
@@ -264,57 +339,8 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
 
   -- | All projections are propositions.
   module Propositionality where
-    propIsAssociative : isProp IsAssociative
-    propIsAssociative x y i = arrowsAreSets _ _ x y i
-
-    propIsIdentity : ∀ {f : ∀ {A} → Arrow A A} → isProp (IsIdentity f)
-    propIsIdentity a b i
-      = arrowsAreSets _ _ (fst a) (fst b) i
-      , arrowsAreSets _ _ (snd a) (snd b) i
-
-    propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
-    propArrowIsSet a b i = isSetIsProp a b i
-
-    propIsInverseOf : ∀ {A B f g} → isProp (IsInverseOf {A} {B} f g)
-    propIsInverseOf x y = λ i →
-      let
-        h : fst x ≡ fst y
-        h = arrowsAreSets _ _ (fst x) (fst y)
-        hh : snd x ≡ snd y
-        hh = arrowsAreSets _ _ (snd x) (snd y)
-      in h i , hh i
-
-    module _ {A B : Object} {f : Arrow A B} where
-      isoIsProp : isProp (Isomorphism f)
-      isoIsProp a@(g , η , ε) a'@(g' , η' , ε') =
-        lemSig (λ g → propIsInverseOf) a a' geq
-          where
-            geq : g ≡ g'
-            geq = begin
-              g             ≡⟨ sym rightIdentity ⟩
-              g ∘ identity  ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
-              g ∘ (f ∘ g')  ≡⟨ isAssociative ⟩
-              (g ∘ f) ∘ g'  ≡⟨ cong (λ φ → φ ∘ g') η ⟩
-              identity ∘ g' ≡⟨ leftIdentity ⟩
-              g'            ∎
-
     propUnivalent : isProp Univalent
     propUnivalent a b i = propPi (λ iso → propIsContr) a b i
-
-    propIsTerminal : ∀ T → isProp (IsTerminal T)
-    propIsTerminal T x y i {X} = res X i
-      where
-      module _ (X : Object) where
-        open Σ (x {X}) renaming (fst to fx ; snd to cx)
-        open Σ (y {X}) renaming (fst to fy ; snd to cy)
-        fp : fx ≡ fy
-        fp = cx fy
-        prop : (x : Arrow X T) → isProp (∀ f → x ≡ f)
-        prop x = propPi (λ y → arrowsAreSets x y)
-        cp : (λ i → ∀ f → fp i ≡ f) [ cx ≡ cy ]
-        cp = lemPropF prop fp
-        res : (fx , cx) ≡ (fy , cy)
-        res i = fp i , cp i
 
     -- | Terminal objects are propositional - a.k.a uniqueness of terminal
     -- | objects.
@@ -353,20 +379,6 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
       res i = p0 i , p1 i
 
     -- Merely the dual of the above statement.
-    propIsInitial : ∀ I → isProp (IsInitial I)
-    propIsInitial I x y i {X} = res X i
-      where
-      module _ (X : Object) where
-        open Σ (x {X}) renaming (fst to fx ; snd to cx)
-        open Σ (y {X}) renaming (fst to fy ; snd to cy)
-        fp : fx ≡ fy
-        fp = cx fy
-        prop : (x : Arrow I X) → isProp (∀ f → x ≡ f)
-        prop x = propPi (λ y → arrowsAreSets x y)
-        cp : (λ i → ∀ f → fp i ≡ f) [ cx ≡ cy ]
-        cp = lemPropF prop fp
-        res : (fx , cx) ≡ (fy , cy)
-        res i = fp i , cp i
 
     propInitial : isProp Initial
     propInitial Xi Yi = res
@@ -404,6 +416,23 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   open RawCategory ℂ
   open Univalence
   private
+    module _ (x y : IsPreCategory ℂ) where
+      module x = IsPreCategory x
+      module y = IsPreCategory y
+      -- In a few places I use the result of propositionality of the various
+      -- projections of `IsCategory` - Here I arbitrarily chose to use this
+      -- result from `x : IsCategory C`. I don't know which (if any) possibly
+      -- adverse effects this may have.
+      -- module Prop = X.Propositionality
+
+      propIsPreCategory : x ≡ y
+      IsPreCategory.isAssociative (propIsPreCategory i)
+        = x.propIsAssociative x.isAssociative y.isAssociative i
+      IsPreCategory.isIdentity    (propIsPreCategory i)
+        = x.propIsIdentity x.isIdentity y.isIdentity i
+      IsPreCategory.arrowsAreSets (propIsPreCategory i)
+        = x.propArrowIsSet x.arrowsAreSets y.arrowsAreSets i
+
     module _ (x y : IsCategory ℂ) where
       module X = IsCategory x
       module Y = IsCategory y
@@ -414,7 +443,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       module Prop = X.Propositionality
 
       isIdentity : (λ _ → IsIdentity identity) [ X.isIdentity ≡ Y.isIdentity ]
-      isIdentity = Prop.propIsIdentity X.isIdentity Y.isIdentity
+      isIdentity = X.propIsIdentity X.isIdentity Y.isIdentity
 
       U : ∀ {a : IsIdentity identity}
         → (λ _ → IsIdentity identity) [ X.isIdentity ≡ a ]
@@ -434,10 +463,13 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       eqUni : U isIdentity Y.univalent
       eqUni = helper Y.univalent
       done : x ≡ y
-      IsCategory.isAssociative (done i) = Prop.propIsAssociative X.isAssociative Y.isAssociative i
-      IsCategory.isIdentity    (done i) = isIdentity i
-      IsCategory.arrowsAreSets (done i) = Prop.propArrowIsSet X.arrowsAreSets Y.arrowsAreSets i
+      IsCategory.isPreCategory (done i)
+        = propIsPreCategory X.isPreCategory Y.isPreCategory i
       IsCategory.univalent     (done i) = eqUni i
+      -- IsCategory.isAssociative (done i) = Prop.propIsAssociative X.isAssociative Y.isAssociative i
+      -- IsCategory.isIdentity    (done i) = isIdentity i
+      -- IsCategory.arrowsAreSets (done i) = Prop.propArrowIsSet X.arrowsAreSets Y.arrowsAreSets i
+      -- IsCategory.univalent     (done i) = eqUni i
 
   propIsCategory : isProp (IsCategory ℂ)
   propIsCategory = done
@@ -486,19 +518,25 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 module Opposite {ℓa ℓb : Level} where
   module _ (ℂ : Category ℓa ℓb) where
     private
-      module ℂ = Category ℂ
-      opRaw : RawCategory ℓa ℓb
-      RawCategory.Object   opRaw = ℂ.Object
-      RawCategory.Arrow    opRaw = Function.flip ℂ.Arrow
-      RawCategory.identity opRaw = ℂ.identity
-      RawCategory._∘_      opRaw = Function.flip ℂ._∘_
+      module _ where
+        module ℂ = Category ℂ
+        opRaw : RawCategory ℓa ℓb
+        RawCategory.Object   opRaw = ℂ.Object
+        RawCategory.Arrow    opRaw = Function.flip ℂ.Arrow
+        RawCategory.identity opRaw = ℂ.identity
+        RawCategory._∘_      opRaw = Function.flip ℂ._∘_
 
-      open RawCategory opRaw
+        open RawCategory opRaw
 
-      isIdentity : IsIdentity identity
-      isIdentity = swap ℂ.isIdentity
+        isIdentity : IsIdentity identity
+        isIdentity = swap ℂ.isIdentity
 
-      open Univalence isIdentity
+        isPreCategory : IsPreCategory opRaw
+        IsPreCategory.isAssociative isPreCategory = sym ℂ.isAssociative
+        IsPreCategory.isIdentity isPreCategory = isIdentity
+        IsPreCategory.arrowsAreSets isPreCategory = ℂ.arrowsAreSets
+
+      open IsPreCategory isPreCategory
 
       module _ {A B : ℂ.Object} where
         open import Cat.Equivalence as Equivalence hiding (_≅_)
@@ -571,9 +609,7 @@ module Opposite {ℓa ℓb : Level} where
         univalent = Equiv≃.fromIso _ _ h
 
       isCategory : IsCategory opRaw
-      IsCategory.isAssociative isCategory = sym ℂ.isAssociative
-      IsCategory.isIdentity    isCategory = isIdentity
-      IsCategory.arrowsAreSets isCategory = ℂ.arrowsAreSets
+      IsCategory.isPreCategory isCategory = isPreCategory
       IsCategory.univalent     isCategory = univalent
 
     opposite : Category ℓa ℓb

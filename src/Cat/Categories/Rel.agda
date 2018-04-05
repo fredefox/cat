@@ -157,10 +157,12 @@ RawRel = record
   ; _∘_ = λ {A B C} S R → λ {( a , c ) → Σ[ b ∈ B ] ( (a , b) ∈ R × (b , c) ∈ S )}
   }
 
-RawIsCategoryRel : IsCategory RawRel
-RawIsCategoryRel = record
-  { isAssociative = funExt is-isAssociative
-  ; isIdentity = funExt ident-l , funExt ident-r
-  ; arrowsAreSets = {!!}
-  ; univalent = {!!}
-  }
+isPreCategory : IsPreCategory RawRel
+
+IsPreCategory.isAssociative isPreCategory = funExt is-isAssociative
+IsPreCategory.isIdentity    isPreCategory = funExt ident-l , funExt ident-r
+IsPreCategory.arrowsAreSets isPreCategory = {!!}
+
+Rel : PreCategory _ _
+PreCategory.raw Rel = RawRel
+PreCategory.isPreCategory Rel = isPreCategory
