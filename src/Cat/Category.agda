@@ -319,6 +319,14 @@ record PreCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     isPreCategory  : IsPreCategory raw
   open IsPreCategory isPreCategory public
 
+-- Definition 9.6.1 in [HoTT]
+record StrictCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
+  field
+    preCategory : PreCategory ℓa ℓb
+  open PreCategory preCategory
+  field
+    objectsAreSets : isSet Object
+
 record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
   field
     isPreCategory : IsPreCategory ℂ
