@@ -23,7 +23,8 @@ open import Cubical.NType
 open import Cubical.NType.Properties
   using
     ( lemPropF ; lemSig ;  lemSigP ; isSetIsProp
-    ; propPi ; propHasLevel ; setPi ; propSet)
+    ; propPi ; propPiImpl ; propHasLevel ; setPi ; propSet
+    ; propSig)
   public
 
 propIsContr : {ℓ : Level} → {A : Set ℓ} → isProp (isContr A)

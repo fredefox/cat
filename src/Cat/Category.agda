@@ -189,24 +189,16 @@ record IsPreCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (ls
     iso→epi×mono iso = iso→epi iso , iso→mono iso
 
   propIsAssociative : isProp IsAssociative
-  propIsAssociative x y i = arrowsAreSets _ _ x y i
+  propIsAssociative = propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl λ _ → arrowsAreSets _ _))))))
 
   propIsIdentity : ∀ {f : ∀ {A} → Arrow A A} → isProp (IsIdentity f)
-  propIsIdentity a b i
-    = arrowsAreSets _ _ (fst a) (fst b) i
-    , arrowsAreSets _ _ (snd a) (snd b) i
+  propIsIdentity = propPiImpl (λ _ → propPiImpl λ _ → propPiImpl (λ _ → propSig (arrowsAreSets _ _) λ _ → arrowsAreSets _ _))
 
   propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
-  propArrowIsSet a b i = isSetIsProp a b i
+  propArrowIsSet = propPiImpl λ _ → propPiImpl (λ _ → isSetIsProp)
 
   propIsInverseOf : ∀ {A B f g} → isProp (IsInverseOf {A} {B} f g)
-  propIsInverseOf x y = λ i →
-    let
-      h : fst x ≡ fst y
-      h = arrowsAreSets _ _ (fst x) (fst y)
-      hh : snd x ≡ snd y
-      hh = arrowsAreSets _ _ (snd x) (snd y)
-    in h i , hh i
+  propIsInverseOf = propSig (arrowsAreSets _ _) (λ _ → arrowsAreSets _ _)
 
   module _ {A B : Object} {f : Arrow A B} where
     isoIsProp : isProp (Isomorphism f)
