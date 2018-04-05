@@ -35,7 +35,7 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
 
     module _ (F : Functor ℂ 𝔻) where
       center : Σ[ G ∈ Object ] (F ≅ G)
-      center = F , id-to-iso F F refl
+      center = F , idToIso F F refl
 
       open Σ center renaming (snd to isoF)
 
@@ -175,7 +175,7 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
       re-ve : (x : A ≡ B) → reverse (obverse x) ≡ x
       re-ve = {!!}
 
-      done : isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
+      done : isEquiv (A ≡ B) (A ≅ B) (idToIso A B)
       done = {!gradLemma obverse reverse ve-re re-ve!}
 
     univalent : Univalent

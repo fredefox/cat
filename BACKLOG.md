@@ -6,7 +6,7 @@ Prove postulates in `Cat.Wishlist`:
 
 Prove that these two formulations of univalence are equivalent:
 
-    ∀ A B → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
+    ∀ A B → isEquiv (A ≡ B) (A ≅ B) (idToIso A B)
     ∀ A   → isContr (Σ[ X ∈ Object ] A ≅ X)
 
 Prove univalence for the category of

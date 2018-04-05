@@ -322,14 +322,14 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         f i = f0 i , {!f1 i!}
       prp : isSet (ℂ.Object × ℂ.Arrow Y A × ℂ.Arrow Y B)
       prp = setSig {sA = {!!}} {(λ _ → setSig {sA = ℂ.arrowsAreSets} {λ _ → ℂ.arrowsAreSets})}
-      ve-re : (p : (X , x) ≡ (Y , y)) → f (id-to-iso _ _ p) ≡ p
+      ve-re : (p : (X , x) ≡ (Y , y)) → f (idToIso _ _ p) ≡ p
       -- ve-re p i j = {!ℂ.arrowsAreSets!} , ℂ.arrowsAreSets _ _ (let k = fst (snd (p i)) in {!!}) {!!} {!!} {!!} , {!!}
       ve-re p = let k = prp {!!} {!!} {!!} {!p!} in {!!}
-      re-ve : (iso : (X , x) ≅ (Y , y)) → id-to-iso _ _ (f iso) ≡ iso
+      re-ve : (iso : (X , x) ≅ (Y , y)) → idToIso _ _ (f iso) ≡ iso
       re-ve = {!!}
-      iso : E.Isomorphism (id-to-iso (X , x) (Y , y))
+      iso : E.Isomorphism (idToIso (X , x) (Y , y))
       iso = f , record { verso-recto = funExt ve-re ; recto-verso = funExt re-ve }
-      res : isEquiv ((X , x) ≡ (Y , y)) ((X , x) ≅ (Y , y)) (id-to-iso (X , x) (Y , y))
+      res : isEquiv ((X , x) ≡ (Y , y)) ((X , x) ≅ (Y , y)) (idToIso (X , x) (Y , y))
       res = Equiv≃.fromIso _ _ iso
 
     isCat : IsCategory raw
