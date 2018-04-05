@@ -52,7 +52,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       private
         module MI = M.IsMonad m
       forthIsMonad : K.IsMonad (forthRaw raw)
-      K.IsMonad.isIdentity     forthIsMonad = proj₂ MI.isInverse
+      K.IsMonad.isIdentity     forthIsMonad = snd MI.isInverse
       K.IsMonad.isNatural      forthIsMonad = MI.isNatural
       K.IsMonad.isDistributive forthIsMonad = MI.isDistributive
 
@@ -83,11 +83,11 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         where
         inv-l = begin
           joinT X ∘ pureT (R.omap X) ≡⟨⟩
-          join ∘ pure                 ≡⟨ proj₁ isInverse ⟩
+          join ∘ pure                 ≡⟨ fst isInverse ⟩
           identity                    ∎
         inv-r = begin
           joinT X ∘ R.fmap (pureT X) ≡⟨⟩
-          join ∘ fmap pure            ≡⟨ proj₂ isInverse ⟩
+          join ∘ fmap pure            ≡⟨ snd isInverse ⟩
           identity                    ∎
 
     back : K.Monad → M.Monad
@@ -160,7 +160,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
              Rfmap (f >>> pureT B) >>> joinT B     ≡⟨⟩
           Rfmap (f >>> pureT B) >>> joinT B        ≡⟨ cong (λ φ → φ >>> joinT B) R.isDistributive ⟩
           Rfmap f >>> Rfmap (pureT B) >>> joinT B  ≡⟨ ℂ.isAssociative ⟩
-          joinT B ∘ Rfmap (pureT B) ∘ Rfmap f      ≡⟨ cong (λ φ → φ ∘ Rfmap f) (proj₂ isInverse) ⟩
+          joinT B ∘ Rfmap (pureT B) ∘ Rfmap f      ≡⟨ cong (λ φ → φ ∘ Rfmap f) (snd isInverse) ⟩
           identity ∘ Rfmap f                       ≡⟨ ℂ.leftIdentity ⟩
           Rfmap f                                  ∎
           )

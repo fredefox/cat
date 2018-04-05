@@ -3,10 +3,11 @@ module Cat.Prelude where
 
 open import Agda.Primitive public
 -- FIXME Use:
--- open import Agda.Builtin.Sigma public
+open import Agda.Builtin.Sigma public
 -- Rather than
 open import Data.Product public
   renaming (∃! to ∃!≈)
+  using (_×_ ; Σ-syntax ; swap)
 
 -- TODO Import Data.Function under appropriate names.
 
@@ -46,7 +47,7 @@ module _ (ℓ : Level) where
 -- * Utilities --
 -----------------
 
--- | Unique existensials.
+-- | Unique existentials.
 ∃! : ∀ {a b} {A : Set a}
   → (A → Set b) → Set (a ⊔ b)
 ∃! = ∃!≈ _≡_
@@ -57,15 +58,15 @@ module _ (ℓ : Level) where
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
 module _ {ℓa ℓb} {A : Set ℓa} {P : A → Set ℓb} (f g : ∃! P) where
-  open Σ (proj₂ f) renaming (proj₂ to u)
+  open Σ (snd f) renaming (snd to u)
 
-  ∃-unique : proj₁ f ≡ proj₁ g
-  ∃-unique = u (proj₁ (proj₂ g))
+  ∃-unique : fst f ≡ fst g
+  ∃-unique = u (fst (snd g))
 
 module _ {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb} {a b : Σ A B}
-  (proj₁≡ : (λ _ → A)            [ proj₁ a ≡ proj₁ b ])
-  (proj₂≡ : (λ i → B (proj₁≡ i)) [ proj₂ a ≡ proj₂ b ]) where
+  (fst≡ : (λ _ → A)            [ fst a ≡ fst b ])
+  (snd≡ : (λ i → B (fst≡ i)) [ snd a ≡ snd b ]) where
 
   Σ≡ : a ≡ b
-  proj₁ (Σ≡ i) = proj₁≡ i
-  proj₂ (Σ≡ i) = proj₂≡ i
+  fst (Σ≡ i) = fst≡ i
+  snd (Σ≡ i) = snd≡ i

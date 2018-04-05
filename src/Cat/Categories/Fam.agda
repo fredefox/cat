@@ -8,12 +8,12 @@ open import Cat.Category
 
 module _ (ℓa ℓb : Level) where
   private
-    Object = Σ[ hA ∈ hSet ℓa ] (proj₁ hA → hSet ℓb)
+    Object = Σ[ hA ∈ hSet ℓa ] (fst hA → hSet ℓb)
     Arr : Object → Object → Set (ℓa ⊔ ℓb)
-    Arr ((A , _) , B) ((A' , _) , B') = Σ[ f ∈ (A → A') ] ({x : A} → proj₁ (B x) → proj₁ (B' (f x)))
+    Arr ((A , _) , B) ((A' , _) , B') = Σ[ f ∈ (A → A') ] ({x : A} → fst (B x) → fst (B' (f x)))
     identity : {A : Object} → Arr A A
-    proj₁ identity = λ x → x
-    proj₂ identity = λ b → b
+    fst identity = λ x → x
+    snd identity = λ b → b
     _∘_ : {a b c : Object} → Arr b c → Arr a b → Arr a c
     (g , g') ∘ (f , f') = g Function.∘ f , g' Function.∘ f'
 
@@ -47,11 +47,11 @@ module _ (ℓa ℓb : Level) where
               {sA = setPi λ _ → hB}
               {sB = λ f →
                 let
-                  helpr : isSet ((a : A) → proj₁ (famA a) → proj₁ (famB (f a)))
-                  helpr = setPi λ a → setPi λ _ → proj₂ (famB (f a))
+                  helpr : isSet ((a : A) → fst (famA a) → fst (famB (f a)))
+                  helpr = setPi λ a → setPi λ _ → snd (famB (f a))
                   -- It's almost like above, but where the first argument is
                   -- implicit.
-                  res : isSet ({a : A} → proj₁ (famA a) → proj₁ (famB (f a)))
+                  res : isSet ({a : A} → fst (famA a) → fst (famB (f a)))
                   res = {!!}
                 in res
               }

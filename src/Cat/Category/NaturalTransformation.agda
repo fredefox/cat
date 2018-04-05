@@ -58,7 +58,7 @@ module _ (F G : Functor ℂ 𝔻) where
   propIsNatural θ x y i {A} {B} f = 𝔻.arrowsAreSets _ _ (x f) (y f) i
 
   NaturalTransformation≡ : {α β : NaturalTransformation}
-    → (eq₁ : α .proj₁ ≡ β .proj₁)
+    → (eq₁ : α .fst ≡ β .fst)
     → α ≡ β
   NaturalTransformation≡ eq = lemSig propIsNatural _ _ eq
 
@@ -88,8 +88,8 @@ module _ {F G H : Functor ℂ 𝔻} where
   T[ θ ∘ η ] C = 𝔻 [ θ C ∘ η C ]
 
   NT[_∘_] : NaturalTransformation G H → NaturalTransformation F G → NaturalTransformation F H
-  proj₁ NT[ (θ , _) ∘ (η , _) ] = T[ θ ∘ η ]
-  proj₂ NT[ (θ , θNat) ∘ (η , ηNat) ] {A} {B} f = begin
+  fst NT[ (θ , _) ∘ (η , _) ] = T[ θ ∘ η ]
+  snd NT[ (θ , θNat) ∘ (η , ηNat) ] {A} {B} f = begin
     𝔻 [ T[ θ ∘ η ] B ∘ F.fmap f ]     ≡⟨⟩
     𝔻 [ 𝔻 [ θ B ∘ η B ] ∘ F.fmap f ] ≡⟨ sym 𝔻.isAssociative ⟩
     𝔻 [ θ B ∘ 𝔻 [ η B ∘ F.fmap f ] ] ≡⟨ cong (λ φ → 𝔻 [ θ B ∘ φ ]) (ηNat f) ⟩

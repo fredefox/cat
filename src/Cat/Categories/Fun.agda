@@ -29,16 +29,16 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
       center : Σ[ G ∈ Object ] (F ≅ G)
       center = F , id-to-iso F F refl
 
-      open Σ center renaming (proj₂ to isoF)
+      open Σ center renaming (snd to isoF)
 
       module _ (cG : Σ[ G ∈ Object ] (F ≅ G)) where
-        open Σ cG renaming (proj₁ to G ; proj₂ to isoG)
+        open Σ cG renaming (fst to G ; snd to isoG)
         module G = Functor G
-        open Σ isoG   renaming (proj₁ to θNT ; proj₂ to invθNT)
-        open Σ invθNT renaming (proj₁ to ηNT ; proj₂ to areInv)
-        open Σ θNT    renaming (proj₁ to θ   ; proj₂ to θN)
-        open Σ ηNT    renaming (proj₁ to η   ; proj₂ to ηN)
-        open Σ areInv renaming (proj₁ to ve-re ; proj₂ to re-ve)
+        open Σ isoG   renaming (fst to θNT ; snd to invθNT)
+        open Σ invθNT renaming (fst to ηNT ; snd to areInv)
+        open Σ θNT    renaming (fst to θ   ; snd to θN)
+        open Σ ηNT    renaming (fst to η   ; snd to ηN)
+        open Σ areInv renaming (fst to ve-re ; snd to re-ve)
 
         -- f ~ Transformation G G
         -- f : (X : ℂ.Object) → 𝔻 [ G.omap X , G.omap X ]

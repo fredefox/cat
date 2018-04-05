@@ -165,12 +165,12 @@ record IsMonad (raw : RawMonad) : Set ℓ where
       R.fmap f  ∘ join        ∎
 
   pureNT : NaturalTransformation R⁰ R
-  proj₁ pureNT = pureT
-  proj₂ pureNT = pureN
+  fst pureNT = pureT
+  snd pureNT = pureN
 
   joinNT : NaturalTransformation R² R
-  proj₁ joinNT = joinT
-  proj₂ joinNT = joinN
+  fst joinNT = joinT
+  snd joinNT = joinN
 
   isNaturalForeign : IsNaturalForeign
   isNaturalForeign = begin

@@ -25,21 +25,21 @@ module _ {ℓa ℓb : Level} where
     private
       module T = Functor T
     Type : (Γ : ℂ.Object) → Set ℓa
-    Type Γ = proj₁ (proj₁ (T.omap Γ))
+    Type Γ = fst (fst (T.omap Γ))
 
     module _ {Γ : ℂ.Object} {A : Type Γ} where
 
       -- module _ {A B : Object ℂ} {γ : ℂ [ A , B ]} where
-      --   k : Σ (proj₁ (omap T B) → proj₁ (omap T A))
+      --   k : Σ (fst (omap T B) → fst (omap T A))
       --     (λ f →
-      --     {x : proj₁ (omap T B)} →
-      --     proj₂ (omap T B) x → proj₂ (omap T A) (f x))
+      --     {x : fst (omap T B)} →
+      --     snd (omap T B) x → snd (omap T A) (f x))
       --   k = T.fmap γ
-      --   k₁ : proj₁ (omap T B) → proj₁ (omap T A)
-      --   k₁ = proj₁ k
-      --   k₂ : ({x : proj₁ (omap T B)} →
-      --     proj₂ (omap T B) x → proj₂ (omap T A) (k₁ x))
-      --   k₂ = proj₂ k
+      --   k₁ : fst (omap T B) → fst (omap T A)
+      --   k₁ = fst k
+      --   k₂ : ({x : fst (omap T B)} →
+      --     snd (omap T B) x → snd (omap T A) (k₁ x))
+      --   k₂ = snd k
 
       record ContextComprehension : Set (ℓa ⊔ ℓb) where
         field

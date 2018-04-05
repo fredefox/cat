@@ -29,12 +29,8 @@
 module Cat.Category where
 
 open import Cat.Prelude
-  renaming
-  ( proj₁ to fst
-  ; proj₂ to snd
-  )
 
-import      Function
+import Function
 
 ------------------
 -- * Categories --
@@ -136,10 +132,10 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
           -- It may be that we need something weaker than this, in that there
           -- may be some other lemmas available to us.
           -- For instance, `need0` should be available to us when we prove `need1`.
-          (need0 : (s : Σ Object (A ≅_)) → (open Σ s renaming (proj₁ to Y) using ()) → A ≡ Y)
+          (need0 : (s : Σ Object (A ≅_)) → (open Σ s renaming (fst to Y) using ()) → A ≡ Y)
           (need2 : (iso : A ≅ A)
-            → (open Σ iso   renaming (proj₁ to f  ; proj₂ to iso-f))
-            → (open Σ iso-f renaming (proj₁ to f~ ; proj₂ to areInv))
+            → (open Σ iso   renaming (fst to f  ; snd to iso-f))
+            → (open Σ iso-f renaming (fst to f~ ; snd to areInv))
             → (identity , identity) ≡ (f , f~)
           ) where
 
@@ -147,7 +143,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
         c = A , idIso A
 
         module _ (y : Σ Object (A ≅_)) where
-          open Σ y renaming (proj₁ to Y ; proj₂ to isoY)
+          open Σ y renaming (fst to Y ; snd to isoY)
           q : A ≡ Y
           q = need0 y
 
@@ -163,8 +159,8 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
             d  : D A refl
             d A≅Y i = a0 i , a1 i , a2 i
               where
-              open Σ A≅Y   renaming (proj₁ to f  ; proj₂ to iso-f)
-              open Σ iso-f renaming (proj₁ to f~ ; proj₂ to areInv)
+              open Σ A≅Y   renaming (fst to f  ; snd to iso-f)
+              open Σ iso-f renaming (fst to f~ ; snd to areInv)
               aaa : (identity , identity) ≡ (f , f~)
               aaa = need2 A≅Y
               a0 : identity ≡ f
@@ -309,8 +305,8 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
     propIsTerminal T x y i {X} = res X i
       where
       module _ (X : Object) where
-        open Σ (x {X}) renaming (proj₁ to fx ; proj₂ to cx)
-        open Σ (y {X}) renaming (proj₁ to fy ; proj₂ to cy)
+        open Σ (x {X}) renaming (fst to fx ; snd to cx)
+        open Σ (y {X}) renaming (fst to fy ; snd to cy)
         fp : fx ≡ fy
         fp = cx fy
         prop : (x : Arrow X T) → isProp (∀ f → x ≡ f)
@@ -328,10 +324,10 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
     propTerminal : isProp Terminal
     propTerminal Xt Yt = res
       where
-      open Σ Xt renaming (proj₁ to X ; proj₂ to Xit)
-      open Σ Yt renaming (proj₁ to Y ; proj₂ to Yit)
-      open Σ (Xit {Y}) renaming (proj₁ to Y→X) using ()
-      open Σ (Yit {X}) renaming (proj₁ to X→Y) using ()
+      open Σ Xt renaming (fst to X ; snd to Xit)
+      open Σ Yt renaming (fst to Y ; snd to Yit)
+      open Σ (Xit {Y}) renaming (fst to Y→X) using ()
+      open Σ (Yit {X}) renaming (fst to X→Y) using ()
       open import Cat.Equivalence hiding (_≅_)
       -- Need to show `left` and `right`, what we know is that the arrows are
       -- unique. Well, I know that if I compose these two arrows they must give
@@ -361,8 +357,8 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
     propIsInitial I x y i {X} = res X i
       where
       module _ (X : Object) where
-        open Σ (x {X}) renaming (proj₁ to fx ; proj₂ to cx)
-        open Σ (y {X}) renaming (proj₁ to fy ; proj₂ to cy)
+        open Σ (x {X}) renaming (fst to fx ; snd to cx)
+        open Σ (y {X}) renaming (fst to fy ; snd to cy)
         fp : fx ≡ fy
         fp = cx fy
         prop : (x : Arrow I X) → isProp (∀ f → x ≡ f)
@@ -375,10 +371,10 @@ record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc 
     propInitial : isProp Initial
     propInitial Xi Yi = res
       where
-      open Σ Xi renaming (proj₁ to X ; proj₂ to Xii)
-      open Σ Yi renaming (proj₁ to Y ; proj₂ to Yii)
-      open Σ (Xii {Y}) renaming (proj₁ to Y→X) using ()
-      open Σ (Yii {X}) renaming (proj₁ to X→Y) using ()
+      open Σ Xi renaming (fst to X ; snd to Xii)
+      open Σ Yi renaming (fst to Y ; snd to Yii)
+      open Σ (Xii {Y}) renaming (fst to Y→X) using ()
+      open Σ (Yii {X}) renaming (fst to X→Y) using ()
       open import Cat.Equivalence hiding (_≅_)
       -- Need to show `left` and `right`, what we know is that the arrows are
       -- unique. Well, I know that if I compose these two arrows they must give
@@ -508,7 +504,7 @@ module Opposite {ℓa ℓb : Level} where
         open import Cat.Equivalence as Equivalence hiding (_≅_)
         k : Equivalence.Isomorphism (ℂ.id-to-iso A B)
         k = Equiv≃.toIso _ _ ℂ.univalent
-        open Σ k renaming (proj₁ to f ; proj₂ to inv)
+        open Σ k renaming (fst to f ; snd to inv)
         open AreInverses inv
 
         _⊙_ = Function._∘_
@@ -531,12 +527,12 @@ module Opposite {ℓa ℓb : Level} where
           where
           l = id-to-iso A B p
           r = flopDem (ℂ.id-to-iso A B p)
-          open Σ l renaming (proj₁ to l-obv ; proj₂ to l-areInv)
-          open Σ l-areInv renaming (proj₁ to l-invs ; proj₂ to l-iso)
-          open Σ l-iso renaming (proj₁ to l-l ; proj₂ to l-r)
-          open Σ r renaming (proj₁ to r-obv ; proj₂ to r-areInv)
-          open Σ r-areInv renaming (proj₁ to r-invs ; proj₂ to r-iso)
-          open Σ r-iso renaming (proj₁ to r-l ; proj₂ to r-r)
+          open Σ l renaming (fst to l-obv ; snd to l-areInv)
+          open Σ l-areInv renaming (fst to l-invs ; snd to l-iso)
+          open Σ l-iso renaming (fst to l-l ; snd to l-r)
+          open Σ r renaming (fst to r-obv ; snd to r-areInv)
+          open Σ r-areInv renaming (fst to r-invs ; snd to r-iso)
+          open Σ r-iso renaming (fst to r-l ; snd to r-r)
           l-obv≡r-obv : l-obv ≡ r-obv
           l-obv≡r-obv = refl
           l-invs≡r-invs : l-invs ≡ r-invs

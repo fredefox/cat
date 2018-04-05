@@ -3,7 +3,7 @@
 
 module Cat.Categories.Cat where
 
-open import Cat.Prelude renaming (proj₁ to fst ; proj₂ to snd)
+open import Cat.Prelude renaming (fst to fst ; snd to snd)
 
 open import Cat.Category
 open import Cat.Category.Functor
@@ -83,16 +83,16 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
   object : Category ℓ ℓ'
   Category.raw object = rawProduct
 
-  proj₁ : Functor object ℂ
-  proj₁ = record
+  fstF : Functor object ℂ
+  fstF = record
     { raw = record
       { omap = fst ; fmap = fst }
     ; isFunctor = record
       { isIdentity = refl ; isDistributive = refl }
     }
 
-  proj₂ : Functor object 𝔻
-  proj₂ = record
+  sndF : Functor object 𝔻
+  sndF = record
     { raw = record
       { omap = snd ; fmap = snd }
     ; isFunctor = record
@@ -116,19 +116,19 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
           open module x₁ = Functor x₁
           open module x₂ = Functor x₂
 
-      isUniqL : F[ proj₁ ∘ x ] ≡ x₁
+      isUniqL : F[ fstF ∘ x ] ≡ x₁
       isUniqL = Functor≡ refl
 
-      isUniqR : F[ proj₂ ∘ x ] ≡ x₂
+      isUniqR : F[ sndF ∘ x ] ≡ x₂
       isUniqR = Functor≡ refl
 
-      isUniq : F[ proj₁ ∘ x ] ≡ x₁ × F[ proj₂ ∘ x ] ≡ x₂
+      isUniq : F[ fstF ∘ x ] ≡ x₁ × F[ sndF ∘ x ] ≡ x₂
       isUniq = isUniqL , isUniqR
 
-    isProduct : ∃![ x ] (F[ proj₁ ∘ x ] ≡ x₁ × F[ proj₂ ∘ x ] ≡ x₂)
+    isProduct : ∃![ x ] (F[ fstF ∘ x ] ≡ x₁ × F[ sndF ∘ x ] ≡ x₂)
     isProduct = x , isUniq , uq
       where
-      module _ {y : Functor X object} (eq : F[ proj₁ ∘ y ] ≡ x₁ × F[ proj₂ ∘ y ] ≡ x₂) where
+      module _ {y : Functor X object} (eq : F[ fstF ∘ y ] ≡ x₁ × F[ sndF ∘ y ] ≡ x₂) where
         omapEq : Functor.omap x ≡ Functor.omap y
         omapEq = {!!}
         -- fmapEq : (λ i → {!{A B : ?} → Arrow A B → 𝔻 [ ? A , ? B ]!}) [ Functor.fmap x ≡ Functor.fmap y ]
@@ -148,8 +148,8 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
 
       rawProduct : RawProduct Catℓ ℂ 𝔻
       RawProduct.object rawProduct = P.object
-      RawProduct.proj₁  rawProduct = P.proj₁
-      RawProduct.proj₂  rawProduct = P.proj₂
+      RawProduct.fst  rawProduct = P.fstF
+      RawProduct.snd  rawProduct = P.sndF
 
       isProduct : IsProduct Catℓ _ _ rawProduct
       IsProduct.ump isProduct = P.isProduct
@@ -182,8 +182,8 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
   object = Fun
 
   module _ {dom cod : Functor ℂ 𝔻 × ℂ.Object} where
-    open Σ dom renaming (proj₁ to F ; proj₂ to A)
-    open Σ cod renaming (proj₁ to G ; proj₂ to B)
+    open Σ dom renaming (fst to F ; snd to A)
+    open Σ cod renaming (fst to G ; snd to B)
     private
       module F = Functor F
       module G = Functor G
@@ -200,7 +200,7 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
   open CatProduct renaming (object to _⊗_) using ()
 
   module _ {c : Functor ℂ 𝔻 × ℂ.Object} where
-    open Σ c renaming (proj₁ to F ; proj₂ to C)
+    open Σ c renaming (fst to F ; snd to C)
 
     ident : fmap {c} {c} (identityNT F , ℂ.identity {A = snd c}) ≡ 𝔻.identity
     ident = begin
@@ -214,9 +214,9 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
         module F = Functor F
 
   module _ {F×A G×B H×C : Functor ℂ 𝔻 × ℂ.Object} where
-    open Σ F×A renaming (proj₁ to F ; proj₂ to A)
-    open Σ G×B renaming (proj₁ to G ; proj₂ to B)
-    open Σ H×C renaming (proj₁ to H ; proj₂ to C)
+    open Σ F×A renaming (fst to F ; snd to A)
+    open Σ G×B renaming (fst to G ; snd to B)
+    open Σ H×C renaming (fst to H ; snd to C)
     private
       module F = Functor F
       module G = Functor G
@@ -225,14 +225,14 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
     module _
       {θ×f : NaturalTransformation F G × ℂ [ A , B ]}
       {η×g : NaturalTransformation G H × ℂ [ B , C ]} where
-      open Σ θ×f renaming (proj₁ to θNT ; proj₂ to f)
-      open Σ θNT renaming (proj₁ to θ   ; proj₂ to θNat)
-      open Σ η×g renaming (proj₁ to ηNT ; proj₂ to g)
-      open Σ ηNT renaming (proj₁ to η   ; proj₂ to ηNat)
+      open Σ θ×f renaming (fst to θNT ; snd to f)
+      open Σ θNT renaming (fst to θ   ; snd to θNat)
+      open Σ η×g renaming (fst to ηNT ; snd to g)
+      open Σ ηNT renaming (fst to η   ; snd to ηNat)
       private
         ηθNT : NaturalTransformation F H
         ηθNT = NT[_∘_] {F} {G} {H} ηNT θNT
-      open Σ ηθNT renaming (proj₁ to ηθ   ; proj₂ to ηθNat)
+      open Σ ηθNT renaming (fst to ηθ   ; snd to ηθNat)
 
       isDistributive :
           𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ F.fmap ( ℂ [ g ∘ f ] ) ]

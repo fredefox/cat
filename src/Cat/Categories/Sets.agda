@@ -2,8 +2,7 @@
 {-# OPTIONS --allow-unsolved-metas --cubical --caching #-}
 module Cat.Categories.Sets where
 
-open import Cat.Prelude hiding (_≃_)
-import Data.Product
+open import Cat.Prelude as P hiding (_≃_)
 
 open import Function using (_∘_ ; _∘′_)
 
@@ -38,8 +37,8 @@ module _ (ℓ : Level) where
     open RawCategory SetsRaw hiding (_∘_)
 
     isIdentity : IsIdentity Function.id
-    proj₁ isIdentity = funExt λ _ → refl
-    proj₂ isIdentity = funExt λ _ → refl
+    fst isIdentity = funExt λ _ → refl
+    snd isIdentity = funExt λ _ → refl
 
     open Univalence (λ {A} {B} {f} → isIdentity {A} {B} {f})
 
@@ -48,14 +47,14 @@ module _ (ℓ : Level) where
 
     isIso = Eqv.Isomorphism
     module _ {hA hB : hSet ℓ} where
-      open Σ hA renaming (proj₁ to A ; proj₂ to sA)
-      open Σ hB renaming (proj₁ to B ; proj₂ to sB)
+      open Σ hA renaming (fst to A ; snd to sA)
+      open Σ hB renaming (fst to B ; snd to sB)
       lem1 : (f : A → B) → isSet A → isSet B → isProp (isIso f)
       lem1 f sA sB = res
         where
         module _ (x y : isIso f) where
-          module x = Σ x renaming (proj₁ to inverse ; proj₂ to areInverses)
-          module y = Σ y renaming (proj₁ to inverse ; proj₂ to areInverses)
+          module x = Σ x renaming (fst to inverse ; snd to areInverses)
+          module y = Σ y renaming (fst to inverse ; snd to areInverses)
           module xA = AreInverses x.areInverses
           module yA = AreInverses y.areInverses
           -- I had a lot of difficulty using the corresponding proof where
@@ -88,24 +87,24 @@ module _ (ℓ : Level) where
           res i = 1eq i , 2eq i
     module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
       lem2 : ((x : A) → isProp (P x)) → (p q : Σ A P)
-        → (p ≡ q) ≃ (proj₁ p ≡ proj₁ q)
+        → (p ≡ q) ≃ (fst p ≡ fst q)
       lem2 pA p q = fromIsomorphism iso
         where
-        f : ∀ {p q} → p ≡ q → proj₁ p ≡ proj₁ q
-        f e i = proj₁ (e i)
-        g : ∀ {p q} → proj₁ p ≡ proj₁ q → p ≡ q
+        f : ∀ {p q} → p ≡ q → fst p ≡ fst q
+        f e i = fst (e i)
+        g : ∀ {p q} → fst p ≡ fst q → p ≡ q
         g {p} {q} = lemSig pA p q
         ve-re : (e : p ≡ q) → (g ∘ f) e ≡ e
         ve-re = pathJ (\ q (e : p ≡ q) → (g ∘ f) e ≡ e)
-                  (\ i j → p .proj₁ , propSet (pA (p .proj₁)) (p .proj₂) (p .proj₂) (λ i → (g {p} {p} ∘ f) (λ i₁ → p) i .proj₂) (λ i → p .proj₂) i j ) q
-        re-ve : (e : proj₁ p ≡ proj₁ q) → (f {p} {q} ∘ g {p} {q}) e ≡ e
+                  (\ i j → p .fst , propSet (pA (p .fst)) (p .snd) (p .snd) (λ i → (g {p} {p} ∘ f) (λ i₁ → p) i .snd) (λ i → p .snd) i j ) q
+        re-ve : (e : fst p ≡ fst q) → (f {p} {q} ∘ g {p} {q}) e ≡ e
         re-ve e = refl
         inv : AreInverses (f {p} {q}) (g {p} {q})
         inv = record
           { verso-recto = funExt ve-re
           ; recto-verso = funExt re-ve
           }
-        iso : (p ≡ q) Eqv.≅ (proj₁ p ≡ proj₁ q)
+        iso : (p ≡ q) Eqv.≅ (fst p ≡ fst q)
         iso = f , g , inv
 
       lem3 : ∀ {ℓc} {Q : A → Set (ℓc ⊔ ℓb)}
@@ -119,37 +118,37 @@ module _ (ℓ : Level) where
           where
           k : Eqv.Isomorphism _
           k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
-          open Σ k renaming (proj₁ to g')
+          open Σ k renaming (fst to g')
         ve-re : (x : Σ A P) → (g ∘ f) x ≡ x
-        ve-re x i = proj₁ x , eq i
+        ve-re x i = fst x , eq i
           where
-          eq : proj₂ ((g ∘ f) x) ≡ proj₂ x
+          eq : snd ((g ∘ f) x) ≡ snd x
           eq = begin
-            proj₂ ((g ∘ f) x) ≡⟨⟩
-            proj₂ (g (f (a , pA))) ≡⟨⟩
+            snd ((g ∘ f) x) ≡⟨⟩
+            snd (g (f (a , pA))) ≡⟨⟩
             g' (_≃_.eqv (eA a) pA) ≡⟨ lem ⟩
             pA ∎
             where
-            open Σ x renaming (proj₁ to a ; proj₂ to pA)
+            open Σ x renaming (fst to a ; snd to pA)
             k : Eqv.Isomorphism _
             k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
-            open Σ k renaming (proj₁ to g' ; proj₂ to inv)
+            open Σ k renaming (fst to g' ; snd to inv)
             module A = AreInverses inv
             -- anti-funExt
             lem : (g' ∘ (_≃_.eqv (eA a))) pA ≡ pA
             lem i = A.verso-recto i pA
         re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
-        re-ve x i = proj₁ x , eq i
+        re-ve x i = fst x , eq i
           where
-          open Σ x renaming (proj₁ to a ; proj₂ to qA)
+          open Σ x renaming (fst to a ; snd to qA)
           eq = begin
-            proj₂ ((f ∘ g) x)                 ≡⟨⟩
+            snd ((f ∘ g) x)                 ≡⟨⟩
             _≃_.eqv (eA a) (g' qA)            ≡⟨ (λ i → A.recto-verso i qA) ⟩
             qA                                ∎
             where
             k : Eqv.Isomorphism _
             k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
-            open Σ k renaming (proj₁ to g' ; proj₂ to inv)
+            open Σ k renaming (fst to g' ; snd to inv)
             module A = AreInverses inv
         inv : AreInverses f g
         inv = record
@@ -183,8 +182,8 @@ module _ (ℓ : Level) where
         in fromIsomorphism iso
 
     module _ {hA hB : Object} where
-      open Σ hA renaming (proj₁ to A ; proj₂ to sA)
-      open Σ hB renaming (proj₁ to B ; proj₂ to sB)
+      open Σ hA renaming (fst to A ; snd to sA)
+      open Σ hB renaming (fst to B ; snd to sB)
 
       -- lem3 and the equivalence from lem4
       step0 : Σ (A → B) isIso ≃ Σ (A → B) (isEquiv A B)
@@ -236,7 +235,7 @@ module _ (ℓ : Level) where
       univ≃ = trivial? ⊙ step0 ⊙ step1 ⊙ step2
 
     module _ (hA : Object) where
-      open Σ hA renaming (proj₁ to A)
+      open Σ hA renaming (fst to A)
 
       eq1 : (Σ[ hB ∈ Object ] hA ≅ hB) ≡ (Σ[ hB ∈ Object ] hA ≡ hB)
       eq1 = ua (lem3 (\ hB → univ≃))
@@ -245,7 +244,7 @@ module _ (ℓ : Level) where
       univalent[Contr] = subst {P = isContr} (sym eq1) tres
         where
         module _ (y : Σ[ hB ∈ Object ] hA ≡ hB) where
-          open Σ y renaming (proj₁ to hB ; proj₂ to hA≡hB)
+          open Σ y renaming (fst to hB ; snd to hA≡hB)
           qres : (hA , refl) ≡ (hB , hA≡hB)
           qres = contrSingl hA≡hB
 
@@ -273,8 +272,8 @@ module _ {ℓ : Level} where
     open import Cubical.Sigma
 
     module _ (hA hB : Object) where
-      open Σ hA renaming (proj₁ to A ; proj₂ to sA)
-      open Σ hB renaming (proj₁ to B ; proj₂ to sB)
+      open Σ hA renaming (fst to A ; snd to sA)
+      open Σ hB renaming (fst to B ; snd to sB)
 
       private
         productObject : Object
@@ -285,30 +284,30 @@ module _ {ℓ : Level} where
           _&&&_ x = f x , g x
 
         module _ (hX : Object) where
-          open Σ hX renaming (proj₁ to X)
+          open Σ hX renaming (fst to X)
           module _ (f : X → A ) (g : X → B) where
-            ump : proj₁ Function.∘′ (f &&& g) ≡ f × proj₂ Function.∘′ (f &&& g) ≡ g
-            proj₁ ump = refl
-            proj₂ ump = refl
+            ump : fst Function.∘′ (f &&& g) ≡ f × snd Function.∘′ (f &&& g) ≡ g
+            fst ump = refl
+            snd ump = refl
 
         rawProduct : RawProduct 𝓢 hA hB
         RawProduct.object rawProduct = productObject
-        RawProduct.proj₁  rawProduct = Data.Product.proj₁
-        RawProduct.proj₂  rawProduct = Data.Product.proj₂
+        RawProduct.fst    rawProduct = fst
+        RawProduct.snd    rawProduct = snd
 
         isProduct : IsProduct 𝓢 _ _ rawProduct
         IsProduct.ump isProduct {X = hX} f g
           = f &&& g , ump hX f g , λ eq → funExt (umpUniq eq)
           where
-          open Σ hX renaming (proj₁ to X) using ()
-          module _ {y : X → A × B} (eq : proj₁ Function.∘′ y ≡ f × proj₂ Function.∘′ y ≡ g) (x : X) where
-            p1 : proj₁ ((f &&& g) x) ≡ proj₁ (y x)
+          open Σ hX renaming (fst to X) using ()
+          module _ {y : X → A × B} (eq : fst Function.∘′ y ≡ f × snd Function.∘′ y ≡ g) (x : X) where
+            p1 : fst ((f &&& g) x) ≡ fst (y x)
             p1 = begin
-              proj₁ ((f &&& g) x) ≡⟨⟩
-              f x ≡⟨ (λ i → sym (proj₁ eq) i x) ⟩
-              proj₁ (y x) ∎
-            p2 : proj₂ ((f &&& g) x) ≡ proj₂ (y x)
-            p2 = λ i → sym (proj₂ eq) i x
+              fst ((f &&& g) x) ≡⟨⟩
+              f x ≡⟨ (λ i → sym (fst eq) i x) ⟩
+              fst (y x) ∎
+            p2 : snd ((f &&& g) x) ≡ snd (y x)
+            p2 = λ i → sym (snd eq) i x
             umpUniq : (f &&& g) x ≡ y x
             umpUniq i = p1 i , p2 i
 

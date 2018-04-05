@@ -29,14 +29,14 @@ record RawMonad : Set ℓ where
   -- Note that `pureT` and `joinT` differs from their definition in the
   -- kleisli formulation only by having an explicit parameter.
   pureT : Transformation Functors.identity R
-  pureT = proj₁ pureNT
+  pureT = fst pureNT
   pureN : Natural Functors.identity R pureT
-  pureN = proj₂ pureNT
+  pureN = snd pureNT
 
   joinT : Transformation F[ R ∘ R ] R
-  joinT = proj₁ joinNT
+  joinT = fst joinNT
   joinN : Natural F[ R ∘ R ] R joinT
-  joinN = proj₂ joinNT
+  joinN = snd joinNT
 
   Romap = Functor.omap R
   Rfmap = Functor.fmap R
@@ -71,7 +71,7 @@ record IsMonad (raw : RawMonad) : Set ℓ where
     joinT Y ∘ R.fmap f ∘ pureT X     ≡⟨ sym ℂ.isAssociative ⟩
     joinT Y ∘ (R.fmap f ∘ pureT X)   ≡⟨ cong (λ φ → joinT Y ∘ φ) (sym (pureN f)) ⟩
     joinT Y ∘ (pureT (R.omap Y) ∘ f) ≡⟨ ℂ.isAssociative ⟩
-    joinT Y ∘ pureT (R.omap Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (proj₁ isInverse) ⟩
+    joinT Y ∘ pureT (R.omap Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (fst isInverse) ⟩
     identity ∘ f                     ≡⟨ ℂ.leftIdentity ⟩
     f                                ∎
 
@@ -129,8 +129,8 @@ private
       where
       xX = x {X}
       yX = y {X}
-      e1 = Category.arrowsAreSets ℂ _ _ (proj₁ xX) (proj₁ yX)
-      e2 = Category.arrowsAreSets ℂ _ _ (proj₂ xX) (proj₂ yX)
+      e1 = Category.arrowsAreSets ℂ _ _ (fst xX) (fst yX)
+      e2 = Category.arrowsAreSets ℂ _ _ (snd xX) (snd yX)
 
   open IsMonad
   propIsMonad : (raw : _) → isProp (IsMonad raw)
