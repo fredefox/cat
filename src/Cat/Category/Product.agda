@@ -1,8 +1,8 @@
 {-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Category.Product where
 
-open import Cubical.NType.Properties
 open import Cat.Prelude as P hiding (_×_ ; fst ; snd)
+open import Cat.Equivalence hiding (_≅_)
 -- module P = Cat.Prelude
 
 open import Cat.Category
@@ -285,10 +285,8 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
 
   open Category cat
 
-  open import Cat.Equivalence
-
   lemma : Terminal ≃ Product ℂ A B
-  lemma = Equiv≃.fromIsomorphism Terminal (Product ℂ A B) (f , g , inv)
+  lemma = fromIsomorphism Terminal (Product ℂ A B) (f , g , inv)
     where
     f : Terminal → Product ℂ A B
     f ((X , x0 , x1) , uniq) = p

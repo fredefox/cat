@@ -3,11 +3,26 @@ module Cat.Equivalence where
 
 open import Cubical.Primitives
 open import Cubical.FromStdLib renaming (ℓ-max to _⊔_)
+-- FIXME: Don't hide ≃
 open import Cubical.PathPrelude hiding (inverse ; _≃_)
 open import Cubical.PathPrelude using (isEquiv ; isContr ; fiber) public
 open import Cubical.GradLemma
 
-open import Cat.Prelude using (lemPropF ; setPi ; lemSig ; propSet ; Preorder ; equalityIsEquivalence)
+open import Cat.Prelude using (lemPropF ; setPi ; lemSig ; propSet ; Preorder ; equalityIsEquivalence ; _≃_)
+
+import Cubical.Univalence as U
+
+module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
+  open Cubical.PathPrelude
+  deEta : A ≃ B → A U.≃ B
+  deEta (a , b) = U.con a b
+  doEta : A U.≃ B → A ≃ B
+  doEta (U.con eqv isEqv) = eqv , isEqv
+
+module _ {ℓ : Level} {A B : Set ℓ} where
+  open Cubical.PathPrelude
+  ua : A ≃ B → A ≡ B
+  ua (f , isEqv) = U.ua (U.con f isEqv)
 
 module _ {ℓa ℓb : Level} where
   private
@@ -242,8 +257,7 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
       where
       import Cubical.NType.Properties as P
 
-  module Equiv≃ where
-    open Equiv ≃isEquiv public
+  open Equiv ≃isEquiv public
 
 module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
   open Cubical.PathPrelude using (_≃_)
@@ -273,20 +287,19 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
         }
 
     composeIsEquiv : isEquiv A B f → isEquiv B C g → isEquiv A C (g ∘ f)
-    composeIsEquiv a b = Equiv≃.fromIso A C (composeIsomorphism a' b')
+    composeIsEquiv a b = fromIso A C (composeIsomorphism a' b')
       where
-      a' = Equiv≃.toIso A B a
-      b' = Equiv≃.toIso B C b
+      a' = toIso A B a
+      b' = toIso B C b
 
   composeIso : {ℓc : Level} {C : Set ℓc} → (A ≅ B) → (B ≅ C) → A ≅ C
   composeIso {C = C} (f , iso-f) (g , iso-g) = g ∘ f , composeIsomorphism iso-f iso-g
 
   -- Gives the quasi inverse from an equivalence.
   module Equivalence (e : A ≃ B) where
-    open Equiv≃ A B public
     private
       iso : Isomorphism (fst e)
-      iso = snd (toIsomorphism e)
+      iso = snd (toIsomorphism _ _ e)
 
     open AreInverses (snd iso) public
 
@@ -303,9 +316,7 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
         }
 
     symmetry : B ≃ A
-    symmetry = B≃A.fromIsomorphism symmetryIso
-      where
-      module B≃A = Equiv≃ B A
+    symmetry = fromIsomorphism _ _ symmetryIso
 
 preorder≅ : (ℓ : Level) → Preorder _ _ _
 preorder≅ ℓ = record
@@ -323,54 +334,24 @@ preorder≅ ℓ = record
     ; trans = composeIso
     }
   }
-
-module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
-  open import Cubical.PathPrelude renaming (_≃_ to _≃η_)
-  open import Cubical.Univalence using (_≃_)
-
-  doEta : A ≃ B → A ≃η B
-  doEta (_≃_.con eqv isEqv) = eqv , isEqv
-
-  deEta : A ≃η B → A ≃ B
-  deEta (eqv , isEqv) = _≃_.con eqv isEqv
-
-module NoEta {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
-  open import Cubical.PathPrelude renaming (_≃_ to _≃η_)
-  open import Cubical.Univalence using (_≃_)
-
-  module Equivalence′ (e : A ≃ B) where
-    open Equivalence (doEta e) hiding
-      ( toIsomorphism ; fromIsomorphism ; _~_
-      ; compose ; symmetryIso ; symmetry ) public
-
-    compose : {ℓc : Level} {C : Set ℓc} → (B ≃ C) → A ≃ C
-    compose ee = deEta (Equivalence.compose (doEta e) (doEta ee))
-
-    symmetry : B ≃ A
-    symmetry = deEta (Equivalence.symmetry (doEta e))
-
-  -- fromIso      : {f : A → B} → Isomorphism f → isEquiv f
-  -- fromIso = ?
-
-  -- toIso        : {f : A → B} → isEquiv f → Isomorphism f
-  -- toIso = ?
-
-  fromIsomorphism : A ≅ B → A ≃ B
-  fromIsomorphism (f , iso) = _≃_.con f (Equiv≃.fromIso _ _ iso)
-
-  toIsomorphism : A ≃ B → A ≅ B
-  toIsomorphism (_≃_.con f eqv) = f , Equiv≃.toIso _ _ eqv
+module _ {ℓ : Level} {A B : Set ℓ} where
+  univalence : (A ≡ B) ≃ (A ≃ B)
+  univalence = Equivalence.compose u' aux
+    where
+    u : (A ≡ B) U.≃ (A U.≃ B)
+    u = U.univalence
+    u' : (A ≡ B) ≃ (A U.≃ B)
+    u' = doEta u
+    aux : (A U.≃ B) ≃ (A ≃ B)
+    aux = fromIsomorphism _ _ (doEta , deEta , record { verso-recto = funExt (λ{ (U.con _ _) → refl}) ; recto-verso = refl })
 
 -- A few results that I have not generalized to work with both the eta and no-eta variable of ≃
 module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
-  open NoEta
-  open import Cubical.Univalence using (_≃_)
-
   -- Equality on sigma's whose second component is a proposition is equivalent
   -- to equality on their first components.
   equivPropSig : ((x : A) → isProp (P x)) → (p q : Σ A P)
     → (p ≡ q) ≃ (fst p ≡ fst q)
-  equivPropSig pA p q = fromIsomorphism iso
+  equivPropSig pA p q = fromIsomorphism _ _ iso
     where
     f : ∀ {p q} → p ≡ q → fst p ≡ fst q
     f e i = fst (e i)
@@ -396,12 +377,12 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
   equivSigSnd {Q = Q} eA = res
     where
     f : Σ A P → Σ A Q
-    f (a , pA) = a , _≃_.eqv (eA a) pA
+    f (a , pA) = a , fst (eA a) pA
     g : Σ A Q → Σ A P
     g (a , qA) = a , g' qA
       where
       k : Isomorphism _
-      k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
+      k = toIso _ _ (snd (eA a))
       open Σ k renaming (fst to g')
     ve-re : (x : Σ A P) → (g ∘ f) x ≡ x
     ve-re x i = fst x , eq i
@@ -410,16 +391,16 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
       eq = begin
         snd ((g ∘ f) x) ≡⟨⟩
         snd (g (f (a , pA))) ≡⟨⟩
-        g' (_≃_.eqv (eA a) pA) ≡⟨ lem ⟩
+        g' (fst (eA a) pA) ≡⟨ lem ⟩
         pA ∎
         where
         open Σ x renaming (fst to a ; snd to pA)
         k : Isomorphism _
-        k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
+        k = toIso _ _ (snd (eA a))
         open Σ k renaming (fst to g' ; snd to inv)
         module A = AreInverses inv
         -- anti-funExt
-        lem : (g' ∘ (_≃_.eqv (eA a))) pA ≡ pA
+        lem : (g' ∘ (fst (eA a))) pA ≡ pA
         lem i = A.verso-recto i pA
     re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
     re-ve x i = fst x , eq i
@@ -427,11 +408,11 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
       open Σ x renaming (fst to a ; snd to qA)
       eq = begin
         snd ((f ∘ g) x)                 ≡⟨⟩
-        _≃_.eqv (eA a) (g' qA)            ≡⟨ (λ i → A.recto-verso i qA) ⟩
+        fst (eA a) (g' qA)            ≡⟨ (λ i → A.recto-verso i qA) ⟩
         qA                                ∎
         where
         k : Isomorphism _
-        k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
+        k = toIso _ _ (snd (eA a))
         open Σ k renaming (fst to g' ; snd to inv)
         module A = AreInverses inv
     inv : AreInverses f g
@@ -442,11 +423,9 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
     iso : Σ A P ≅ Σ A Q
     iso = f , g , inv
     res : Σ A P ≃ Σ A Q
-    res = fromIsomorphism iso
+    res = fromIsomorphism _ _ iso
 
 module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
-  open NoEta
-  open import Cubical.Univalence using (_≃_)
   -- Equivalence is equivalent to isomorphism when the domain and codomain of
   -- the equivalence is a set.
   equivSetIso : isSet A → isSet B → (f : A → B)
@@ -454,17 +433,17 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
   equivSetIso sA sB f =
     let
       obv : isEquiv A B f → Isomorphism f
-      obv = Equiv≃.toIso A B
+      obv = toIso A B
       inv : Isomorphism f → isEquiv A B f
-      inv = Equiv≃.fromIso A B
+      inv = fromIso A B
       re-ve : (x : isEquiv A B f) → (inv ∘ obv) x ≡ x
-      re-ve = Equiv≃.inverse-from-to-iso A B
+      re-ve = inverse-from-to-iso A B
       ve-re : (x : Isomorphism f)       → (obv ∘ inv) x ≡ x
-      ve-re = Equiv≃.inverse-to-from-iso A B sA sB
+      ve-re = inverse-to-from-iso A B sA sB
       iso : isEquiv A B f ≅ Isomorphism f
       iso = obv , inv ,
         record
           { verso-recto = funExt re-ve
           ; recto-verso = funExt ve-re
           }
-    in fromIsomorphism iso
+    in fromIsomorphism _ _ iso

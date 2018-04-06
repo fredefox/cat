@@ -78,7 +78,6 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
           F[ F  ∘ G~ ] ≡⟨ prop1 ⟩
           idFunctor ∎
 
-        open import Cubical.Univalence
         p0 : F ≡ G
         p0 = begin
           F                              ≡⟨ sym Functors.rightIdentity ⟩

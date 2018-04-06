@@ -33,9 +33,6 @@ module _ (ℓa ℓb : Level) where
     isIdentity : IsIdentity λ { {A} → identity {A} }
     isIdentity = (Σ≡ refl refl) , Σ≡ refl refl
 
-    open import Cubical.NType.Properties
-    open import Cubical.Sigma
-
     isPreCategory : IsPreCategory RawFam
     IsPreCategory.isAssociative isPreCategory
       {A} {B} {C} {D} {f} {g} {h} = isAssociative {A} {B} {C} {D} {f} {g} {h}

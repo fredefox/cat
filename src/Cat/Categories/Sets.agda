@@ -2,21 +2,15 @@
 {-# OPTIONS --allow-unsolved-metas --cubical --caching #-}
 module Cat.Categories.Sets where
 
-open import Cat.Prelude as P hiding (_≃_)
+open import Cat.Prelude as P
 
 open import Function using (_∘_ ; _∘′_)
-
-open import Cubical.Univalence using (univalence ; con ; _≃_ ; idtoeqv ; ua)
 
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
 open import Cat.Wishlist
-open import Cat.Equivalence as Eqv using (AreInverses ; module Equiv≃ ; module NoEta)
-
-open NoEta
-
-module Equivalence = Equivalence′
+open import Cat.Equivalence renaming (_≅_ to _≈_)
 
 _⊙_ : {ℓa ℓb ℓc : Level} {A : Set ℓa} {B : Set ℓb} {C : Set ℓc} → (A ≃ B) → (B ≃ C) → A ≃ C
 eqA ⊙ eqB = Equivalence.compose eqA eqB
@@ -52,7 +46,7 @@ module _ (ℓ : Level) where
 
     open IsPreCategory isPreCat hiding (_∘_)
 
-    isIso = Eqv.Isomorphism
+    isIso = TypeIsomorphism
     module _ {hA hB : hSet ℓ} where
       open Σ hA renaming (fst to A ; snd to sA)
       open Σ hB renaming (fst to B ; snd to sB)
@@ -95,7 +89,7 @@ module _ (ℓ : Level) where
     module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
       lem2 : ((x : A) → isProp (P x)) → (p q : Σ A P)
         → (p ≡ q) ≃ (fst p ≡ fst q)
-      lem2 pA p q = fromIsomorphism iso
+      lem2 pA p q = fromIsomorphism _ _ iso
         where
         f : ∀ {p q} → p ≡ q → fst p ≡ fst q
         f e i = fst (e i)
@@ -111,7 +105,7 @@ module _ (ℓ : Level) where
           { verso-recto = funExt ve-re
           ; recto-verso = funExt re-ve
           }
-        iso : (p ≡ q) Eqv.≅ (fst p ≡ fst q)
+        iso : (p ≡ q) ≈ (fst p ≡ fst q)
         iso = f , g , inv
 
       lem3 : ∀ {ℓc} {Q : A → Set (ℓc ⊔ ℓb)}
@@ -119,12 +113,12 @@ module _ (ℓ : Level) where
       lem3 {Q = Q} eA = res
         where
         f : Σ A P → Σ A Q
-        f (a , pA) = a , _≃_.eqv (eA a) pA
+        f (a , pA) = a , fst (eA a) pA
         g : Σ A Q → Σ A P
         g (a , qA) = a , g' qA
           where
-          k : Eqv.Isomorphism _
-          k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
+          k : TypeIsomorphism _
+          k = toIso _ _ (snd (eA a))
           open Σ k renaming (fst to g')
         ve-re : (x : Σ A P) → (g ∘ f) x ≡ x
         ve-re x i = fst x , eq i
@@ -133,16 +127,16 @@ module _ (ℓ : Level) where
           eq = begin
             snd ((g ∘ f) x) ≡⟨⟩
             snd (g (f (a , pA))) ≡⟨⟩
-            g' (_≃_.eqv (eA a) pA) ≡⟨ lem ⟩
+            g' (fst (eA a) pA) ≡⟨ lem ⟩
             pA ∎
             where
             open Σ x renaming (fst to a ; snd to pA)
-            k : Eqv.Isomorphism _
-            k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
+            k : TypeIsomorphism _
+            k = toIso _ _ (snd (eA a))
             open Σ k renaming (fst to g' ; snd to inv)
             module A = AreInverses inv
             -- anti-funExt
-            lem : (g' ∘ (_≃_.eqv (eA a))) pA ≡ pA
+            lem : (g' ∘ (fst (eA a))) pA ≡ pA
             lem i = A.verso-recto i pA
         re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
         re-ve x i = fst x , eq i
@@ -150,11 +144,11 @@ module _ (ℓ : Level) where
           open Σ x renaming (fst to a ; snd to qA)
           eq = begin
             snd ((f ∘ g) x)                 ≡⟨⟩
-            _≃_.eqv (eA a) (g' qA)            ≡⟨ (λ i → A.recto-verso i qA) ⟩
+            fst (eA a) (g' qA)            ≡⟨ (λ i → A.recto-verso i qA) ⟩
             qA                                ∎
             where
-            k : Eqv.Isomorphism _
-            k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
+            k : TypeIsomorphism _
+            k = toIso _ _ (snd (eA a))
             open Σ k renaming (fst to g' ; snd to inv)
             module A = AreInverses inv
         inv : AreInverses f g
@@ -162,10 +156,10 @@ module _ (ℓ : Level) where
           { verso-recto = funExt ve-re
           ; recto-verso = funExt re-ve
           }
-        iso : Σ A P Eqv.≅ Σ A Q
+        iso : Σ A P ≈ Σ A Q
         iso = f , g , inv
         res : Σ A P ≃ Σ A Q
-        res = fromIsomorphism iso
+        res = fromIsomorphism _ _ iso
 
     module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
       lem4 : isSet A → isSet B → (f : A → B)
@@ -173,20 +167,20 @@ module _ (ℓ : Level) where
       lem4 sA sB f =
         let
           obv : isEquiv A B f → isIso f
-          obv = Equiv≃.toIso A B
+          obv = toIso A B
           inv : isIso f → isEquiv A B f
-          inv = Equiv≃.fromIso A B
+          inv = fromIso A B
           re-ve : (x : isEquiv A B f) → (inv ∘ obv) x ≡ x
-          re-ve = Equiv≃.inverse-from-to-iso A B
+          re-ve = inverse-from-to-iso A B
           ve-re : (x : isIso f)       → (obv ∘ inv) x ≡ x
-          ve-re = Equiv≃.inverse-to-from-iso A B sA sB
-          iso : isEquiv A B f Eqv.≅ isIso f
+          ve-re = inverse-to-from-iso A B sA sB
+          iso : isEquiv A B f ≈ isIso f
           iso = obv , inv ,
             record
               { verso-recto = funExt re-ve
               ; recto-verso = funExt ve-re
               }
-        in fromIsomorphism iso
+        in fromIsomorphism _ _ iso
 
     module _ {hA hB : Object} where
       open Σ hA renaming (fst to A ; snd to sA)
@@ -198,33 +192,15 @@ module _ (ℓ : Level) where
 
       -- univalence
       step1 : Σ (A → B) (isEquiv A B) ≃ (A ≡ B)
-      step1 = hh ⊙ h
-        where
-          h : (A ≃ B) ≃ (A ≡ B)
-          h = sym≃ (univalence {A = A} {B})
-          obv : Σ (A → B) (isEquiv A B) → A ≃ B
-          obv = Eqv.deEta
-          inv : A ≃ B → Σ (A → B) (isEquiv A B)
-          inv = Eqv.doEta
-          re-ve : (x : _) → (inv ∘ obv) x ≡ x
-          re-ve x = refl
-          -- Because _≃_ does not have eta equality!
-          ve-re : (x : _) → (obv ∘ inv) x ≡ x
-          ve-re (con eqv isEqv) i = con eqv isEqv
-          areInv : AreInverses obv inv
-          areInv = record { verso-recto = funExt re-ve ; recto-verso = funExt ve-re }
-          eqv : Σ (A → B) (isEquiv A B) Eqv.≅ (A ≃ B)
-          eqv = obv , inv , areInv
-          hh : Σ (A → B) (isEquiv A B) ≃ (A ≃ B)
-          hh = fromIsomorphism eqv
+      step1 = sym≃ univalence
 
       -- lem2 with propIsSet
       step2 : (A ≡ B) ≃ (hA ≡ hB)
       step2 = sym≃ (lem2 (λ A → isSetIsProp) hA hB)
 
       -- Go from an isomorphism on sets to an isomorphism on homotopic sets
-      trivial? : (hA ≅ hB) ≃ (A Eqv.≅ B)
-      trivial? = sym≃ (fromIsomorphism res)
+      trivial? : (hA ≅ hB) ≃ (A ≈ B)
+      trivial? = sym≃ (fromIsomorphism _ _ res)
         where
         fwd : Σ (A → B) isIso → hA ≅ hB
         fwd (f , g , inv) = f , g , inv.toPair
@@ -232,7 +208,7 @@ module _ (ℓ : Level) where
           module inv = AreInverses inv
         bwd : hA ≅ hB → Σ (A → B) isIso
         bwd (f , g , x , y) = f , g , record { verso-recto = x ; recto-verso = y }
-        res : Σ (A → B) isIso Eqv.≅ (hA ≅ hB)
+        res : Σ (A → B) isIso ≈ (hA ≅ hB)
         res = fwd , bwd , record { verso-recto = refl ; recto-verso = refl }
 
       conclusion : (hA ≅ hB) ≃ (hA ≡ hB)
@@ -274,7 +250,6 @@ module _ {ℓ : Level} where
   private
     𝓢 = 𝓢𝓮𝓽 ℓ
     open Category 𝓢
-    open import Cubical.Sigma
 
     module _ (hA hB : Object) where
       open Σ hA renaming (fst to A ; snd to sA)

@@ -5,7 +5,6 @@ open import Cat.Prelude
 open import Function
 
 open import Cubical
-open import Cubical.NType.Properties using (lemPropF)
 
 open import Cat.Category
 

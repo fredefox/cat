@@ -29,6 +29,7 @@
 module Cat.Category where
 
 open import Cat.Prelude
+open import Cat.Equivalence as Equivalence renaming (_≅_ to _≈_ ; Isomorphism to TypeIsomorphism) hiding (preorder≅)
 
 import Function
 
@@ -122,8 +123,6 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
     import Cat.Equivalence as E
     open E public using () renaming (Isomorphism to TypeIsomorphism)
-    open E using (module Equiv≃)
-    open Equiv≃ using (fromIso)
 
     univalenceFromIsomorphism : {A B : Object}
       → TypeIsomorphism (idToIso A B) → isEquiv (A ≡ B) (A ≅ B) (idToIso A B)
@@ -299,10 +298,8 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
     univalent≃ = _ , univalent
 
     module _ {A B : Object} where
-      open import Cat.Equivalence using (module Equiv≃)
-
       iso-to-id : (A ≅ B) → (A ≡ B)
-      iso-to-id = fst (Equiv≃.toIso _ _ univalent)
+      iso-to-id = fst (toIso _ _ univalent)
 
     -- | All projections are propositions.
     module Propositionality where
@@ -321,7 +318,6 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         open Σ Yt renaming (fst to Y ; snd to Yit)
         open Σ (Xit {Y}) renaming (fst to Y→X) using ()
         open Σ (Yit {X}) renaming (fst to X→Y) using ()
-        open import Cat.Equivalence hiding (_≅_)
         -- Need to show `left` and `right`, what we know is that the arrows are
         -- unique. Well, I know that if I compose these two arrows they must give
         -- the identity, since also the identity is the unique such arrow (by X
@@ -336,10 +332,10 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         right = Yprop _ _
         iso : X ≅ Y
         iso = X→Y , Y→X , left , right
-        fromIso : X ≅ Y → X ≡ Y
-        fromIso = fst (Equiv≃.toIso (X ≡ Y) (X ≅ Y) univalent)
+        fromIso' : X ≅ Y → X ≡ Y
+        fromIso' = fst (toIso (X ≡ Y) (X ≅ Y) univalent)
         p0 : X ≡ Y
-        p0 = fromIso iso
+        p0 = fromIso' iso
         p1 : (λ i → IsTerminal (p0 i)) [ Xit ≡ Yit ]
         p1 = lemPropF propIsTerminal p0
         res : Xt ≡ Yt
@@ -354,7 +350,6 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         open Σ Yi renaming (fst to Y ; snd to Yii)
         open Σ (Xii {Y}) renaming (fst to Y→X) using ()
         open Σ (Yii {X}) renaming (fst to X→Y) using ()
-        open import Cat.Equivalence hiding (_≅_)
         -- Need to show `left` and `right`, what we know is that the arrows are
         -- unique. Well, I know that if I compose these two arrows they must give
         -- the identity, since also the identity is the unique such arrow (by X
@@ -369,10 +364,10 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         right = Xprop _ _
         iso : X ≅ Y
         iso = Y→X , X→Y , right , left
-        fromIso : X ≅ Y → X ≡ Y
-        fromIso = fst (Equiv≃.toIso (X ≡ Y) (X ≅ Y) univalent)
+        fromIso' : X ≅ Y → X ≡ Y
+        fromIso' = fst (toIso (X ≡ Y) (X ≅ Y) univalent)
         p0 : X ≡ Y
-        p0 = fromIso iso
+        p0 = fromIso' iso
         p1 : (λ i → IsInitial (p0 i)) [ Xii ≡ Yii ]
         p1 = lemPropF propIsInitial p0
         res : Xi ≡ Yi
@@ -436,9 +431,12 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   propIsCategory : isProp (IsCategory ℂ)
   propIsCategory = done
 
+
 -- | Univalent categories
 --
 -- Just bundles up the data with witnesses inhabiting the propositions.
+
+-- Question: Should I remove the type `Category`?
 record Category (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   field
     raw            : RawCategory ℓa ℓb
@@ -459,10 +457,8 @@ module _ {ℓa ℓb : Level} {ℂ 𝔻 : Category ℓa ℓb} where
       isCategoryEq = lemPropF propIsCategory rawEq
 
     Category≡ : ℂ ≡ 𝔻
-    Category≡ i = record
-      { raw        = rawEq i
-      ; isCategory = isCategoryEq i
-      }
+    Category.raw (Category≡ i) = rawEq i
+    Category.isCategory (Category≡ i) = isCategoryEq i
 
 -- | Syntax for arrows- and composition in a given category.
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
@@ -501,9 +497,8 @@ module Opposite {ℓa ℓb : Level} where
       open IsPreCategory isPreCategory
 
       module _ {A B : ℂ.Object} where
-        open import Cat.Equivalence as Equivalence hiding (_≅_)
         k : Equivalence.Isomorphism (ℂ.idToIso A B)
-        k = Equiv≃.toIso _ _ ℂ.univalent
+        k = toIso _ _ ℂ.univalent
         open Σ k renaming (fst to f ; snd to inv)
         open AreInverses inv
 
@@ -568,7 +563,7 @@ module Opposite {ℓa ℓb : Level} where
         h = ff , invv
         univalent : isEquiv (A ≡ B) (A ≅ B)
           (Univalence.idToIso (swap ℂ.isIdentity) A B)
-        univalent = Equiv≃.fromIso _ _ h
+        univalent = fromIso _ _ h
 
       isCategory : IsCategory opRaw
       IsCategory.isPreCategory isCategory = isPreCategory
