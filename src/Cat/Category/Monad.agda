@@ -29,7 +29,7 @@ import Cat.Category.Monad.Kleisli
 open import Cat.Categories.Fun
 
 module Monoidal = Cat.Category.Monad.Monoidal
-module Kleisli = Cat.Category.Monad.Kleisli
+module Kleisli  = Cat.Category.Monad.Kleisli
 
 -- | The monoidal- and kleisli presentation of monads are equivalent.
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where

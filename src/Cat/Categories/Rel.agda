@@ -1,7 +1,7 @@
 {-# OPTIONS --cubical --allow-unsolved-metas #-}
 module Cat.Categories.Rel where
 
-open import Cat.Prelude renaming (fst to fst ; snd to snd)
+open import Cat.Prelude hiding (Rel)
 open import Function
 
 open import Cat.Category

@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 module Cat.Category.Monoid where
 
 open import Agda.Primitive
@@ -6,9 +7,10 @@ open import Cat.Category
 open import Cat.Category.Product
 open import Cat.Category.Functor
 import Cat.Categories.Cat as Cat
+open import Cat.Prelude hiding (_×_ ; empty)
 
 -- TODO: Incorrect!
-module _ (ℓa ℓb : Level) where
+module _ {ℓa ℓb : Level} where
   private
     ℓ = lsuc (ℓa ⊔ ℓb)
 
@@ -21,30 +23,34 @@ module _ (ℓa ℓb : Level) where
     _×_ : ∀ {ℓa ℓb} → Category ℓa ℓb → Category ℓa ℓb → Category ℓa ℓb
     ℂ × 𝔻 = Cat.CatProduct.object ℂ 𝔻
 
-  record RawMonoidalCategory : Set ℓ where
+  record RawMonoidalCategory (ℂ : Category ℓa ℓb) : Set ℓ where
+    open Category ℂ public hiding (IsAssociative)
     field
-      category : Category ℓa ℓb
-    open Category category public
-    field
-      {{hasProducts}} : HasProducts category
       empty  : Object
       -- aka. tensor product, monoidal product.
-      append : Functor (category × category) category
-    open HasProducts hasProducts public
+      append : Functor (ℂ × ℂ) ℂ
 
-  record MonoidalCategory : Set ℓ where
+    module F = Functor append
+
+    _⊗_ = append
+    mappend = F.fmap
+
+    IsAssociative : Set _
+    IsAssociative = {A B : Object} → (f g h : Arrow A A) → mappend ({!mappend!} , {!mappend!}) ≡ mappend (f , mappend (g , h))
+
+  record MonoidalCategory (ℂ : Category ℓa ℓb) : Set ℓ where
     field
-      raw : RawMonoidalCategory
+      raw : RawMonoidalCategory ℂ
     open RawMonoidalCategory raw public
 
-module _ {ℓa ℓb : Level} (ℂ : MonoidalCategory ℓa ℓb) where
+module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) {monoidal : MonoidalCategory ℂ} {hasProducts : HasProducts ℂ} where
   private
     ℓ = ℓa ⊔ ℓb
 
-  open MonoidalCategory ℂ public
+  open MonoidalCategory monoidal public hiding (mappend)
+  open HasProducts hasProducts
 
-  record Monoid : Set ℓ where
+  record MonoidalObject (M : Object) : Set ℓ where
     field
-      carrier : Object
-      mempty  : Arrow empty carrier
-      mappend : Arrow (carrier × carrier) carrier
+      mempty  : Arrow empty M
+      mappend : Arrow (M × M) M

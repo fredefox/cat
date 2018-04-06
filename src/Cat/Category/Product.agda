@@ -123,46 +123,47 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       }
 
     module _ where
-      open RawCategory raw
+      private
+        open RawCategory raw
 
-      propEqs : ∀ {X' : Object}{Y' : Object} (let X , xa , xb = X') (let Y , ya , yb = Y')
-                → (xy : ℂ.Arrow X Y) → isProp (ℂ [ ya ∘ xy ] ≡ xa × ℂ [ yb ∘ xy ] ≡ xb)
-      propEqs xs = propSig (ℂ.arrowsAreSets _ _) (\ _ → ℂ.arrowsAreSets _ _)
+        propEqs : ∀ {X' : Object}{Y' : Object} (let X , xa , xb = X') (let Y , ya , yb = Y')
+                  → (xy : ℂ.Arrow X Y) → isProp (ℂ [ ya ∘ xy ] ≡ xa × ℂ [ yb ∘ xy ] ≡ xb)
+        propEqs xs = propSig (ℂ.arrowsAreSets _ _) (\ _ → ℂ.arrowsAreSets _ _)
 
-      isAssociative : IsAssociative
-      isAssociative {A'@(A , a0 , a1)} {B , _} {C , c0 , c1} {D'@(D , d0 , d1)} {ff@(f , f0 , f1)} {gg@(g , g0 , g1)} {hh@(h , h0 , h1)} i
-        = s0 i , lemPropF propEqs s0 {P.snd l} {P.snd r} i
-        where
-        l = hh ∘ (gg ∘ ff)
-        r = hh ∘ gg ∘ ff
-        -- s0 : h ℂ.∘ (g ℂ.∘ f) ≡ h ℂ.∘ g ℂ.∘ f
-        s0 : fst l ≡ fst r
-        s0 = ℂ.isAssociative {f = f} {g} {h}
-
-
-      isIdentity : IsIdentity identity
-      isIdentity {AA@(A , a0 , a1)} {BB@(B , b0 , b1)} {f , f0 , f1} = leftIdentity , rightIdentity
-        where
-        leftIdentity : identity ∘ (f , f0 , f1) ≡ (f , f0 , f1)
-        leftIdentity i = l i , lemPropF propEqs l {snd L} {snd R} i
+        isAssociative : IsAssociative
+        isAssociative {A'@(A , a0 , a1)} {B , _} {C , c0 , c1} {D'@(D , d0 , d1)} {ff@(f , f0 , f1)} {gg@(g , g0 , g1)} {hh@(h , h0 , h1)} i
+          = s0 i , lemPropF propEqs s0 {P.snd l} {P.snd r} i
           where
-          L = identity ∘ (f , f0 , f1)
-          R : Arrow AA BB
-          R = f , f0 , f1
-          l : fst L ≡ fst R
-          l = ℂ.leftIdentity
-        rightIdentity : (f , f0 , f1) ∘ identity ≡ (f , f0 , f1)
-        rightIdentity i = l i , lemPropF propEqs l {snd L} {snd R} i
-          where
-          L = (f , f0 , f1) ∘ identity
-          R : Arrow AA BB
-          R = (f , f0 , f1)
-          l : ℂ [ f ∘ ℂ.identity ] ≡ f
-          l = ℂ.rightIdentity
+          l = hh ∘ (gg ∘ ff)
+          r = hh ∘ gg ∘ ff
+          -- s0 : h ℂ.∘ (g ℂ.∘ f) ≡ h ℂ.∘ g ℂ.∘ f
+          s0 : fst l ≡ fst r
+          s0 = ℂ.isAssociative {f = f} {g} {h}
 
-      arrowsAreSets : ArrowsAreSets
-      arrowsAreSets {X , x0 , x1} {Y , y0 , y1}
-        = sigPresNType {n = ⟨0⟩} ℂ.arrowsAreSets λ a → propSet (propEqs _)
+
+        isIdentity : IsIdentity identity
+        isIdentity {AA@(A , a0 , a1)} {BB@(B , b0 , b1)} {f , f0 , f1} = leftIdentity , rightIdentity
+          where
+          leftIdentity : identity ∘ (f , f0 , f1) ≡ (f , f0 , f1)
+          leftIdentity i = l i , lemPropF propEqs l {snd L} {snd R} i
+            where
+            L = identity ∘ (f , f0 , f1)
+            R : Arrow AA BB
+            R = f , f0 , f1
+            l : fst L ≡ fst R
+            l = ℂ.leftIdentity
+          rightIdentity : (f , f0 , f1) ∘ identity ≡ (f , f0 , f1)
+          rightIdentity i = l i , lemPropF propEqs l {snd L} {snd R} i
+            where
+            L = (f , f0 , f1) ∘ identity
+            R : Arrow AA BB
+            R = (f , f0 , f1)
+            l : ℂ [ f ∘ ℂ.identity ] ≡ f
+            l = ℂ.rightIdentity
+
+        arrowsAreSets : ArrowsAreSets
+        arrowsAreSets {X , x0 , x1} {Y , y0 , y1}
+          = sigPresNType {n = ⟨0⟩} ℂ.arrowsAreSets λ a → propSet (propEqs _)
 
       isPreCat : IsPreCategory raw
       IsPreCategory.isAssociative isPreCat = isAssociative
@@ -171,69 +172,106 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
 
     open IsPreCategory isPreCat
 
-    -- module _ (X : Object) where
-    --   center : Σ Object (X ≅_)
-    --   center = X , idIso X
-
-    --   module _ (y : Σ Object (X ≅_)) where
-    --     open Σ y renaming (fst to Y ; snd to X≅Y)
-
-    --     contractible : (X , idIso X) ≡ (Y , X≅Y)
-    --     contractible = {!!}
-
-    --   univalent[Contr] : isContr (Σ Object (X ≅_))
-    --   univalent[Contr] = center , contractible
-    --   module _ (y : Σ Object (X ≡_)) where
-    --     open Σ y renaming (fst to Y ; snd to p)
-    --     a0 : X ≡ Y
-    --     a0 = {!!}
-    --     a1 : PathP (λ i → X ≡ a0 i) refl p
-    --     a1 = {!!}
-    --       where
-    --       P : (Z : Object) → X ≡ Z → Set _
-    --       P Z p = PathP (λ i → X ≡ Z)
-
-    --     alt' : (X , refl) ≡ y
-    --     alt' i = a0 i , a1 i
-    --   alt : isContr (Σ Object (X ≡_))
-    --   alt = (X , refl) , alt'
-
     univalent : Univalent
-    univalent {X , x} {Y , y} = {!res!}
+    univalent {(X , xa , xb)} {(Y , ya , yb)} = univalenceFromIsomorphism res
       where
-      open import Cat.Equivalence as E hiding (_≅_)
-      open import Cubical.Univalence
-      module _ (c : (X , x) ≅ (Y , y)) where
-      -- module _ (c : _ ≅ _) where
-        open Σ c renaming (fst to f_c ; snd to inv_c)
-        open Σ inv_c renaming (fst to g_c ; snd to ainv_c)
-        open Σ ainv_c renaming (fst to left ; snd to right)
-        c0 : X ℂ.≅ Y
-        c0 = fst f_c , fst g_c , (λ i → fst (left i)) , (λ i → fst (right i))
-        f0 : X ≡ Y
-        f0 = ℂ.iso-to-id c0
-        module _ {A : ℂ.Object} (α : ℂ.Arrow X A) where
-          coedom : ℂ.Arrow Y A
-          coedom = coe (λ i → ℂ.Arrow (f0 i) A) α
-        coex : ℂ.Arrow Y A × ℂ.Arrow Y B
-        coex = coe (λ i → ℂ.Arrow (f0 i) A × ℂ.Arrow (f0 i) B) x
-        f1 : PathP (λ i → ℂ.Arrow (f0 i) A × ℂ.Arrow (f0 i) B) x coex
-        f1 = {!sym!}
-        f2 : coex ≡ y
-        f2 = {!!}
-        f : (X , x) ≡ (Y , y)
-        f i = f0 i , {!f1 i!}
-      prp : isSet (ℂ.Object × ℂ.Arrow Y A × ℂ.Arrow Y B)
-      prp = setSig {sA = {!!}} {(λ _ → setSig {sA = ℂ.arrowsAreSets} {λ _ → ℂ.arrowsAreSets})}
-      ve-re : (p : (X , x) ≡ (Y , y)) → f (idToIso _ _ p) ≡ p
-      -- ve-re p i j = {!ℂ.arrowsAreSets!} , ℂ.arrowsAreSets _ _ (let k = fst (snd (p i)) in {!!}) {!!} {!!} {!!} , {!!}
-      ve-re p = let k = prp {!!} {!!} {!!} {!p!} in {!!}
-      re-ve : (iso : (X , x) ≅ (Y , y)) → idToIso _ _ (f iso) ≡ iso
-      re-ve = {!!}
-      iso : E.Isomorphism (idToIso (X , x) (Y , y))
-      iso = f , record { verso-recto = funExt ve-re ; recto-verso = funExt re-ve }
-      res : isEquiv ((X , x) ≡ (Y , y)) ((X , x) ≅ (Y , y)) (idToIso (X , x) (Y , y))
-      res = Equiv≃.fromIso _ _ iso
+      open import Cat.Equivalence using (composeIso) renaming (_≅_ to _≈_)
+      -- open import Relation.Binary.PreorderReasoning (Cat.Equivalence.preorder≅ {!!}) using ()
+      --   renaming
+      --     ( _∼⟨_⟩_ to _≈⟨_⟩_
+      --     ; begin_ to begin!_
+      --     ; _∎ to _∎! )
+      -- lawl
+      --   : ((X , xa , xb) ≡ (Y , ya , yb))
+      --   ≈ (Σ[ iso ∈ (X ℂ.≅ Y) ] let p = ℂ.iso-to-id iso in (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
+      -- lawl = {!begin! ? ≈⟨ ? ⟩ ? ∎!!}
+      -- Problem with the above approach: Preorders only work for heterogeneous equaluties.
+
+      -- (X , xa , xb) ≡ (Y , ya , yb)
+      -- ≅
+      -- Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb)
+      -- ≅
+      -- Σ (X ℂ.≅ Y) (λ iso
+      --   → let p = ℂ.iso-to-id iso
+      --   in
+      --   ( PathP (λ i → ℂ.Arrow (p i) A) xa ya)
+      --   × PathP (λ i → ℂ.Arrow (p i) B) xb yb
+      --   )
+      -- ≅
+      -- (X , xa , xb) ≅ (Y , ya , yb)
+      step0
+        : ((X , xa , xb) ≡ (Y , ya , yb))
+        ≈ (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
+      step0
+        = (λ p → (λ i → fst (p i)) , (λ i → fst (snd (p i))) , (λ i → snd (snd (p i))))
+        , (λ x  → λ i → fst x i , (fst (snd x) i) , (snd (snd x) i))
+        , record
+          { verso-recto = {!!}
+          ; recto-verso = {!!}
+          }
+      step1
+        : (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
+        ≈ Σ (X ℂ.≅ Y) (λ iso
+          → let p = ℂ.iso-to-id iso
+          in
+          ( PathP (λ i → ℂ.Arrow (p i) A) xa ya)
+          × PathP (λ i → ℂ.Arrow (p i) B) xb yb
+          )
+      step1
+        = (λ{ (p , x) → (ℂ.idToIso _ _ p) , {!snd x!}})
+        -- Goal is:
+        --
+        --     φ x
+        --
+        -- where `x` is
+        --
+        --   ℂ.iso-to-id (ℂ.idToIso _ _ p)
+        --
+        -- I have `φ p` in scope, but surely `p` and `x` are the same - though
+        -- perhaps not definitonally.
+        , (λ{ (iso , x) → ℂ.iso-to-id iso , x})
+        , record { verso-recto = {!!} ; recto-verso = {!!} }
+      lemA : {A B : Object} {f g : Arrow A B} → fst f ≡ fst g → f ≡ g
+      lemA {A} {B} {f = f} {g} p i = p i , h i
+        where
+        h : PathP (λ i →
+            (ℂ [ fst (snd B) ∘ p i ]) ≡ fst (snd A) ×
+            (ℂ [ snd (snd B) ∘ p i ]) ≡ snd (snd A)
+          ) (snd f) (snd g)
+        h = lemPropF (λ a → propSig
+          (ℂ.arrowsAreSets (ℂ [ fst (snd B) ∘ a ]) (fst (snd A)))
+          λ _ → ℂ.arrowsAreSets (ℂ [ snd (snd B) ∘ a ]) (snd (snd A)))
+          p
+      step2
+        : Σ (X ℂ.≅ Y) (λ iso
+          → let p = ℂ.iso-to-id iso
+          in
+          ( PathP (λ i → ℂ.Arrow (p i) A) xa ya)
+          × PathP (λ i → ℂ.Arrow (p i) B) xb yb
+          )
+        ≈ ((X , xa , xb) ≅ (Y , ya , yb))
+      step2
+        = ( λ{ ((f , f~ , inv-f) , x)
+            → ( f , {!!})
+            , ( (f~ , {!!})
+              , lemA {!!}
+              , lemA {!!}
+              )
+            }
+          )
+        , (λ x → {!!})
+        , {!!}
+      -- One thing to watch out for here is that the isomorphisms going forwards
+      -- must compose to give idToIso
+      iso
+        : ((X , xa , xb) ≡ (Y , ya , yb))
+        ≈ ((X , xa , xb) ≅ (Y , ya , yb))
+      iso = step0 ⊙ step1 ⊙ step2
+        where
+        infixl 5 _⊙_
+        _⊙_ = composeIso
+      res : TypeIsomorphism (idToIso (X , xa , xb) (Y , ya , yb))
+      res = {!snd iso!}
 
     isCat : IsCategory raw
     IsCategory.isPreCategory isCat = isPreCat
@@ -346,3 +384,6 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object �
 
   propHasProducts : isProp (HasProducts ℂ)
   propHasProducts x y i = record { product = productEq x y i }
+
+fmap≡ : {A : Set} {a0 a1 : A} {B : Set} → (f : A → B) → Path a0 a1 → Path (f a0) (f a1)
+fmap≡ = cong

@@ -71,3 +71,17 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb} {a b : Σ A B}
   Σ≡ : a ≡ b
   fst (Σ≡ i) = fst≡ i
   snd (Σ≡ i) = snd≡ i
+
+import Relation.Binary
+open Relation.Binary public using (Preorder ; Transitive ; IsEquivalence ; Rel)
+
+equalityIsEquivalence : {ℓ : Level} {A : Set ℓ} → IsEquivalence {A = A} _≡_
+IsEquivalence.refl  equalityIsEquivalence = refl
+IsEquivalence.sym   equalityIsEquivalence = sym
+IsEquivalence.trans equalityIsEquivalence = trans
+
+IsPreorder
+  : {a ℓ : Level} {A : Set a}
+  → (_∼_ : Rel A ℓ) -- The relation.
+  → Set _
+IsPreorder _~_ = Relation.Binary.IsPreorder _≡_ _~_

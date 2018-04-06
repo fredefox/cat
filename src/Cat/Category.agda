@@ -120,6 +120,15 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     Univalent : Set (ℓa ⊔ ℓb)
     Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (idToIso A B)
 
+    import Cat.Equivalence as E
+    open E public using () renaming (Isomorphism to TypeIsomorphism)
+    open E using (module Equiv≃)
+    open Equiv≃ using (fromIso)
+
+    univalenceFromIsomorphism : {A B : Object}
+      → TypeIsomorphism (idToIso A B) → isEquiv (A ≡ B) (A ≅ B) (idToIso A B)
+    univalenceFromIsomorphism = fromIso _ _
+
     -- A perhaps more readable version of univalence:
     Univalent≃ = {A B : Object} → (A ≡ B) ≃ (A ≅ B)
 
@@ -243,6 +252,34 @@ record IsPreCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (ls
       cp = lemPropF prop fp
       res : (fx , cx) ≡ (fy , cy)
       res i = fp i , cp i
+
+  module _ where
+    private
+      trans≅ : Transitive _≅_
+      trans≅ (f , f~ , f-inv) (g , g~ , g-inv)
+        = g ∘ f
+        , f~ ∘ g~
+        , ( begin
+            (f~ ∘ g~) ∘ (g ∘ f) ≡⟨ isAssociative ⟩
+            (f~ ∘ g~) ∘ g ∘ f ≡⟨ cong (λ φ → φ ∘ f) (sym isAssociative) ⟩
+            f~ ∘ (g~ ∘ g) ∘ f ≡⟨ cong (λ φ → f~ ∘ φ ∘ f) (fst g-inv) ⟩
+            f~ ∘ identity ∘ f ≡⟨ cong (λ φ → φ ∘ f) rightIdentity ⟩
+            f~ ∘ f           ≡⟨ fst f-inv ⟩
+            identity ∎
+          )
+        , ( begin
+            g ∘ f ∘ (f~ ∘ g~) ≡⟨ isAssociative ⟩
+            g ∘ f ∘ f~ ∘ g~ ≡⟨ cong (λ φ → φ ∘ g~) (sym isAssociative) ⟩
+            g ∘ (f ∘ f~) ∘ g~ ≡⟨ cong (λ φ → g ∘ φ ∘ g~) (snd f-inv) ⟩
+            g ∘ identity ∘ g~ ≡⟨ cong (λ φ → φ ∘ g~) rightIdentity ⟩
+            g ∘ g~ ≡⟨ snd g-inv ⟩
+            identity ∎
+          )
+      isPreorder : IsPreorder _≅_
+      isPreorder = record { isEquivalence = equalityIsEquivalence ; reflexive = idToIso _ _ ; trans = trans≅ }
+
+    preorder≅ : Preorder _ _ _
+    preorder≅ = record { Carrier = Object ; _≈_ = _≡_ ; _∼_ = _≅_ ; isPreorder = isPreorder }
 
 record PreCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   field

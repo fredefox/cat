@@ -7,7 +7,7 @@ open import Cubical.PathPrelude hiding (inverse ; _≃_)
 open import Cubical.PathPrelude using (isEquiv ; isContr ; fiber) public
 open import Cubical.GradLemma
 
-open import Cat.Prelude using (lemPropF ; setPi ; lemSig ; propSet)
+open import Cat.Prelude using (lemPropF ; setPi ; lemSig ; propSet ; Preorder ; equalityIsEquivalence)
 
 module _ {ℓa ℓb : Level} where
   private
@@ -278,6 +278,8 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
       a' = Equiv≃.toIso A B a
       b' = Equiv≃.toIso B C b
 
+  composeIso : {ℓc : Level} {C : Set ℓc} → (A ≅ B) → (B ≅ C) → A ≅ C
+  composeIso {C = C} (f , iso-f) (g , iso-g) = g ∘ f , composeIsomorphism iso-f iso-g
 
   -- Gives the quasi inverse from an equivalence.
   module Equivalence (e : A ≃ B) where
@@ -287,9 +289,6 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
       iso = snd (toIsomorphism e)
 
     open AreInverses (snd iso) public
-
-    composeIso : {ℓc : Level} {C : Set ℓc} → (B ≅ C) → A ≅ C
-    composeIso {C = C} (g , iso-g) = g ∘ obverse , composeIsomorphism iso iso-g
 
     compose : {ℓc : Level} {C : Set ℓc} → (B ≃ C) → A ≃ C
     compose (f , isEquiv) = f ∘ obverse , composeIsEquiv (snd e) isEquiv
@@ -307,6 +306,23 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
     symmetry = B≃A.fromIsomorphism symmetryIso
       where
       module B≃A = Equiv≃ B A
+
+preorder≅ : (ℓ : Level) → Preorder _ _ _
+preorder≅ ℓ = record
+  { Carrier = Set ℓ ; _≈_ = _≡_ ; _∼_ = _≅_
+  ; isPreorder = record
+    { isEquivalence = equalityIsEquivalence
+    ; reflexive = λ p
+      → coe p
+      , coe (sym p)
+      -- I believe I stashed the proof of this somewhere.
+      , record
+        { verso-recto = {!refl!}
+        ; recto-verso = {!!}
+        }
+    ; trans = composeIso
+    }
+  }
 
 module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
   open import Cubical.PathPrelude renaming (_≃_ to _≃η_)
