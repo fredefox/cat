@@ -142,252 +142,242 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     -- This is not so straight-forward so you can assume it
     postulate from[Contr] : Univalent[Contr] → Univalent
 
--- | The mere proposition of being a category.
---
--- Also defines a few lemmas:
---
---     iso-is-epi  : Isomorphism f → Epimorphism {X = X} f
---     iso-is-mono : Isomorphism f → Monomorphism {X = X} f
---
--- Sans `univalent` this would be what is referred to as a pre-category in
--- [HoTT].
-record IsPreCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
-  open RawCategory ℂ public
-  field
-    isAssociative : IsAssociative
-    isIdentity    : IsIdentity identity
-    arrowsAreSets : ArrowsAreSets
-  open Univalence isIdentity public
+module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
+  record IsPreCategory : Set (lsuc (ℓa ⊔ ℓb)) where
+    open RawCategory ℂ public
+    field
+      isAssociative : IsAssociative
+      isIdentity    : IsIdentity identity
+      arrowsAreSets : ArrowsAreSets
+    open Univalence isIdentity public
 
-  leftIdentity : {A B : Object} {f : Arrow A B} → identity ∘ f ≡ f
-  leftIdentity {A} {B} {f} = fst (isIdentity {A = A} {B} {f})
+    leftIdentity : {A B : Object} {f : Arrow A B} → identity ∘ f ≡ f
+    leftIdentity {A} {B} {f} = fst (isIdentity {A = A} {B} {f})
 
-  rightIdentity : {A B : Object} {f : Arrow A B} → f ∘ identity ≡ f
-  rightIdentity {A} {B} {f} = snd (isIdentity {A = A} {B} {f})
+    rightIdentity : {A B : Object} {f : Arrow A B} → f ∘ identity ≡ f
+    rightIdentity {A} {B} {f} = snd (isIdentity {A = A} {B} {f})
 
-  ------------
-  -- Lemmas --
-  ------------
+    ------------
+    -- Lemmas --
+    ------------
 
-  -- | Relation between iso- epi- and mono- morphisms.
-  module _ {A B : Object} {X : Object} (f : Arrow A B) where
-    iso→epi : Isomorphism f → Epimorphism {X = X} f
-    iso→epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
-      g₀              ≡⟨ sym rightIdentity ⟩
-      g₀ ∘ identity   ≡⟨ cong (_∘_ g₀) (sym right-inv) ⟩
-      g₀ ∘ (f ∘ f-)   ≡⟨ isAssociative ⟩
-      (g₀ ∘ f) ∘ f-   ≡⟨ cong (λ φ → φ ∘ f-) eq ⟩
-      (g₁ ∘ f) ∘ f-   ≡⟨ sym isAssociative ⟩
-      g₁ ∘ (f ∘ f-)   ≡⟨ cong (_∘_ g₁) right-inv ⟩
-      g₁ ∘ identity   ≡⟨ rightIdentity ⟩
-      g₁              ∎
+    -- | Relation between iso- epi- and mono- morphisms.
+    module _ {A B : Object} {X : Object} (f : Arrow A B) where
+      iso→epi : Isomorphism f → Epimorphism {X = X} f
+      iso→epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
+        g₀              ≡⟨ sym rightIdentity ⟩
+        g₀ ∘ identity   ≡⟨ cong (_∘_ g₀) (sym right-inv) ⟩
+        g₀ ∘ (f ∘ f-)   ≡⟨ isAssociative ⟩
+        (g₀ ∘ f) ∘ f-   ≡⟨ cong (λ φ → φ ∘ f-) eq ⟩
+        (g₁ ∘ f) ∘ f-   ≡⟨ sym isAssociative ⟩
+        g₁ ∘ (f ∘ f-)   ≡⟨ cong (_∘_ g₁) right-inv ⟩
+        g₁ ∘ identity   ≡⟨ rightIdentity ⟩
+        g₁              ∎
 
-    iso→mono : Isomorphism f → Monomorphism {X = X} f
-    iso→mono (f- , left-inv , right-inv) g₀ g₁ eq =
-      begin
-      g₀            ≡⟨ sym leftIdentity ⟩
-      identity ∘ g₀ ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
-      (f- ∘ f) ∘ g₀ ≡⟨ sym isAssociative ⟩
-      f- ∘ (f ∘ g₀) ≡⟨ cong (_∘_ f-) eq ⟩
-      f- ∘ (f ∘ g₁) ≡⟨ isAssociative ⟩
-      (f- ∘ f) ∘ g₁ ≡⟨ cong (λ φ → φ ∘ g₁) left-inv ⟩
-      identity ∘ g₁ ≡⟨ leftIdentity ⟩
-      g₁            ∎
+      iso→mono : Isomorphism f → Monomorphism {X = X} f
+      iso→mono (f- , left-inv , right-inv) g₀ g₁ eq =
+        begin
+        g₀            ≡⟨ sym leftIdentity ⟩
+        identity ∘ g₀ ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
+        (f- ∘ f) ∘ g₀ ≡⟨ sym isAssociative ⟩
+        f- ∘ (f ∘ g₀) ≡⟨ cong (_∘_ f-) eq ⟩
+        f- ∘ (f ∘ g₁) ≡⟨ isAssociative ⟩
+        (f- ∘ f) ∘ g₁ ≡⟨ cong (λ φ → φ ∘ g₁) left-inv ⟩
+        identity ∘ g₁ ≡⟨ leftIdentity ⟩
+        g₁            ∎
 
-    iso→epi×mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
-    iso→epi×mono iso = iso→epi iso , iso→mono iso
+      iso→epi×mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
+      iso→epi×mono iso = iso→epi iso , iso→mono iso
 
-  propIsAssociative : isProp IsAssociative
-  propIsAssociative = propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl λ _ → arrowsAreSets _ _))))))
+    propIsAssociative : isProp IsAssociative
+    propIsAssociative = propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl λ _ → arrowsAreSets _ _))))))
 
-  propIsIdentity : ∀ {f : ∀ {A} → Arrow A A} → isProp (IsIdentity f)
-  propIsIdentity = propPiImpl (λ _ → propPiImpl λ _ → propPiImpl (λ _ → propSig (arrowsAreSets _ _) λ _ → arrowsAreSets _ _))
+    propIsIdentity : ∀ {f : ∀ {A} → Arrow A A} → isProp (IsIdentity f)
+    propIsIdentity = propPiImpl (λ _ → propPiImpl λ _ → propPiImpl (λ _ → propSig (arrowsAreSets _ _) λ _ → arrowsAreSets _ _))
 
-  propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
-  propArrowIsSet = propPiImpl λ _ → propPiImpl (λ _ → isSetIsProp)
+    propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
+    propArrowIsSet = propPiImpl λ _ → propPiImpl (λ _ → isSetIsProp)
 
-  propIsInverseOf : ∀ {A B f g} → isProp (IsInverseOf {A} {B} f g)
-  propIsInverseOf = propSig (arrowsAreSets _ _) (λ _ → arrowsAreSets _ _)
+    propIsInverseOf : ∀ {A B f g} → isProp (IsInverseOf {A} {B} f g)
+    propIsInverseOf = propSig (arrowsAreSets _ _) (λ _ → arrowsAreSets _ _)
 
-  module _ {A B : Object} {f : Arrow A B} where
-    isoIsProp : isProp (Isomorphism f)
-    isoIsProp a@(g , η , ε) a'@(g' , η' , ε') =
-      lemSig (λ g → propIsInverseOf) a a' geq
+    module _ {A B : Object} {f : Arrow A B} where
+      isoIsProp : isProp (Isomorphism f)
+      isoIsProp a@(g , η , ε) a'@(g' , η' , ε') =
+        lemSig (λ g → propIsInverseOf) a a' geq
+          where
+            geq : g ≡ g'
+            geq = begin
+              g             ≡⟨ sym rightIdentity ⟩
+              g ∘ identity  ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
+              g ∘ (f ∘ g')  ≡⟨ isAssociative ⟩
+              (g ∘ f) ∘ g'  ≡⟨ cong (λ φ → φ ∘ g') η ⟩
+              identity ∘ g' ≡⟨ leftIdentity ⟩
+              g'            ∎
+
+    propIsInitial : ∀ I → isProp (IsInitial I)
+    propIsInitial I x y i {X} = res X i
+      where
+      module _ (X : Object) where
+        open Σ (x {X}) renaming (fst to fx ; snd to cx)
+        open Σ (y {X}) renaming (fst to fy ; snd to cy)
+        fp : fx ≡ fy
+        fp = cx fy
+        prop : (x : Arrow I X) → isProp (∀ f → x ≡ f)
+        prop x = propPi (λ y → arrowsAreSets x y)
+        cp : (λ i → ∀ f → fp i ≡ f) [ cx ≡ cy ]
+        cp = lemPropF prop fp
+        res : (fx , cx) ≡ (fy , cy)
+        res i = fp i , cp i
+
+    propIsTerminal : ∀ T → isProp (IsTerminal T)
+    propIsTerminal T x y i {X} = res X i
+      where
+      module _ (X : Object) where
+        open Σ (x {X}) renaming (fst to fx ; snd to cx)
+        open Σ (y {X}) renaming (fst to fy ; snd to cy)
+        fp : fx ≡ fy
+        fp = cx fy
+        prop : (x : Arrow X T) → isProp (∀ f → x ≡ f)
+        prop x = propPi (λ y → arrowsAreSets x y)
+        cp : (λ i → ∀ f → fp i ≡ f) [ cx ≡ cy ]
+        cp = lemPropF prop fp
+        res : (fx , cx) ≡ (fy , cy)
+        res i = fp i , cp i
+
+    module _ where
+      private
+        trans≅ : Transitive _≅_
+        trans≅ (f , f~ , f-inv) (g , g~ , g-inv)
+          = g ∘ f
+          , f~ ∘ g~
+          , ( begin
+              (f~ ∘ g~) ∘ (g ∘ f) ≡⟨ isAssociative ⟩
+              (f~ ∘ g~) ∘ g ∘ f ≡⟨ cong (λ φ → φ ∘ f) (sym isAssociative) ⟩
+              f~ ∘ (g~ ∘ g) ∘ f ≡⟨ cong (λ φ → f~ ∘ φ ∘ f) (fst g-inv) ⟩
+              f~ ∘ identity ∘ f ≡⟨ cong (λ φ → φ ∘ f) rightIdentity ⟩
+              f~ ∘ f           ≡⟨ fst f-inv ⟩
+              identity ∎
+            )
+          , ( begin
+              g ∘ f ∘ (f~ ∘ g~) ≡⟨ isAssociative ⟩
+              g ∘ f ∘ f~ ∘ g~ ≡⟨ cong (λ φ → φ ∘ g~) (sym isAssociative) ⟩
+              g ∘ (f ∘ f~) ∘ g~ ≡⟨ cong (λ φ → g ∘ φ ∘ g~) (snd f-inv) ⟩
+              g ∘ identity ∘ g~ ≡⟨ cong (λ φ → φ ∘ g~) rightIdentity ⟩
+              g ∘ g~ ≡⟨ snd g-inv ⟩
+              identity ∎
+            )
+        isPreorder : IsPreorder _≅_
+        isPreorder = record { isEquivalence = equalityIsEquivalence ; reflexive = idToIso _ _ ; trans = trans≅ }
+
+      preorder≅ : Preorder _ _ _
+      preorder≅ = record { Carrier = Object ; _≈_ = _≡_ ; _∼_ = _≅_ ; isPreorder = isPreorder }
+
+  record PreCategory : Set (lsuc (ℓa ⊔ ℓb)) where
+    field
+      isPreCategory  : IsPreCategory
+    open IsPreCategory isPreCategory public
+
+  -- Definition 9.6.1 in [HoTT]
+  record StrictCategory : Set (lsuc (ℓa ⊔ ℓb)) where
+    field
+      preCategory : PreCategory
+    open PreCategory preCategory
+    field
+      objectsAreSets : isSet Object
+
+  record IsCategory : Set (lsuc (ℓa ⊔ ℓb)) where
+    field
+      isPreCategory : IsPreCategory
+    open IsPreCategory isPreCategory public
+    field
+      univalent : Univalent
+
+    -- | The formulation of univalence expressed with _≃_ is trivially admissable -
+    -- just "forget" the equivalence.
+    univalent≃ : Univalent≃
+    univalent≃ = _ , univalent
+
+    module _ {A B : Object} where
+      open import Cat.Equivalence using (module Equiv≃)
+
+      iso-to-id : (A ≅ B) → (A ≡ B)
+      iso-to-id = fst (Equiv≃.toIso _ _ univalent)
+
+    -- | All projections are propositions.
+    module Propositionality where
+      propUnivalent : isProp Univalent
+      propUnivalent a b i = propPi (λ iso → propIsContr) a b i
+
+      -- | Terminal objects are propositional - a.k.a uniqueness of terminal
+      -- | objects.
+      --
+      -- Having two terminal objects induces an isomorphism between them - and
+      -- because of univalence this is equivalent to equality.
+      propTerminal : isProp Terminal
+      propTerminal Xt Yt = res
         where
-          geq : g ≡ g'
-          geq = begin
-            g             ≡⟨ sym rightIdentity ⟩
-            g ∘ identity  ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
-            g ∘ (f ∘ g')  ≡⟨ isAssociative ⟩
-            (g ∘ f) ∘ g'  ≡⟨ cong (λ φ → φ ∘ g') η ⟩
-            identity ∘ g' ≡⟨ leftIdentity ⟩
-            g'            ∎
+        open Σ Xt renaming (fst to X ; snd to Xit)
+        open Σ Yt renaming (fst to Y ; snd to Yit)
+        open Σ (Xit {Y}) renaming (fst to Y→X) using ()
+        open Σ (Yit {X}) renaming (fst to X→Y) using ()
+        open import Cat.Equivalence hiding (_≅_)
+        -- Need to show `left` and `right`, what we know is that the arrows are
+        -- unique. Well, I know that if I compose these two arrows they must give
+        -- the identity, since also the identity is the unique such arrow (by X
+        -- and Y both being terminal objects.)
+        Xprop : isProp (Arrow X X)
+        Xprop f g = trans (sym (snd Xit f)) (snd Xit g)
+        Yprop : isProp (Arrow Y Y)
+        Yprop f g = trans (sym (snd Yit f)) (snd Yit g)
+        left : Y→X ∘ X→Y ≡ identity
+        left = Xprop _ _
+        right : X→Y ∘ Y→X ≡ identity
+        right = Yprop _ _
+        iso : X ≅ Y
+        iso = X→Y , Y→X , left , right
+        fromIso : X ≅ Y → X ≡ Y
+        fromIso = fst (Equiv≃.toIso (X ≡ Y) (X ≅ Y) univalent)
+        p0 : X ≡ Y
+        p0 = fromIso iso
+        p1 : (λ i → IsTerminal (p0 i)) [ Xit ≡ Yit ]
+        p1 = lemPropF propIsTerminal p0
+        res : Xt ≡ Yt
+        res i = p0 i , p1 i
 
-  propIsInitial : ∀ I → isProp (IsInitial I)
-  propIsInitial I x y i {X} = res X i
-    where
-    module _ (X : Object) where
-      open Σ (x {X}) renaming (fst to fx ; snd to cx)
-      open Σ (y {X}) renaming (fst to fy ; snd to cy)
-      fp : fx ≡ fy
-      fp = cx fy
-      prop : (x : Arrow I X) → isProp (∀ f → x ≡ f)
-      prop x = propPi (λ y → arrowsAreSets x y)
-      cp : (λ i → ∀ f → fp i ≡ f) [ cx ≡ cy ]
-      cp = lemPropF prop fp
-      res : (fx , cx) ≡ (fy , cy)
-      res i = fp i , cp i
+      -- Merely the dual of the above statement.
 
-  propIsTerminal : ∀ T → isProp (IsTerminal T)
-  propIsTerminal T x y i {X} = res X i
-    where
-    module _ (X : Object) where
-      open Σ (x {X}) renaming (fst to fx ; snd to cx)
-      open Σ (y {X}) renaming (fst to fy ; snd to cy)
-      fp : fx ≡ fy
-      fp = cx fy
-      prop : (x : Arrow X T) → isProp (∀ f → x ≡ f)
-      prop x = propPi (λ y → arrowsAreSets x y)
-      cp : (λ i → ∀ f → fp i ≡ f) [ cx ≡ cy ]
-      cp = lemPropF prop fp
-      res : (fx , cx) ≡ (fy , cy)
-      res i = fp i , cp i
+      propInitial : isProp Initial
+      propInitial Xi Yi = res
+        where
+        open Σ Xi renaming (fst to X ; snd to Xii)
+        open Σ Yi renaming (fst to Y ; snd to Yii)
+        open Σ (Xii {Y}) renaming (fst to Y→X) using ()
+        open Σ (Yii {X}) renaming (fst to X→Y) using ()
+        open import Cat.Equivalence hiding (_≅_)
+        -- Need to show `left` and `right`, what we know is that the arrows are
+        -- unique. Well, I know that if I compose these two arrows they must give
+        -- the identity, since also the identity is the unique such arrow (by X
+        -- and Y both being terminal objects.)
+        Xprop : isProp (Arrow X X)
+        Xprop f g = trans (sym (snd Xii f)) (snd Xii g)
+        Yprop : isProp (Arrow Y Y)
+        Yprop f g = trans (sym (snd Yii f)) (snd Yii g)
+        left : Y→X ∘ X→Y ≡ identity
+        left = Yprop _ _
+        right : X→Y ∘ Y→X ≡ identity
+        right = Xprop _ _
+        iso : X ≅ Y
+        iso = Y→X , X→Y , right , left
+        fromIso : X ≅ Y → X ≡ Y
+        fromIso = fst (Equiv≃.toIso (X ≡ Y) (X ≅ Y) univalent)
+        p0 : X ≡ Y
+        p0 = fromIso iso
+        p1 : (λ i → IsInitial (p0 i)) [ Xii ≡ Yii ]
+        p1 = lemPropF propIsInitial p0
+        res : Xi ≡ Yi
+        res i = p0 i , p1 i
 
-  module _ where
-    private
-      trans≅ : Transitive _≅_
-      trans≅ (f , f~ , f-inv) (g , g~ , g-inv)
-        = g ∘ f
-        , f~ ∘ g~
-        , ( begin
-            (f~ ∘ g~) ∘ (g ∘ f) ≡⟨ isAssociative ⟩
-            (f~ ∘ g~) ∘ g ∘ f ≡⟨ cong (λ φ → φ ∘ f) (sym isAssociative) ⟩
-            f~ ∘ (g~ ∘ g) ∘ f ≡⟨ cong (λ φ → f~ ∘ φ ∘ f) (fst g-inv) ⟩
-            f~ ∘ identity ∘ f ≡⟨ cong (λ φ → φ ∘ f) rightIdentity ⟩
-            f~ ∘ f           ≡⟨ fst f-inv ⟩
-            identity ∎
-          )
-        , ( begin
-            g ∘ f ∘ (f~ ∘ g~) ≡⟨ isAssociative ⟩
-            g ∘ f ∘ f~ ∘ g~ ≡⟨ cong (λ φ → φ ∘ g~) (sym isAssociative) ⟩
-            g ∘ (f ∘ f~) ∘ g~ ≡⟨ cong (λ φ → g ∘ φ ∘ g~) (snd f-inv) ⟩
-            g ∘ identity ∘ g~ ≡⟨ cong (λ φ → φ ∘ g~) rightIdentity ⟩
-            g ∘ g~ ≡⟨ snd g-inv ⟩
-            identity ∎
-          )
-      isPreorder : IsPreorder _≅_
-      isPreorder = record { isEquivalence = equalityIsEquivalence ; reflexive = idToIso _ _ ; trans = trans≅ }
-
-    preorder≅ : Preorder _ _ _
-    preorder≅ = record { Carrier = Object ; _≈_ = _≡_ ; _∼_ = _≅_ ; isPreorder = isPreorder }
-
-record PreCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
-  field
-    raw            : RawCategory ℓa ℓb
-    isPreCategory  : IsPreCategory raw
-  open IsPreCategory isPreCategory public
-
--- Definition 9.6.1 in [HoTT]
-record StrictCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
-  field
-    preCategory : PreCategory ℓa ℓb
-  open PreCategory preCategory
-  field
-    objectsAreSets : isSet Object
-
-record IsCategory {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) : Set (lsuc (ℓa ⊔ ℓb)) where
-  field
-    isPreCategory : IsPreCategory ℂ
-  open IsPreCategory isPreCategory public
-  field
-    univalent : Univalent
-
-  -- | The formulation of univalence expressed with _≃_ is trivially admissable -
-  -- just "forget" the equivalence.
-  univalent≃ : Univalent≃
-  univalent≃ = _ , univalent
-
-  module _ {A B : Object} where
-    open import Cat.Equivalence using (module Equiv≃)
-
-    iso-to-id : (A ≅ B) → (A ≡ B)
-    iso-to-id = fst (Equiv≃.toIso _ _ univalent)
-
-  -- | All projections are propositions.
-  module Propositionality where
-    propUnivalent : isProp Univalent
-    propUnivalent a b i = propPi (λ iso → propIsContr) a b i
-
-    -- | Terminal objects are propositional - a.k.a uniqueness of terminal
-    -- | objects.
-    --
-    -- Having two terminal objects induces an isomorphism between them - and
-    -- because of univalence this is equivalent to equality.
-    propTerminal : isProp Terminal
-    propTerminal Xt Yt = res
-      where
-      open Σ Xt renaming (fst to X ; snd to Xit)
-      open Σ Yt renaming (fst to Y ; snd to Yit)
-      open Σ (Xit {Y}) renaming (fst to Y→X) using ()
-      open Σ (Yit {X}) renaming (fst to X→Y) using ()
-      open import Cat.Equivalence hiding (_≅_)
-      -- Need to show `left` and `right`, what we know is that the arrows are
-      -- unique. Well, I know that if I compose these two arrows they must give
-      -- the identity, since also the identity is the unique such arrow (by X
-      -- and Y both being terminal objects.)
-      Xprop : isProp (Arrow X X)
-      Xprop f g = trans (sym (snd Xit f)) (snd Xit g)
-      Yprop : isProp (Arrow Y Y)
-      Yprop f g = trans (sym (snd Yit f)) (snd Yit g)
-      left : Y→X ∘ X→Y ≡ identity
-      left = Xprop _ _
-      right : X→Y ∘ Y→X ≡ identity
-      right = Yprop _ _
-      iso : X ≅ Y
-      iso = X→Y , Y→X , left , right
-      fromIso : X ≅ Y → X ≡ Y
-      fromIso = fst (Equiv≃.toIso (X ≡ Y) (X ≅ Y) univalent)
-      p0 : X ≡ Y
-      p0 = fromIso iso
-      p1 : (λ i → IsTerminal (p0 i)) [ Xit ≡ Yit ]
-      p1 = lemPropF propIsTerminal p0
-      res : Xt ≡ Yt
-      res i = p0 i , p1 i
-
-    -- Merely the dual of the above statement.
-
-    propInitial : isProp Initial
-    propInitial Xi Yi = res
-      where
-      open Σ Xi renaming (fst to X ; snd to Xii)
-      open Σ Yi renaming (fst to Y ; snd to Yii)
-      open Σ (Xii {Y}) renaming (fst to Y→X) using ()
-      open Σ (Yii {X}) renaming (fst to X→Y) using ()
-      open import Cat.Equivalence hiding (_≅_)
-      -- Need to show `left` and `right`, what we know is that the arrows are
-      -- unique. Well, I know that if I compose these two arrows they must give
-      -- the identity, since also the identity is the unique such arrow (by X
-      -- and Y both being terminal objects.)
-      Xprop : isProp (Arrow X X)
-      Xprop f g = trans (sym (snd Xii f)) (snd Xii g)
-      Yprop : isProp (Arrow Y Y)
-      Yprop f g = trans (sym (snd Yii f)) (snd Yii g)
-      left : Y→X ∘ X→Y ≡ identity
-      left = Yprop _ _
-      right : X→Y ∘ Y→X ≡ identity
-      right = Xprop _ _
-      iso : X ≅ Y
-      iso = Y→X , X→Y , right , left
-      fromIso : X ≅ Y → X ≡ Y
-      fromIso = fst (Equiv≃.toIso (X ≡ Y) (X ≅ Y) univalent)
-      p0 : X ≡ Y
-      p0 = fromIso iso
-      p1 : (λ i → IsInitial (p0 i)) [ Xii ≡ Yii ]
-      p1 = lemPropF propIsInitial p0
-      res : Xi ≡ Yi
-      res i = p0 i , p1 i
-
--- | Propositionality of being a category
 module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   open RawCategory ℂ
   open Univalence
@@ -442,10 +432,6 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       IsCategory.isPreCategory (done i)
         = propIsPreCategory X.isPreCategory Y.isPreCategory i
       IsCategory.univalent     (done i) = eqUni i
-      -- IsCategory.isAssociative (done i) = Prop.propIsAssociative X.isAssociative Y.isAssociative i
-      -- IsCategory.isIdentity    (done i) = isIdentity i
-      -- IsCategory.arrowsAreSets (done i) = Prop.propArrowIsSet X.arrowsAreSets Y.arrowsAreSets i
-      -- IsCategory.univalent     (done i) = eqUni i
 
   propIsCategory : isProp (IsCategory ℂ)
   propIsCategory = done

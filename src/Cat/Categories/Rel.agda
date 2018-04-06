@@ -163,6 +163,5 @@ IsPreCategory.isAssociative isPreCategory = funExt is-isAssociative
 IsPreCategory.isIdentity    isPreCategory = funExt ident-l , funExt ident-r
 IsPreCategory.arrowsAreSets isPreCategory = {!!}
 
-Rel : PreCategory _ _
-PreCategory.raw Rel = RawRel
+Rel : PreCategory RawRel
 PreCategory.isPreCategory Rel = isPreCategory
