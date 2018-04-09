@@ -121,9 +121,6 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     Univalent : Set (ℓa ⊔ ℓb)
     Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (idToIso A B)
 
-    import Cat.Equivalence as E
-    open E public using () renaming (Isomorphism to TypeIsomorphism)
-
     univalenceFromIsomorphism : {A B : Object}
       → TypeIsomorphism (idToIso A B) → isEquiv (A ≡ B) (A ≅ B) (idToIso A B)
     univalenceFromIsomorphism = fromIso _ _
@@ -305,6 +302,9 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       iso-to-id : (A ≅ B) → (A ≡ B)
       iso-to-id = fst (toIso _ _ univalent)
 
+      asTypeIso : TypeIsomorphism (idToIso A B)
+      asTypeIso = toIso _ _ univalent
+
     -- | All projections are propositions.
     module Propositionality where
       -- | Terminal objects are propositional - a.k.a uniqueness of terminal
@@ -333,10 +333,8 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         right = Yprop _ _
         iso : X ≅ Y
         iso = X→Y , Y→X , left , right
-        fromIso' : X ≅ Y → X ≡ Y
-        fromIso' = fst (toIso (X ≡ Y) (X ≅ Y) univalent)
         p0 : X ≡ Y
-        p0 = fromIso' iso
+        p0 = iso-to-id iso
         p1 : (λ i → IsTerminal (p0 i)) [ Xit ≡ Yit ]
         p1 = lemPropF propIsTerminal p0
         res : Xt ≡ Yt
@@ -365,14 +363,8 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         right = Xprop _ _
         iso : X ≅ Y
         iso = Y→X , X→Y , right , left
-        fromIso' : X ≅ Y → X ≡ Y
-        fromIso' = fst (toIso (X ≡ Y) (X ≅ Y) univalent)
-        p0 : X ≡ Y
-        p0 = fromIso' iso
-        p1 : (λ i → IsInitial (p0 i)) [ Xii ≡ Yii ]
-        p1 = lemPropF propIsInitial p0
         res : Xi ≡ Yi
-        res i = p0 i , p1 i
+        res = lemSig propIsInitial _ _ (iso-to-id iso)
 
 module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   open RawCategory ℂ
@@ -495,72 +487,62 @@ module Opposite {ℓa ℓb : Level} where
       module _ {A B : ℂ.Object} where
         k : Equivalence.Isomorphism (ℂ.idToIso A B)
         k = toIso _ _ ℂ.univalent
-        open Σ k renaming (fst to f ; snd to inv)
-        open AreInverses inv
+        open Σ k renaming (fst to η ; snd to inv-η)
+        open AreInverses inv-η
 
         _⊙_ = Function._∘_
         infixr 9 _⊙_
 
-        -- f    : A ℂ.≅ B → A ≡ B
-        flipDem : A ≅ B → A ℂ.≅ B
-        flipDem (f , g , inv) = g , f , inv
+        genericly : {ℓa ℓb ℓc : Level} {a : Set ℓa} {b : Set ℓb} {c : Set ℓc}
+          → a × b × c → b × a × c
+        genericly (a , b , c) = (b , a , c)
 
-        flopDem : A ℂ.≅ B → A ≅ B
-        flopDem (f , g , inv) = g , f , inv
+        shuffle : A ≅ B → A ℂ.≅ B
+        shuffle (f , g , inv) = g , f , inv
+
+        shuffle~ : A ℂ.≅ B → A ≅ B
+        shuffle~ (f , g , inv) = g , f , inv
 
         -- Shouldn't be necessary to use `arrowsAreSets` here, but we have it,
         -- so why not?
-        lem : (p : A ≡ B) → idToIso A B p ≡ flopDem (ℂ.idToIso A B p)
-        lem p i = l≡r i
+        lem : (p : A ≡ B) → idToIso A B p ≡ shuffle~ (ℂ.idToIso A B p)
+        lem p = Σ≡ refl (Σ≡ refl (Σ≡ (ℂ.arrowsAreSets _ _ l-l r-l) (ℂ.arrowsAreSets _ _ l-r r-r)))
           where
           l = idToIso A B p
-          r = flopDem (ℂ.idToIso A B p)
+          r = shuffle~ (ℂ.idToIso A B p)
           open Σ l renaming (fst to l-obv ; snd to l-areInv)
           open Σ l-areInv renaming (fst to l-invs ; snd to l-iso)
           open Σ l-iso renaming (fst to l-l ; snd to l-r)
           open Σ r renaming (fst to r-obv ; snd to r-areInv)
           open Σ r-areInv renaming (fst to r-invs ; snd to r-iso)
           open Σ r-iso renaming (fst to r-l ; snd to r-r)
-          l-obv≡r-obv : l-obv ≡ r-obv
-          l-obv≡r-obv = refl
-          l-invs≡r-invs : l-invs ≡ r-invs
-          l-invs≡r-invs = refl
-          l-l≡r-l : l-l ≡ r-l
-          l-l≡r-l = ℂ.arrowsAreSets _ _ l-l r-l
-          l-r≡r-r : l-r ≡ r-r
-          l-r≡r-r = ℂ.arrowsAreSets _ _ l-r r-r
-          l≡r : l ≡ r
-          l≡r i = l-obv≡r-obv i , l-invs≡r-invs i , l-l≡r-l i , l-r≡r-r i
 
-        ff : A ≅ B → A ≡ B
-        ff = f ⊙ flipDem
+        ζ : A ≅ B → A ≡ B
+        ζ = η ⊙ shuffle
 
         -- inv : AreInverses (ℂ.idToIso A B) f
-        invv : AreInverses (idToIso A B) ff
+        inv-ζ : AreInverses (idToIso A B) ζ
         -- recto-verso : ℂ.idToIso A B ∘ f ≡ idFun (A ℂ.≅ B)
-        invv = record
+        inv-ζ = record
           { verso-recto = funExt (λ x → begin
-            (ff ⊙ idToIso A B) x                       ≡⟨⟩
-            (f  ⊙ flipDem ⊙ idToIso A B) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → f ⊙ flipDem ⊙ φ) (funExt lem)) ⟩
-            (f  ⊙ flipDem ⊙ flopDem ⊙ ℂ.idToIso A B) x ≡⟨⟩
-            (f  ⊙ ℂ.idToIso A B) x                     ≡⟨ (λ i → verso-recto i x) ⟩
+            (ζ ⊙ idToIso A B) x                       ≡⟨⟩
+            (η  ⊙ shuffle ⊙ idToIso A B) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → η ⊙ shuffle ⊙ φ) (funExt lem)) ⟩
+            (η  ⊙ shuffle ⊙ shuffle~ ⊙ ℂ.idToIso A B) x ≡⟨⟩
+            (η  ⊙ ℂ.idToIso A B) x                     ≡⟨ (λ i → verso-recto i x) ⟩
             x ∎)
           ; recto-verso = funExt (λ x → begin
-            (idToIso A B ⊙ f ⊙ flipDem) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → φ ⊙ f ⊙ flipDem) (funExt lem)) ⟩
-            (flopDem ⊙ ℂ.idToIso A B ⊙ f ⊙ flipDem) x ≡⟨ cong (λ φ → φ x) (cong (λ φ → flopDem ⊙ φ ⊙ flipDem) recto-verso) ⟩
-            (flopDem ⊙ flipDem) x                       ≡⟨⟩
+            (idToIso A B ⊙ η ⊙ shuffle) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → φ ⊙ η ⊙ shuffle) (funExt lem)) ⟩
+            (shuffle~ ⊙ ℂ.idToIso A B ⊙ η ⊙ shuffle) x ≡⟨ cong (λ φ → φ x) (cong (λ φ → shuffle~ ⊙ φ ⊙ shuffle) recto-verso) ⟩
+            (shuffle~ ⊙ shuffle) x                       ≡⟨⟩
             x ∎)
           }
 
         h : Equivalence.Isomorphism (idToIso A B)
-        h = ff , invv
-        univalent : isEquiv (A ≡ B) (A ≅ B)
-          (Univalence.idToIso (swap ℂ.isIdentity) A B)
-        univalent = fromIso _ _ h
+        h = ζ , inv-ζ
 
       isCategory : IsCategory opRaw
       IsCategory.isPreCategory isCategory = isPreCategory
-      IsCategory.univalent     isCategory = univalent
+      IsCategory.univalent     isCategory = univalenceFromIsomorphism h
 
     opposite : Category ℓa ℓb
     Category.raw        opposite = opRaw
