@@ -10,12 +10,15 @@ Prove that these two formulations of univalence are equivalent:
     ∀ A   → isContr (Σ[ X ∈ Object ] A ≅ X)
 
 Prove univalence for the category of
-  * the opposite category
   * functors and natural transformations
 
 Prove:
   * `isProp (Product ...)`
   * `isProp (HasProducts ...)`
+
+Rename composition in categories
+
+In stead of using AreInverses, just use a sigma-type
 
 Ideas for future work
 ---------------------
