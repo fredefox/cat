@@ -29,7 +29,11 @@
 module Cat.Category where
 
 open import Cat.Prelude
-open import Cat.Equivalence as Equivalence renaming (_≅_ to _≈_ ; Isomorphism to TypeIsomorphism) hiding (preorder≅)
+import Cat.Equivalence
+open Cat.Equivalence public using () renaming (Isomorphism to TypeIsomorphism)
+open Cat.Equivalence
+  renaming (_≅_ to _≈_)
+  hiding (preorder≅ ; Isomorphism)
 
 import Function
 
@@ -485,7 +489,7 @@ module Opposite {ℓa ℓb : Level} where
       open IsPreCategory isPreCategory
 
       module _ {A B : ℂ.Object} where
-        k : Equivalence.Isomorphism (ℂ.idToIso A B)
+        k : TypeIsomorphism (ℂ.idToIso A B)
         k = toIso _ _ ℂ.univalent
         open Σ k renaming (fst to η ; snd to inv-η)
         open AreInverses inv-η
@@ -537,7 +541,7 @@ module Opposite {ℓa ℓb : Level} where
             x ∎)
           }
 
-        h : Equivalence.Isomorphism (idToIso A B)
+        h : TypeIsomorphism (idToIso A B)
         h = ζ , inv-ζ
 
       isCategory : IsCategory opRaw

@@ -209,3 +209,6 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
   Monoidal≃Kleisli : M.Monad ≃ K.Monad
   Monoidal≃Kleisli = forth , eqv
+
+  Monoidal≡Kleisli : M.Monad ≡ K.Monad
+  Monoidal≡Kleisli = ua (forth , eqv)

@@ -172,9 +172,6 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         where
         t' : ((Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad {omap} {pure})
           ≡ §2-3.§2.toMonad
-        cong-d : ∀ {ℓ} {A : Set ℓ} {ℓ'} {B : A → Set ℓ'} {x y : A}
-          → (f : (x : A) → B x) → (eq : x ≡ y) → PathP (\ i → B (eq i)) (f x) (f y)
-        cong-d f p = λ i → f (p i)
         t' = cong (\ φ → φ ∘ §2-3.§2.toMonad) re-ve
         t : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad {omap} {pure})
           ≡ (§2-fromMonad ∘ §2-3.§2.toMonad)

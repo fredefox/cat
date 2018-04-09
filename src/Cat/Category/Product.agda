@@ -203,12 +203,15 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         : ((X , xa , xb) ≡ (Y , ya , yb))
         ≈ (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
       step0
-        = (λ p → (λ i → fst (p i)) , (λ i → fst (snd (p i))) , (λ i → snd (snd (p i))))
-        , (λ x  → λ i → fst x i , (fst (snd x) i) , (snd (snd x) i))
+        = (λ p → cong fst p , cong-d (fst ⊙ snd) p , cong-d (snd ⊙ snd) p)
+        -- , (λ x  → λ i → fst x i , (fst (snd x) i) , (snd (snd x) i))
+        , (λ{ (p , q , r) → Σ≡ p λ i → q i , r i})
         , record
           { verso-recto = {!!}
           ; recto-verso = {!!}
           }
+          where
+          open import Function renaming (_∘_ to _⊙_)
       step1
         : (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
         ≈ Σ (X ℂ.≅ Y) (λ iso
