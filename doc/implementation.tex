@@ -74,7 +74,7 @@ content, two witnesses must be the same. All the proofs are really quite
 mechanical. Lets have a look at one of them: The identity law states that:
 %
 $$
-\prod_{A\ B \tp \Object} \prod_{f \tp A \to B} \id \comp f \equiv f \x f \id \equiv f
+\prod_{A\ B \tp \Object} \prod_{f \tp A \to B} \id \comp f \equiv f \x f \comp \id \equiv f
 $$
 %
 There are multiple ways to prove this. Perhaps one of the more intuitive proofs
@@ -88,204 +88,480 @@ I.e.; pi-types preserve propositionality when the co-domain is always a
 proposition.
 %
 $$
-\mathit{propSig} \tp \isProp\ A \to \left(\prod_{a : A} \isProp\ (P\ a)\right) \to \isProp\ \left(\sum_{a \tp A} P\ a\right)
+\mathit{propSig} \tp \isProp\ A \to \left(\prod_{a \tp A} \isProp\ (P\ a)\right) \to \isProp\ \left(\sum_{a \tp A} P\ a\right)
 $$
 %
 I.e.; sigma-types preserve propositionality whenever it's first component is a
 proposition, and it's second component is always a proposition for all points of
 in the left type.
 
-Defines the basic notion of a category. This definition
-closely follows that of [HoTT]: That is, the standard definition of a category
-(data; objects, arrows, composition and identity, laws; preservation of identity
-and composition) plus the extra condition that it is univalent - namely that you
-can get an equality of two objects from an isomorphism.
+So the proof goes like this: We `eliminate' the 3 function abstractions by
+applying $\propPi$ three times, then we eliminate the (non-dependent) sigma-type
+by applying $\propSig$ and are thus left with the two proof-obligations:
+$\isProp\ (\id \comp f \equiv f)$ and $\isProp\ (f \comp \id \equiv f)$ which
+follows from the type of arrows being a set.
 
-\subsubsection{Functors}
-Defines the notion of a functor - also split up into data and laws.
+This example illustrates nicely how we can use these combinators to reason about
+`canonical' types like $\sum$ and $\prod$. Similiar combinators can be defined
+at the other homotopic levels. These combinators are however not applicable in
+situations where we want to reason about other types - e.g. types we've defined
+ourselves. For instance, after we've proven that all the projections of
+pre-categories are propositions, we would like to bundle this up to show that
+the type of pre-categories is also a proposition. Since pre-categories are not
+formulates with a chain of sigma-types we wont have any combinators available to
+help us here. In stead we'll use the path-type directly.
 
-Propositionality for being a functor.
-
-Composition of functors and the identity functor.
-
-\subsubsection{Products}
-Definition of what it means for an object to be a product in a given category.
-
-Definition of what it means for a category to have all products.
-
-\WIP{} Prove propositionality for being a product and having products.
-
-\subsubsection{Exponentials}
-Definition of what it means to be an exponential object.
-
-Definition of what it means for a category to have all exponential objects.
-
-\subsubsection{Cartesian closed categories}
-Definition of what it means for a category to be cartesian closed; namely that
-it has all products and all exponentials.
-
-\subsubsection{Natural transformations}
-Definition of transformations\footnote{Maybe this is a name I made up for a
-  family of morphisms} and the naturality condition for these.
-
-Proof that naturality is a mere proposition and the accompanying equality
-principle. Proof that natural transformations are homotopic sets.
-
-The identity natural transformation.
-
-\subsubsection{Yoneda embedding}
-
-The yoneda embedding is typically presented in terms of the category of
-categories (cf. Awodey) \emph however this is not stricly needed - all we need
-is what would be the exponential object in that category - this happens to be
-functors and so this is how we define the yoneda embedding.
-
-\subsubsection{Monads}
-
-Defines an equivalence between these two formulations of a monad:
-
-\subsubsubsection{Monoidal monads}
-
-Defines the standard monoidal representation of a monad:
-
-An endofunctor with two natural transformations (called ``pure'' and ``join'')
-and some laws about these natural transformations.
-
-Propositionality proofs and equality principle is provided.
-
-\subsubsubsection{Kleisli monads}
-
-A presentation of monads perhaps more familiar to a functional programer:
-
-A map on objects and two maps on morphisms (called ``pure'' and ``bind'') and
-some laws about these maps.
-
-Propositionality proofs and equality principle is provided.
-
-\subsubsubsection{Voevodsky's construction}
-
-Provides construction 2.3 as presented in an unpublished paper by Vladimir
-Voevodsky. This construction is similiar to the equivalence provided for the two
-preceding formulations
-\footnote{ TODO: I would like to include in the thesis some motivation for why
-  this construction is particularly interesting.}
-
-\subsubsection{Homotopy sets}
-The typical category of sets where the objects are modelled by an Agda set
-(henceforth ``$\Type$'') at a given level is not a valid category in this cubical
-settings, we need to restrict the types to be those that are homotopy sets. Thus
-the objects of this category are:
+What we want to prove is:
 %
-$$\hSet_\ell \defeq \sum_{A \tp \MCU_\ell} \isSet\ A$$
+$$
+\isProp\ \IsPreCategory
+$$
 %
-The definition of univalence for categories I have defined is:
+Which is judgmentally the same as
 %
-$$\isEquiv\ (\hA \equiv \hB)\ (\hA \cong \hB)\ \idToIso$$
+$$
+\prod_{a\ b \tp \IsPreCategory} a \equiv b
+$$
 %
-Where $\hA and \hB$ denote objects in the category. Note that this is stronger
-than
+So let $a\ b \tp \IsPreCategory$ be given. To prove the equality $a \equiv b$ is
+to give a continuous path from the index-type into path-space - in this case
+$\IsPreCategory$. This path must satisfy being being judgmentally the same as
+$a$ at the left endpoint and $b$ at the right endpoint. I.e. a function $I \to
+\IsPreCategory$. We know we can form a continuous path between all projections
+of $a$ and $b$, this follows from the type of all the projections being mere
+propositions. For instance, the path between $\isIdentity_a$ and $\isIdentity_b$
+is simply formed by:
 %
-$$(\hA \equiv \hB) \simeq (\hA \cong \hB)$$
+$$
+\propIsIdentity\ \isIdentity_a\ \isIdentity_b \tp \isIdentity_a \equiv \isIdentity_b
+$$
 %
-Because we require that the equivalence is constructed from the witness to:
+So to give the continuous function $I \to \IsPreCategory$ that is our goal we
+introduce $i \tp I$ and proceed by constructing an element of $\IsPreCategory$
+by using that all the projections are propositions to generate paths between all
+projections. Once we have such a path e.g. $p : \isIdentity_a \equiv
+\isIdentity_b$ we can elimiate it with $i$ and thus obtaining $p\ i \tp
+\isIdentity_{p\ i}$ and this element satisfies exactly that it corresponds to
+the corresponding projections at either endpoint. Thus the element we construct
+at $i$ becomes:
 %
-$$\id \comp f \equiv f \x f \comp \id \equiv f$$
+\begin{align*}
+  & \{\ \mathit{propIsAssociative}\   \mathit{isAssociative}_x\
+       \mathit{isAssociative}_y\ i  \\
+  & ,\  \mathit{propIsIdentity}\      \mathit{isIdentity}_x\
+       \mathit{isIdentity}_y\ i  \\
+  & ,\  \mathit{propArrowsAreSets}\ \mathit{arrowsAreSets}_x\
+       \mathit{arrowsAreSets}_y\ i  \\
+  & \}
+\end{align*}
 %
-And indeed univalence does not follow immediately from univalence for types:
-%
-$$(A \equiv B) \simeq (A \simeq B)$$
-%
-Because $A\ B \tp \Type$ whereas $\hA\ \hB \tp \hSet$.
+I've found that this to be a general pattern when proving things in homotopy
+type theory, namely that you have to wrap and unwrap equalities at different
+levels. It is worth noting that proving this theorem with the regular inductive
+equality type would already not be possible, since we at least need
+extensionality (the projections are all $\prod$-types). Assuming we had
+functional extensionality available to us as an axiom, we would use functional
+extensionality (in reverse?) to retreive the equalities in $a$ and $b$,
+pattern-match on them to see that they are both $\mathit{refl}$ and then close
+the proof with $\mathit{refl}$. Of course this theorem is not so interesting in
+the setting of ITT since we know a priori that equality proofs are unique.
 
-For this reason I have shown that this category satisfies the following
-equivalent formulation of being univalent:
+The situation is a bit more complicated when we have a dependent type. For
+instance, when we want to show that $\IsCategory$ is a mere proposition.
+$\IsCategory$ is a record with two fields, a witness to being a pre-category and
+the univalence condition. Recall that the univalence condition is indexed by the
+identity-proof. So if we follow the same recipe as above, let $a\ b \tp
+\IsCategory$, to show them equal, we now need to give two paths. One homogenous:
 %
-$$\prod_{A \tp hSet} \isContr \left( \sum_{X \tp hSet} A \cong X \right)$$
+$$
+p_{\isPreCategory} \tp \isPreCategory_a \equiv \isPreCategory_b
+$$
 %
-But I have not shown that it is indeed equivalent to my former definition.
-\subsubsection{Categories}
-Note that this category does in fact not exist. In stead I provide the
-definition of the ``raw'' category as well as some of the laws.
+and one heterogeneous:
+%
+$$
+Path\ (\Gl i \to Univalent_{p\ i})\ \isPreCategory_a\ \isPreCategory_b
+$$
+%
+Which depends on the choice of $p_{\isPreCategory}$. The first of these we can
+provide since, as we have shown, $\IsPreCategory$ is a proposition. However,
+even though $\Univalent$ is also a proposition, we cannot use this directly to
+show the latter. This is becasue $\isProp$ talks about non-dependent paths. To
+`promote' this to a dependent path we can use another useful combinator;
+$\lemPropF$. Given a type $A \tp \MCU$ and a type family on $A$; $B : A \to
+\MCU$. Let $P$ be a proposition indexed by an element of $A$ and say we have a
+path between some two elements in $A$; $p : a_0 \equiv a_1$ then we can built a
+heterogeneous path between any two $b$'s at the endpoints:
+%
+$$
+Path\ (\Gl i \to B\ (p\ i))\ b0\ b1
+$$
+%
+where $b_0 \tp B a_0$ and $b_1 \tp B\ a_1$. This is quite a mouthful, but the
+example at present should serve as an illustration. In this case $A =
+\mathit{IsIdentity}\ \mathit{identity}$ and $B = \mathit{Univalent}$ we've shown
+that being a category is a proposition, a result that holds for any choice of
+identity proof. Finally we must provide a proof that the identity proofs at $a$
+and $b$ are indeed the same, this we can extract from $p_{\isPreCategory}$ by
+applying using congruence of paths: $\congruence\ \mathit{isIdentity}\
+p_{\isPreCategory}$
 
-Furthermore I provide some helpful lemmas about this raw category. For instance
-I have shown what would be the exponential object in such a category.
+When we have a proper category we can make precise the notion of ``identifying
+isomorphic types'' (TODO cite awodey here). That is, we can construct the
+function:
+%
+$$
+\isoToId \tp (A \cong B) \to (A \equiv B)
+$$
+%
+One application of this, and a perhaps somewhat surprising result, is that
+terminal objects are propositional. Intuitively; they do not have any
+interesting structure. The proof of this follows from the usual observation that
+any two terminal objects are isomorphic. The proof is omitted here, but the
+curious reader can check the implementation for the details. (TODO: The proof is
+a bit fun, should I include it?)
 
-These lemmas can be used to provide the actual exponential object in a context
-where we have a witness to this being a category. This is useful if this library
-is later extended to talk about higher categories.
+In the following I will demonstrate how to instantiate a category and
+subsequently why the result above is very useful to have when equating
+categories (TODO: This promise is not fulfilled immediately as I digress and
+talk about equivalences). So let us define the notion of the opposite category.
+This is arguably one of the simplest constructions of a category one can give.
+Let $\bC$ be a category, we then define a new category called the opposite of
+$\bC$; $\overline{\bC}$. It has the same objects and the same identity, an arrow
+from $A$ to $B$ in this category corresponds to an arrow from $B$ to $A$ in the
+underlying category. Function composition will then be reverse function
+composition from the underlying category.
 
-\subsubsection{Functors}
-The category of functors and natural transformations. An immediate corrolary is
-the set of presheaf categories.
+Showing that this forms a pre-category is rather straightforward. I'll state the
+laws in terms of the underlying category $\bC$:
+%
+$$
+h >>> (g >>> f) \equiv h >>> g >>> f
+$$
+%
+Since $>>>$ is reverse function composition this is just the symmetric version
+of associativity.
+%
+$$
+\matit{identity} >>> f \equiv f \x f >>> identity \equiv f
+$$
+This is just the swapped version of identity.
 
-\WIP{} I have not shown that the category of functors is univalent.
+Finally, that the arrows form sets just follows by flipping the order of the
+arguments. Or in other words since $\Hom_{A\ B}$ is a set for all $A\ B \tp
+\Object$ then so is $\Hom_{B\ A}$.
 
-\subsubsection{Relations}
-The category of relations. \WIP{} I have not shown that this category is
-univalent. Not sure I intend to do so either.
+Now, to show that this category is univalent is not as trivial. So I will
+digress at this point and talk about equivalences. We will return to this category in section ????.
 
-\subsubsection{Free category}
-The free category of a category. \WIP{} I have not shown that this category is
-univalent.
-
-\subsection{Current Challenges}
-Besides the items marked \WIP{} above I still feel a bit unsure about what to
-include in my report. Most of my work so far has been specifically about
-developing this library. Some ideas:
+\subsection{Equivalences}
+The usual notion of a function $f : A \to B$ having an inverses is:
+%
+$$
+\sum_{g : B \to A} f \comp g \equiv \identity_{B} \x g \comp f \equiv \identity_{A}
+$$
+%
+This is defined in \cite[p. 129]{hott-2013} and is referred to as the a
+quasi-inverse. At the same place \cite{hott-2013} gives an ``interface'' for
+what an equivalence $\isequiv : (A \to B) \to \MCU$ must supply:
 %
 \begin{itemize}
 \item
-  Modularity properties
+  $\qinv\ f \to \isequiv\ f$
 \item
-  Compare with setoid-approach to solve similiar problems.
+  $\isequiv\ f \to \qinv\ f$
 \item
-  How to structure an implementation to best deal with types that have no
-  structure (propositions) and those that do (sets and everything above)
+  $\isequiv\ f$ is a proposition
 \end{itemize}
 %
-\subsection{Ideas for future developments}
-\subsubsection{Higher categories}
-I only have a notion of (1-)categories. Perhaps it would be nice to also
-formalize higher categories.
+Having such an interface us to both 1) think rather abstractly about how to work
+with equivalences and 2) to use ad-hoc definitions of equivalences. The specific
+instantiation of $\isequiv$ as defined in \cite{cubical} is:
+%
+$$
+isEquiv\ f \defeq \prod_{b : B} \isContr\ (\fiber\ f\ b)
+$$
+where
+$$
+\fiber\ f\ b \defeq \sum_{a \tp A} b \equiv f\ a
+$$
+%
+I give it's definition here mainly for completeness, because as I stated we can
+move away from this specific instantiation and think about it more abstractly
+once we have shown that this definition actually works as an equivalence.
 
-\subsubsection{Hierarchy of concepts related to monads}
-In Haskell the type-class Monad sits in a hierarchy atop the notion of a functor
-and applicative functors. There's probably a similiar notion in the
-category-theoretic approach to developing this.
+The first function from the list of requirements we will call
+$\mathit{fromIsomorphism}$, this is known as $\mathit{gradLemma}$ in
+\cite{cubical} the second one we will refer to as $\mathit{toIsmorphism}$. It's
+implementation can be found in the sources. Likewise the proof that this
+equivalence is propositional can be found in my implementation.
 
-As I have already defined monads from these two perspectives, it would be
-interesting to take this idea even further and actually show how monads are
-related to applicative functors and functors. I'm not entirely sure how this
-would look in Agda though.
+So another way to provide a proof that a category is univalent is to give give
+an inverse to $\idToIso\ A\ B$. I want to stress here that the notion of an
+inverse at this point is conflated. There is the notion of an inverse in the
+context of a category (where the concept of functions are generalized to arrows)
+and, as here, an inverse as a regular type-theoretic function. This is
+particularly confusing because the function that one must give the inverse to
+has the type
+%
+$$
+(A \cong B) \to (A \equiv B)
+$$
+%
+where $\cong$ refers to ismorphism \emph{in the category}!
 
-\subsubsection{Use formulation on the standard library}
-I also thought it would be interesting to use this library to show certain
-properties about functors, applicative functors and monads used in the Agda
-Standard library. So I went ahead and tried to show that agda's standard
-library's notion of a functor (along with suitable laws) is equivalent to my
-formulation (in the category of homotopic sets). I ran into two problems here,
-however; the first one is that the standard library's notion of a functor is
-indexed by the object map:
+TODO: There is a lot more to say about equivalences!
+
+\subsection{Categories contd.}
+Back from this aside, we can now show that the opposite category is also
+univalent simply by showing that $\idToIso \tp (A \equiv B) \to (A \cong B)$ is
+an isomorphism (seen as a function). Dually we have that $\idToIso_{\bC} \tp (A
+\equiv B) \to (A \cong_{\bC} B)$ is an isomorphism. Let us denote it's inverse
+as $\eta \tp (A \cong_{\bC} B) \to (A \equiv B)$. If we squint we can see what
+we need is a way to go between $\cong$ and $\cong_{\bC}$, well, an inhabitant of
+$A \cong B$ is simply a pair of arrows $f$ being the isomorphism and $g$ it's
+inverse. In the present category $g$ will play the role of the isomorphism and
+$f$ will be the inverse. Similarly we can go in the opposite direction. These
+two functions are obviously inverses. Name them $\mathit{shuffle} \tp (A \cong
+B) \to (A \cong_{\bC} B)$ and $\mathit{shuffle}^{-1} : (A \cong_{\bC} B) \to (A
+\cong B)$ respectively.
+
+As the inverse of $\idToIso$ we will pick $\zeta \defeq \eta \comp
+\mathit{shuffle}$. The proof that they are inverses go as follows:
 %
-$$
-\Functor \tp (\Type \to \Type) \to \Type
-$$
-%
-Where $\Functor\ F$ has the member:
-%
-$$
-\fmap \tp (A \to B) \to F A \to F B
-$$
-%
-Whereas the object map in my definition is existentially quantified:
-%
-$$
-\Functor \tp \Type
-$$
-%
-And $\Functor$ has these members:
 \begin{align*}
-F     & \tp \Type \to \Type \\
-\fmap & \tp (A \to B) \to F A \to F B\}
+\zeta \comp \idToIso & \equiv
+\eta \comp \shuffle \comp \idToIso
+&& \text{by definition} \\
+%% ≡⟨ cong (λ φ → φ x) (cong (λ φ → η ⊙ shuffle ⊙ φ) (funExt lem)) ⟩ \\
+%
+& \equiv
+\eta \comp \shuffle \comp \inv{\shuffle} \comp \idToIso
+&& \text{lemma} \\
+%%   ≡⟨⟩ \\
+& \equiv
+\eta \comp \idToIso_{\bC}
+&& \text{$\shuffle$ is an isomorphism} \\
+%%   ≡⟨ (λ i → verso-recto i x) ⟩ \\
+& \equiv
+\identity
+&& \text{$\eta$ is an ismorphism} \\
 \end{align*}
 %
+The other direction is analogous.
+
+The lemma used in this proof show that $\idToIso \equiv \inv{\shuffle} \comp
+\idToIso_{\bC}$ it's a rather straight-forward proof since being-an-inverse-of
+is a proposition.
+
+So, in conclusion, we've shown that the opposite category is indeed a category.
+We can now proceed to show that this construction is an involution, namely:
+%
+$$
+\prod_{\bC : \Category} \left(\bC^T\right)^T \equiv \bC
+$$
+%
+As we've seen the laws in $\left(\bC^T\right)^T$ get quite involved.\footnote{We
+  haven't even seen the full story because we've used this `interface' for
+  equivalences.} Luckily they being a category is a proposition, so we need not
+concern ourselves with this bit when proving the above. We can use the equality
+principle for categories that lets us prove an equality just by giving an
+equality on the data-part. So, given a category $\bC$ what we must provide is
+the following proof:
+%
+$$
+\mathit{raw}\ \left(\bC^T\right)^T \equiv \mathit{raw}\ \bC
+$$
+%
+And these are judgmentally the same. I remind the reader that the left-hand side
+is constructed by flipping the arrows, an action that is certainly an
+involution.
+
+%% \subsubsection{Functors}
+%% Defines the notion of a functor - also split up into data and laws.
+
+%% Propositionality for being a functor.
+
+%% Composition of functors and the identity functor.
+
+%% \subsubsection{Products}
+%% Definition of what it means for an object to be a product in a given category.
+
+%% Definition of what it means for a category to have all products.
+
+%% \WIP{} Prove propositionality for being a product and having products.
+
+%% \subsubsection{Exponentials}
+%% Definition of what it means to be an exponential object.
+
+%% Definition of what it means for a category to have all exponential objects.
+
+%% \subsubsection{Cartesian closed categories}
+%% Definition of what it means for a category to be cartesian closed; namely that
+%% it has all products and all exponentials.
+
+%% \subsubsection{Natural transformations}
+%% Definition of transformations\footnote{Maybe this is a name I made up for a
+%%   family of morphisms} and the naturality condition for these.
+
+%% Proof that naturality is a mere proposition and the accompanying equality
+%% principle. Proof that natural transformations are homotopic sets.
+
+%% The identity natural transformation.
+
+%% \subsubsection{Yoneda embedding}
+
+%% The yoneda embedding is typically presented in terms of the category of
+%% categories (cf. Awodey) \emph however this is not stricly needed - all we need
+%% is what would be the exponential object in that category - this happens to be
+%% functors and so this is how we define the yoneda embedding.
+
+%% \subsubsection{Monads}
+
+%% Defines an equivalence between these two formulations of a monad:
+
+%% \subsubsubsection{Monoidal monads}
+
+%% Defines the standard monoidal representation of a monad:
+
+%% An endofunctor with two natural transformations (called ``pure'' and ``join'')
+%% and some laws about these natural transformations.
+
+%% Propositionality proofs and equality principle is provided.
+
+%% \subsubsubsection{Kleisli monads}
+
+%% A presentation of monads perhaps more familiar to a functional programer:
+
+%% A map on objects and two maps on morphisms (called ``pure'' and ``bind'') and
+%% some laws about these maps.
+
+%% Propositionality proofs and equality principle is provided.
+
+%% \subsubsubsection{Voevodsky's construction}
+
+%% Provides construction 2.3 as presented in an unpublished paper by Vladimir
+%% Voevodsky. This construction is similiar to the equivalence provided for the two
+%% preceding formulations
+%% \footnote{ TODO: I would like to include in the thesis some motivation for why
+%%   this construction is particularly interesting.}
+
+%% \subsubsection{Homotopy sets}
+%% The typical category of sets where the objects are modelled by an Agda set
+%% (henceforth ``$\Type$'') at a given level is not a valid category in this cubical
+%% settings, we need to restrict the types to be those that are homotopy sets. Thus
+%% the objects of this category are:
+%% %
+%% $$\hSet_\ell \defeq \sum_{A \tp \MCU_\ell} \isSet\ A$$
+%% %
+%% The definition of univalence for categories I have defined is:
+%% %
+%% $$\isEquiv\ (\hA \equiv \hB)\ (\hA \cong \hB)\ \idToIso$$
+%% %
+%% Where $\hA and \hB$ denote objects in the category. Note that this is stronger
+%% than
+%% %
+%% $$(\hA \equiv \hB) \simeq (\hA \cong \hB)$$
+%% %
+%% Because we require that the equivalence is constructed from the witness to:
+%% %
+%% $$\id \comp f \equiv f \x f \comp \id \equiv f$$
+%% %
+%% And indeed univalence does not follow immediately from univalence for types:
+%% %
+%% $$(A \equiv B) \simeq (A \simeq B)$$
+%% %
+%% Because $A\ B \tp \Type$ whereas $\hA\ \hB \tp \hSet$.
+
+%% For this reason I have shown that this category satisfies the following
+%% equivalent formulation of being univalent:
+%% %
+%% $$\prod_{A \tp hSet} \isContr \left( \sum_{X \tp hSet} A \cong X \right)$$
+%% %
+%% But I have not shown that it is indeed equivalent to my former definition.
+%% \subsubsection{Categories}
+%% Note that this category does in fact not exist. In stead I provide the
+%% definition of the ``raw'' category as well as some of the laws.
+
+%% Furthermore I provide some helpful lemmas about this raw category. For instance
+%% I have shown what would be the exponential object in such a category.
+
+%% These lemmas can be used to provide the actual exponential object in a context
+%% where we have a witness to this being a category. This is useful if this library
+%% is later extended to talk about higher categories.
+
+%% \subsubsection{Functors}
+%% The category of functors and natural transformations. An immediate corrolary is
+%% the set of presheaf categories.
+
+%% \WIP{} I have not shown that the category of functors is univalent.
+
+%% \subsubsection{Relations}
+%% The category of relations. \WIP{} I have not shown that this category is
+%% univalent. Not sure I intend to do so either.
+
+%% \subsubsection{Free category}
+%% The free category of a category. \WIP{} I have not shown that this category is
+%% univalent.
+
+%% \subsection{Current Challenges}
+%% Besides the items marked \WIP{} above I still feel a bit unsure about what to
+%% include in my report. Most of my work so far has been specifically about
+%% developing this library. Some ideas:
+%% %
+%% \begin{itemize}
+%% \item
+%%   Modularity properties
+%% \item
+%%   Compare with setoid-approach to solve similiar problems.
+%% \item
+%%   How to structure an implementation to best deal with types that have no
+%%   structure (propositions) and those that do (sets and everything above)
+%% \end{itemize}
+%% %
+%% \subsection{Ideas for future developments}
+%% \subsubsection{Higher categories}
+%% I only have a notion of (1-)categories. Perhaps it would be nice to also
+%% formalize higher categories.
+
+%% \subsubsection{Hierarchy of concepts related to monads}
+%% In Haskell the type-class Monad sits in a hierarchy atop the notion of a functor
+%% and applicative functors. There's probably a similiar notion in the
+%% category-theoretic approach to developing this.
+
+%% As I have already defined monads from these two perspectives, it would be
+%% interesting to take this idea even further and actually show how monads are
+%% related to applicative functors and functors. I'm not entirely sure how this
+%% would look in Agda though.
+
+%% \subsubsection{Use formulation on the standard library}
+%% I also thought it would be interesting to use this library to show certain
+%% properties about functors, applicative functors and monads used in the Agda
+%% Standard library. So I went ahead and tried to show that agda's standard
+%% library's notion of a functor (along with suitable laws) is equivalent to my
+%% formulation (in the category of homotopic sets). I ran into two problems here,
+%% however; the first one is that the standard library's notion of a functor is
+%% indexed by the object map:
+%% %
+%% $$
+%% \Functor \tp (\Type \to \Type) \to \Type
+%% $$
+%% %
+%% Where $\Functor\ F$ has the member:
+%% %
+%% $$
+%% \fmap \tp (A \to B) \to F A \to F B
+%% $$
+%% %
+%% Whereas the object map in my definition is existentially quantified:
+%% %
+%% $$
+%% \Functor \tp \Type
+%% $$
+%% %
+%% And $\Functor$ has these members:
+%% \begin{align*}
+%% F     & \tp \Type \to \Type \\
+%% \fmap & \tp (A \to B) \to F A \to F B\}
+%% \end{align*}
+%% %
