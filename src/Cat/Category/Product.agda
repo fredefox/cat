@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas --cubical #-}
+{-# OPTIONS --allow-unsolved-metas --cubical --caching #-}
 module Cat.Category.Product where
 
 open import Cat.Prelude as P hiding (_×_ ; fst ; snd)
@@ -183,7 +183,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       --     ; _∎ to _∎! )
       -- lawl
       --   : ((X , xa , xb) ≡ (Y , ya , yb))
-      --   ≈ (Σ[ iso ∈ (X ℂ.≅ Y) ] let p = ℂ.iso-to-id iso in (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
+      --   ≈ (Σ[ iso ∈ (X ℂ.≅ Y) ] let p = ℂ.isoToId iso in (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
       -- lawl = {!begin! ? ≈⟨ ? ⟩ ? ∎!!}
       -- Problem with the above approach: Preorders only work for heterogeneous equaluties.
 
@@ -192,7 +192,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       -- Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb)
       -- ≅
       -- Σ (X ℂ.≅ Y) (λ iso
-      --   → let p = ℂ.iso-to-id iso
+      --   → let p = ℂ.isoToId iso
       --   in
       --   ( PathP (λ i → ℂ.Arrow (p i) A) xa ya)
       --   × PathP (λ i → ℂ.Arrow (p i) B) xb yb
@@ -207,63 +207,104 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         -- , (λ x  → λ i → fst x i , (fst (snd x) i) , (snd (snd x) i))
         , (λ{ (p , q , r) → Σ≡ p λ i → q i , r i})
         , record
-          { verso-recto = {!!}
-          ; recto-verso = {!!}
+          { verso-recto = funExt (λ{ p → refl})
+          ; recto-verso = funExt (λ{ (p , q , r) → refl})
           }
           where
           open import Function renaming (_∘_ to _⊙_)
+
+      -- Should follow from c being univalent
+      iso-id-inv : {p : X ≡ Y} → p ≡ ℂ.isoToId (ℂ.idToIso X Y p)
+      iso-id-inv {p} = sym (λ i → AreInverses.verso-recto ℂ.inverse-from-to-iso' i p)
+      id-iso-inv : {iso : X ℂ.≅ Y} → iso ≡ ℂ.idToIso X Y (ℂ.isoToId iso)
+      id-iso-inv {iso} = sym (λ i → AreInverses.recto-verso ℂ.inverse-from-to-iso' i iso)
+
+      lemA : {A B : Object} {f g : Arrow A B} → fst f ≡ fst g → f ≡ g
+      lemA {A} {B} {f = f} {g} p i = p i , h i
+         where
+         h : PathP (λ i →
+           (ℂ [ fst (snd B) ∘ p i ]) ≡ fst (snd A) ×
+           (ℂ [ snd (snd B) ∘ p i ]) ≡ snd (snd A)
+           ) (snd f) (snd g)
+         h = lemPropF (λ a → propSig
+           (ℂ.arrowsAreSets (ℂ [ fst (snd B) ∘ a ]) (fst (snd A)))
+           λ _ → ℂ.arrowsAreSets (ℂ [ snd (snd B) ∘ a ]) (snd (snd A)))
+           p
+
       step1
         : (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
         ≈ Σ (X ℂ.≅ Y) (λ iso
-          → let p = ℂ.iso-to-id iso
+          → let p = ℂ.isoToId iso
           in
           ( PathP (λ i → ℂ.Arrow (p i) A) xa ya)
           × PathP (λ i → ℂ.Arrow (p i) B) xb yb
           )
       step1
-        = (λ{ (p , x) → (ℂ.idToIso _ _ p) , {!snd x!}})
+        = (λ{ (p , x)
+          → (ℂ.idToIso _ _ p)
+          , let
+             P-l : (p : X ≡ Y) → Set _
+             P-l φ = PathP (λ i → ℂ.Arrow (φ i) A) xa ya
+             P-r : (p : X ≡ Y) → Set _
+             P-r φ = PathP (λ i → ℂ.Arrow (φ i) B) xb yb
+             left  : P-l p
+             left = fst x
+             right : P-r p
+             right = snd x
+           in subst {P = P-l} iso-id-inv left , subst {P = P-r} iso-id-inv right
+          })
         -- Goal is:
         --
         --     φ x
         --
         -- where `x` is
         --
-        --   ℂ.iso-to-id (ℂ.idToIso _ _ p)
+        --   ℂ.isoToId (ℂ.idToIso _ _ p)
         --
         -- I have `φ p` in scope, but surely `p` and `x` are the same - though
         -- perhaps not definitonally.
-        , (λ{ (iso , x) → ℂ.iso-to-id iso , x})
-        , record { verso-recto = {!!} ; recto-verso = {!!} }
-      lemA : {A B : Object} {f g : Arrow A B} → fst f ≡ fst g → f ≡ g
-      lemA {A} {B} {f = f} {g} p i = p i , h i
-        where
-        h : PathP (λ i →
-            (ℂ [ fst (snd B) ∘ p i ]) ≡ fst (snd A) ×
-            (ℂ [ snd (snd B) ∘ p i ]) ≡ snd (snd A)
-          ) (snd f) (snd g)
-        h = lemPropF (λ a → propSig
-          (ℂ.arrowsAreSets (ℂ [ fst (snd B) ∘ a ]) (fst (snd A)))
-          λ _ → ℂ.arrowsAreSets (ℂ [ snd (snd B) ∘ a ]) (snd (snd A)))
-          p
+        , (λ{ (iso , x) → ℂ.isoToId iso , x})
+        , record
+          { verso-recto = funExt (λ{ (p , q , r) → Σ≡ (sym iso-id-inv) (toPathP {A = λ i → {!!}} {!!})})
+          -- { verso-recto = funExt (λ{ (p , q , r) → Σ≡ (sym iso-id-inv) {!!}})
+          ; recto-verso = funExt (λ x → Σ≡ (sym id-iso-inv) {!!})
+          }
       step2
         : Σ (X ℂ.≅ Y) (λ iso
-          → let p = ℂ.iso-to-id iso
+          → let p = ℂ.isoToId iso
           in
           ( PathP (λ i → ℂ.Arrow (p i) A) xa ya)
           × PathP (λ i → ℂ.Arrow (p i) B) xb yb
           )
         ≈ ((X , xa , xb) ≅ (Y , ya , yb))
       step2
-        = ( λ{ ((f , f~ , inv-f) , x)
-            → ( f , {!!})
-            , ( (f~ , {!!})
-              , lemA {!!}
-              , lemA {!!}
+        = ( λ{ ((f , f~ , inv-f) , p , q)
+          → ( f , (let r = fromPathP p in {!r!}) , {!!})
+            , ( (f~ , {!!} , {!!})
+              , lemA (fst inv-f)
+              , lemA (snd inv-f)
               )
             }
           )
-        , (λ x → {!!})
-        , {!!}
+        , (λ{ (f , f~ , inv-f , inv-f~) →
+          let
+            iso : X ℂ.≅ Y
+            iso = fst f , fst f~ , cong fst inv-f , cong fst inv-f~
+            helper : PathP (λ i → ℂ.Arrow (ℂ.isoToId ? i) A) xa ya
+            helper = {!!}
+          in iso , helper , {!!}})
+        , record
+          { verso-recto = funExt (λ x → lemSig
+            (λ x → propSig prop0 (λ _ → prop1))
+            _ _
+            (Σ≡ {!!} (ℂ.propIsomorphism _ _ _)))
+          ; recto-verso = funExt (λ{ (f , _) → lemSig propIsomorphism _ _ {!refl!}})
+          }
+          where
+          prop0 : ∀ {x} → isProp (PathP (λ i → ℂ.Arrow (ℂ.isoToId x i) A) xa ya)
+          prop0 {x} = pathJ (λ y p → ∀ x → isProp (PathP (λ i → ℂ.Arrow (p i) A) xa x)) (λ x → ℂ.arrowsAreSets _ _) Y (ℂ.isoToId x) ya
+          prop1 : ∀ {x} → isProp (PathP (λ i → ℂ.Arrow (ℂ.isoToId x i) B) xb yb)
+          prop1 {x} = pathJ (λ y p → ∀ x → isProp (PathP (λ i → ℂ.Arrow (p i) B) xb x)) (λ x → ℂ.arrowsAreSets _ _) Y (ℂ.isoToId x) yb
       -- One thing to watch out for here is that the isomorphisms going forwards
       -- must compose to give idToIso
       iso
@@ -273,8 +314,16 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         where
         infixl 5 _⊙_
         _⊙_ = composeIso
+      equiv1
+        : ((X , xa , xb) ≡ (Y , ya , yb))
+        ≃ ((X , xa , xb) ≅ (Y , ya , yb))
+      equiv1 = _ , fromIso _ _ (snd iso)
+
       res : TypeIsomorphism (idToIso (X , xa , xb) (Y , ya , yb))
-      res = {!snd iso!}
+      res = {!snd equiv1!}
+
+    univalent2 : ∀ X Y → (X ≅ Y) ≃ (X ≡ Y)
+    univalent2 = {!!}
 
     isCat : IsCategory raw
     IsCategory.isPreCategory isCat = isPreCat

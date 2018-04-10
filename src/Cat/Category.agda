@@ -136,11 +136,24 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     Univalent[Contr] : Set _
     Univalent[Contr] = ∀ A → isContr (Σ[ X ∈ Object ] A ≅ X)
 
+    Univalent[Andrea] : Set _
+    Univalent[Andrea] = ∀ A B → (A ≅ B) ≃ (A ≡ B)
+
     -- From: Thierry Coquand <Thierry.Coquand@cse.gu.se>
     -- Date: Wed, Mar 21, 2018 at 3:12 PM
     --
     -- This is not so straight-forward so you can assume it
     postulate from[Contr] : Univalent[Contr] → Univalent
+
+    from[Andrea] : Univalent[Andrea] → Univalent
+    from[Andrea] = from[Contr] Function.∘ step
+      where
+      module _ (f : Univalent[Andrea]) (A : Object) where
+        aux : isContr (Σ[ B ∈ Object ] A ≡ B)
+        aux = ?
+
+        step : isContr (Σ Object (A ≅_))
+        step = {!subst {P = isContr} {!!} aux!}
 
     propUnivalent : isProp Univalent
     propUnivalent a b i = propPi (λ iso → propIsContr) a b i
@@ -205,9 +218,9 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
     propIsInverseOf : ∀ {A B f g} → isProp (IsInverseOf {A} {B} f g)
     propIsInverseOf = propSig (arrowsAreSets _ _) (λ _ → arrowsAreSets _ _)
 
-    module _ {A B : Object} {f : Arrow A B} where
-      isoIsProp : isProp (Isomorphism f)
-      isoIsProp a@(g , η , ε) a'@(g' , η' , ε') =
+    module _ {A B : Object} (f : Arrow A B) where
+      propIsomorphism : isProp (Isomorphism f)
+      propIsomorphism a@(g , η , ε) a'@(g' , η' , ε') =
         lemSig (λ g → propIsInverseOf) a a' geq
           where
             geq : g ≡ g'
@@ -303,11 +316,18 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
     univalent≃ = _ , univalent
 
     module _ {A B : Object} where
-      iso-to-id : (A ≅ B) → (A ≡ B)
-      iso-to-id = fst (toIso _ _ univalent)
+      private
+        iso : TypeIsomorphism (idToIso A B)
+        iso = toIso _ _ univalent
+
+      isoToId : (A ≅ B) → (A ≡ B)
+      isoToId = fst iso
 
       asTypeIso : TypeIsomorphism (idToIso A B)
       asTypeIso = toIso _ _ univalent
+
+      inverse-from-to-iso' : AreInverses (idToIso A B) isoToId
+      inverse-from-to-iso' = snd iso
 
     -- | All projections are propositions.
     module Propositionality where
@@ -338,7 +358,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         iso : X ≅ Y
         iso = X→Y , Y→X , left , right
         p0 : X ≡ Y
-        p0 = iso-to-id iso
+        p0 = isoToId iso
         p1 : (λ i → IsTerminal (p0 i)) [ Xit ≡ Yit ]
         p1 = lemPropF propIsTerminal p0
         res : Xt ≡ Yt
@@ -368,7 +388,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         iso : X ≅ Y
         iso = Y→X , X→Y , right , left
         res : Xi ≡ Yi
-        res = lemSig propIsInitial _ _ (iso-to-id iso)
+        res = lemSig propIsInitial _ _ (isoToId iso)
 
 module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   open RawCategory ℂ
