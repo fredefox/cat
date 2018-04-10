@@ -150,7 +150,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
       where
       module _ (f : Univalent[Andrea]) (A : Object) where
         aux : isContr (Σ[ B ∈ Object ] A ≡ B)
-        aux = ?
+        aux = {!!}
 
         step : isContr (Σ Object (A ≅_))
         step = {!subst {P = isContr} {!!} aux!}
@@ -328,6 +328,21 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 
       inverse-from-to-iso' : AreInverses (idToIso A B) isoToId
       inverse-from-to-iso' = snd iso
+
+      -- lemma 9.1.9 in hott
+    module _ {a a' b b' : Object}
+      (p : a ≡ a') (q : b ≡ b') (f : Arrow a b)
+      where
+      private
+        q* : Arrow b b'
+        q* = fst (idToIso b b' q)
+        p~ : Arrow a' a
+        p~ = fst (snd (idToIso _ _ p))
+        pq : Arrow a b ≡ Arrow a' b'
+        pq i = Arrow (p i) (q i)
+
+      9-1-9 : coe pq f ≡ q* ∘ f ∘ p~
+      9-1-9 = transpP {!!} {!!}
 
     -- | All projections are propositions.
     module Propositionality where
