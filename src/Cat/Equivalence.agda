@@ -8,16 +8,9 @@ open import Cubical.PathPrelude hiding (inverse ; _≃_)
 open import Cubical.PathPrelude using (isEquiv ; isContr ; fiber) public
 open import Cubical.GradLemma
 
-open import Cat.Prelude using (lemPropF ; setPi ; lemSig ; propSet ; Preorder ; equalityIsEquivalence ; _≃_)
+open import Cat.Prelude using (lemPropF ; setPi ; lemSig ; propSet ; Preorder ; equalityIsEquivalence ; _≃_ ; propSig)
 
 import Cubical.Univalence as U
-
-module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
-  open Cubical.PathPrelude
-  deEta : A ≃ B → A U.≃ B
-  deEta (a , b) = U.con a b
-  doEta : A U.≃ B → A ≃ B
-  doEta (U.con eqv isEqv) = eqv , isEqv
 
 module _ {ℓ : Level} {A B : Set ℓ} where
   open Cubical.PathPrelude
@@ -40,18 +33,9 @@ module _ {ℓa ℓb : Level} where
       obverse = f
       reverse = g
       inverse = reverse
-      toPair : Σ _ _
-      toPair = verso-recto , recto-verso
 
     Isomorphism : (f : A → B) → Set _
     Isomorphism f = Σ (B → A) λ g → AreInverses f g
-
-    module _ {f : A → B} {g : B → A}
-        (inv : (g ∘ f) ≡ idFun A
-             × (f ∘ g) ≡ idFun B) where
-      open Σ inv renaming (fst to ve-re ; snd to re-ve)
-      toAreInverses : AreInverses f g
-      toAreInverses = ve-re , re-ve
 
   _≅_ : Set ℓa → Set ℓb → Set _
   A ≅ B = Σ (A → B) Isomorphism
@@ -127,7 +111,8 @@ module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
       fromIso (toIso x)   ≡⟨ propIsEquiv _ (fromIso (toIso x)) x ⟩
       x ∎
 
-    -- `toIso` is abstract - so I probably can't close this proof.
+    -- | The other inverse law does not hold in general, it does hold, however,
+    -- | if `A` and `B` are sets.
     module _ (sA : isSet A) (sB : isSet B) where
       module _ {f : A → B} (iso : Isomorphism f) where
         module _ (iso-x iso-y : Isomorphism f) where
@@ -275,26 +260,20 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
   composeIso : {ℓc : Level} {C : Set ℓc} → (A ≅ B) → (B ≅ C) → A ≅ C
   composeIso {C = C} (f , iso-f) (g , iso-g) = g ∘ f , composeIsomorphism iso-f iso-g
 
+  symmetryIso : (A ≅ B) → B ≅ A
+  symmetryIso (inverse , obverse , verso-recto , recto-verso)
+    = obverse
+    , inverse
+    , recto-verso
+    , verso-recto
+
   -- Gives the quasi inverse from an equivalence.
   module Equivalence (e : A ≃ B) where
-    private
-      iso : Isomorphism (fst e)
-      iso = snd (toIsomorphism _ _ e)
-
-    open AreInverses {f = fst e} {fst iso} (snd iso) public
-
     compose : {ℓc : Level} {C : Set ℓc} → (B ≃ C) → A ≃ C
-    compose (f , isEquiv) = f ∘ obverse , composeIsEquiv (snd e) isEquiv
-
-    symmetryIso : B ≅ A
-    symmetryIso
-      = inverse
-      , obverse
-      , recto-verso
-      , verso-recto
+    compose e' = fromIsomorphism _ _ (composeIso (toIsomorphism _ _ e) (toIsomorphism _ _ e'))
 
     symmetry : B ≃ A
-    symmetry = fromIsomorphism _ _ symmetryIso
+    symmetry = fromIsomorphism _ _ (symmetryIso (toIsomorphism _ _ e))
 
 preorder≅ : (ℓ : Level) → Preorder _ _ _
 preorder≅ ℓ = record
@@ -304,7 +283,6 @@ preorder≅ ℓ = record
     ; reflexive = λ p
       → coe p
       , coe (sym p)
-      -- I believe I stashed the proof of this somewhere.
       , funExt (λ x → inv-coe p)
       , funExt (λ x → inv-coe' p)
     ; trans = composeIso
@@ -346,6 +324,11 @@ module _ {ℓ : Level} {A B : Set ℓ} where
   univalence : (A ≡ B) ≃ (A ≃ B)
   univalence = Equivalence.compose u' aux
     where
+    module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
+      deEta : A ≃ B → A U.≃ B
+      deEta (a , b) = U.con a b
+      doEta : A U.≃ B → A ≃ B
+      doEta (U.con eqv isEqv) = eqv , isEqv
     u : (A ≡ B) U.≃ (A U.≃ B)
     u = U.univalence
     u' : (A ≡ B) ≃ (A U.≃ B)
