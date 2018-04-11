@@ -150,11 +150,11 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
         lem : Σ Object (A ≅_) ≃ Σ Object (A ≡_)
         lem = equivSig {ℓa} {ℓb} {Object} {A ≅_} {_} {A ≡_} (f A)
 
-        aux : isContr (Σ[ B ∈ Object ] A ≡ B)
-        aux = {!Σ Object (A ≡_)!}
+        aux : isContr (Σ Object (A ≡_))
+        aux = (A , refl) , (λ y → contrSingl (snd y))
 
         step : isContr (Σ Object (A ≅_))
-        step = {!subst {P = isContr} {!!} aux!}
+        step = equivPreservesNType {n = ⟨-2⟩} (Equivalence.symmetry lem) aux
 
     propUnivalent : isProp Univalent
     propUnivalent a b i = propPi (λ iso → propIsContr) a b i
