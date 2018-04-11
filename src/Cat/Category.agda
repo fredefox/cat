@@ -35,8 +35,6 @@ open Cat.Equivalence
   renaming (_≅_ to _≈_)
   hiding (preorder≅ ; Isomorphism)
 
-import Function
-
 ------------------
 -- * Categories --
 ------------------
@@ -146,7 +144,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     postulate from[Contr] : Univalent[Contr] → Univalent
 
     from[Andrea] : Univalent[Andrea] → Univalent
-    from[Andrea] = from[Contr] Function.∘ step
+    from[Andrea] = from[Contr] ∘ step
       where
       module _ (f : Univalent[Andrea]) (A : Object) where
         aux : isContr (Σ[ B ∈ Object ] A ≡ B)
@@ -510,7 +508,7 @@ module Opposite {ℓa ℓb : Level} where
         module ℂ = Category ℂ
         opRaw : RawCategory ℓa ℓb
         RawCategory.Object   opRaw = ℂ.Object
-        RawCategory.Arrow    opRaw = Function.flip ℂ.Arrow
+        RawCategory.Arrow    opRaw = flip ℂ.Arrow
         RawCategory.identity opRaw = ℂ.identity
         RawCategory._<<<_    opRaw = ℂ._>>>_
 
@@ -528,9 +526,6 @@ module Opposite {ℓa ℓb : Level} where
         k = toIso _ _ ℂ.univalent
         open Σ k renaming (fst to η ; snd to inv-η)
         open AreInverses inv-η
-
-        _⊙_ = Function._∘_
-        infixr 9 _⊙_
 
         genericly : {ℓa ℓb ℓc : Level} {a : Set ℓa} {b : Set ℓb} {c : Set ℓc}
           → a × b × c → b × a × c
@@ -557,22 +552,22 @@ module Opposite {ℓa ℓb : Level} where
           open Σ r-iso renaming (fst to r-l ; snd to r-r)
 
         ζ : A ≅ B → A ≡ B
-        ζ = η ⊙ shuffle
+        ζ = η ∘ shuffle
 
         -- inv : AreInverses (ℂ.idToIso A B) f
         inv-ζ : AreInverses (idToIso A B) ζ
         -- recto-verso : ℂ.idToIso A B <<< f ≡ idFun (A ℂ.≅ B)
         inv-ζ = record
           { verso-recto = funExt (λ x → begin
-            (ζ ⊙ idToIso A B) x                       ≡⟨⟩
-            (η  ⊙ shuffle ⊙ idToIso A B) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → η ⊙ shuffle ⊙ φ) (funExt lem)) ⟩
-            (η  ⊙ shuffle ⊙ shuffle~ ⊙ ℂ.idToIso A B) x ≡⟨⟩
-            (η  ⊙ ℂ.idToIso A B) x                     ≡⟨ (λ i → verso-recto i x) ⟩
+            (ζ ∘ idToIso A B) x                       ≡⟨⟩
+            (η  ∘ shuffle ∘ idToIso A B) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → η ∘ shuffle ∘ φ) (funExt lem)) ⟩
+            (η  ∘ shuffle ∘ shuffle~ ∘ ℂ.idToIso A B) x ≡⟨⟩
+            (η  ∘ ℂ.idToIso A B) x                     ≡⟨ (λ i → verso-recto i x) ⟩
             x ∎)
           ; recto-verso = funExt (λ x → begin
-            (idToIso A B ⊙ η ⊙ shuffle) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → φ ⊙ η ⊙ shuffle) (funExt lem)) ⟩
-            (shuffle~ ⊙ ℂ.idToIso A B ⊙ η ⊙ shuffle) x ≡⟨ cong (λ φ → φ x) (cong (λ φ → shuffle~ ⊙ φ ⊙ shuffle) recto-verso) ⟩
-            (shuffle~ ⊙ shuffle) x                       ≡⟨⟩
+            (idToIso A B ∘ η ∘ shuffle) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → φ ∘ η ∘ shuffle) (funExt lem)) ⟩
+            (shuffle~ ∘ ℂ.idToIso A B ∘ η ∘ shuffle) x ≡⟨ cong (λ φ → φ x) (cong (λ φ → shuffle~ ∘ φ ∘ shuffle) recto-verso) ⟩
+            (shuffle~ ∘ shuffle) x                       ≡⟨⟩
             x ∎)
           }
 

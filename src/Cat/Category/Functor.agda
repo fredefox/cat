@@ -2,7 +2,6 @@
 module Cat.Category.Functor where
 
 open import Cat.Prelude
-open import Function
 
 open import Cubical
 
@@ -165,8 +164,8 @@ module Functors where
   module _ {ℓc ℓcc : Level} {ℂ : Category ℓc ℓcc} where
     private
       raw : RawFunctor ℂ ℂ
-      RawFunctor.omap raw = Function.id
-      RawFunctor.fmap raw = Function.id
+      RawFunctor.omap raw = idFun _
+      RawFunctor.fmap raw = idFun _
 
       isFunctor : IsFunctor ℂ ℂ raw
       IsFunctor.isIdentity     isFunctor = refl

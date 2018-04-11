@@ -2,7 +2,6 @@
 module Cat.Categories.Fam where
 
 open import Cat.Prelude
-import Function
 
 open import Cat.Category
 
@@ -15,7 +14,7 @@ module _ (ℓa ℓb : Level) where
     fst identity = λ x → x
     snd identity = λ b → b
     _<<<_ : {a b c : Object} → Arr b c → Arr a b → Arr a c
-    (g , g') <<< (f , f') = g Function.∘ f , g' Function.∘ f'
+    (g , g') <<< (f , f') = g ∘ f , g' ∘ f'
 
     RawFam : RawCategory (lsuc (ℓa ⊔ ℓb)) (ℓa ⊔ ℓb)
     RawFam = record

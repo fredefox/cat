@@ -2,7 +2,6 @@
 module Cat.Categories.Rel where
 
 open import Cat.Prelude hiding (Rel)
-open import Function
 
 open import Cat.Category
 

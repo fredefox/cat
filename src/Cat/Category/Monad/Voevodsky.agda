@@ -5,7 +5,6 @@ This module provides construction 2.3 in [voe]
 module Cat.Category.Monad.Voevodsky where
 
 open import Cat.Prelude
-open import Function
 
 open import Cat.Category
 open import Cat.Category.Functor as F
@@ -132,10 +131,10 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       Kleisli→Monoidal : K.Monad → M.Monad
       Kleisli→Monoidal = E.reverse
 
-      ve-re : Kleisli→Monoidal ∘ Monoidal→Kleisli ≡ Function.id
+      ve-re : Kleisli→Monoidal ∘ Monoidal→Kleisli ≡ idFun _
       ve-re = E.verso-recto
 
-      re-ve : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
+      re-ve : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ idFun _
       re-ve = E.recto-verso
 
       forth : §2-3.§1 omap pure → §2-3.§2 omap pure

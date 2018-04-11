@@ -9,7 +9,10 @@ open import Data.Product public
   renaming (∃! to ∃!≈)
   using (_×_ ; Σ-syntax ; swap)
 
--- TODO Import Data.Function under appropriate names.
+open import Function using (_∘_ ; _∘′_ ; _$_ ; case_of_ ; flip) public
+
+idFun : ∀ {a} (A : Set a) → A → A
+idFun A a = a
 
 open import Cubical public
 -- FIXME rename `gradLemma` to `fromIsomorphism` - perhaps just use wrapper

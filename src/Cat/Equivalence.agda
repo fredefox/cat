@@ -151,8 +151,6 @@ module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
             (x ∘ f) ∘ y   ≡⟨ cong (λ φ → φ ∘ y) inv-x.verso-recto ⟩
             y ∎
 
-          open import Cat.Prelude
-
           propInv : ∀ g → isProp (AreInverses f g)
           propInv g t u i = record { verso-recto = a i ; recto-verso = b i }
             where

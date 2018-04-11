@@ -3,7 +3,6 @@ module Cat.Category.Product where
 
 open import Cat.Prelude as P hiding (_×_ ; fst ; snd)
 open import Cat.Equivalence hiding (_≅_)
--- module P = Cat.Prelude
 
 open import Cat.Category
 
@@ -203,15 +202,13 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         : ((X , xa , xb) ≡ (Y , ya , yb))
         ≈ (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
       step0
-        = (λ p → cong fst p , cong-d (fst ⊙ snd) p , cong-d (snd ⊙ snd) p)
+        = (λ p → cong fst p , cong-d (fst ∘ snd) p , cong-d (snd ∘ snd) p)
         -- , (λ x  → λ i → fst x i , (fst (snd x) i) , (snd (snd x) i))
         , (λ{ (p , q , r) → Σ≡ p λ i → q i , r i})
         , record
           { verso-recto = funExt (λ{ p → refl})
           ; recto-verso = funExt (λ{ (p , q , r) → refl})
           }
-          where
-          open import Function renaming (_∘_ to _⊙_)
 
       -- Should follow from c being univalent
       iso-id-inv : {p : X ≡ Y} → p ≡ ℂ.isoToId (ℂ.idToIso X Y p)

@@ -4,8 +4,6 @@ module Cat.Categories.Sets where
 
 open import Cat.Prelude as P
 
-open import Function using (_∘_ ; _∘′_)
-
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
@@ -25,14 +23,14 @@ module _ (ℓ : Level) where
     SetsRaw : RawCategory (lsuc ℓ) ℓ
     RawCategory.Object   SetsRaw = hSet ℓ
     RawCategory.Arrow    SetsRaw (T , _) (U , _) = T → U
-    RawCategory.identity SetsRaw = Function.id
-    RawCategory._<<<_    SetsRaw = Function._∘′_
+    RawCategory.identity SetsRaw = idFun _
+    RawCategory._<<<_    SetsRaw = _∘′_
 
     module _ where
       private
         open RawCategory SetsRaw hiding (_<<<_)
 
-        isIdentity : IsIdentity Function.id
+        isIdentity : IsIdentity (idFun _)
         fst isIdentity = funExt λ _ → refl
         snd isIdentity = funExt λ _ → refl
 
@@ -70,17 +68,17 @@ module _ (ℓ : Level) where
             where
             module xxA = AreInverses xx
             module yyA = AreInverses yy
-            ve-re : g ∘ f ≡ Function.id
+            ve-re : g ∘ f ≡ idFun _
             ve-re = arrowsAreSets {A = hA} {B = hA} _ _ xxA.verso-recto yyA.verso-recto i
-            re-ve : f ∘ g ≡ Function.id
+            re-ve : f ∘ g ≡ idFun _
             re-ve = arrowsAreSets {A = hB} {B = hB} _ _ xxA.recto-verso yyA.recto-verso i
           1eq : x.inverse ≡ y.inverse
           1eq = begin
             x.inverse                   ≡⟨⟩
-            x.inverse ∘ Function.id     ≡⟨ cong (λ φ → x.inverse ∘ φ) (sym yA.recto-verso) ⟩
+            x.inverse ∘ idFun _         ≡⟨ cong (λ φ → x.inverse ∘ φ) (sym yA.recto-verso) ⟩
             x.inverse ∘ (f ∘ y.inverse) ≡⟨⟩
             (x.inverse ∘ f) ∘ y.inverse ≡⟨ cong (λ φ → φ ∘ y.inverse) xA.verso-recto ⟩
-            Function.id ∘ y.inverse     ≡⟨⟩
+            idFun _ ∘ y.inverse         ≡⟨⟩
             y.inverse                   ∎
           2eq : (λ i → AreInverses f (1eq i)) [ x.areInverses ≡ y.areInverses ]
           2eq = lemPropF p 1eq
@@ -266,7 +264,7 @@ module _ {ℓ : Level} where
         module _ (hX : Object) where
           open Σ hX renaming (fst to X)
           module _ (f : X → A ) (g : X → B) where
-            ump : fst Function.∘′ (f &&& g) ≡ f × snd Function.∘′ (f &&& g) ≡ g
+            ump : fst ∘′ (f &&& g) ≡ f × snd ∘′ (f &&& g) ≡ g
             fst ump = refl
             snd ump = refl
 
@@ -280,7 +278,7 @@ module _ {ℓ : Level} where
           = f &&& g , ump hX f g , λ eq → funExt (umpUniq eq)
           where
           open Σ hX renaming (fst to X) using ()
-          module _ {y : X → A × B} (eq : fst Function.∘′ y ≡ f × snd Function.∘′ y ≡ g) (x : X) where
+          module _ {y : X → A × B} (eq : fst ∘′ y ≡ f × snd ∘′ y ≡ g) (x : X) where
             p1 : fst ((f &&& g) x) ≡ fst (y x)
             p1 = begin
               fst ((f &&& g) x) ≡⟨⟩

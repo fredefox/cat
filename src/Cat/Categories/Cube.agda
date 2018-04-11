@@ -7,7 +7,6 @@ open import Data.Bool hiding (T)
 open import Data.Sum hiding ([_,_])
 open import Data.Unit
 open import Data.Empty
-open import Function
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
 
