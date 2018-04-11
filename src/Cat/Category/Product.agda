@@ -105,8 +105,8 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
           × ℂ [ y1 ∘ f ] ≡ x1
           }
       ; identity = λ{ {X , f , g} → ℂ.identity {X} , ℂ.rightIdentity , ℂ.rightIdentity}
-      ; _∘_ = λ { {_ , a0 , a1} {_ , b0 , b1} {_ , c0 , c1} (f , f0 , f1) (g , g0 , g1)
-        → (f ℂ.∘ g)
+      ; _<<<_ = λ { {_ , a0 , a1} {_ , b0 , b1} {_ , c0 , c1} (f , f0 , f1) (g , g0 , g1)
+        → (f ℂ.<<< g)
           , (begin
               ℂ [ c0 ∘ ℂ [ f ∘ g ] ] ≡⟨ ℂ.isAssociative ⟩
               ℂ [ ℂ [ c0 ∘ f ] ∘ g ] ≡⟨ cong (λ φ → ℂ [ φ ∘ g ]) f0 ⟩
@@ -134,9 +134,9 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         isAssociative {A'@(A , a0 , a1)} {B , _} {C , c0 , c1} {D'@(D , d0 , d1)} {ff@(f , f0 , f1)} {gg@(g , g0 , g1)} {hh@(h , h0 , h1)} i
           = s0 i , lemPropF propEqs s0 {P.snd l} {P.snd r} i
           where
-          l = hh ∘ (gg ∘ ff)
-          r = hh ∘ gg ∘ ff
-          -- s0 : h ℂ.∘ (g ℂ.∘ f) ≡ h ℂ.∘ g ℂ.∘ f
+          l = hh <<< (gg <<< ff)
+          r = hh <<< gg <<< ff
+          -- s0 : h ℂ.<<< (g ℂ.<<< f) ≡ h ℂ.<<< g ℂ.<<< f
           s0 : fst l ≡ fst r
           s0 = ℂ.isAssociative {f = f} {g} {h}
 
@@ -144,18 +144,18 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         isIdentity : IsIdentity identity
         isIdentity {AA@(A , a0 , a1)} {BB@(B , b0 , b1)} {f , f0 , f1} = leftIdentity , rightIdentity
           where
-          leftIdentity : identity ∘ (f , f0 , f1) ≡ (f , f0 , f1)
+          leftIdentity : identity <<< (f , f0 , f1) ≡ (f , f0 , f1)
           leftIdentity i = l i , lemPropF propEqs l {snd L} {snd R} i
             where
-            L = identity ∘ (f , f0 , f1)
+            L = identity <<< (f , f0 , f1)
             R : Arrow AA BB
             R = f , f0 , f1
             l : fst L ≡ fst R
             l = ℂ.leftIdentity
-          rightIdentity : (f , f0 , f1) ∘ identity ≡ (f , f0 , f1)
+          rightIdentity : (f , f0 , f1) <<< identity ≡ (f , f0 , f1)
           rightIdentity i = l i , lemPropF propEqs l {snd L} {snd R} i
             where
-            L = (f , f0 , f1) ∘ identity
+            L = (f , f0 , f1) <<< identity
             R : Arrow AA BB
             R = (f , f0 , f1)
             l : ℂ [ f ∘ ℂ.identity ] ≡ f

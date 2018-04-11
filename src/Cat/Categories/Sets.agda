@@ -26,11 +26,11 @@ module _ (ℓ : Level) where
     RawCategory.Object   SetsRaw = hSet ℓ
     RawCategory.Arrow    SetsRaw (T , _) (U , _) = T → U
     RawCategory.identity SetsRaw = Function.id
-    RawCategory._∘_      SetsRaw = Function._∘′_
+    RawCategory._<<<_    SetsRaw = Function._∘′_
 
     module _ where
       private
-        open RawCategory SetsRaw hiding (_∘_)
+        open RawCategory SetsRaw hiding (_<<<_)
 
         isIdentity : IsIdentity Function.id
         fst isIdentity = funExt λ _ → refl
@@ -44,7 +44,7 @@ module _ (ℓ : Level) where
       IsPreCategory.isIdentity    isPreCat {A} {B} = isIdentity    {A} {B}
       IsPreCategory.arrowsAreSets isPreCat {A} {B} = arrowsAreSets {A} {B}
 
-    open IsPreCategory isPreCat hiding (_∘_)
+    open IsPreCategory isPreCat hiding (_<<<_)
 
     isIso = TypeIsomorphism
     module _ {hA hB : hSet ℓ} where

@@ -18,7 +18,7 @@ open import Cat.Category.NaturalTransformation ℂ ℂ
 private
   ℓ = ℓa ⊔ ℓb
   module ℂ = Category ℂ
-  open ℂ using (Arrow ; identity ; Object ; _∘_ ; _>>>_)
+  open ℂ using (Arrow ; identity ; Object ; _<<<_ ; _>>>_)
 
 -- | Data for a monad.
 --
@@ -34,7 +34,7 @@ record RawMonad : Set ℓ where
   --
   -- This should perhaps be defined in a "Klesli-version" of functors as well?
   fmap : ∀ {A B} → ℂ [ A , B ] → ℂ [ omap A , omap B ]
-  fmap f = bind (pure ∘ f)
+  fmap f = bind (pure <<< f)
 
   -- | Composition of monads aka. the kleisli-arrow.
   _>=>_ : {A B C : Object} → ℂ [ A , omap B ] → ℂ [ B , omap C ] → ℂ [ A , omap C ]
@@ -62,14 +62,14 @@ record RawMonad : Set ℓ where
   -- This is really a functor law. Should we have a kleisli-representation of
   -- functors as well and make them a super-class?
   Fusion = {X Y Z : Object} {g : ℂ [ Y , Z ]} {f : ℂ [ X , Y ]}
-    → fmap (g ∘ f) ≡ fmap g ∘ fmap f
+    → fmap (g <<< f) ≡ fmap g <<< fmap f
 
   -- In the ("foreign") formulation of a monad `IsNatural`'s analogue here would be:
   IsNaturalForeign : Set _
-  IsNaturalForeign = {X : Object} → join {X} ∘ fmap join ≡ join ∘ join
+  IsNaturalForeign = {X : Object} → join {X} <<< fmap join ≡ join <<< join
 
   IsInverse : Set _
-  IsInverse = {X : Object} → join {X} ∘ pure ≡ identity × join {X} ∘ fmap pure ≡ identity
+  IsInverse = {X : Object} → join {X} <<< pure ≡ identity × join {X} <<< fmap pure ≡ identity
 
 record IsMonad (raw : RawMonad) : Set ℓ where
   open RawMonad raw public
@@ -81,18 +81,21 @@ record IsMonad (raw : RawMonad) : Set ℓ where
   -- | Map fusion is admissable.
   fusion : Fusion
   fusion {g = g} {f} = begin
-    fmap (g ∘ f)               ≡⟨⟩
-    bind ((f >>> g) >>> pure)  ≡⟨ cong bind ℂ.isAssociative ⟩
-    bind (f >>> (g >>> pure))  ≡⟨ cong (λ φ → bind (f >>> φ)) (sym (isNatural _)) ⟩
-    bind (f >>> (pure >>> (bind (g >>> pure)))) ≡⟨⟩
+    fmap (g <<< f)                 ≡⟨⟩
+    bind ((f >>> g) >>> pure)      ≡⟨ cong bind ℂ.isAssociative ⟩
+    bind (f >>> (g >>> pure))
+      ≡⟨ cong (λ φ → bind (f >>> φ)) (sym (isNatural _)) ⟩
+    bind (f >>> (pure >>> (bind (g >>> pure))))
+      ≡⟨⟩
     bind (f >>> (pure >>> fmap g)) ≡⟨⟩
-    bind ((fmap g ∘ pure) ∘ f) ≡⟨ cong bind (sym ℂ.isAssociative) ⟩
-    bind (fmap g ∘ (pure ∘ f)) ≡⟨ sym distrib ⟩
-    bind (pure ∘ g) ∘ bind (pure ∘ f) ≡⟨⟩
-    fmap g ∘ fmap f            ∎
+    bind ((fmap g <<< pure) <<< f) ≡⟨ cong bind (sym ℂ.isAssociative) ⟩
+    bind (fmap g <<< (pure <<< f)) ≡⟨ sym distrib ⟩
+    bind (pure <<< g) <<< bind (pure <<< f)
+      ≡⟨⟩
+    fmap g <<< fmap f              ∎
     where
-      distrib : fmap g ∘ fmap f ≡ bind (fmap g ∘ (pure ∘ f))
-      distrib = isDistributive (pure ∘ g) (pure ∘ f)
+      distrib : fmap g <<< fmap f ≡ bind (fmap g <<< (pure <<< f))
+      distrib = isDistributive (pure <<< g) (pure <<< f)
 
   -- | This formulation gives rise to the following endo-functor.
   private
@@ -102,15 +105,15 @@ record IsMonad (raw : RawMonad) : Set ℓ where
 
     isFunctorR : IsFunctor ℂ ℂ rawR
     IsFunctor.isIdentity isFunctorR = begin
-      bind (pure ∘ identity) ≡⟨ cong bind (ℂ.rightIdentity) ⟩
-      bind pure              ≡⟨ isIdentity ⟩
-      identity               ∎
+      bind (pure <<< identity) ≡⟨ cong bind (ℂ.rightIdentity) ⟩
+      bind pure                ≡⟨ isIdentity ⟩
+      identity                 ∎
 
     IsFunctor.isDistributive isFunctorR {f = f} {g} = begin
-      bind (pure ∘ (g ∘ f))             ≡⟨⟩
-      fmap (g ∘ f)                      ≡⟨ fusion ⟩
-      fmap g ∘ fmap f                   ≡⟨⟩
-      bind (pure ∘ g) ∘ bind (pure ∘ f) ∎
+      bind (pure <<< (g <<< f))               ≡⟨⟩
+      fmap (g <<< f)                          ≡⟨ fusion ⟩
+      fmap g <<< fmap f                       ≡⟨⟩
+      bind (pure <<< g) <<< bind (pure <<< f) ∎
 
   -- FIXME Naming!
   R : EndoFunctor ℂ
@@ -129,20 +132,20 @@ record IsMonad (raw : RawMonad) : Set ℓ where
     pureT A = pure
     pureN : Natural R⁰ R pureT
     pureN {A} {B} f = begin
-      pureT B             ∘ R⁰.fmap f ≡⟨⟩
-      pure            ∘ f          ≡⟨ sym (isNatural _) ⟩
-      bind (pure ∘ f) ∘ pure       ≡⟨⟩
-      fmap f          ∘ pure       ≡⟨⟩
-      R.fmap f       ∘ pureT A        ∎
+      pureT B             <<< R⁰.fmap f ≡⟨⟩
+      pure            <<< f             ≡⟨ sym (isNatural _) ⟩
+      bind (pure <<< f) <<< pure        ≡⟨⟩
+      fmap f          <<< pure          ≡⟨⟩
+      R.fmap f       <<< pureT A        ∎
     joinT : Transformation R² R
     joinT C = join
     joinN : Natural R² R joinT
     joinN f = begin
-      join       ∘ R².fmap f  ≡⟨⟩
-      bind identity     ∘ R².fmap f  ≡⟨⟩
-      R².fmap f >>> bind identity    ≡⟨⟩
-      fmap (fmap f) >>> bind identity ≡⟨⟩
-      fmap (bind (f >>> pure)) >>> bind identity          ≡⟨⟩
+      join       <<< R².fmap f                   ≡⟨⟩
+      bind identity     <<< R².fmap f            ≡⟨⟩
+      R².fmap f >>> bind identity                ≡⟨⟩
+      fmap (fmap f) >>> bind identity            ≡⟨⟩
+      fmap (bind (f >>> pure)) >>> bind identity ≡⟨⟩
       bind (bind (f >>> pure) >>> pure) >>> bind identity
         ≡⟨ isDistributive _ _ ⟩
       bind ((bind (f >>> pure) >>> pure) >=> identity)
@@ -155,14 +158,14 @@ record IsMonad (raw : RawMonad) : Set ℓ where
         ≡⟨ cong bind ℂ.leftIdentity ⟩
       bind (bind (f >>> pure))
         ≡⟨ cong bind (sym ℂ.rightIdentity) ⟩
-      bind (identity >>> bind (f >>> pure)) ≡⟨⟩
+      bind (identity >>> bind (f >>> pure))   ≡⟨⟩
       bind (identity >=> (f >>> pure))
         ≡⟨ sym (isDistributive _ _) ⟩
-      bind identity     >>> bind (f >>> pure)    ≡⟨⟩
-      bind identity     >>> fmap f    ≡⟨⟩
-      bind identity     >>> R.fmap f ≡⟨⟩
-      R.fmap f  ∘ bind identity      ≡⟨⟩
-      R.fmap f  ∘ join        ∎
+      bind identity     >>> bind (f >>> pure) ≡⟨⟩
+      bind identity     >>> fmap f            ≡⟨⟩
+      bind identity     >>> R.fmap f          ≡⟨⟩
+      R.fmap f  <<< bind identity             ≡⟨⟩
+      R.fmap f  <<< join                      ∎
 
   pureNT : NaturalTransformation R⁰ R
   fst pureNT = pureT

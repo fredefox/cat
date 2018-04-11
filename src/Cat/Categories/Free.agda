@@ -30,7 +30,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     RawCategory.Object   RawFree = ℂ.Object
     RawCategory.Arrow    RawFree = Path ℂ.Arrow
     RawCategory.identity RawFree = empty
-    RawCategory._∘_      RawFree = concatenate
+    RawCategory._<<<_    RawFree = concatenate
 
     open RawCategory RawFree
 

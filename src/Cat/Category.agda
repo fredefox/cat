@@ -13,7 +13,7 @@
 -- Data
 -- ----
 -- identity; the identity arrow
--- _∘_; function composition
+-- _<<<_; function composition
 --
 -- Laws
 -- ----
@@ -52,9 +52,9 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     Object   : Set ℓa
     Arrow    : Object → Object → Set ℓb
     identity : {A : Object} → Arrow A A
-    _∘_      : {A B C : Object} → Arrow B C → Arrow A B → Arrow A C
+    _<<<_    : {A B C : Object} → Arrow B C → Arrow A B → Arrow A C
 
-  infixl 10 _∘_ _>>>_
+  infixl 10 _<<<_ _>>>_
 
   -- | Operations on data
 
@@ -65,7 +65,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   codomain {b = b} _ = b
 
   _>>>_ : {A B C : Object} → (Arrow A B) → (Arrow B C) → Arrow A C
-  f >>> g = g ∘ f
+  f >>> g = g <<< f
 
   -- | Laws about the data
 
@@ -73,17 +73,17 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   -- right-hand-side.
   IsAssociative : Set (ℓa ⊔ ℓb)
   IsAssociative = ∀ {A B C D} {f : Arrow A B} {g : Arrow B C} {h : Arrow C D}
-    → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
+    → h <<< (g <<< f) ≡ (h <<< g) <<< f
 
   IsIdentity : ({A : Object} → Arrow A A) → Set (ℓa ⊔ ℓb)
   IsIdentity id = {A B : Object} {f : Arrow A B}
-    → id ∘ f ≡ f × f ∘ id ≡ f
+    → id <<< f ≡ f × f <<< id ≡ f
 
   ArrowsAreSets : Set (ℓa ⊔ ℓb)
   ArrowsAreSets = ∀ {A B : Object} → isSet (Arrow A B)
 
   IsInverseOf : ∀ {A B} → (Arrow A B) → (Arrow B A) → Set ℓb
-  IsInverseOf = λ f g → g ∘ f ≡ identity × f ∘ g ≡ identity
+  IsInverseOf = λ f g → g <<< f ≡ identity × f <<< g ≡ identity
 
   Isomorphism : ∀ {A B} → (f : Arrow A B) → Set ℓb
   Isomorphism {A} {B} f = Σ[ g ∈ Arrow B A ] IsInverseOf f g
@@ -93,10 +93,10 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
   module _ {A B : Object} where
     Epimorphism : {X : Object } → (f : Arrow A B) → Set ℓb
-    Epimorphism {X} f = (g₀ g₁ : Arrow B X) → g₀ ∘ f ≡ g₁ ∘ f → g₀ ≡ g₁
+    Epimorphism {X} f = (g₀ g₁ : Arrow B X) → g₀ <<< f ≡ g₁ <<< f → g₀ ≡ g₁
 
     Monomorphism : {X : Object} → (f : Arrow A B) → Set ℓb
-    Monomorphism {X} f = (g₀ g₁ : Arrow X A) → f ∘ g₀ ≡ f ∘ g₁ → g₀ ≡ g₁
+    Monomorphism {X} f = (g₀ g₁ : Arrow X A) → f <<< g₀ ≡ f <<< g₁ → g₀ ≡ g₁
 
   IsInitial  : Object → Set (ℓa ⊔ ℓb)
   IsInitial  I = {X : Object} → isContr (Arrow I X)
@@ -167,10 +167,10 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       arrowsAreSets : ArrowsAreSets
     open Univalence isIdentity public
 
-    leftIdentity : {A B : Object} {f : Arrow A B} → identity ∘ f ≡ f
+    leftIdentity : {A B : Object} {f : Arrow A B} → identity <<< f ≡ f
     leftIdentity {A} {B} {f} = fst (isIdentity {A = A} {B} {f})
 
-    rightIdentity : {A B : Object} {f : Arrow A B} → f ∘ identity ≡ f
+    rightIdentity : {A B : Object} {f : Arrow A B} → f <<< identity ≡ f
     rightIdentity {A} {B} {f} = snd (isIdentity {A = A} {B} {f})
 
     ------------
@@ -181,26 +181,26 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
     module _ {A B : Object} {X : Object} (f : Arrow A B) where
       iso→epi : Isomorphism f → Epimorphism {X = X} f
       iso→epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
-        g₀              ≡⟨ sym rightIdentity ⟩
-        g₀ ∘ identity   ≡⟨ cong (_∘_ g₀) (sym right-inv) ⟩
-        g₀ ∘ (f ∘ f-)   ≡⟨ isAssociative ⟩
-        (g₀ ∘ f) ∘ f-   ≡⟨ cong (λ φ → φ ∘ f-) eq ⟩
-        (g₁ ∘ f) ∘ f-   ≡⟨ sym isAssociative ⟩
-        g₁ ∘ (f ∘ f-)   ≡⟨ cong (_∘_ g₁) right-inv ⟩
-        g₁ ∘ identity   ≡⟨ rightIdentity ⟩
-        g₁              ∎
+        g₀                  ≡⟨ sym rightIdentity ⟩
+        g₀ <<< identity     ≡⟨ cong (_<<<_ g₀) (sym right-inv) ⟩
+        g₀ <<< (f <<< f-)   ≡⟨ isAssociative ⟩
+        (g₀ <<< f) <<< f-   ≡⟨ cong (λ φ → φ <<< f-) eq ⟩
+        (g₁ <<< f) <<< f-   ≡⟨ sym isAssociative ⟩
+        g₁ <<< (f <<< f-)   ≡⟨ cong (_<<<_ g₁) right-inv ⟩
+        g₁ <<< identity     ≡⟨ rightIdentity ⟩
+        g₁                  ∎
 
       iso→mono : Isomorphism f → Monomorphism {X = X} f
       iso→mono (f- , left-inv , right-inv) g₀ g₁ eq =
         begin
-        g₀            ≡⟨ sym leftIdentity ⟩
-        identity ∘ g₀ ≡⟨ cong (λ φ → φ ∘ g₀) (sym left-inv) ⟩
-        (f- ∘ f) ∘ g₀ ≡⟨ sym isAssociative ⟩
-        f- ∘ (f ∘ g₀) ≡⟨ cong (_∘_ f-) eq ⟩
-        f- ∘ (f ∘ g₁) ≡⟨ isAssociative ⟩
-        (f- ∘ f) ∘ g₁ ≡⟨ cong (λ φ → φ ∘ g₁) left-inv ⟩
-        identity ∘ g₁ ≡⟨ leftIdentity ⟩
-        g₁            ∎
+        g₀                ≡⟨ sym leftIdentity ⟩
+        identity <<< g₀   ≡⟨ cong (λ φ → φ <<< g₀) (sym left-inv) ⟩
+        (f- <<< f) <<< g₀ ≡⟨ sym isAssociative ⟩
+        f- <<< (f <<< g₀) ≡⟨ cong (_<<<_ f-) eq ⟩
+        f- <<< (f <<< g₁) ≡⟨ isAssociative ⟩
+        (f- <<< f) <<< g₁ ≡⟨ cong (λ φ → φ <<< g₁) left-inv ⟩
+        identity <<< g₁   ≡⟨ leftIdentity ⟩
+        g₁                ∎
 
       iso→epi×mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
       iso→epi×mono iso = iso→epi iso , iso→mono iso
@@ -210,7 +210,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 
     propIsIdentity : ∀ {f : ∀ {A} → Arrow A A} → isProp (IsIdentity f)
     propIsIdentity {id} = propPiImpl (λ _ → propPiImpl λ _ → propPiImpl (λ f →
-      propSig (arrowsAreSets (id ∘ f) f) λ _ → arrowsAreSets (f ∘ id) f))
+      propSig (arrowsAreSets (id <<< f) f) λ _ → arrowsAreSets (f <<< id) f))
 
     propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
     propArrowIsSet = propPiImpl λ _ → propPiImpl (λ _ → isSetIsProp)
@@ -225,12 +225,12 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
           where
             geq : g ≡ g'
             geq = begin
-              g             ≡⟨ sym rightIdentity ⟩
-              g ∘ identity  ≡⟨ cong (λ φ → g ∘ φ) (sym ε') ⟩
-              g ∘ (f ∘ g')  ≡⟨ isAssociative ⟩
-              (g ∘ f) ∘ g'  ≡⟨ cong (λ φ → φ ∘ g') η ⟩
-              identity ∘ g' ≡⟨ leftIdentity ⟩
-              g'            ∎
+              g                 ≡⟨ sym rightIdentity ⟩
+              g <<< identity    ≡⟨ cong (λ φ → g <<< φ) (sym ε') ⟩
+              g <<< (f <<< g')  ≡⟨ isAssociative ⟩
+              (g <<< f) <<< g'  ≡⟨ cong (λ φ → φ <<< g') η ⟩
+              identity <<< g'   ≡⟨ leftIdentity ⟩
+              g'                ∎
 
     propIsInitial : ∀ I → isProp (IsInitial I)
     propIsInitial I x y i {X} = res X i
@@ -266,23 +266,23 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       private
         trans≅ : Transitive _≅_
         trans≅ (f , f~ , f-inv) (g , g~ , g-inv)
-          = g ∘ f
-          , f~ ∘ g~
+          = g <<< f
+          , f~ <<< g~
           , ( begin
-              (f~ ∘ g~) ∘ (g ∘ f) ≡⟨ isAssociative ⟩
-              (f~ ∘ g~) ∘ g ∘ f ≡⟨ cong (λ φ → φ ∘ f) (sym isAssociative) ⟩
-              f~ ∘ (g~ ∘ g) ∘ f ≡⟨ cong (λ φ → f~ ∘ φ ∘ f) (fst g-inv) ⟩
-              f~ ∘ identity ∘ f ≡⟨ cong (λ φ → φ ∘ f) rightIdentity ⟩
-              f~ ∘ f           ≡⟨ fst f-inv ⟩
-              identity ∎
+              (f~ <<< g~) <<< (g <<< f) ≡⟨ isAssociative ⟩
+              (f~ <<< g~) <<< g <<< f   ≡⟨ cong (λ φ → φ <<< f) (sym isAssociative) ⟩
+              f~ <<< (g~ <<< g) <<< f   ≡⟨ cong (λ φ → f~ <<< φ <<< f) (fst g-inv) ⟩
+              f~ <<< identity <<< f     ≡⟨ cong (λ φ → φ <<< f) rightIdentity ⟩
+              f~ <<< f                  ≡⟨ fst f-inv ⟩
+              identity                  ∎
             )
           , ( begin
-              g ∘ f ∘ (f~ ∘ g~) ≡⟨ isAssociative ⟩
-              g ∘ f ∘ f~ ∘ g~ ≡⟨ cong (λ φ → φ ∘ g~) (sym isAssociative) ⟩
-              g ∘ (f ∘ f~) ∘ g~ ≡⟨ cong (λ φ → g ∘ φ ∘ g~) (snd f-inv) ⟩
-              g ∘ identity ∘ g~ ≡⟨ cong (λ φ → φ ∘ g~) rightIdentity ⟩
-              g ∘ g~ ≡⟨ snd g-inv ⟩
-              identity ∎
+              g <<< f <<< (f~ <<< g~) ≡⟨ isAssociative ⟩
+              g <<< f <<< f~ <<< g~   ≡⟨ cong (λ φ → φ <<< g~) (sym isAssociative) ⟩
+              g <<< (f <<< f~) <<< g~ ≡⟨ cong (λ φ → g <<< φ <<< g~) (snd f-inv) ⟩
+              g <<< identity <<< g~   ≡⟨ cong (λ φ → φ <<< g~) rightIdentity ⟩
+              g <<< g~                ≡⟨ snd g-inv ⟩
+              identity                ∎
             )
         isPreorder : IsPreorder _≅_
         isPreorder = record { isEquivalence = equalityIsEquivalence ; reflexive = idToIso _ _ ; trans = trans≅ }
@@ -341,7 +341,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         pq : Arrow a b ≡ Arrow a' b'
         pq i = Arrow (p i) (q i)
 
-      9-1-9 : coe pq f ≡ q* ∘ f ∘ p~
+      9-1-9 : coe pq f ≡ q* <<< f <<< p~
       9-1-9 = transpP {!!} {!!}
 
     -- | All projections are propositions.
@@ -366,9 +366,9 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         Xprop f g = trans (sym (snd Xit f)) (snd Xit g)
         Yprop : isProp (Arrow Y Y)
         Yprop f g = trans (sym (snd Yit f)) (snd Yit g)
-        left : Y→X ∘ X→Y ≡ identity
+        left : Y→X <<< X→Y ≡ identity
         left = Xprop _ _
-        right : X→Y ∘ Y→X ≡ identity
+        right : X→Y <<< Y→X ≡ identity
         right = Yprop _ _
         iso : X ≅ Y
         iso = X→Y , Y→X , left , right
@@ -396,9 +396,9 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         Xprop f g = trans (sym (snd Xii f)) (snd Xii g)
         Yprop : isProp (Arrow Y Y)
         Yprop f g = trans (sym (snd Yii f)) (snd Yii g)
-        left : Y→X ∘ X→Y ≡ identity
+        left : Y→X <<< X→Y ≡ identity
         left = Yprop _ _
-        right : X→Y ∘ Y→X ≡ identity
+        right : X→Y <<< Y→X ≡ identity
         right = Xprop _ _
         iso : X ≅ Y
         iso = Y→X , X→Y , right , left
@@ -497,7 +497,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   _[_,_] = Arrow
 
   _[_∘_] : {A B C : Object} → (g : Arrow B C) → (f : Arrow A B) → Arrow A C
-  _[_∘_] = _∘_
+  _[_∘_] = _<<<_
 
 -- | The opposite category
 --
@@ -512,7 +512,7 @@ module Opposite {ℓa ℓb : Level} where
         RawCategory.Object   opRaw = ℂ.Object
         RawCategory.Arrow    opRaw = Function.flip ℂ.Arrow
         RawCategory.identity opRaw = ℂ.identity
-        RawCategory._∘_      opRaw = ℂ._>>>_
+        RawCategory._<<<_    opRaw = ℂ._>>>_
 
         open RawCategory opRaw
 
@@ -561,7 +561,7 @@ module Opposite {ℓa ℓb : Level} where
 
         -- inv : AreInverses (ℂ.idToIso A B) f
         inv-ζ : AreInverses (idToIso A B) ζ
-        -- recto-verso : ℂ.idToIso A B ∘ f ≡ idFun (A ℂ.≅ B)
+        -- recto-verso : ℂ.idToIso A B <<< f ≡ idFun (A ℂ.≅ B)
         inv-ζ = record
           { verso-recto = funExt (λ x → begin
             (ζ ⊙ idToIso A B) x                       ≡⟨⟩
@@ -600,7 +600,7 @@ module Opposite {ℓa ℓb : Level} where
       RawCategory.Object   (rawInv _) = Object
       RawCategory.Arrow    (rawInv _) = Arrow
       RawCategory.identity (rawInv _) = identity
-      RawCategory._∘_      (rawInv _) = _∘_
+      RawCategory._<<<_    (rawInv _) = _<<<_
 
     oppositeIsInvolution : opposite (opposite ℂ) ≡ ℂ
     oppositeIsInvolution = Category≡ rawInv

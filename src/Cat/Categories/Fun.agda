@@ -20,7 +20,7 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
       RawCategory.Object   raw = Functor ℂ 𝔻
       RawCategory.Arrow    raw = NaturalTransformation
       RawCategory.identity raw {F} = identity F
-      RawCategory._∘_      raw {F} {G} {H} = NT[_∘_] {F} {G} {H}
+      RawCategory._<<<_    raw {F} {G} {H} = NT[_∘_] {F} {G} {H}
 
     module _ where
       open RawCategory raw hiding (identity)
@@ -154,9 +154,9 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
         ob = fromEq p
         re : Arrow B A
         re = fromEq (sym p)
-        vr : _∘_ {A = A} {B} {A} re ob ≡ identity A
+        vr : _<<<_ {A = A} {B} {A} re ob ≡ identity A
         vr = {!!}
-        rv : _∘_ {A = B} {A} {B} ob re ≡ identity B
+        rv : _<<<_ {A = B} {A} {B} ob re ≡ identity B
         rv = {!!}
         isInverse : IsInverseOf {A} {B} ob re
         isInverse = vr , rv
@@ -201,7 +201,7 @@ module _ {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') where
       { Object = Presheaf ℂ
       ; Arrow = NaturalTransformation
       ; identity = λ {F} → identity F
-      ; _∘_ = λ {F G H} → NT[_∘_] {F = F} {G = G} {H = H}
+      ; _<<<_ = λ {F G H} → NT[_∘_] {F = F} {G = G} {H = H}
       }
 
   --   isCategory : IsCategory raw

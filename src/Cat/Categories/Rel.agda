@@ -154,7 +154,7 @@ RawRel = record
   { Object = Set
   ; Arrow = λ S R → Subset (S × R)
   ; identity = λ {S} → Diag S
-  ; _∘_ = λ {A B C} S R → λ {( a , c ) → Σ[ b ∈ B ] ( (a , b) ∈ R × (b , c) ∈ S )}
+  ; _<<<_ = λ {A B C} S R → λ {( a , c ) → Σ[ b ∈ B ] ( (a , b) ∈ R × (b , c) ∈ S )}
   }
 
 isPreCategory : IsPreCategory RawRel

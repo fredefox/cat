@@ -14,15 +14,15 @@ module _ (ℓa ℓb : Level) where
     identity : {A : Object} → Arr A A
     fst identity = λ x → x
     snd identity = λ b → b
-    _∘_ : {a b c : Object} → Arr b c → Arr a b → Arr a c
-    (g , g') ∘ (f , f') = g Function.∘ f , g' Function.∘ f'
+    _<<<_ : {a b c : Object} → Arr b c → Arr a b → Arr a c
+    (g , g') <<< (f , f') = g Function.∘ f , g' Function.∘ f'
 
     RawFam : RawCategory (lsuc (ℓa ⊔ ℓb)) (ℓa ⊔ ℓb)
     RawFam = record
       { Object = Object
       ; Arrow = Arr
       ; identity = λ { {A} → identity {A = A}}
-      ; _∘_ = λ {a b c} → _∘_ {a} {b} {c}
+      ; _<<<_ = λ {a b c} → _<<<_ {a} {b} {c}
       }
 
     open RawCategory RawFam hiding (Object ; identity)

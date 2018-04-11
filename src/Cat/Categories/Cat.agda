@@ -18,7 +18,7 @@ module _ (ℓ ℓ' : Level) where
   RawCategory.Object   RawCat = Category ℓ ℓ'
   RawCategory.Arrow    RawCat = Functor
   RawCategory.identity RawCat = Functors.identity
-  RawCategory._∘_      RawCat = F[_∘_]
+  RawCategory._<<<_    RawCat = F[_∘_]
 
   -- NB! `ArrowsAreSets RawCat` is *not* provable. The type of functors,
   -- however, form a groupoid! Therefore there is no (1-)category of
@@ -50,18 +50,18 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
         Arr (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
         identity : {o : Obj} → Arr o o
         identity = ℂ.identity , 𝔻.identity
-        _∘_ :
+        _<<<_ :
           {a b c : Obj} →
           Arr b c →
           Arr a b →
           Arr a c
-        _∘_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → ℂ [ bc∈C ∘ ab∈C ] , 𝔻 [ bc∈D ∘ ab∈D ]}
+        _<<<_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → ℂ [ bc∈C ∘ ab∈C ] , 𝔻 [ bc∈D ∘ ab∈D ]}
 
       rawProduct : RawCategory ℓ ℓ'
       RawCategory.Object   rawProduct = Obj
       RawCategory.Arrow    rawProduct = Arr
       RawCategory.identity rawProduct = identity
-      RawCategory._∘_      rawProduct = _∘_
+      RawCategory._<<<_    rawProduct = _<<<_
 
     open RawCategory rawProduct
 
