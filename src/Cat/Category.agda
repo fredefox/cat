@@ -147,8 +147,11 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     from[Andrea] = from[Contr] ∘ step
       where
       module _ (f : Univalent[Andrea]) (A : Object) where
+        lem : Σ Object (A ≅_) ≃ Σ Object (A ≡_)
+        lem = equivSig {ℓa} {ℓb} {Object} {A ≅_} {_} {A ≡_} (f A)
+
         aux : isContr (Σ[ B ∈ Object ] A ≡ B)
-        aux = {!!}
+        aux = {!Σ Object (A ≡_)!}
 
         step : isContr (Σ Object (A ≅_))
         step = {!subst {P = isContr} {!!} aux!}

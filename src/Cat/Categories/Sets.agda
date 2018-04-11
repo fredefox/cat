@@ -106,59 +106,6 @@ module _ (ℓ : Level) where
         iso : (p ≡ q) ≈ (fst p ≡ fst q)
         iso = f , g , inv
 
-      lem3 : ∀ {ℓc} {Q : A → Set (ℓc ⊔ ℓb)}
-        → ((a : A) → P a ≃ Q a) → Σ A P ≃ Σ A Q
-      lem3 {Q = Q} eA = res
-        where
-        f : Σ A P → Σ A Q
-        f (a , pA) = a , fst (eA a) pA
-        g : Σ A Q → Σ A P
-        g (a , qA) = a , g' qA
-          where
-          k : TypeIsomorphism _
-          k = toIso _ _ (snd (eA a))
-          open Σ k renaming (fst to g')
-        ve-re : (x : Σ A P) → (g ∘ f) x ≡ x
-        ve-re x i = fst x , eq i
-          where
-          eq : snd ((g ∘ f) x) ≡ snd x
-          eq = begin
-            snd ((g ∘ f) x) ≡⟨⟩
-            snd (g (f (a , pA))) ≡⟨⟩
-            g' (fst (eA a) pA) ≡⟨ lem ⟩
-            pA ∎
-            where
-            open Σ x renaming (fst to a ; snd to pA)
-            k : TypeIsomorphism _
-            k = toIso _ _ (snd (eA a))
-            open Σ k renaming (fst to g' ; snd to inv)
-            module A = AreInverses inv
-            -- anti-funExt
-            lem : (g' ∘ (fst (eA a))) pA ≡ pA
-            lem i = A.verso-recto i pA
-        re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
-        re-ve x i = fst x , eq i
-          where
-          open Σ x renaming (fst to a ; snd to qA)
-          eq = begin
-            snd ((f ∘ g) x)                 ≡⟨⟩
-            fst (eA a) (g' qA)            ≡⟨ (λ i → A.recto-verso i qA) ⟩
-            qA                                ∎
-            where
-            k : TypeIsomorphism _
-            k = toIso _ _ (snd (eA a))
-            open Σ k renaming (fst to g' ; snd to inv)
-            module A = AreInverses inv
-        inv : AreInverses f g
-        inv = record
-          { verso-recto = funExt ve-re
-          ; recto-verso = funExt re-ve
-          }
-        iso : Σ A P ≈ Σ A Q
-        iso = f , g , inv
-        res : Σ A P ≃ Σ A Q
-        res = fromIsomorphism _ _ iso
-
     module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
       lem4 : isSet A → isSet B → (f : A → B)
         → isEquiv A B f ≃ isIso f
@@ -186,7 +133,7 @@ module _ (ℓ : Level) where
 
       -- lem3 and the equivalence from lem4
       step0 : Σ (A → B) isIso ≃ Σ (A → B) (isEquiv A B)
-      step0 = lem3 {ℓc = lzero} (λ f → sym≃ (lem4 sA sB f))
+      step0 = equivSig (λ f → sym≃ (lem4 sA sB f))
 
       -- univalence
       step1 : Σ (A → B) (isEquiv A B) ≃ (A ≡ B)
@@ -219,7 +166,7 @@ module _ (ℓ : Level) where
       open Σ hA renaming (fst to A)
 
       eq1 : (Σ[ hB ∈ Object ] hA ≅ hB) ≡ (Σ[ hB ∈ Object ] hA ≡ hB)
-      eq1 = ua (lem3 (\ hB → univ≃))
+      eq1 = ua (equivSig (\ hB → univ≃))
 
       univalent[Contr] : isContr (Σ[ hB ∈ Object ] hA ≅ hB)
       univalent[Contr] = subst {P = isContr} (sym eq1) tres

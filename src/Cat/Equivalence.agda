@@ -445,3 +445,57 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
           ; recto-verso = funExt ve-re
           }
     in fromIsomorphism _ _ iso
+
+module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
+  equivSig : {ℓc : Level} {Q : A → Set ℓc}
+    → ((a : A) → P a ≃ Q a) → Σ A P ≃ Σ A Q
+  equivSig {Q = Q} eA = res
+    where
+    f : Σ A P → Σ A Q
+    f (a , pA) = a , fst (eA a) pA
+    g : Σ A Q → Σ A P
+    g (a , qA) = a , g' qA
+      where
+      k : Isomorphism _
+      k = toIso _ _ (snd (eA a))
+      open Σ k renaming (fst to g')
+    ve-re : (x : Σ A P) → (g ∘ f) x ≡ x
+    ve-re x i = fst x , eq i
+      where
+      eq : snd ((g ∘ f) x) ≡ snd x
+      eq = begin
+        snd ((g ∘ f) x) ≡⟨⟩
+        snd (g (f (a , pA))) ≡⟨⟩
+        g' (fst (eA a) pA) ≡⟨ lem ⟩
+        pA ∎
+        where
+        open Σ x renaming (fst to a ; snd to pA)
+        k : Isomorphism _
+        k = toIso _ _ (snd (eA a))
+        open Σ k renaming (fst to g' ; snd to inv)
+        module A = AreInverses inv
+        -- anti-funExt
+        lem : (g' ∘ (fst (eA a))) pA ≡ pA
+        lem i = A.verso-recto i pA
+    re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
+    re-ve x i = fst x , eq i
+      where
+      open Σ x renaming (fst to a ; snd to qA)
+      eq = begin
+        snd ((f ∘ g) x)                 ≡⟨⟩
+        fst (eA a) (g' qA)            ≡⟨ (λ i → A.recto-verso i qA) ⟩
+        qA                                ∎
+        where
+        k : Isomorphism _
+        k = toIso _ _ (snd (eA a))
+        open Σ k renaming (fst to g' ; snd to inv)
+        module A = AreInverses inv
+    inv : AreInverses f g
+    inv = record
+      { verso-recto = funExt ve-re
+      ; recto-verso = funExt re-ve
+      }
+    iso : Σ A P ≅ Σ A Q
+    iso = f , g , inv
+    res : Σ A P ≃ Σ A Q
+    res = fromIsomorphism _ _ iso

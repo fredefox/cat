@@ -172,32 +172,15 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
     open IsPreCategory isPreCat
 
     univalent : Univalent
-    univalent {(X , xa , xb)} {(Y , ya , yb)} = univalenceFromIsomorphism res
-      where
-      open import Cat.Equivalence using (composeIso) renaming (_≅_ to _≈_)
-      -- open import Relation.Binary.PreorderReasoning (Cat.Equivalence.preorder≅ {!!}) using ()
-      --   renaming
-      --     ( _∼⟨_⟩_ to _≈⟨_⟩_
-      --     ; begin_ to begin!_
-      --     ; _∎ to _∎! )
-      -- lawl
-      --   : ((X , xa , xb) ≡ (Y , ya , yb))
-      --   ≈ (Σ[ iso ∈ (X ℂ.≅ Y) ] let p = ℂ.isoToId iso in (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
-      -- lawl = {!begin! ? ≈⟨ ? ⟩ ? ∎!!}
-      -- Problem with the above approach: Preorders only work for heterogeneous equaluties.
+    univalent {(X , xa , xb)} {(Y , ya , yb)} = {!!}
 
-      -- (X , xa , xb) ≡ (Y , ya , yb)
-      -- ≅
-      -- Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb)
-      -- ≅
-      -- Σ (X ℂ.≅ Y) (λ iso
-      --   → let p = ℂ.isoToId iso
-      --   in
-      --   ( PathP (λ i → ℂ.Arrow (p i) A) xa ya)
-      --   × PathP (λ i → ℂ.Arrow (p i) B) xb yb
-      --   )
-      -- ≅
-      -- (X , xa , xb) ≅ (Y , ya , yb)
+    -- module _ {(X , xa , xb) : Object} {(Y , ya , yb) : Object} where
+    module _ (𝕏 𝕐 : Object) where
+      open Σ 𝕏 renaming (fst to X ; snd to x)
+      open Σ x renaming (fst to xa ; snd to xb)
+      open Σ 𝕐 renaming (fst to Y ; snd to y)
+      open Σ y renaming (fst to ya ; snd to yb)
+      open import Cat.Equivalence using (composeIso) renaming (_≅_ to _≈_)
       step0
         : ((X , xa , xb) ≡ (Y , ya , yb))
         ≈ (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
@@ -287,7 +270,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
           let
             iso : X ℂ.≅ Y
             iso = fst f , fst f~ , cong fst inv-f , cong fst inv-f~
-            helper : PathP (λ i → ℂ.Arrow (ℂ.isoToId ? i) A) xa ya
+            helper : PathP (λ i → ℂ.Arrow (ℂ.isoToId {!!} i) A) xa ya
             helper = {!!}
           in iso , helper , {!!}})
         , record
@@ -315,12 +298,13 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         : ((X , xa , xb) ≡ (Y , ya , yb))
         ≃ ((X , xa , xb) ≅ (Y , ya , yb))
       equiv1 = _ , fromIso _ _ (snd iso)
+      equiv4reel
+        : ((X , xa , xb) ≅ (Y , ya , yb))
+        ≃ ((X , xa , xb) ≡ (Y , ya , yb))
+      equiv4reel = {!!}
 
-      res : TypeIsomorphism (idToIso (X , xa , xb) (Y , ya , yb))
-      res = {!snd equiv1!}
-
-    univalent2 : ∀ X Y → (X ≅ Y) ≃ (X ≡ Y)
-    univalent2 = {!!}
+    univalent' : Univalent
+    univalent' = from[Andrea] equiv4reel
 
     isCat : IsCategory raw
     IsCategory.isPreCategory isCat = isPreCat
