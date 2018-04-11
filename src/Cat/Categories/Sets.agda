@@ -162,25 +162,8 @@ module _ (ℓ : Level) where
       univ≃ : (hA ≅ hB) ≃ (hA ≡ hB)
       univ≃ = trivial? ⊙ step0 ⊙ step1 ⊙ step2
 
-    module _ (hA : Object) where
-      open Σ hA renaming (fst to A)
-
-      eq1 : (Σ[ hB ∈ Object ] hA ≅ hB) ≡ (Σ[ hB ∈ Object ] hA ≡ hB)
-      eq1 = ua (equivSig (\ hB → univ≃))
-
-      univalent[Contr] : isContr (Σ[ hB ∈ Object ] hA ≅ hB)
-      univalent[Contr] = subst {P = isContr} (sym eq1) tres
-        where
-        module _ (y : Σ[ hB ∈ Object ] hA ≡ hB) where
-          open Σ y renaming (fst to hB ; snd to hA≡hB)
-          qres : (hA , refl) ≡ (hB , hA≡hB)
-          qres = contrSingl hA≡hB
-
-        tres : isContr (Σ[ hB ∈ Object ] hA ≡ hB)
-        tres = (hA , refl) , qres
-
     univalent : Univalent
-    univalent = from[Contr] univalent[Contr]
+    univalent = from[Andrea] (λ _ _ → univ≃)
 
     SetsIsCategory : IsCategory SetsRaw
     IsCategory.isPreCategory SetsIsCategory = isPreCat
