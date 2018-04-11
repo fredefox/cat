@@ -123,7 +123,7 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   -- | to talk about voevodsky's construction.
   module _ (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
     private
-      module E = AreInverses (Monoidal≅Kleisli ℂ .snd .snd)
+      module E = AreInverses {f = (fst (Monoidal≅Kleisli ℂ))} {fst (snd (Monoidal≅Kleisli ℂ))}(Monoidal≅Kleisli ℂ .snd .snd)
 
       Monoidal→Kleisli : M.Monad → K.Monad
       Monoidal→Kleisli = E.obverse

@@ -31,10 +31,12 @@ module _ {ℓa ℓb : Level} where
   module _ {A : Set ℓa} {B : Set ℓb} where
     -- Quasi-inverse in [HoTT] §2.4.6
     -- FIXME Maybe rename?
-    record AreInverses (f : A → B) (g : B → A) : Set ℓ where
-      field
-        verso-recto : g ∘ f ≡ idFun A
-        recto-verso : f ∘ g ≡ idFun B
+    AreInverses : (f : A → B) (g : B → A) → Set ℓ
+    AreInverses f g = g ∘ f ≡ idFun A × f ∘ g ≡ idFun B
+
+    module AreInverses {f : A → B} {g : B → A}
+      (inv : AreInverses f g) where
+      open Σ inv renaming (fst to verso-recto ; snd to recto-verso) public
       obverse = f
       reverse = g
       inverse = reverse
@@ -49,10 +51,7 @@ module _ {ℓa ℓb : Level} where
              × (f ∘ g) ≡ idFun B) where
       open Σ inv renaming (fst to ve-re ; snd to re-ve)
       toAreInverses : AreInverses f g
-      toAreInverses = record
-        { verso-recto = ve-re
-        ; recto-verso = re-ve
-        }
+      toAreInverses = ve-re , re-ve
 
   _≅_ : Set ℓa → Set ℓb → Set _
   A ≅ B = Σ (A → B) Isomorphism
@@ -61,16 +60,12 @@ module _ {ℓ : Level} {A B : Set ℓ} {f : A → B}
   (g : B → A) (s : {A B : Set ℓ} → isSet (A → B)) where
 
   propAreInverses : isProp (AreInverses {A = A} {B} f g)
-  propAreInverses x y i = record
-    { verso-recto = ve-re
-    ; recto-verso = re-ve
-    }
+  propAreInverses x y i = ve-re , re-ve
     where
-    open AreInverses
     ve-re : g ∘ f ≡ idFun A
-    ve-re = s (g ∘ f) (idFun A) (verso-recto x) (verso-recto y) i
+    ve-re = s (g ∘ f) (idFun A) (fst x) (fst y) i
     re-ve : f ∘ g ≡ idFun B
-    re-ve = s (f ∘ g) (idFun B) (recto-verso x) (recto-verso y) i
+    re-ve = s (f ∘ g) (idFun B) (snd x) (snd y) i
 
 module _ {ℓ : Level} {A B : Set ℓ} (f : A → B)
   (sA : isSet A) (sB : isSet B) where
@@ -81,20 +76,17 @@ module _ {ℓ : Level} {A B : Set ℓ} (f : A → B)
         module _ (x y : Isomorphism f) where
           module x = Σ x renaming (fst to inverse ; snd to areInverses)
           module y = Σ y renaming (fst to inverse ; snd to areInverses)
-          module xA = AreInverses x.areInverses
-          module yA = AreInverses y.areInverses
+          module xA = AreInverses {f = f} {x.inverse} x.areInverses
+          module yA = AreInverses {f = f} {y.inverse} y.areInverses
           -- I had a lot of difficulty using the corresponding proof where
           -- AreInverses is defined. This is sadly a bit anti-modular. The
           -- reason for my troubles is probably related to the type of objects
           -- being hSet's rather than sets.
           p : ∀ {f} g → isProp (AreInverses {A = A} {B} f g)
-          p {f} g xx yy i = record
-            { verso-recto = ve-re
-            ; recto-verso = re-ve
-            }
+          p {f} g xx yy i = ve-re , re-ve
             where
-            module xxA = AreInverses xx
-            module yyA = AreInverses yy
+            module xxA = AreInverses {f = f} {g} xx
+            module yyA = AreInverses {f = f} {g} yy
             setPiB : ∀ {X : Set ℓ} → isSet (X → B)
             setPiB = setPi (λ _ → sB)
             setPiA : ∀ {X : Set ℓ} → isSet (X → A)
@@ -141,33 +133,29 @@ module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
         module _ (iso-x iso-y : Isomorphism f) where
           open Σ iso-x renaming (fst to x ; snd to inv-x)
           open Σ iso-y renaming (fst to y ; snd to inv-y)
-          module inv-x = AreInverses inv-x
-          module inv-y = AreInverses inv-y
 
           fx≡fy : x ≡ y
           fx≡fy = begin
-            x             ≡⟨ cong (λ φ → x ∘ φ) (sym inv-y.recto-verso) ⟩
+            x             ≡⟨ cong (λ φ → x ∘ φ) (sym (snd inv-y)) ⟩
             x ∘ (f ∘ y)   ≡⟨⟩
-            (x ∘ f) ∘ y   ≡⟨ cong (λ φ → φ ∘ y) inv-x.verso-recto ⟩
+            (x ∘ f) ∘ y   ≡⟨ cong (λ φ → φ ∘ y) (fst inv-x) ⟩
             y ∎
 
           propInv : ∀ g → isProp (AreInverses f g)
-          propInv g t u i = record { verso-recto = a i ; recto-verso = b i }
+          propInv g t u i = a i , b i
             where
-            module t = AreInverses t
-            module u = AreInverses u
-            a : t.verso-recto ≡ u.verso-recto
+            a : (fst t) ≡ (fst u)
             a i = h
               where
               hh : ∀ a → (g ∘ f) a ≡ a
-              hh a = sA ((g ∘ f) a) a (λ i → t.verso-recto i a) (λ i → u.verso-recto i a) i
+              hh a = sA ((g ∘ f) a) a (λ i → (fst t) i a) (λ i → (fst u) i a) i
               h : g ∘ f ≡ idFun A
               h i a = hh a i
-            b : t.recto-verso ≡ u.recto-verso
+            b : (snd t) ≡ (snd u)
             b i = h
               where
               hh : ∀ b → (f ∘ g) b ≡ b
-              hh b = sB _ _ (λ i → t.recto-verso i b) (λ i → u.recto-verso i b) i
+              hh b = sB _ _ (λ i → snd t i b) (λ i → snd u i b) i
               h : f ∘ g ≡ idFun B
               h i b = hh b i
 
@@ -201,10 +189,7 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
       reverse = inverse
 
       areInverses : AreInverses obverse inverse
-      areInverses = record
-        { verso-recto = funExt verso-recto
-        ; recto-verso = funExt recto-verso
-        }
+      areInverses = funExt verso-recto , funExt recto-verso
         where
         recto-verso : ∀ b → (obverse ∘ inverse) b ≡ b
         recto-verso b = begin
@@ -245,11 +230,10 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
     ≃isEquiv : Equiv A B (isEquiv A B)
     Equiv.fromIso     ≃isEquiv {f} (f~ , iso) = gradLemma f f~ rv vr
       where
-      open AreInverses iso
       rv : (b : B) → _ ≡ b
-      rv b i = recto-verso i b
+      rv b i = snd iso i b
       vr : (a : A) → _ ≡ a
-      vr a i = verso-recto i a
+      vr a i = fst iso i a
     Equiv.toIso        ≃isEquiv = toIsomorphism
     Equiv.propIsEquiv  ≃isEquiv = P.propIsEquiv
       where
@@ -266,21 +250,19 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
     composeIsomorphism a b = f~ ∘ g~ , inv
       where
       open Σ a renaming (fst to f~ ; snd to inv-a)
-      module A = AreInverses inv-a
       open Σ b renaming (fst to g~ ; snd to inv-b)
-      module B = AreInverses inv-b
       inv : AreInverses (g ∘ f) (f~ ∘ g~)
       inv = record
-        { verso-recto = begin
+        { fst = begin
           (f~ ∘ g~) ∘ (g ∘ f) ≡⟨⟩
-          f~ ∘ (g~ ∘ g) ∘ f   ≡⟨ cong (λ φ → f~ ∘ φ ∘ f) B.verso-recto ⟩
+          f~ ∘ (g~ ∘ g) ∘ f   ≡⟨ cong (λ φ → f~ ∘ φ ∘ f) (fst inv-b) ⟩
           f~ ∘ idFun _ ∘ f    ≡⟨⟩
-          f~ ∘ f              ≡⟨ A.verso-recto ⟩
+          f~ ∘ f              ≡⟨ (fst inv-a) ⟩
           idFun A             ∎
-        ; recto-verso = begin
+        ; snd = begin
           (g ∘ f) ∘ (f~ ∘ g~) ≡⟨⟩
-          g ∘ (f ∘ f~) ∘ g~   ≡⟨ cong (λ φ → g ∘ φ ∘ g~) A.recto-verso ⟩
-          g ∘ g~              ≡⟨ B.recto-verso ⟩
+          g ∘ (f ∘ f~) ∘ g~   ≡⟨ cong (λ φ → g ∘ φ ∘ g~) (snd inv-a) ⟩
+          g ∘ g~              ≡⟨ (snd inv-b) ⟩
           idFun C             ∎
         }
 
@@ -299,7 +281,7 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
       iso : Isomorphism (fst e)
       iso = snd (toIsomorphism _ _ e)
 
-    open AreInverses (snd iso) public
+    open AreInverses {f = fst e} {fst iso} (snd iso) public
 
     compose : {ℓc : Level} {C : Set ℓc} → (B ≃ C) → A ≃ C
     compose (f , isEquiv) = f ∘ obverse , composeIsEquiv (snd e) isEquiv
@@ -308,10 +290,8 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
     symmetryIso
       = inverse
       , obverse
-      , record
-        { verso-recto = recto-verso
-        ; recto-verso = verso-recto
-        }
+      , recto-verso
+      , verso-recto
 
     symmetry : B ≃ A
     symmetry = fromIsomorphism _ _ symmetryIso
@@ -325,13 +305,43 @@ preorder≅ ℓ = record
       → coe p
       , coe (sym p)
       -- I believe I stashed the proof of this somewhere.
-      , record
-        { verso-recto = {!refl!}
-        ; recto-verso = {!!}
-        }
+      , funExt (λ x → inv-coe p)
+      , funExt (λ x → inv-coe' p)
     ; trans = composeIso
     }
   }
+  where
+  module _ {ℓ : Level} {A : Set ℓ} {a : A} where
+    id-coe : coe refl a ≡ a
+    id-coe = begin
+      coe refl a                 ≡⟨⟩
+      pathJ (λ y x → A) _ A refl ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
+      _ ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
+      a ∎
+
+  module _ {ℓ : Level} {A B : Set ℓ} {a : A} where
+    inv-coe : (p : A ≡ B) → coe (sym p) (coe p a) ≡ a
+    inv-coe p =
+      let
+        D : (y : Set ℓ) → _ ≡ y → Set _
+        D _ q = coe (sym q) (coe q a) ≡ a
+        d : D A refl
+        d = begin
+          coe (sym refl) (coe refl a) ≡⟨⟩
+          coe refl (coe refl a)       ≡⟨ id-coe ⟩
+          coe refl a                  ≡⟨ id-coe ⟩
+          a ∎
+      in pathJ D d B p
+    inv-coe' : (p : B ≡ A) → coe p (coe (sym p) a) ≡ a
+    inv-coe' p =
+      let
+        D : (y : Set ℓ) → _ ≡ y → Set _
+        D _ q = coe (sym q) (coe q a) ≡ a
+        k : coe p (coe (sym p) a) ≡ a
+        k = pathJ D (trans id-coe id-coe) B (sym p)
+      in k
+
+
 module _ {ℓ : Level} {A B : Set ℓ} where
   univalence : (A ≡ B) ≃ (A ≃ B)
   univalence = Equivalence.compose u' aux
@@ -341,7 +351,7 @@ module _ {ℓ : Level} {A B : Set ℓ} where
     u' : (A ≡ B) ≃ (A U.≃ B)
     u' = doEta u
     aux : (A U.≃ B) ≃ (A ≃ B)
-    aux = fromIsomorphism _ _ (doEta , deEta , record { verso-recto = funExt (λ{ (U.con _ _) → refl}) ; recto-verso = refl })
+    aux = fromIsomorphism _ _ (doEta , deEta , funExt (λ{ (U.con _ _) → refl}) , refl)
 
 -- A few results that I have not generalized to work with both the eta and no-eta variable of ≃
 module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
@@ -361,10 +371,7 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
     re-ve : (e : fst p ≡ fst q) → (f {p} {q} ∘ g {p} {q}) e ≡ e
     re-ve e = refl
     inv : AreInverses (f {p} {q}) (g {p} {q})
-    inv = record
-      { verso-recto = funExt ve-re
-      ; recto-verso = funExt re-ve
-      }
+    inv = funExt ve-re , funExt re-ve
     iso : (p ≡ q) ≅ (fst p ≡ fst q)
     iso = f , g , inv
 
@@ -396,28 +403,22 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
         k : Isomorphism _
         k = toIso _ _ (snd (eA a))
         open Σ k renaming (fst to g' ; snd to inv)
-        module A = AreInverses inv
-        -- anti-funExt
         lem : (g' ∘ (fst (eA a))) pA ≡ pA
-        lem i = A.verso-recto i pA
+        lem i = fst inv i pA
     re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
     re-ve x i = fst x , eq i
       where
       open Σ x renaming (fst to a ; snd to qA)
       eq = begin
         snd ((f ∘ g) x)                 ≡⟨⟩
-        fst (eA a) (g' qA)            ≡⟨ (λ i → A.recto-verso i qA) ⟩
-        qA                                ∎
+        fst (eA a) (g' qA)              ≡⟨ (λ i → snd inv i qA) ⟩
+        qA                              ∎
         where
         k : Isomorphism _
         k = toIso _ _ (snd (eA a))
         open Σ k renaming (fst to g' ; snd to inv)
-        module A = AreInverses inv
     inv : AreInverses f g
-    inv = record
-      { verso-recto = funExt ve-re
-      ; recto-verso = funExt re-ve
-      }
+    inv = funExt ve-re , funExt re-ve
     iso : Σ A P ≅ Σ A Q
     iso = f , g , inv
     res : Σ A P ≃ Σ A Q
@@ -439,11 +440,7 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
       ve-re : (x : Isomorphism f)       → (obv ∘ inv) x ≡ x
       ve-re = inverse-to-from-iso A B sA sB
       iso : isEquiv A B f ≅ Isomorphism f
-      iso = obv , inv ,
-        record
-          { verso-recto = funExt re-ve
-          ; recto-verso = funExt ve-re
-          }
+      iso = obv , inv , funExt re-ve , funExt ve-re
     in fromIsomorphism _ _ iso
 
 module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
@@ -473,28 +470,23 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
         k : Isomorphism _
         k = toIso _ _ (snd (eA a))
         open Σ k renaming (fst to g' ; snd to inv)
-        module A = AreInverses inv
         -- anti-funExt
         lem : (g' ∘ (fst (eA a))) pA ≡ pA
-        lem i = A.verso-recto i pA
+        lem i = fst inv i pA
     re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
     re-ve x i = fst x , eq i
       where
       open Σ x renaming (fst to a ; snd to qA)
       eq = begin
         snd ((f ∘ g) x)                 ≡⟨⟩
-        fst (eA a) (g' qA)            ≡⟨ (λ i → A.recto-verso i qA) ⟩
+        fst (eA a) (g' qA)            ≡⟨ (λ i → snd inv i qA) ⟩
         qA                                ∎
         where
         k : Isomorphism _
         k = toIso _ _ (snd (eA a))
         open Σ k renaming (fst to g' ; snd to inv)
-        module A = AreInverses inv
     inv : AreInverses f g
-    inv = record
-      { verso-recto = funExt ve-re
-      ; recto-verso = funExt re-ve
-      }
+    inv = funExt ve-re , funExt re-ve
     iso : Σ A P ≅ Σ A Q
     iso = f , g , inv
     res : Σ A P ≃ Σ A Q

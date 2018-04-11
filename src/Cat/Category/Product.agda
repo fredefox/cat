@@ -184,10 +184,8 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         = (λ p → cong fst p , cong-d (fst ∘ snd) p , cong-d (snd ∘ snd) p)
         -- , (λ x  → λ i → fst x i , (fst (snd x) i) , (snd (snd x) i))
         , (λ{ (p , q , r) → Σ≡ p λ i → q i , r i})
-        , record
-          { verso-recto = funExt (λ{ p → refl})
-          ; recto-verso = funExt (λ{ (p , q , r) → refl})
-          }
+        , funExt (λ{ p → refl})
+        , funExt (λ{ (p , q , r) → refl})
 
       -- Should follow from c being univalent
       iso-id-inv : {p : X ≡ Y} → p ≡ ℂ.isoToId (ℂ.idToIso X Y p)
@@ -240,11 +238,8 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         -- I have `φ p` in scope, but surely `p` and `x` are the same - though
         -- perhaps not definitonally.
         , (λ{ (iso , x) → ℂ.isoToId iso , x})
-        , record
-          { verso-recto = funExt (λ{ (p , q , r) → Σ≡ (sym iso-id-inv) (toPathP {A = λ i → {!!}} {!!})})
-          -- { verso-recto = funExt (λ{ (p , q , r) → Σ≡ (sym iso-id-inv) {!!}})
-          ; recto-verso = funExt (λ x → Σ≡ (sym id-iso-inv) {!!})
-          }
+        , funExt (λ{ (p , q , r) → Σ≡ (sym iso-id-inv) (toPathP {A = λ i → {!!}} {!!})})
+        , funExt (λ x → Σ≡ (sym id-iso-inv) {!!})
       step2
         : Σ (X ℂ.≅ Y) (λ iso
           → let p = ℂ.isoToId iso
@@ -270,11 +265,11 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
             helper = {!!}
           in iso , helper , {!!}})
         , record
-          { verso-recto = funExt (λ x → lemSig
+          { fst = funExt (λ x → lemSig
             (λ x → propSig prop0 (λ _ → prop1))
             _ _
             (Σ≡ {!!} (ℂ.propIsomorphism _ _ _)))
-          ; recto-verso = funExt (λ{ (f , _) → lemSig propIsomorphism _ _ {!refl!}})
+          ; snd = funExt (λ{ (f , _) → lemSig propIsomorphism _ _ {!refl!}})
           }
           where
           prop0 : ∀ {x} → isProp (PathP (λ i → ℂ.Arrow (ℂ.isoToId x i) A) xa ya)
@@ -386,10 +381,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       RawProduct.fst (e i) = p.fst
       RawProduct.snd (e i) = p.snd
     inv : AreInverses f g
-    inv = record
-      { verso-recto = funExt ve-re
-      ; recto-verso = funExt re-ve
-      }
+    inv = funExt ve-re , funExt re-ve
 
   propProduct : isProp (Product ℂ A B)
   propProduct = equivPreservesNType {n = ⟨-1⟩} lemma Propositionality.propTerminal

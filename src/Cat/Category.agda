@@ -528,7 +528,7 @@ module Opposite {ℓa ℓb : Level} where
         k : TypeIsomorphism (ℂ.idToIso A B)
         k = toIso _ _ ℂ.univalent
         open Σ k renaming (fst to η ; snd to inv-η)
-        open AreInverses inv-η
+        open AreInverses {f = ℂ.idToIso A B} {η} inv-η
 
         genericly : {ℓa ℓb ℓc : Level} {a : Set ℓa} {b : Set ℓb} {c : Set ℓc}
           → a × b × c → b × a × c
@@ -561,13 +561,13 @@ module Opposite {ℓa ℓb : Level} where
         inv-ζ : AreInverses (idToIso A B) ζ
         -- recto-verso : ℂ.idToIso A B <<< f ≡ idFun (A ℂ.≅ B)
         inv-ζ = record
-          { verso-recto = funExt (λ x → begin
+          { fst = funExt (λ x → begin
             (ζ ∘ idToIso A B) x                       ≡⟨⟩
             (η  ∘ shuffle ∘ idToIso A B) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → η ∘ shuffle ∘ φ) (funExt lem)) ⟩
             (η  ∘ shuffle ∘ shuffle~ ∘ ℂ.idToIso A B) x ≡⟨⟩
             (η  ∘ ℂ.idToIso A B) x                     ≡⟨ (λ i → verso-recto i x) ⟩
             x ∎)
-          ; recto-verso = funExt (λ x → begin
+          ; snd = funExt (λ x → begin
             (idToIso A B ∘ η ∘ shuffle) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → φ ∘ η ∘ shuffle) (funExt lem)) ⟩
             (shuffle~ ∘ ℂ.idToIso A B ∘ η ∘ shuffle) x ≡⟨ cong (λ φ → φ x) (cong (λ φ → shuffle~ ∘ φ ∘ shuffle) recto-verso) ⟩
             (shuffle~ ∘ shuffle) x                       ≡⟨⟩

@@ -54,30 +54,23 @@ module _ (ℓ : Level) where
         module _ (x y : isIso f) where
           module x = Σ x renaming (fst to inverse ; snd to areInverses)
           module y = Σ y renaming (fst to inverse ; snd to areInverses)
-          module xA = AreInverses x.areInverses
-          module yA = AreInverses y.areInverses
           -- I had a lot of difficulty using the corresponding proof where
           -- AreInverses is defined. This is sadly a bit anti-modular. The
           -- reason for my troubles is probably related to the type of objects
           -- being hSet's rather than sets.
           p : ∀ {f} g → isProp (AreInverses {A = A} {B} f g)
-          p {f} g xx yy i = record
-            { verso-recto = ve-re
-            ; recto-verso = re-ve
-            }
+          p {f} g xx yy i = ve-re , re-ve
             where
-            module xxA = AreInverses xx
-            module yyA = AreInverses yy
             ve-re : g ∘ f ≡ idFun _
-            ve-re = arrowsAreSets {A = hA} {B = hA} _ _ xxA.verso-recto yyA.verso-recto i
+            ve-re = arrowsAreSets {A = hA} {B = hA} _ _ (fst xx) (fst yy) i
             re-ve : f ∘ g ≡ idFun _
-            re-ve = arrowsAreSets {A = hB} {B = hB} _ _ xxA.recto-verso yyA.recto-verso i
+            re-ve = arrowsAreSets {A = hB} {B = hB} _ _ (snd xx) (snd yy) i
           1eq : x.inverse ≡ y.inverse
           1eq = begin
             x.inverse                   ≡⟨⟩
-            x.inverse ∘ idFun _         ≡⟨ cong (λ φ → x.inverse ∘ φ) (sym yA.recto-verso) ⟩
+            x.inverse ∘ idFun _         ≡⟨ cong (λ φ → x.inverse ∘ φ) (sym (snd y.areInverses)) ⟩
             x.inverse ∘ (f ∘ y.inverse) ≡⟨⟩
-            (x.inverse ∘ f) ∘ y.inverse ≡⟨ cong (λ φ → φ ∘ y.inverse) xA.verso-recto ⟩
+            (x.inverse ∘ f) ∘ y.inverse ≡⟨ cong (λ φ → φ ∘ y.inverse) (fst x.areInverses) ⟩
             idFun _ ∘ y.inverse         ≡⟨⟩
             y.inverse                   ∎
           2eq : (λ i → AreInverses f (1eq i)) [ x.areInverses ≡ y.areInverses ]
@@ -99,10 +92,7 @@ module _ (ℓ : Level) where
         re-ve : (e : fst p ≡ fst q) → (f {p} {q} ∘ g {p} {q}) e ≡ e
         re-ve e = refl
         inv : AreInverses (f {p} {q}) (g {p} {q})
-        inv = record
-          { verso-recto = funExt ve-re
-          ; recto-verso = funExt re-ve
-          }
+        inv = funExt ve-re , funExt re-ve
         iso : (p ≡ q) ≈ (fst p ≡ fst q)
         iso = f , g , inv
 
@@ -120,11 +110,7 @@ module _ (ℓ : Level) where
           ve-re : (x : isIso f)       → (obv ∘ inv) x ≡ x
           ve-re = inverse-to-from-iso A B sA sB
           iso : isEquiv A B f ≈ isIso f
-          iso = obv , inv ,
-            record
-              { verso-recto = funExt re-ve
-              ; recto-verso = funExt ve-re
-              }
+          iso = obv , inv , funExt re-ve , funExt ve-re
         in fromIsomorphism _ _ iso
 
     module _ {hA hB : Object} where
@@ -139,20 +125,8 @@ module _ (ℓ : Level) where
       step2 : (hA ≡ hB) ≃ (A ≡ B)
       step2 = lem2 (λ A → isSetIsProp) hA hB
 
-      -- Go from an isomorphism on sets to an isomorphism on homotopic sets
-      trivial? : (A ≈ B) ≃ (hA ≅ hB)
-      trivial? = fromIsomorphism _ _ res
-        where
-        fwd : Σ (A → B) isIso → hA ≅ hB
-        fwd (f , g , inv) = f , g , inv.toPair
-          where
-          module inv = AreInverses inv
-        bwd : hA ≅ hB → Σ (A → B) isIso
-        bwd (f , g , x , y) = f , g , record { verso-recto = x ; recto-verso = y }
-        res : Σ (A → B) isIso ≈ (hA ≅ hB)
-        res = fwd , bwd , record { verso-recto = refl ; recto-verso = refl }
       univ≃ : (hA ≡ hB) ≃ (hA ≅ hB)
-      univ≃ = step2 ⊙ univalence ⊙ step0 ⊙ trivial?
+      univ≃ = step2 ⊙ univalence ⊙ step0
 
     univalent : Univalent
     univalent = from[Andrea] (λ _ _ → univ≃)
