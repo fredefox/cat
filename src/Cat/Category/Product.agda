@@ -171,10 +171,6 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
 
     open IsPreCategory isPreCat
 
-    univalent : Univalent
-    univalent {(X , xa , xb)} {(Y , ya , yb)} = {!!}
-
-    -- module _ {(X , xa , xb) : Object} {(Y , ya , yb) : Object} where
     module _ (𝕏 𝕐 : Object) where
       open Σ 𝕏 renaming (fst to X ; snd to x)
       open Σ x renaming (fst to xa ; snd to xb)
@@ -298,13 +294,9 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         : ((X , xa , xb) ≡ (Y , ya , yb))
         ≃ ((X , xa , xb) ≅ (Y , ya , yb))
       equiv1 = _ , fromIso _ _ (snd iso)
-      equiv4reel
-        : ((X , xa , xb) ≅ (Y , ya , yb))
-        ≃ ((X , xa , xb) ≡ (Y , ya , yb))
-      equiv4reel = {!!}
 
-    univalent' : Univalent
-    univalent' = from[Andrea] equiv4reel
+    univalent : Univalent
+    univalent = from[Andrea] equiv1
 
     isCat : IsCategory raw
     IsCategory.isPreCategory isCat = isPreCat

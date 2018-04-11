@@ -135,7 +135,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     Univalent[Contr] = ∀ A → isContr (Σ[ X ∈ Object ] A ≅ X)
 
     Univalent[Andrea] : Set _
-    Univalent[Andrea] = ∀ A B → (A ≅ B) ≃ (A ≡ B)
+    Univalent[Andrea] = ∀ A B → (A ≡ B) ≃ (A ≅ B)
 
     -- From: Thierry Coquand <Thierry.Coquand@cse.gu.se>
     -- Date: Wed, Mar 21, 2018 at 3:12 PM
@@ -147,14 +147,14 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     from[Andrea] = from[Contr] ∘ step
       where
       module _ (f : Univalent[Andrea]) (A : Object) where
-        lem : Σ Object (A ≅_) ≃ Σ Object (A ≡_)
-        lem = equivSig {ℓa} {ℓb} {Object} {A ≅_} {_} {A ≡_} (f A)
+        lem : Σ Object (A ≡_) ≃ Σ Object (A ≅_)
+        lem = equivSig (f A)
 
         aux : isContr (Σ Object (A ≡_))
         aux = (A , refl) , (λ y → contrSingl (snd y))
 
         step : isContr (Σ Object (A ≅_))
-        step = equivPreservesNType {n = ⟨-2⟩} (Equivalence.symmetry lem) aux
+        step = equivPreservesNType {n = ⟨-2⟩} lem aux
 
     propUnivalent : isProp Univalent
     propUnivalent a b i = propPi (λ iso → propIsContr) a b i

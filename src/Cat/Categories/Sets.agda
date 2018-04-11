@@ -132,20 +132,16 @@ module _ (ℓ : Level) where
       open Σ hB renaming (fst to B ; snd to sB)
 
       -- lem3 and the equivalence from lem4
-      step0 : Σ (A → B) isIso ≃ Σ (A → B) (isEquiv A B)
-      step0 = equivSig (λ f → sym≃ (lem4 sA sB f))
-
-      -- univalence
-      step1 : Σ (A → B) (isEquiv A B) ≃ (A ≡ B)
-      step1 = sym≃ univalence
+      step0 : Σ (A → B) (isEquiv A B) ≃ Σ (A → B) isIso
+      step0 = equivSig (lem4 sA sB)
 
       -- lem2 with propIsSet
-      step2 : (A ≡ B) ≃ (hA ≡ hB)
-      step2 = sym≃ (lem2 (λ A → isSetIsProp) hA hB)
+      step2 : (hA ≡ hB) ≃ (A ≡ B)
+      step2 = lem2 (λ A → isSetIsProp) hA hB
 
       -- Go from an isomorphism on sets to an isomorphism on homotopic sets
-      trivial? : (hA ≅ hB) ≃ (A ≈ B)
-      trivial? = sym≃ (fromIsomorphism _ _ res)
+      trivial? : (A ≈ B) ≃ (hA ≅ hB)
+      trivial? = fromIsomorphism _ _ res
         where
         fwd : Σ (A → B) isIso → hA ≅ hB
         fwd (f , g , inv) = f , g , inv.toPair
@@ -155,12 +151,8 @@ module _ (ℓ : Level) where
         bwd (f , g , x , y) = f , g , record { verso-recto = x ; recto-verso = y }
         res : Σ (A → B) isIso ≈ (hA ≅ hB)
         res = fwd , bwd , record { verso-recto = refl ; recto-verso = refl }
-
-      conclusion : (hA ≅ hB) ≃ (hA ≡ hB)
-      conclusion = trivial? ⊙ step0 ⊙ step1 ⊙ step2
-
-      univ≃ : (hA ≅ hB) ≃ (hA ≡ hB)
-      univ≃ = trivial? ⊙ step0 ⊙ step1 ⊙ step2
+      univ≃ : (hA ≡ hB) ≃ (hA ≅ hB)
+      univ≃ = step2 ⊙ univalence ⊙ step0 ⊙ trivial?
 
     univalent : Univalent
     univalent = from[Andrea] (λ _ _ → univ≃)
