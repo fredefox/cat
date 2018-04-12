@@ -250,8 +250,31 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         ≈ ((X , xa , xb) ≅ (Y , ya , yb))
       step2
         = ( λ{ ((f , f~ , inv-f) , p , q)
-            → ( f  , {!ℂ.9-1-9'!} , {!!})
-            , ( f~ , {!!} , {!!})
+            →
+            let
+              r : X ≡ Y
+              r = ℂ.isoToId (f , f~ , inv-f)
+              r-arrow : (ℂ.Arrow X A) ≡ (ℂ.Arrow Y A)
+              r-arrow i = ℂ.Arrow (r i) A
+              t : coe r-arrow xa ≡ ℂ.identity ℂ.<<< xa ℂ.<<< f~
+              t = {!? ≡ ?!}
+              lem : ∀ {x} → ℂ.idToIso _ _ (ℂ.isoToId x) ≡ x
+              lem {x} i = snd ℂ.inverse-from-to-iso' i x
+              h : ya ≡ xa ℂ.<<< f~
+              h = begin
+                ya ≡⟨ {!!} ⟩
+                coe r-arrow  xa
+                  ≡⟨ ℂ.9-1-9 r refl xa ⟩
+                fst (ℂ.idToIso _ _ refl) ℂ.<<< xa ℂ.<<< fst (snd (ℂ.idToIso _ _ r))
+                  ≡⟨ cong (λ φ → φ ℂ.<<< xa ℂ.<<< fst (snd (ℂ.idToIso _ _ r))) (subst-neutral {P = λ x → ℂ.Arrow x x}) ⟩
+                ℂ.identity ℂ.<<< xa ℂ.<<< fst (snd (ℂ.idToIso _ _ r))
+                  ≡⟨ cong (λ φ → ℂ.identity ℂ.<<< xa ℂ.<<< φ) (cong (λ x → (fst (snd x))) lem) ⟩
+                ℂ.identity ℂ.<<< xa ℂ.<<< f~
+                  ≡⟨ cong (ℂ._<<< f~) ℂ.leftIdentity ⟩
+                xa ℂ.<<< f~ ∎
+            in
+              ( f  , {!h!} , {!!})
+            , ( f~ , sym h , {!!})
             , lemA (fst inv-f)
             , lemA (snd inv-f)
             }
