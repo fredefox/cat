@@ -250,11 +250,10 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         ≈ ((X , xa , xb) ≅ (Y , ya , yb))
       step2
         = ( λ{ ((f , f~ , inv-f) , p , q)
-          → ( f , (let r = fromPathP p in {!r!}) , {!!})
-            , ( (f~ , {!!} , {!!})
-              , lemA (fst inv-f)
-              , lemA (snd inv-f)
-              )
+            → ( f  , {!ℂ.9-1-9'!} , {!!})
+            , ( f~ , {!!} , {!!})
+            , lemA (fst inv-f)
+            , lemA (snd inv-f)
             }
           )
         , (λ{ (f , f~ , inv-f , inv-f~) →

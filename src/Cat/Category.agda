@@ -337,6 +337,8 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       private
         q* : Arrow b b'
         q* = fst (idToIso b b' q)
+        p* : Arrow a a'
+        p* = fst (idToIso _ _ p)
         p~ : Arrow a' a
         p~ = fst (snd (idToIso _ _ p))
         pq : Arrow a b ≡ Arrow a' b'
@@ -364,6 +366,17 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 
       9-1-9 : coe pq f ≡ q* <<< f <<< p~
       9-1-9 = pathJ D d a' p
+
+      9-1-9' : coe pq f <<< p* ≡ q* <<< f
+      9-1-9' = begin
+        coe pq f <<< p* ≡⟨ cong (_<<< p*) 9-1-9 ⟩
+        q* <<< f <<< p~ <<< p* ≡⟨ sym isAssociative ⟩
+        q* <<< f <<< (p~ <<< p*) ≡⟨ cong (λ φ → q* <<< f <<< φ) lem ⟩
+        q* <<< f <<< identity ≡⟨ rightIdentity ⟩
+        q* <<< f ∎
+        where
+        lem : p~ <<< p* ≡ identity
+        lem = fst (snd (snd (idToIso _ _ p)))
 
     -- | All projections are propositions.
     module Propositionality where
