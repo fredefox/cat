@@ -88,3 +88,11 @@ IsPreorder
   → (_∼_ : Rel A ℓ) -- The relation.
   → Set _
 IsPreorder _~_ = Relation.Binary.IsPreorder _≡_ _~_
+
+module _ {ℓ : Level} {A : Set ℓ} {a : A} where
+  id-coe : coe refl a ≡ a
+  id-coe = begin
+    coe refl a                 ≡⟨⟩
+    pathJ (λ y x → A) _ A refl ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
+    _ ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
+    a ∎

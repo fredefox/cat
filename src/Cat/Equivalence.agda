@@ -3,12 +3,11 @@ module Cat.Equivalence where
 
 open import Cubical.Primitives
 open import Cubical.FromStdLib renaming (ℓ-max to _⊔_)
--- FIXME: Don't hide ≃
-open import Cubical.PathPrelude hiding (inverse ; _≃_)
+open import Cubical.PathPrelude hiding (inverse)
 open import Cubical.PathPrelude using (isEquiv ; isContr ; fiber) public
 open import Cubical.GradLemma
 
-open import Cat.Prelude using (lemPropF ; setPi ; lemSig ; propSet ; Preorder ; equalityIsEquivalence ; _≃_ ; propSig)
+open import Cat.Prelude using (lemPropF ; setPi ; lemSig ; propSet ; Preorder ; equalityIsEquivalence ; propSig ; id-coe)
 
 import Cubical.Univalence as U
 
@@ -289,14 +288,6 @@ preorder≅ ℓ = record
     }
   }
   where
-  module _ {ℓ : Level} {A : Set ℓ} {a : A} where
-    id-coe : coe refl a ≡ a
-    id-coe = begin
-      coe refl a                 ≡⟨⟩
-      pathJ (λ y x → A) _ A refl ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
-      _ ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
-      a ∎
-
   module _ {ℓ : Level} {A B : Set ℓ} {a : A} where
     inv-coe : (p : A ≡ B) → coe (sym p) (coe p a) ≡ a
     inv-coe p =
