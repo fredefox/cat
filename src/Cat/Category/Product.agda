@@ -216,8 +216,14 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
           )
       step1
         = symIso
-            (isoSigFst {A = (X ℂ.≅ Y)} {B = (X ≡ Y)} {!!} {Q = \ p → (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb)} ℂ.isoToId
-                           (symIso (_ , ℂ.asTypeIso {X} {Y}) .snd))
+            (isoSigFst
+              {A = (X ℂ.≅ Y)}
+              {B = (X ≡ Y)}
+              (ℂ.groupoidObject _ _)
+              {Q = \ p → (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb)}
+              ℂ.isoToId
+              (symIso (_ , ℂ.asTypeIso {X} {Y}) .snd)
+            )
 
       step2
         : Σ (X ℂ.≅ Y) (λ iso

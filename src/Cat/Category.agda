@@ -496,6 +496,20 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         res : Xi ≡ Yi
         res = lemSig propIsInitial _ _ (isoToId iso)
 
+    groupoidObject : isGrpd Object
+    groupoidObject A B = res
+      where
+      open import Data.Nat using (_≤_ ; z≤n ; s≤s)
+      setIso : ∀ x → isSet (Isomorphism x)
+      setIso x = ntypeCommulative ((s≤s {n = 1} z≤n)) (propIsomorphism x)
+      step : isSet (A ≅ B)
+      step = setSig {sA = arrowsAreSets} {sB = setIso}
+      res : isSet (A ≡ B)
+      res = equivPreservesNType
+        {A = A ≅ B} {B = A ≡ B} {n = ⟨0⟩}
+        (Equivalence.symmetry (univalent≃ {A = A} {B}))
+        step
+
 module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   open RawCategory ℂ
   open Univalence

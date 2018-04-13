@@ -21,7 +21,7 @@ open import Cubical.GradLemma
   using (gradLemma)
   public
 open import Cubical.NType
-  using (⟨-2⟩ ; ⟨-1⟩ ; ⟨0⟩ ; TLevel ; HasLevel)
+  using (⟨-2⟩ ; ⟨-1⟩ ; ⟨0⟩ ; TLevel ; HasLevel ; isGrpd)
   public
 open import Cubical.NType.Properties
   using
@@ -96,3 +96,5 @@ module _ {ℓ : Level} {A : Set ℓ} {a : A} where
     pathJ (λ y x → A) _ A refl ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
     _ ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
     a ∎
+
+open import Cat.Wishlist public
