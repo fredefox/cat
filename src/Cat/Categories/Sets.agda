@@ -129,7 +129,7 @@ module _ (ℓ : Level) where
       univ≃ = step2 ⊙ univalence ⊙ step0
 
     univalent : Univalent
-    univalent = from[Andrea] (λ _ _ → univ≃)
+    univalent = univalenceFrom≃ univ≃
 
     SetsIsCategory : IsCategory SetsRaw
     IsCategory.isPreCategory SetsIsCategory = isPreCat

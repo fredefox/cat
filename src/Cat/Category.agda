@@ -130,25 +130,23 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     -- A perhaps more readable version of univalence:
     Univalent≃ = {A B : Object} → (A ≡ B) ≃ (A ≅ B)
 
-    -- | Equivalent formulation of univalence.
-    Univalent[Contr] : Set _
-    Univalent[Contr] = ∀ A → isContr (Σ[ X ∈ Object ] A ≅ X)
+    private
+      -- | Equivalent formulation of univalence.
+      Univalent[Contr] : Set _
+      Univalent[Contr] = ∀ A → isContr (Σ[ X ∈ Object ] A ≅ X)
 
-    Univalent[Andrea] : Set _
-    Univalent[Andrea] = ∀ A B → (A ≡ B) ≃ (A ≅ B)
+      -- From: Thierry Coquand <Thierry.Coquand@cse.gu.se>
+      -- Date: Wed, Mar 21, 2018 at 3:12 PM
+      --
+      -- This is not so straight-forward so you can assume it
+      postulate from[Contr] : Univalent[Contr] → Univalent
 
-    -- From: Thierry Coquand <Thierry.Coquand@cse.gu.se>
-    -- Date: Wed, Mar 21, 2018 at 3:12 PM
-    --
-    -- This is not so straight-forward so you can assume it
-    postulate from[Contr] : Univalent[Contr] → Univalent
-
-    from[Andrea] : Univalent[Andrea] → Univalent
-    from[Andrea] = from[Contr] ∘ step
+    univalenceFrom≃ : Univalent≃ → Univalent
+    univalenceFrom≃ = from[Contr] ∘ step
       where
-      module _ (f : Univalent[Andrea]) (A : Object) where
+      module _ (f : Univalent≃) (A : Object) where
         lem : Σ Object (A ≡_) ≃ Σ Object (A ≅_)
-        lem = equivSig (f A)
+        lem = equivSig λ _ → f
 
         aux : isContr (Σ Object (A ≡_))
         aux = (A , refl) , (λ y → contrSingl (snd y))
