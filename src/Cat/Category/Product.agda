@@ -238,7 +238,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         -- I have `φ p` in scope, but surely `p` and `x` are the same - though
         -- perhaps not definitonally.
         , (λ{ (iso , x) → ℂ.isoToId iso , x})
-        , funExt (λ{ (p , q , r) → Σ≡ (sym iso-id-inv) (toPathP {A = λ i → {!!}} {!!})})
+        , funExt (λ{ (p , q , r) → Σ≡ (sym iso-id-inv) {!!}})
         , funExt (λ x → Σ≡ (sym id-iso-inv) {!!})
       step2
         : Σ (X ℂ.≅ Y) (λ iso
@@ -249,55 +249,9 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
           )
         ≈ ((X , xa , xb) ≅ (Y , ya , yb))
       step2
-        = ( λ{ ((f , f~ , inv-f) , p , q)
-            →
-            let
-              r : X ≡ Y
-              r = ℂ.isoToId (f , f~ , inv-f)
-              r-arrow : (ℂ.Arrow X A) ≡ (ℂ.Arrow Y A)
-              r-arrow i = ℂ.Arrow (r i) A
-              t : coe r-arrow xa ≡ ℂ.identity ℂ.<<< xa ℂ.<<< f~
-              t = {!? ≡ ?!}
-              lem : ∀ {A B} {x : A ℂ.≅ B} → ℂ.idToIso A B (ℂ.isoToId x) ≡ x
-              lem = λ{ {x = x} i → snd ℂ.inverse-from-to-iso' i x}
-              lem' : ∀ {A B} {x : A ≡ B} → ℂ.isoToId (ℂ.idToIso _ _ x) ≡ x
-              lem' = λ{ {x = x} i → fst ℂ.inverse-from-to-iso' i x}
-              h : ya ≡ xa ℂ.<<< f~
-              h = begin
-                ya ≡⟨ sym (coe-lem p) ⟩
-                coe r-arrow xa
-                  ≡⟨ ℂ.9-1-9 r refl xa ⟩
-                fst (ℂ.idToIso _ _ refl) ℂ.<<< xa ℂ.<<< fst (snd (ℂ.idToIso _ _ r))
-                  ≡⟨ cong (λ φ → φ ℂ.<<< xa ℂ.<<< fst (snd (ℂ.idToIso _ _ r))) subst-neutral ⟩
-                ℂ.identity ℂ.<<< xa ℂ.<<< fst (snd (ℂ.idToIso _ _ r))
-                  ≡⟨ cong (λ φ → ℂ.identity ℂ.<<< xa ℂ.<<< φ) (cong (λ x → (fst (snd x))) lem) ⟩
-                ℂ.identity ℂ.<<< xa ℂ.<<< f~
-                  ≡⟨ cong (ℂ._<<< f~) ℂ.leftIdentity ⟩
-                xa ℂ.<<< f~ ∎
-              complicated : Y ≡ X
-              complicated = (λ z → sym (ℂ.isoToId (f , f~ , inv-f)) z)
-            in
-              ( f  , (begin
-                ℂ [ ya ∘ f ] ≡⟨⟩
-                ya ℂ.<<< f   ≡⟨ sym ℂ.leftIdentity ⟩
-                ℂ.identity ℂ.<<< (ya ℂ.<<< f)
-                  ≡⟨ ℂ.isAssociative ⟩
-                ℂ.identity ℂ.<<< ya ℂ.<<< f
-                  ≡⟨ cong (λ φ → φ ℂ.<<< ya ℂ.<<< f) (sym subst-neutral) ⟩
-                fst (ℂ.idToIso _ _ refl) ℂ.<<< ya ℂ.<<< f
-                ≡⟨ cong (λ φ → fst (ℂ.idToIso _ _ refl) ℂ.<<< ya ℂ.<<< φ)
-                  (begin
-                    f ≡⟨ {!cong (λ x → (fst (snd x))) ((lem {x = f~ , f , swap inv-f}))!} ⟩
-                    -- f ≡⟨ cong fst (sym (lem {f , f~ , inv-f})) ⟩
-                    -- fst (     ℂ.idToIso X Y (           ℂ.isoToId (f , f~ , inv-f))) ≡⟨ {!fst inv-f!} ⟩
-                    fst (snd (ℂ.idToIso Y X (λ z → sym (ℂ.isoToId (f , f~ , inv-f)) z))) ∎)
-                 ⟩
-                _ ℂ.<<< ya ℂ.<<< fst (snd (ℂ.idToIso _ _ _))
-                  ≡⟨ sym (ℂ.9-1-9 (sym r) refl ya) ⟩
-                coe (sym r-arrow) ya
-                  ≡⟨ coe-lem (λ i → p (~ i)) ⟩
-                xa ∎) , {!!})
-            , ( f~ , sym h , {!!})
+        = ( λ{ (iso@(f , f~ , inv-f) , p , q)
+            → ( f  , sym (ℂ.domain-twist0 iso p) , sym (ℂ.domain-twist0 iso q))
+            , ( f~ , sym (ℂ.domain-twist iso p) , sym (ℂ.domain-twist iso q))
             , lemA (fst inv-f)
             , lemA (snd inv-f)
             }
@@ -308,26 +262,26 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
             iso = fst f , fst f~ , cong fst inv-f , cong fst inv-f~
             p : X ≡ Y
             p = ℂ.isoToId iso
-            lem : xa ≡ _
-            lem = begin
-              xa ≡⟨ sym (fst (snd f)) ⟩
-              ya ℂ.<<< fst f ≡⟨ sym ℂ.leftIdentity ⟩
-              ℂ.identity ℂ.<<< (ya ℂ.<<< fst f) ≡⟨ ℂ.isAssociative ⟩
-              ℂ.identity ℂ.<<< ya ℂ.<<< fst f ≡⟨ {!sym (ℂ.9-1-9 ? refl ya)!} ⟩
-              _ ℂ.<<< ya ℂ.<<< _ ≡⟨ sym (ℂ.9-1-9 (sym p) refl ya) ⟩
-              coe (λ i → ℂ.Arrow (p (~ i)) A) ya ∎
-            lem0 = begin
-              xa ≡⟨ {!!} ⟩
-              coe _ xa ≡⟨ {!!} ⟩
-              ya ℂ.<<< fst f ∎
-            helper : PathP (λ i → ℂ.Arrow (p i) A) xa ya
-            helper = {!snd f!}
-          in iso , ? , {!!}})
+            pA : ℂ.Arrow X A ≡ ℂ.Arrow Y A
+            pA = cong (λ x → ℂ.Arrow x A) p
+            pB : ℂ.Arrow X B ≡ ℂ.Arrow Y B
+            pB = cong (λ x → ℂ.Arrow x B) p
+            k0 = begin
+              coe pB xb ≡⟨ ℂ.coe-dom iso ⟩
+              xb ℂ.<<< fst f~ ≡⟨ snd (snd f~) ⟩
+              yb ∎
+            k1 = begin
+              coe pA xa ≡⟨ ℂ.coe-dom iso ⟩
+              xa ℂ.<<< fst f~ ≡⟨ fst (snd f~) ⟩
+              ya ∎
+            helper : PathP (λ i → pA i) xa ya
+            helper = coe-lem-inv k1
+          in iso , coe-lem-inv k1 , coe-lem-inv k0})
         , record
           { fst = funExt (λ x → lemSig
             (λ x → propSig prop0 (λ _ → prop1))
             _ _
-            (Σ≡ {!ℂ!} (ℂ.propIsomorphism _ _ _)))
+            (Σ≡ {!!} (ℂ.propIsomorphism _ _ _)))
           ; snd = funExt (λ{ (f , _) → lemSig propIsomorphism _ _ {!refl!}})
           }
           where

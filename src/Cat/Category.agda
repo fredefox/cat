@@ -327,6 +327,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       asTypeIso : TypeIsomorphism (idToIso A B)
       asTypeIso = toIso _ _ univalent
 
+      -- FIXME Rename
       inverse-from-to-iso' : AreInverses (idToIso A B) isoToId
       inverse-from-to-iso' = snd iso
 
@@ -377,6 +378,62 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         where
         lem : p~ <<< p* ≡ identity
         lem = fst (snd (snd (idToIso _ _ p)))
+    module _ {A B X : Object} (iso : A ≅ B) where
+      private
+        p : A ≡ B
+        p = isoToId iso
+        p-dom : Arrow A X ≡ Arrow B X
+        p-dom = cong (λ x → Arrow x X) p
+        p-cod : Arrow X A ≡ Arrow X B
+        p-cod = cong (λ x → Arrow X x) p
+        lem : ∀ {A B} {x : A ≅ B} → idToIso A B (isoToId x) ≡ x
+        lem {x = x} i = snd inverse-from-to-iso' i x
+
+      open Σ iso renaming (fst to ι) using ()
+      open Σ (snd iso) renaming (fst to ι~ ; snd to inv)
+
+      coe-dom : {f : Arrow A X} → coe p-dom f ≡ f <<< ι~
+      coe-dom {f} = begin
+        coe p-dom f
+          ≡⟨ 9-1-9 p refl f ⟩
+        fst (idToIso _ _ refl) <<< f <<< fst (snd (idToIso _ _ p))
+          ≡⟨ cong (λ φ → φ <<< f <<< fst (snd (idToIso _ _ p))) subst-neutral ⟩
+        identity <<< f <<< fst (snd (idToIso _ _ p))
+          ≡⟨ cong (λ φ → identity <<< f <<< φ) (cong (λ x → (fst (snd x))) lem) ⟩
+        identity <<< f <<< ι~
+          ≡⟨ cong (_<<< ι~) leftIdentity ⟩
+        f <<< ι~ ∎
+
+      coe-cod : {f : Arrow X A} → coe p-cod f ≡ ι <<< f
+      coe-cod {f} = begin
+        coe p-cod f
+          ≡⟨ 9-1-9 refl p f ⟩
+        fst (idToIso _ _ p) <<< f <<< fst (snd (idToIso _ _ refl))
+          ≡⟨ cong (λ φ → fst (idToIso _ _ p) <<< f <<< φ) subst-neutral ⟩
+        fst (idToIso _ _ p) <<< f <<< identity
+          ≡⟨ cong (λ φ → φ <<< f <<< identity) (cong fst lem) ⟩
+        ι <<< f <<< identity
+          ≡⟨ sym isAssociative ⟩
+        ι <<< (f <<< identity)
+          ≡⟨ cong (ι <<<_) rightIdentity ⟩
+        ι <<< f ∎
+
+      module _ {f : Arrow A X} {g : Arrow B X} (q : PathP (λ i → p-dom i) f g) where
+        domain-twist : g ≡ f <<< ι~
+        domain-twist = begin
+          g            ≡⟨ sym (coe-lem q) ⟩
+          coe p-dom f  ≡⟨ coe-dom ⟩
+          f <<< ι~      ∎
+
+        -- This can probably also just be obtained from the above my taking the
+        -- symmetric isomorphism.
+        domain-twist0 : f ≡ g <<< ι
+        domain-twist0 = begin
+          f ≡⟨ sym rightIdentity ⟩
+          f <<< identity ≡⟨ cong (f <<<_) (sym (fst inv)) ⟩
+          f <<< (ι~ <<< ι) ≡⟨ isAssociative ⟩
+          f <<< ι~ <<< ι ≡⟨ cong (_<<< ι) (sym domain-twist) ⟩
+          g <<< ι ∎
 
     -- | All projections are propositions.
     module Propositionality where
