@@ -189,9 +189,9 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
 
       -- Should follow from c being univalent
       iso-id-inv : {p : X ≡ Y} → p ≡ ℂ.isoToId (ℂ.idToIso X Y p)
-      iso-id-inv {p} = sym (λ i → AreInverses.verso-recto ℂ.inverse-from-to-iso' i p)
+      iso-id-inv {p} = sym (λ i → fst (ℂ.inverse-from-to-iso' {X} {Y}) i p)
       id-iso-inv : {iso : X ℂ.≅ Y} → iso ≡ ℂ.idToIso X Y (ℂ.isoToId iso)
-      id-iso-inv {iso} = sym (λ i → AreInverses.recto-verso ℂ.inverse-from-to-iso' i iso)
+      id-iso-inv {iso} = sym (λ i → snd (ℂ.inverse-from-to-iso' {X} {Y}) i iso)
 
       lemA : {A B : Object} {f g : Arrow A B} → fst f ≡ fst g → f ≡ g
       lemA {A} {B} {f = f} {g} p i = p i , h i
