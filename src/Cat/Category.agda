@@ -344,25 +344,25 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         pq : Arrow a b ≡ Arrow a' b'
         pq i = Arrow (p i) (q i)
 
-      U : ∀ b'' → b ≡ b'' → Set _
-      U b'' q' = coe (λ i → Arrow a (q' i)) f ≡ fst (idToIso _ _ q') <<< f <<< (fst (snd (idToIso _ _ refl)))
-      u : coe (λ i → Arrow a b) f ≡ fst (idToIso _ _ refl) <<< f <<< (fst (snd (idToIso _ _ refl)))
-      u = begin
-        coe refl f     ≡⟨ id-coe ⟩
-        f              ≡⟨ sym leftIdentity ⟩
-        identity <<< f ≡⟨ sym rightIdentity ⟩
-        identity <<< f <<< identity ≡⟨ cong (λ φ → identity <<< f <<< φ) lem ⟩
-        identity <<< f <<< (fst (snd (idToIso _ _ refl))) ≡⟨ cong (λ φ → φ <<< f <<< (fst (snd (idToIso _ _ refl)))) lem ⟩
-        fst (idToIso _ _ refl) <<< f <<< (fst (snd (idToIso _ _ refl))) ∎
-        where
-        lem : ∀ {x} → PathP (λ _ → Arrow x x) identity (fst (idToIso x x refl))
-        lem = sym (subst-neutral {P = λ x → Arrow x x})
+        U : ∀ b'' → b ≡ b'' → Set _
+        U b'' q' = coe (λ i → Arrow a (q' i)) f ≡ fst (idToIso _ _ q') <<< f <<< (fst (snd (idToIso _ _ refl)))
+        u : coe (λ i → Arrow a b) f ≡ fst (idToIso _ _ refl) <<< f <<< (fst (snd (idToIso _ _ refl)))
+        u = begin
+          coe refl f     ≡⟨ id-coe ⟩
+          f              ≡⟨ sym leftIdentity ⟩
+          identity <<< f ≡⟨ sym rightIdentity ⟩
+          identity <<< f <<< identity ≡⟨ cong (λ φ → identity <<< f <<< φ) lem ⟩
+          identity <<< f <<< (fst (snd (idToIso _ _ refl))) ≡⟨ cong (λ φ → φ <<< f <<< (fst (snd (idToIso _ _ refl)))) lem ⟩
+          fst (idToIso _ _ refl) <<< f <<< (fst (snd (idToIso _ _ refl))) ∎
+          where
+          lem : ∀ {x} → PathP (λ _ → Arrow x x) identity (fst (idToIso x x refl))
+          lem = sym subst-neutral
 
-      D : ∀ a'' → a ≡ a'' → Set _
-      D a'' p' = coe (λ i → Arrow (p' i) (q i)) f ≡ fst (idToIso b b' q) <<< f <<< (fst (snd (idToIso _ _ p')))
+        D : ∀ a'' → a ≡ a'' → Set _
+        D a'' p' = coe (λ i → Arrow (p' i) (q i)) f ≡ fst (idToIso b b' q) <<< f <<< (fst (snd (idToIso _ _ p')))
 
-      d : coe (λ i → Arrow a (q i)) f ≡ fst (idToIso b b' q) <<< f <<< (fst (snd (idToIso _ _ refl)))
-      d = pathJ U u b' q
+        d : coe (λ i → Arrow a (q i)) f ≡ fst (idToIso b b' q) <<< f <<< (fst (snd (idToIso _ _ refl)))
+        d = pathJ U u b' q
 
       9-1-9 : coe pq f ≡ q* <<< f <<< p~
       9-1-9 = pathJ D d a' p
