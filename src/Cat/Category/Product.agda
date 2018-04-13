@@ -122,8 +122,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       }
 
     module _ where
-      private
-        open RawCategory raw
+      open RawCategory raw
 
       propEqs : ∀ {X' : Object}{Y' : Object} (let X , xa , xb = X') (let Y , ya , yb = Y')
                   → (xy : ℂ.Arrow X Y) → isProp (ℂ [ ya ∘ xy ] ≡ xa × ℂ [ yb ∘ xy ] ≡ xb)
@@ -262,13 +261,11 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
             helper : PathP (λ i → pA i) xa ya
             helper = coe-lem-inv k1
           in iso , coe-lem-inv k1 , coe-lem-inv k0})
-        , record
-          { fst = funExt (λ x → lemSig
+        , funExt (λ x → lemSig
             (λ x → propSig prop0 (λ _ → prop1))
             _ _
             (Σ≡ refl (ℂ.propIsomorphism _ _ _)))
-          ; snd = funExt (λ{ (f , _) → lemSig propIsomorphism _ _ (Σ≡ refl (propEqs _ _ _))})
-          }
+        , funExt (λ{ (f , _) → lemSig propIsomorphism _ _ (Σ≡ refl (propEqs _ _ _))})
           where
           prop0 : ∀ {x} → isProp (PathP (λ i → ℂ.Arrow (ℂ.isoToId x i) A) xa ya)
           prop0 {x} = pathJ (λ y p → ∀ x → isProp (PathP (λ i → ℂ.Arrow (p i) A) xa x)) (λ x → ℂ.arrowsAreSets _ _) Y (ℂ.isoToId x) ya
