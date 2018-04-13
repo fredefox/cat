@@ -39,6 +39,23 @@ module _ {ℓa ℓb : Level} where
   _≅_ : Set ℓa → Set ℓb → Set _
   A ≅ B = Σ (A → B) Isomorphism
 
+symIso : ∀ {ℓa ℓb} {A : Set ℓa}{B : Set ℓb} → A ≅ B → B ≅ A
+symIso (f , g , p , q)= g , f , q , p
+
+module _ {ℓa ℓb ℓc} {A : Set ℓa} {B : Set ℓb} (sB : isSet B) {Q : B → Set ℓc} (f : A → B)  where
+
+  Σ-fst-map : Σ A (\ a → Q (f a)) → Σ B Q
+  Σ-fst-map (x , q) = f x , q
+
+  isoSigFst : Isomorphism f → Σ A (\ a → Q (f a)) ≅ (Σ B Q)
+  isoSigFst (g , g-f , f-g) = Σ-fst-map
+    , (\ { (b , q) → g b , transp (\ i → Q (f-g (~ i) b)) q })
+    , funExt (\ { (a , q) → Cat.Prelude.Σ≡ (\ i → g-f i a)
+             let r = (transp-iso' ((λ i → Q (f-g (i) (f a)))) q) in
+                 transp (\ i → PathP (\ j → Q (sB _ _ (λ j₁ → f-g j₁ (f a)) (λ j₁ → f (g-f j₁ a)) i j)) (transp (λ i₁ → Q (f-g (~ i₁) (f a))) q) q) r })
+    , funExt (\ { (b , q) → Cat.Prelude.Σ≡ (\ i → f-g i b) (transp-iso' (λ i → Q (f-g i b)) q)})
+
+
 module _ {ℓ : Level} {A B : Set ℓ} {f : A → B}
   (g : B → A) (s : {A B : Set ℓ} → isSet (A → B)) where
 

@@ -214,32 +214,10 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
           × PathP (λ i → ℂ.Arrow (p i) B) xb yb
           )
       step1
-        = (λ{ (p , x)
-          → (ℂ.idToIso _ _ p)
-          , let
-             P-l : (p : X ≡ Y) → Set _
-             P-l φ = PathP (λ i → ℂ.Arrow (φ i) A) xa ya
-             P-r : (p : X ≡ Y) → Set _
-             P-r φ = PathP (λ i → ℂ.Arrow (φ i) B) xb yb
-             left  : P-l p
-             left = fst x
-             right : P-r p
-             right = snd x
-           in subst {P = P-l} iso-id-inv left , subst {P = P-r} iso-id-inv right
-          })
-        -- Goal is:
-        --
-        --     φ x
-        --
-        -- where `x` is
-        --
-        --   ℂ.isoToId (ℂ.idToIso _ _ p)
-        --
-        -- I have `φ p` in scope, but surely `p` and `x` are the same - though
-        -- perhaps not definitonally.
-        , (λ{ (iso , x) → ℂ.isoToId iso , x})
-        , funExt (λ{ (p , q , r) → Σ≡ (sym iso-id-inv) {!!}})
-        , funExt (λ x → Σ≡ (sym id-iso-inv) {!!})
+        = symIso
+            (isoSigFst {A = (X ℂ.≅ Y)} {B = (X ≡ Y)} {!!} {Q = \ p → (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb)} ℂ.isoToId
+                           (symIso (_ , ℂ.asTypeIso {X} {Y}) .snd))
+
       step2
         : Σ (X ℂ.≅ Y) (λ iso
           → let p = ℂ.isoToId iso
