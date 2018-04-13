@@ -125,10 +125,11 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       private
         open RawCategory raw
 
-        propEqs : ∀ {X' : Object}{Y' : Object} (let X , xa , xb = X') (let Y , ya , yb = Y')
+      propEqs : ∀ {X' : Object}{Y' : Object} (let X , xa , xb = X') (let Y , ya , yb = Y')
                   → (xy : ℂ.Arrow X Y) → isProp (ℂ [ ya ∘ xy ] ≡ xa × ℂ [ yb ∘ xy ] ≡ xb)
-        propEqs xs = propSig (ℂ.arrowsAreSets _ _) (\ _ → ℂ.arrowsAreSets _ _)
+      propEqs xs = propSig (ℂ.arrowsAreSets _ _) (\ _ → ℂ.arrowsAreSets _ _)
 
+      private
         isAssociative : IsAssociative
         isAssociative {A'@(A , a0 , a1)} {B , _} {C , c0 , c1} {D'@(D , d0 , d1)} {ff@(f , f0 , f1)} {gg@(g , g0 , g1)} {hh@(h , h0 , h1)} i
           = s0 i , lemPropF propEqs s0 {P.snd l} {P.snd r} i
@@ -259,8 +260,8 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
           { fst = funExt (λ x → lemSig
             (λ x → propSig prop0 (λ _ → prop1))
             _ _
-            (Σ≡ {!!} (ℂ.propIsomorphism _ _ _)))
-          ; snd = funExt (λ{ (f , _) → lemSig propIsomorphism _ _ {!refl!}})
+            (Σ≡ refl (ℂ.propIsomorphism _ _ _)))
+          ; snd = funExt (λ{ (f , _) → lemSig propIsomorphism _ _ (Σ≡ refl (propEqs _ _ _))})
           }
           where
           prop0 : ∀ {x} → isProp (PathP (λ i → ℂ.Arrow (ℂ.isoToId x i) A) xa ya)
