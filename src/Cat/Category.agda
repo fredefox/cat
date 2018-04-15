@@ -497,9 +497,9 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
     groupoidObject : isGrpd Object
     groupoidObject A B = res
       where
-      open import Data.Nat using (_≤_ ; z≤n ; s≤s)
+      open import Data.Nat using (_≤_ ; ≤′-refl ; ≤′-step)
       setIso : ∀ x → isSet (Isomorphism x)
-      setIso x = ntypeCommulative ((s≤s {n = 1} z≤n)) (propIsomorphism x)
+      setIso x = ntypeCumulative {n = 1} (≤′-step ≤′-refl) (propIsomorphism x)
       step : isSet (A ≅ B)
       step = setSig {sA = arrowsAreSets} {sB = setIso}
       res : isSet (A ≡ B)
