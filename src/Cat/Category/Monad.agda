@@ -204,11 +204,8 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
   open import Cat.Equivalence
 
-  Monoidal≅Kleisli : M.Monad ≅ K.Monad
-  Monoidal≅Kleisli = forth , back , funExt backeq , funExt fortheq
-
-  Monoidal≃Kleisli : M.Monad ≃ K.Monad
-  Monoidal≃Kleisli = forth , eqv
+  Monoidal≊Kleisli : M.Monad ≅ K.Monad
+  Monoidal≊Kleisli = forth , back , funExt backeq , funExt fortheq
 
   Monoidal≡Kleisli : M.Monad ≡ K.Monad
-  Monoidal≡Kleisli = ua (forth , eqv)
+  Monoidal≡Kleisli = isoToPath Monoidal≊Kleisli

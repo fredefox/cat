@@ -32,7 +32,6 @@ open import Cat.Prelude
 import Cat.Equivalence
 open Cat.Equivalence public using () renaming (Isomorphism to TypeIsomorphism)
 open Cat.Equivalence
-  renaming (_≅_ to _≈_)
   hiding (preorder≅ ; Isomorphism)
 
 ------------------
@@ -52,6 +51,8 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     identity : {A : Object} → Arrow A A
     _<<<_    : {A B C : Object} → Arrow B C → Arrow A B → Arrow A C
 
+  -- infixr 8 _<<<_
+  -- infixl 8 _>>>_
   infixl 10 _<<<_ _>>>_
 
   -- | Operations on data
@@ -86,8 +87,8 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   Isomorphism : ∀ {A B} → (f : Arrow A B) → Set ℓb
   Isomorphism {A} {B} f = Σ[ g ∈ Arrow B A ] IsInverseOf f g
 
-  _≅_ : (A B : Object) → Set ℓb
-  _≅_ A B = Σ[ f ∈ Arrow A B ] (Isomorphism f)
+  _≊_ : (A B : Object) → Set ℓb
+  _≊_ A B = Σ[ f ∈ Arrow A B ] (Isomorphism f)
 
   module _ {A B : Object} where
     Epimorphism : {X : Object } → (f : Arrow A B) → Set ℓb
@@ -111,29 +112,30 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   -- | Univalence is indexed by a raw category as well as an identity proof.
   module Univalence (isIdentity : IsIdentity identity) where
     -- | The identity isomorphism
-    idIso : (A : Object) → A ≅ A
+    idIso : (A : Object) → A ≊ A
     idIso A = identity , identity , isIdentity
 
     -- | Extract an isomorphism from an equality
     --
     -- [HoTT §9.1.4]
-    idToIso : (A B : Object) → A ≡ B → A ≅ B
-    idToIso A B eq = transp (\ i → A ≅ eq i) (idIso A)
+    idToIso : (A B : Object) → A ≡ B → A ≊ B
+    idToIso A B eq = transp (\ i → A ≊ eq i) (idIso A)
 
     Univalent : Set (ℓa ⊔ ℓb)
-    Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≅ B) (idToIso A B)
+    Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≊ B) (idToIso A B)
 
     univalenceFromIsomorphism : {A B : Object}
-      → TypeIsomorphism (idToIso A B) → isEquiv (A ≡ B) (A ≅ B) (idToIso A B)
+      → TypeIsomorphism (idToIso A B) → isEquiv (A ≡ B) (A ≊ B) (idToIso A B)
     univalenceFromIsomorphism = fromIso _ _
 
     -- A perhaps more readable version of univalence:
-    Univalent≃ = {A B : Object} → (A ≡ B) ≃ (A ≅ B)
+    Univalent≃ = {A B : Object} → (A ≡ B) ≃ (A ≊ B)
+    Univalent≅ = {A B : Object} → (A ≡ B) ≅ (A ≊ B)
 
     private
       -- | Equivalent formulation of univalence.
       Univalent[Contr] : Set _
-      Univalent[Contr] = ∀ A → isContr (Σ[ X ∈ Object ] A ≅ X)
+      Univalent[Contr] = ∀ A → isContr (Σ[ X ∈ Object ] A ≊ X)
 
       -- From: Thierry Coquand <Thierry.Coquand@cse.gu.se>
       -- Date: Wed, Mar 21, 2018 at 3:12 PM
@@ -145,14 +147,17 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     univalenceFrom≃ = from[Contr] ∘ step
       where
       module _ (f : Univalent≃) (A : Object) where
-        lem : Σ Object (A ≡_) ≃ Σ Object (A ≅_)
+        lem : Σ Object (A ≡_) ≃ Σ Object (A ≊_)
         lem = equivSig λ _ → f
 
         aux : isContr (Σ Object (A ≡_))
         aux = (A , refl) , (λ y → contrSingl (snd y))
 
-        step : isContr (Σ Object (A ≅_))
+        step : isContr (Σ Object (A ≊_))
         step = equivPreservesNType {n = ⟨-2⟩} lem aux
+
+    univalenceFrom≅ : Univalent≅ → Univalent
+    univalenceFrom≅ x = univalenceFrom≃ $ fromIsomorphism _ _ x
 
     propUnivalent : isProp Univalent
     propUnivalent a b i = propPi (λ iso → propIsContr) a b i
@@ -263,8 +268,8 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 
     module _ where
       private
-        trans≅ : Transitive _≅_
-        trans≅ (f , f~ , f-inv) (g , g~ , g-inv)
+        trans≊ : Transitive _≊_
+        trans≊ (f , f~ , f-inv) (g , g~ , g-inv)
           = g <<< f
           , f~ <<< g~
           , ( begin
@@ -283,11 +288,11 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
               g <<< g~                ≡⟨ snd g-inv ⟩
               identity                ∎
             )
-        isPreorder : IsPreorder _≅_
-        isPreorder = record { isEquivalence = equalityIsEquivalence ; reflexive = idToIso _ _ ; trans = trans≅ }
+        isPreorder : IsPreorder _≊_
+        isPreorder = record { isEquivalence = equalityIsEquivalence ; reflexive = idToIso _ _ ; trans = trans≊ }
 
-      preorder≅ : Preorder _ _ _
-      preorder≅ = record { Carrier = Object ; _≈_ = _≡_ ; _∼_ = _≅_ ; isPreorder = isPreorder }
+      preorder≊ : Preorder _ _ _
+      preorder≊ = record { Carrier = Object ; _≈_ = _≡_ ; _∼_ = _≊_ ; isPreorder = isPreorder }
 
   record PreCategory : Set (lsuc (ℓa ⊔ ℓb)) where
     field
@@ -319,7 +324,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         iso : TypeIsomorphism (idToIso A B)
         iso = toIso _ _ univalent
 
-      isoToId : (A ≅ B) → (A ≡ B)
+      isoToId : (A ≊ B) → (A ≡ B)
       isoToId = fst iso
 
       asTypeIso : TypeIsomorphism (idToIso A B)
@@ -329,14 +334,47 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       inverse-from-to-iso' : AreInverses (idToIso A B) isoToId
       inverse-from-to-iso' = snd iso
 
-      -- lemma 9.1.9 in hott
+    module _ {a b : Object} (f : Arrow a b) where
+      module _ {a' : Object} (p : a ≡ a') where
+        private
+          p~ : Arrow a' a
+          p~ = fst (snd (idToIso _ _ p))
+
+          D : ∀ a'' → a ≡ a'' → Set _
+          D a'' p' = coe (cong (λ x → Arrow x b) p') f ≡ f <<< (fst (snd (idToIso _ _ p')))
+
+        9-1-9-left  : coe (cong (λ x → Arrow x b) p) f ≡ f <<< p~
+        9-1-9-left  = pathJ D (begin
+          coe refl f ≡⟨ id-coe ⟩
+          f ≡⟨ sym rightIdentity ⟩
+          f <<< identity ≡⟨ cong (f <<<_) (sym subst-neutral) ⟩
+          f <<< _ ∎) a' p
+
+      module _ {b' : Object} (p : b ≡ b') where
+        private
+          p* : Arrow b  b'
+          p* = fst (idToIso _ _ p)
+
+          D : ∀ b'' → b ≡ b'' → Set _
+          D b'' p' = coe (cong (λ x → Arrow a x) p') f ≡ fst (idToIso _ _ p') <<< f
+
+        9-1-9-right : coe (cong (λ x → Arrow a x) p) f ≡ p* <<< f
+        9-1-9-right = pathJ D (begin
+          coe refl f ≡⟨ id-coe ⟩
+          f ≡⟨ sym leftIdentity ⟩
+          identity <<< f ≡⟨ cong (_<<< f) (sym subst-neutral) ⟩
+          _ <<< f ∎) b' p
+
+    -- lemma 9.1.9 in hott
     module _ {a a' b b' : Object}
       (p : a ≡ a') (q : b ≡ b') (f : Arrow a b)
       where
       private
-        q* : Arrow b b'
-        q* = fst (idToIso b b' q)
-        p* : Arrow a a'
+        q* : Arrow b  b'
+        q* = fst (idToIso _ _ q)
+        q~ : Arrow b' b
+        q~ = fst (snd (idToIso _ _ q))
+        p* : Arrow a  a'
         p* = fst (idToIso _ _ p)
         p~ : Arrow a' a
         p~ = fst (snd (idToIso _ _ p))
@@ -376,7 +414,8 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         where
         lem : p~ <<< p* ≡ identity
         lem = fst (snd (snd (idToIso _ _ p)))
-    module _ {A B X : Object} (iso : A ≅ B) where
+
+    module _ {A B X : Object} (iso : A ≊ B) where
       private
         p : A ≡ B
         p = isoToId iso
@@ -384,7 +423,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         p-dom = cong (λ x → Arrow x X) p
         p-cod : Arrow X A ≡ Arrow X B
         p-cod = cong (λ x → Arrow X x) p
-        lem : ∀ {A B} {x : A ≅ B} → idToIso A B (isoToId x) ≡ x
+        lem : ∀ {A B} {x : A ≊ B} → idToIso A B (isoToId x) ≡ x
         lem {x = x} i = snd inverse-from-to-iso' i x
 
       open Σ iso renaming (fst to ι) using ()
@@ -459,7 +498,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         left = Xprop _ _
         right : X→Y <<< Y→X ≡ identity
         right = Yprop _ _
-        iso : X ≅ Y
+        iso : X ≊ Y
         iso = X→Y , Y→X , left , right
         p0 : X ≡ Y
         p0 = isoToId iso
@@ -489,7 +528,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         left = Yprop _ _
         right : X→Y <<< Y→X ≡ identity
         right = Xprop _ _
-        iso : X ≅ Y
+        iso : X ≊ Y
         iso = Y→X , X→Y , right , left
         res : Xi ≡ Yi
         res = lemSig propIsInitial _ _ (isoToId iso)
@@ -500,11 +539,11 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       open import Data.Nat using (_≤_ ; z≤n ; s≤s)
       setIso : ∀ x → isSet (Isomorphism x)
       setIso x = ntypeCommulative ((s≤s {n = 1} z≤n)) (propIsomorphism x)
-      step : isSet (A ≅ B)
+      step : isSet (A ≊ B)
       step = setSig {sA = arrowsAreSets} {sB = setIso}
       res : isSet (A ≡ B)
       res = equivPreservesNType
-        {A = A ≅ B} {B = A ≡ B} {n = ⟨0⟩}
+        {A = A ≊ B} {B = A ≡ B} {n = ⟨0⟩}
         (Equivalence.symmetry (univalent≃ {A = A} {B}))
         step
 
@@ -636,10 +675,10 @@ module Opposite {ℓa ℓb : Level} where
           → a × b × c → b × a × c
         genericly (a , b , c) = (b , a , c)
 
-        shuffle : A ≅ B → A ℂ.≅ B
+        shuffle : A ≊ B → A ℂ.≊ B
         shuffle (f , g , inv) = g , f , inv
 
-        shuffle~ : A ℂ.≅ B → A ≅ B
+        shuffle~ : A ℂ.≊ B → A ≊ B
         shuffle~ (f , g , inv) = g , f , inv
 
         -- Shouldn't be necessary to use `arrowsAreSets` here, but we have it,
@@ -656,12 +695,12 @@ module Opposite {ℓa ℓb : Level} where
           open Σ r-areInv renaming (fst to r-invs ; snd to r-iso)
           open Σ r-iso renaming (fst to r-l ; snd to r-r)
 
-        ζ : A ≅ B → A ≡ B
+        ζ : A ≊ B → A ≡ B
         ζ = η ∘ shuffle
 
         -- inv : AreInverses (ℂ.idToIso A B) f
         inv-ζ : AreInverses (idToIso A B) ζ
-        -- recto-verso : ℂ.idToIso A B <<< f ≡ idFun (A ℂ.≅ B)
+        -- recto-verso : ℂ.idToIso A B <<< f ≡ idFun (A ℂ.≊ B)
         inv-ζ = record
           { fst = funExt (λ x → begin
             (ζ ∘ idToIso A B) x                       ≡⟨⟩

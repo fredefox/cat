@@ -90,6 +90,7 @@ IsPreorder
 IsPreorder _~_ = Relation.Binary.IsPreorder _≡_ _~_
 
 module _ {ℓ : Level} {A : Set ℓ} {a : A} where
+  -- FIXME rename to `coe-neutral`
   id-coe : coe refl a ≡ a
   id-coe = begin
     coe refl a                 ≡⟨⟩

@@ -5,7 +5,7 @@ open import Cubical.Primitives
 open import Cubical.FromStdLib renaming (ℓ-max to _⊔_)
 open import Cubical.PathPrelude hiding (inverse)
 open import Cubical.PathPrelude using (isEquiv ; isContr ; fiber) public
-open import Cubical.GradLemma
+open import Cubical.GradLemma hiding (isoToPath)
 
 open import Cat.Prelude using (lemPropF ; setPi ; lemSig ; propSet ; Preorder ; equalityIsEquivalence ; propSig ; id-coe)
 
@@ -329,6 +329,9 @@ preorder≅ ℓ = record
 
 
 module _ {ℓ : Level} {A B : Set ℓ} where
+  isoToPath : (A ≅ B) → (A ≡ B)
+  isoToPath = ua ∘ fromIsomorphism _ _
+
   univalence : (A ≡ B) ≃ (A ≃ B)
   univalence = Equivalence.compose u' aux
     where

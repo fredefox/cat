@@ -2,7 +2,7 @@
 module Cat.Category.Product where
 
 open import Cat.Prelude as P hiding (_×_ ; fst ; snd)
-open import Cat.Equivalence hiding (_≅_)
+open import Cat.Equivalence
 
 open import Cat.Category
 
@@ -176,10 +176,10 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       open Σ x renaming (fst to xa ; snd to xb)
       open Σ 𝕐 renaming (fst to Y ; snd to y)
       open Σ y renaming (fst to ya ; snd to yb)
-      open import Cat.Equivalence using (composeIso) renaming (_≅_ to _≈_)
+      open import Cat.Equivalence using (composeIso) renaming (_≅_ to _≅_)
       step0
         : ((X , xa , xb) ≡ (Y , ya , yb))
-        ≈ (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
+        ≅ (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
       step0
         = (λ p → cong fst p , cong-d (fst ∘ snd) p , cong-d (snd ∘ snd) p)
         -- , (λ x  → λ i → fst x i , (fst (snd x) i) , (snd (snd x) i))
@@ -190,7 +190,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       -- Should follow from c being univalent
       iso-id-inv : {p : X ≡ Y} → p ≡ ℂ.isoToId (ℂ.idToIso X Y p)
       iso-id-inv {p} = sym (λ i → fst (ℂ.inverse-from-to-iso' {X} {Y}) i p)
-      id-iso-inv : {iso : X ℂ.≅ Y} → iso ≡ ℂ.idToIso X Y (ℂ.isoToId iso)
+      id-iso-inv : {iso : X ℂ.≊ Y} → iso ≡ ℂ.idToIso X Y (ℂ.isoToId iso)
       id-iso-inv {iso} = sym (λ i → snd (ℂ.inverse-from-to-iso' {X} {Y}) i iso)
 
       lemA : {A B : Object} {f g : Arrow A B} → fst f ≡ fst g → f ≡ g
@@ -207,7 +207,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
 
       step1
         : (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb))
-        ≈ Σ (X ℂ.≅ Y) (λ iso
+        ≅ Σ (X ℂ.≊ Y) (λ iso
           → let p = ℂ.isoToId iso
           in
           ( PathP (λ i → ℂ.Arrow (p i) A) xa ya)
@@ -216,7 +216,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       step1
         = symIso
             (isoSigFst
-              {A = (X ℂ.≅ Y)}
+              {A = (X ℂ.≊ Y)}
               {B = (X ≡ Y)}
               (ℂ.groupoidObject _ _)
               {Q = \ p → (PathP (λ i → ℂ.Arrow (p i) A) xa ya) × (PathP (λ i → ℂ.Arrow (p i) B) xb yb)}
@@ -225,13 +225,13 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
             )
 
       step2
-        : Σ (X ℂ.≅ Y) (λ iso
+        : Σ (X ℂ.≊ Y) (λ iso
           → let p = ℂ.isoToId iso
           in
           ( PathP (λ i → ℂ.Arrow (p i) A) xa ya)
           × PathP (λ i → ℂ.Arrow (p i) B) xb yb
           )
-        ≈ ((X , xa , xb) ≅ (Y , ya , yb))
+        ≅ ((X , xa , xb) ≊ (Y , ya , yb))
       step2
         = ( λ{ (iso@(f , f~ , inv-f) , p , q)
             → ( f  , sym (ℂ.domain-twist0 iso p) , sym (ℂ.domain-twist0 iso q))
@@ -242,7 +242,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
           )
         , (λ{ (f , f~ , inv-f , inv-f~) →
           let
-            iso : X ℂ.≅ Y
+            iso : X ℂ.≊ Y
             iso = fst f , fst f~ , cong fst inv-f , cong fst inv-f~
             p : X ≡ Y
             p = ℂ.isoToId iso
@@ -275,14 +275,14 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       -- must compose to give idToIso
       iso
         : ((X , xa , xb) ≡ (Y , ya , yb))
-        ≈ ((X , xa , xb) ≅ (Y , ya , yb))
+        ≅ ((X , xa , xb) ≊ (Y , ya , yb))
       iso = step0 ⊙ step1 ⊙ step2
         where
         infixl 5 _⊙_
         _⊙_ = composeIso
       equiv1
         : ((X , xa , xb) ≡ (Y , ya , yb))
-        ≃ ((X , xa , xb) ≅ (Y , ya , yb))
+        ≃ ((X , xa , xb) ≊ (Y , ya , yb))
       equiv1 = _ , fromIso _ _ (snd iso)
 
     univalent : Univalent

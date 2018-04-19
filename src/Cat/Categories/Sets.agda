@@ -8,7 +8,7 @@ open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
 open import Cat.Wishlist
-open import Cat.Equivalence renaming (_≅_ to _≈_)
+open import Cat.Equivalence
 
 _⊙_ : {ℓa ℓb ℓc : Level} {A : Set ℓa} {B : Set ℓb} {C : Set ℓc} → (A ≃ B) → (B ≃ C) → A ≃ C
 eqA ⊙ eqB = Equivalence.compose eqA eqB
@@ -93,7 +93,7 @@ module _ (ℓ : Level) where
         re-ve e = refl
         inv : AreInverses (f {p} {q}) (g {p} {q})
         inv = funExt ve-re , funExt re-ve
-        iso : (p ≡ q) ≈ (fst p ≡ fst q)
+        iso : (p ≡ q) ≅ (fst p ≡ fst q)
         iso = f , g , inv
 
     module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
@@ -109,7 +109,7 @@ module _ (ℓ : Level) where
           re-ve = inverse-from-to-iso A B
           ve-re : (x : isIso f)       → (obv ∘ inv) x ≡ x
           ve-re = inverse-to-from-iso A B sA sB
-          iso : isEquiv A B f ≈ isIso f
+          iso : isEquiv A B f ≅ isIso f
           iso = obv , inv , funExt re-ve , funExt ve-re
         in fromIsomorphism _ _ iso
 
@@ -125,7 +125,7 @@ module _ (ℓ : Level) where
       step2 : (hA ≡ hB) ≃ (A ≡ B)
       step2 = lem2 (λ A → isSetIsProp) hA hB
 
-      univ≃ : (hA ≡ hB) ≃ (hA ≅ hB)
+      univ≃ : (hA ≡ hB) ≃ (hA ≊ hB)
       univ≃ = step2 ⊙ univalence ⊙ step0
 
     univalent : Univalent
