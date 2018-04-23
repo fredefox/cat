@@ -7,7 +7,6 @@ open import Cat.Equivalence
 open import Cat.Category
 
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
-
   open Category ℂ
 
   module _ (A B : Object) where
@@ -18,8 +17,6 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         fst  : ℂ [ object , A ]
         snd  : ℂ [ object , B ]
 
-    -- FIXME Not sure this is actually a proposition - so this name is
-    -- misleading.
     record IsProduct (raw : RawProduct) : Set (ℓa ⊔ ℓb) where
       open RawProduct raw public
       field

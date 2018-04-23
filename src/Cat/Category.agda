@@ -119,7 +119,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     --
     -- [HoTT §9.1.4]
     idToIso : (A B : Object) → A ≡ B → A ≊ B
-    idToIso A B eq = transp (\ i → A ≊ eq i) (idIso A)
+    idToIso A B eq = subst eq (idIso A)
 
     Univalent : Set (ℓa ⊔ ℓb)
     Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≊ B) (idToIso A B)
@@ -348,7 +348,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
           coe refl f ≡⟨ id-coe ⟩
           f ≡⟨ sym rightIdentity ⟩
           f <<< identity ≡⟨ cong (f <<<_) (sym subst-neutral) ⟩
-          f <<< _ ∎) a' p
+          f <<< _ ≡⟨ {!!} ⟩ _ ∎) a' p
 
       module _ {b' : Object} (p : b ≡ b') where
         private
@@ -431,28 +431,17 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 
       coe-dom : {f : Arrow A X} → coe p-dom f ≡ f <<< ι~
       coe-dom {f} = begin
-        coe p-dom f
-          ≡⟨ 9-1-9 p refl f ⟩
-        fst (idToIso _ _ refl) <<< f <<< fst (snd (idToIso _ _ p))
-          ≡⟨ cong (λ φ → φ <<< f <<< fst (snd (idToIso _ _ p))) subst-neutral ⟩
-        identity <<< f <<< fst (snd (idToIso _ _ p))
-          ≡⟨ cong (λ φ → identity <<< f <<< φ) (cong (λ x → (fst (snd x))) lem) ⟩
-        identity <<< f <<< ι~
-          ≡⟨ cong (_<<< ι~) leftIdentity ⟩
+        coe p-dom f ≡⟨ 9-1-9-left f p ⟩
+        f <<< fst (snd (idToIso _ _ (isoToId iso))) ≡⟨⟩
+        f <<< fst (snd (idToIso _ _ p)) ≡⟨ cong (f <<<_) (cong (fst ∘ snd) lem) ⟩
         f <<< ι~ ∎
 
       coe-cod : {f : Arrow X A} → coe p-cod f ≡ ι <<< f
       coe-cod {f} = begin
         coe p-cod f
-          ≡⟨ 9-1-9 refl p f ⟩
-        fst (idToIso _ _ p) <<< f <<< fst (snd (idToIso _ _ refl))
-          ≡⟨ cong (λ φ → fst (idToIso _ _ p) <<< f <<< φ) subst-neutral ⟩
-        fst (idToIso _ _ p) <<< f <<< identity
-          ≡⟨ cong (λ φ → φ <<< f <<< identity) (cong fst lem) ⟩
-        ι <<< f <<< identity
-          ≡⟨ sym isAssociative ⟩
-        ι <<< (f <<< identity)
-          ≡⟨ cong (ι <<<_) rightIdentity ⟩
+          ≡⟨ 9-1-9-right f p ⟩
+        fst (idToIso _ _ p) <<< f
+          ≡⟨ cong (λ φ → φ <<< f) (cong fst lem) ⟩
         ι <<< f ∎
 
       module _ {f : Arrow A X} {g : Arrow B X} (q : PathP (λ i → p-dom i) f g) where

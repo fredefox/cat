@@ -7,7 +7,10 @@ open import Cubical.PathPrelude hiding (inverse)
 open import Cubical.PathPrelude using (isEquiv ; isContr ; fiber) public
 open import Cubical.GradLemma hiding (isoToPath)
 
-open import Cat.Prelude using (lemPropF ; setPi ; lemSig ; propSet ; Preorder ; equalityIsEquivalence ; propSig ; id-coe)
+open import Cat.Prelude using
+  ( lemPropF ; setPi ; lemSig ; propSet
+  ; Preorder ; equalityIsEquivalence ; propSig ; id-coe
+  ; Setoid )
 
 import Cubical.Univalence as U
 
@@ -327,6 +330,48 @@ preorder≅ ℓ = record
         k = pathJ D (trans id-coe id-coe) B (sym p)
       in k
 
+setoid≅ : (ℓ : Level) → Setoid _ _
+setoid≅ ℓ = record
+  { Carrier = Set ℓ
+  ; _≈_ = _≅_
+  ; isEquivalence = record
+    { refl = idFun _ , idFun _ , (funExt λ _ → refl) , (funExt λ _ → refl)
+    ; sym = symmetryIso
+    ; trans = composeIso
+    }
+  }
+
+setoid≃ : (ℓ : Level) → Setoid _ _
+setoid≃ ℓ = record
+  { Carrier = Set ℓ
+  ; _≈_ = _≃_
+  ; isEquivalence = record
+    { refl = idEquiv
+    ; sym = Equivalence.symmetry
+    ; trans = λ x x₁ → Equivalence.compose x x₁
+    }
+  }
+
+-- If the second component of a pair is propositional, then equality of such
+-- pairs is equivalent to equality of their first components.
+module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
+  equivSigProp : ((x : A) → isProp (P x)) → {p q : Σ A P}
+    → (p ≡ q) ≃ (fst p ≡ fst q)
+  equivSigProp pA {p} {q} = fromIsomorphism _ _ iso
+    where
+    f : ∀ {p q} → p ≡ q → fst p ≡ fst q
+    f = cong fst
+    g : ∀ {p q} → fst p ≡ fst q → p ≡ q
+    g = lemSig pA _ _
+    ve-re : (e : p ≡ q) → (g ∘ f) e ≡ e
+    ve-re = pathJ (\ q (e : p ≡ q) → (g ∘ f) e ≡ e)
+              (\ i j → p .fst , propSet (pA (p .fst)) (p .snd) (p .snd) (λ i → (g {p} {p} ∘ f) (λ i₁ → p) i .snd) (λ i → p .snd) i j ) q
+    re-ve : (e : fst p ≡ fst q) → (f {p} {q} ∘ g {p} {q}) e ≡ e
+    re-ve e = refl
+    inv : AreInverses (f {p} {q}) (g {p} {q})
+    inv = funExt ve-re , funExt re-ve
+    iso : (p ≡ q) ≅ (fst p ≡ fst q)
+    iso = f , g , inv
 
 module _ {ℓ : Level} {A B : Set ℓ} where
   isoToPath : (A ≅ B) → (A ≡ B)
@@ -346,6 +391,24 @@ module _ {ℓ : Level} {A B : Set ℓ} where
     u' = doEta u
     aux : (A U.≃ B) ≃ (A ≃ B)
     aux = fromIsomorphism _ _ (doEta , deEta , funExt (λ{ (U.con _ _) → refl}) , refl)
+
+  -- Equivalence is equivalent to isomorphism when the equivalence (resp.
+  -- isomorphism) acts on sets.
+  module _ (sA : isSet A) (sB : isSet B) where
+    equiv≃iso : (f : A → B) → isEquiv A B f ≃ Isomorphism f
+    equiv≃iso f =
+      let
+        obv : isEquiv A B f → Isomorphism f
+        obv = toIso A B
+        inv : Isomorphism f → isEquiv A B f
+        inv = fromIso A B
+        re-ve : (x : isEquiv A B f) → (inv ∘ obv) x ≡ x
+        re-ve = inverse-from-to-iso A B
+        ve-re : (x : Isomorphism f) → (obv ∘ inv) x ≡ x
+        ve-re = inverse-to-from-iso A B sA sB
+        iso : isEquiv A B f ≅ Isomorphism f
+        iso = obv , inv , funExt re-ve , funExt ve-re
+      in fromIsomorphism _ _ iso
 
 -- A few results that I have not generalized to work with both the eta and no-eta variable of ≃
 module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
@@ -438,6 +501,8 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
     in fromIsomorphism _ _ iso
 
 module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
+  -- Equivalence of pairs whose first components are identitical can be obtained
+  -- from an equivalence of their seecond components.
   equivSig : {ℓc : Level} {Q : A → Set ℓc}
     → ((a : A) → P a ≃ Q a) → Σ A P ≃ Σ A Q
   equivSig {Q = Q} eA = res

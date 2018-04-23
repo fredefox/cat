@@ -76,7 +76,9 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb} {a b : Σ A B}
   snd (Σ≡ i) = snd≡ i
 
 import Relation.Binary
-open Relation.Binary public using (Preorder ; Transitive ; IsEquivalence ; Rel)
+open Relation.Binary public using
+  ( Preorder ; Transitive ; IsEquivalence ; Rel
+  ; Setoid )
 
 equalityIsEquivalence : {ℓ : Level} {A : Set ℓ} → IsEquivalence {A = A} _≡_
 IsEquivalence.refl  equalityIsEquivalence = refl
