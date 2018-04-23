@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass{report}
 
 \input{packages.tex}
 \input{macros.tex}
@@ -15,9 +15,12 @@
 \begin{document}
 
 \maketitle
+\tableofcontents
 
-\input{report.tex}
+\chapter{Introduction}
+\input{introduction.tex}
 
+\chapter{Implementation}
 \input{implementation.tex}
 
 \bibliographystyle{plainnat}

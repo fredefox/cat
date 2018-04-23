@@ -1,5 +1,3 @@
-\section{Introduction}
-%
 Functional extensionality and univalence is not expressible in
 \nomen{Intensional Martin Löf Type Theory} (ITT). This poses a severe limitation
 on both 1) what is \emph{provable} and 2) the \emph{reusability} of proofs.
@@ -10,7 +8,9 @@ Furthermore an extension has been implemented for the proof assistant Agda
 (\cite{agda}, \cite{cubical-agda}) that allows us to work in such a ``cubical
 setting''. This thesis will explore the usefulness of this extension in the
 context of category theory.
-
+%
+\section{Motivating examples}
+%
 In the following two sections I present two examples that illustrate some
 limitations inherent in ITT and -- by extension -- Agda.
 %
@@ -94,7 +94,7 @@ $$\mathit{univalence} \tp (A \simeq B) \simeq (A \equiv B)$$
 %
 In particular this allows us to construct an equality from an equivalence $\mathit{ua} \tp
 (A \simeq B) \to (A \equiv B)$ and vice-versa.
-\subsection{Formalizing Category Theory}
+\section{Formalizing Category Theory}
 %
 The above examples serve to illustrate the limitation of Agda. One case where
 these limitations are particularly prohibitive is in the study of Category
@@ -162,3 +162,5 @@ constructor:
 data _≡_ {a} {A : Set a} (x : A) : A → Set a where
   instance refl : x ≡ x
 \end{verbatim}
+%
+I shall refer to this as the (usual) inductive equality type.

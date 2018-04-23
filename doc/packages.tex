@@ -7,7 +7,7 @@
 
 \usepackage{parskip}
 \usepackage{multicol}
-\usepackage{amsmath,amssymb}
+\usepackage{amssymb,amsmath,amsthm,stmaryrd,mathrsfs,wasysym}
 \usepackage[toc,page]{appendix}
 \usepackage{xspace}
 
@@ -24,5 +24,17 @@
 
 \usepackage{chalmerstitle}
 
+\usepackage{mathpazo}
+\usepackage[scaled=0.95]{helvet}
+\usepackage{courier}
+\linespread{1.05} % Palatino looks better with this
+
 \usepackage{fontspec}
-\setmonofont{FreeMono.otf}
+\setmonofont[Mapping=tex-text]{FreeMono.otf}
+%% \setmonofont{FreeMono.otf}
+
+
+\pagestyle{fancyplain}
+\setlength{\headheight}{15pt}
+\renewcommand{\chaptermark}[1]{\markboth{\textsc{Chapter \thechapter. #1}}{}}
+\renewcommand{\sectionmark}[1]{\markright{\textsc{\thesection\ #1}}}

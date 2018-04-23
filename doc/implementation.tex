@@ -1,4 +1,3 @@
-\section{Implementation}
 This implementation formalizes the following concepts:
 %
 \begin{itemize}
@@ -16,9 +15,9 @@ This implementation formalizes the following concepts:
 \subsubitem Voevodsky's construction
 \item Category of \ldots
 \subitem Homotopy sets
-\subitem Categories
-\subitem Relations
-\subitem Functors
+\subitem Categories -- only data-part
+\subitem Relations -- only data-part
+\subitem Functors -- only as a precategory
 \subitem Free category
 \end{itemize}
 %
@@ -33,7 +32,7 @@ This allows me to reason about things in a more mathematical way, where one can
 reason about two categories by simply focusing on the data. This is acheived by
 creating a function embodying the ``equality principle'' for a given type.
 
-\subsubsection{Categories}
+\section{Categories}
 The data for a category consist of objects, morphisms (or arrows as I will refer
 to them henceforth), the identity arrow and composition of arrows.
 
@@ -50,28 +49,33 @@ Raw categories satisfying these properties are called a pre-categories.
 
 As a further requirement to be a proper category we require it to be univalent.
 This requirement is quite similiar to univalence for types, but we let
-isomorphism of objects play the role of equivalence of types. The univalence
+isomorphism on objects play the role of equivalence on types. The univalence
 criterion is:
 %
 $$
-\isEquiv\ (A \cong B)\ (A \equiv B)\ \idToIso_{A\ B}
+\isEquiv\ (A \equiv B)\ (A \approxeq B)\ \idToIso
 $$
 %
-Note that this is a stronger requirement than:
+Here $\approxeq$ denotes isomorphism on objects (whereas $\cong$ denotes
+isomorphism of types).
+
+Note that this is not the same as:
 %
 $$
-(A \cong B) \simeq (A \equiv B)
+(A \equiv B) \simeq (A \approxeq B)
 $$
 %
-Which is permissable simply by ``forgetting'' that $\idToIso_{A\ B}$ plays the
-role of the equivalence.
+The two types are logically equivalent, however. One can construct the latter
+from the formerr simply by ``forgetting'' that $\idToIso$ plays the role
+of the equivalence. The other direction is more involved.
 
 With all this in place it is now possible to prove that all the laws are indeed
 mere propositions. Most of the proofs simply use the fact that the type of
 arrows are sets. This is because most of the laws are a collection of equations
-between arrows in the category. And since such a proof does not have any
-content, two witnesses must be the same. All the proofs are really quite
-mechanical. Lets have a look at one of them: The identity law states that:
+between arrows in the category. And since such a proof does not have any content
+exactly because the type of arrows form a set, two witnesses must be the same.
+All the proofs are really quite mechanical. Lets have a look at one of them: The
+identity law states that:
 %
 $$
 \prod_{A\ B \tp \Object} \prod_{f \tp A \to B} \id \comp f \equiv f \x f \comp \id \equiv f
@@ -92,24 +96,29 @@ $$
 $$
 %
 I.e.; sigma-types preserve propositionality whenever it's first component is a
-proposition, and it's second component is always a proposition for all points of
-in the left type.
+proposition, and it's second component is a proposition for all points of in the
+left type.
 
 So the proof goes like this: We `eliminate' the 3 function abstractions by
-applying $\propPi$ three times, then we eliminate the (non-dependent) sigma-type
-by applying $\propSig$ and are thus left with the two proof-obligations:
-$\isProp\ (\id \comp f \equiv f)$ and $\isProp\ (f \comp \id \equiv f)$ which
-follows from the type of arrows being a set.
+applying $\propPi$ three times. So our proof obligation becomes:
+%
+$$
+\isProp \left( \id \comp f \equiv f \x f \comp \id \equiv f \right)
+$$
+%
+then we eliminate the (non-dependent) sigma-type by applying $\propSig$ giving
+us the two obligations: $\isProp\ (\id \comp f \equiv f)$ and $\isProp\ (f \comp
+\id \equiv f)$ which follows from the type of arrows being a set.
 
 This example illustrates nicely how we can use these combinators to reason about
 `canonical' types like $\sum$ and $\prod$. Similiar combinators can be defined
 at the other homotopic levels. These combinators are however not applicable in
 situations where we want to reason about other types - e.g. types we've defined
 ourselves. For instance, after we've proven that all the projections of
-pre-categories are propositions, we would like to bundle this up to show that
-the type of pre-categories is also a proposition. Since pre-categories are not
-formulates with a chain of sigma-types we wont have any combinators available to
-help us here. In stead we'll use the path-type directly.
+pre-categories are propositions, then we would like to bundle this up to show
+that the type of pre-categories is also a proposition. Since pre-categories are
+not formulated with a chain of sigma-types we wont have any combinators
+available to help us here. In stead we'll have to use the path-type directly.
 
 What we want to prove is:
 %
@@ -180,7 +189,7 @@ $$
 and one heterogeneous:
 %
 $$
-Path\ (\Gl i \to Univalent_{p\ i})\ \isPreCategory_a\ \isPreCategory_b
+Path\ (\lambda i \to Univalent_{p\ i})\ \isPreCategory_a\ \isPreCategory_b
 $$
 %
 Which depends on the choice of $p_{\isPreCategory}$. The first of these we can
@@ -194,7 +203,7 @@ path between some two elements in $A$; $p : a_0 \equiv a_1$ then we can built a
 heterogeneous path between any two $b$'s at the endpoints:
 %
 $$
-Path\ (\Gl i \to B\ (p\ i))\ b0\ b1
+Path\ (\lambda i \to B\ (p\ i))\ b0\ b1
 $$
 %
 where $b_0 \tp B a_0$ and $b_1 \tp B\ a_1$. This is quite a mouthful, but the
@@ -211,7 +220,7 @@ isomorphic types'' (TODO cite awodey here). That is, we can construct the
 function:
 %
 $$
-\isoToId \tp (A \cong B) \to (A \equiv B)
+\isoToId \tp (A \approxeq B) \to (A \equiv B)
 $$
 %
 One application of this, and a perhaps somewhat surprising result, is that
@@ -221,40 +230,8 @@ any two terminal objects are isomorphic. The proof is omitted here, but the
 curious reader can check the implementation for the details. (TODO: The proof is
 a bit fun, should I include it?)
 
-In the following I will demonstrate how to instantiate a category and
-subsequently why the result above is very useful to have when equating
-categories (TODO: This promise is not fulfilled immediately as I digress and
-talk about equivalences). So let us define the notion of the opposite category.
-This is arguably one of the simplest constructions of a category one can give.
-Let $\bC$ be a category, we then define a new category called the opposite of
-$\bC$; $\overline{\bC}$. It has the same objects and the same identity, an arrow
-from $A$ to $B$ in this category corresponds to an arrow from $B$ to $A$ in the
-underlying category. Function composition will then be reverse function
-composition from the underlying category.
-
-Showing that this forms a pre-category is rather straightforward. I'll state the
-laws in terms of the underlying category $\bC$:
-%
-$$
-h >>> (g >>> f) \equiv h >>> g >>> f
-$$
-%
-Since $>>>$ is reverse function composition this is just the symmetric version
-of associativity.
-%
-$$
-\matit{identity} >>> f \equiv f \x f >>> identity \equiv f
-$$
-This is just the swapped version of identity.
-
-Finally, that the arrows form sets just follows by flipping the order of the
-arguments. Or in other words since $\Hom_{A\ B}$ is a set for all $A\ B \tp
-\Object$ then so is $\Hom_{B\ A}$.
-
-Now, to show that this category is univalent is not as trivial. So I will
-digress at this point and talk about equivalences. We will return to this category in section ????.
-
-\subsection{Equivalences}
+\section{Equivalences}
+\label{equiv}
 The usual notion of a function $f : A \to B$ having an inverses is:
 %
 $$
@@ -263,20 +240,20 @@ $$
 %
 This is defined in \cite[p. 129]{hott-2013} and is referred to as the a
 quasi-inverse. At the same place \cite{hott-2013} gives an ``interface'' for
-what an equivalence $\isequiv : (A \to B) \to \MCU$ must supply:
+what an equivalence $\isEquiv : (A \to B) \to \MCU$ must supply:
 %
 \begin{itemize}
 \item
-  $\qinv\ f \to \isequiv\ f$
+  $\qinv\ f \to \isEquiv\ f$
 \item
-  $\isequiv\ f \to \qinv\ f$
+  $\isEquiv\ f \to \qinv\ f$
 \item
-  $\isequiv\ f$ is a proposition
+  $\isEquiv\ f$ is a proposition
 \end{itemize}
 %
-Having such an interface us to both 1) think rather abstractly about how to work
-with equivalences and 2) to use ad-hoc definitions of equivalences. The specific
-instantiation of $\isequiv$ as defined in \cite{cubical} is:
+Having such an interface gives us both 1) a way to think rather abstractly about
+how to work with equivalences and 2) to use ad-hoc definitions of equivalences.
+The specific instantiation of $\isEquiv$ as defined in \cite{cubical} is:
 %
 $$
 isEquiv\ f \defeq \prod_{b : B} \isContr\ (\fiber\ f\ b)
@@ -296,37 +273,200 @@ $\mathit{fromIsomorphism}$, this is known as $\mathit{gradLemma}$ in
 implementation can be found in the sources. Likewise the proof that this
 equivalence is propositional can be found in my implementation.
 
-So another way to provide a proof that a category is univalent is to give give
-an inverse to $\idToIso\ A\ B$. I want to stress here that the notion of an
-inverse at this point is conflated. There is the notion of an inverse in the
-context of a category (where the concept of functions are generalized to arrows)
-and, as here, an inverse as a regular type-theoretic function. This is
-particularly confusing because the function that one must give the inverse to
-has the type
+We say that two types $A\;B \tp \Type$ are equivalent exactly if there exists an
+equivalence between them:
 %
 $$
-(A \cong B) \to (A \equiv B)
+A \simeq B \defeq \sum_{f \tp A \to B} \isEquiv\ f
 $$
 %
-where $\cong$ refers to ismorphism \emph{in the category}!
+Note that the term equivalence here is overloaded referring both to the map $f
+\tp A \to B$ and the type $A \simeq B$. I will use these conflated terms when it
+it is clear from the context what is being referred to.
 
-TODO: There is a lot more to say about equivalences!
+Just like we could promote a quasi-inverse to an equivalence we can promote an
+isomorphism to an equivalence:
+%
+$$
+\mathit{fromIsomorphism} \tp A \cong B \to A \simeq B
+$$
+%
+and vice-versa:
+%
+$$
+\mathit{toIsomorphism} \tp A \simeq B \to A \cong B
+$$
+%
+The notion of an isomorphism is similarly conflated as isomorphism can refer to
+the type $A \cong B$ as well as the the map $A \to B$ that witness this.
 
-\subsection{Categories contd.}
-Back from this aside, we can now show that the opposite category is also
-univalent simply by showing that $\idToIso \tp (A \equiv B) \to (A \cong B)$ is
-an isomorphism (seen as a function). Dually we have that $\idToIso_{\bC} \tp (A
-\equiv B) \to (A \cong_{\bC} B)$ is an isomorphism. Let us denote it's inverse
-as $\eta \tp (A \cong_{\bC} B) \to (A \equiv B)$. If we squint we can see what
-we need is a way to go between $\cong$ and $\cong_{\bC}$, well, an inhabitant of
-$A \cong B$ is simply a pair of arrows $f$ being the isomorphism and $g$ it's
-inverse. In the present category $g$ will play the role of the isomorphism and
-$f$ will be the inverse. Similarly we can go in the opposite direction. These
-two functions are obviously inverses. Name them $\mathit{shuffle} \tp (A \cong
-B) \to (A \cong_{\bC} B)$ and $\mathit{shuffle}^{-1} : (A \cong_{\bC} B) \to (A
-\cong B)$ respectively.
+Both $\cong$ and $\simeq$ form equivalence relations.
 
-As the inverse of $\idToIso$ we will pick $\zeta \defeq \eta \comp
+\section{Univalence}
+\label{univalence}
+As noted in the introduction the univalence for types $A\; B \tp \Type$ states
+that:
+%
+$$
+\mathit{Univalence} \defeq (A \equiv B) \simeq (A \simeq B)
+$$
+%
+As mentioned the univalence criterion for some category $\bC$ says that for all
+\emph{objects} $A\;B$ we must have:
+$$
+\isEquiv\ (A \equiv B)\ (A \approxeq B)\ \idToIso
+$$
+And I mentioned that this was logically equivalent to
+%
+$$
+(A \equiv B) \simeq (A \approxeq B)
+$$
+%
+Given that we saw in the previous section that we can construct an equivalence
+from an isomorphism it suffices to demonstrate:
+%
+$$
+(A \equiv B) \cong (A \approxeq B)
+$$
+%
+That is, we must demonstrate that there is an isomorphism (on types) between
+equalities and isomorphisms (on arrows). It's worthwhile to dwell on this for a
+few seconds. This type looks very similar to univalence for types and is
+therefore perhaps a bit more intuitive to grasp the implications of. Of course
+univalence for types (which is a proposition -- i.e. provable) does not imply
+univalence in any category since morphisms in a category are not regular maps --
+in stead they can be thought of as a generalization hereof; i.e. arrows. The
+univalence criterion therefore is simply a way of restricting arrows to behave
+similarly to maps.
+
+I will now mention a few helpful thoerems that follow from univalence that will
+become useful later.
+
+Obviously univalence gives us an isomorphism $A \equiv B \to A \approxeq B$. I
+will name these for convenience:
+%
+$$
+\idToIso \tp A \equiv B \to A \approxeq B
+$$
+%
+$$
+\isoToId \tp A \approxeq B \to A \equiv B
+$$
+%
+The next few theorems are variations on theorem 9.1.9 from \cite{HoTT-book}. Let
+an isomorphism $A \approxeq B$ in some category $\bC$ be given. Name the
+isomorphism $\iota \tp A \to B$ and its inverse $\widetilde{\iota} \tp B \to A$.
+Since $\bC$ is a category (and therefore univalent) the isomorphism induces a
+path $p \tp A \equiv B$. From this equality we can get two further paths:
+$p_{\mathit{dom}} \tp \mathit{Arrow}\ A\ X \equiv \mathit{Arrow}\ A'\ X$ and
+$p_{\mathit{cod}} \tp \mathit{Arrow}\ X\ A \equiv \mathit{Arrow}\ X\ A'$. We
+then have the following two theorems:
+%
+$$
+\mathit{coeDom} \tp \prod_{f \tp A \to X} \mathit{coe}\ p_{\mathit{dom}}\ f \equiv f \lll \widetilde{\iota}
+$$
+%
+%
+$$
+\mathit{coeCod} \tp \prod_{f \tp A \to X} \mathit{coe}\ p_{\mathit{cod}}\ f \equiv \iota \lll f
+$$
+%
+I will give the proof of the first theorem here, the second one is analagous.
+\begin{align*}
+\mathit{coe}\ p_{\mathit{dom}}\ f
+  & \equiv f \lll \mathit{obverse}_{\mathit{idToIso}\ p} && \text{lemma} \\
+  & \equiv f \lll \widetilde{\iota}
+    && \text{$\mathit{idToIso}$ and $\mathit{isoToId}$ are inverses}\\
+\end{align*}
+%
+In the second step we use the fact that $p$ is constructed from the isomorphism
+$\iota$ -- $\mathit{obverse}$ denotes the map $B \to A$ induced by the
+isomorphism $\mathit{idToIso}\ p \tp A \cong B$. The helper-lemma is similar to
+what we're trying to prove but talks about paths rather than isomorphisms:
+%
+$$
+\prod_{f \tp \mathit{Arrow}\ A\ B} \prod_{p \tp A \equiv A'} \mathit{coe}\ p^*\ f \equiv f \lll \mathit{obverse}_{\mathit{idToIso}\ p}
+$$
+%
+Note that the asterisk in $p^*$ denotes the path $\mathit{Arrow}\ A\ B \equiv
+\mathit{Arrow}\ A'\ B$ induced by $p$. To prove this statement I let $f$ and $p$
+be given and then invoke based-path-induction. The induction will be based at $A
+\tp \mathit{Object}$, so let $\widetilde{A} \tp \Object$ and $\widetilde{p} \tp
+A \equiv \widetilde{A}$ be given. The family that we perform induction over will
+be:
+%
+$$
+\mathit{coe}\ {\widetilde{p}}^*\ f \equiv f \lll \mathit{obverse}_{\mathit{idToIso}\ \widetilde{p}}
+$$
+The base-case therefore becomes:
+\begin{align*}
+\mathit{coe}\ {\widetilde{\refl}}^*\ f
+& \equiv f \\
+& \equiv f \lll \mathit{identity} \\
+& \equiv f \lll \mathit{obverse}_{\mathit{idToIso}\ \widetilde{\refl}}
+\end{align*}
+%
+The first step follows because reflixivity is a neutral element for coercions.
+The second step is the identity law in the category. The last step has to do
+with the fact that $\mathit{idToIso}$ is constructed by substituting according
+to the supplied path and since reflexivity is also the neutral element for
+substuitutions we arrive at the desired expression. To close the
+based-path-induction we must supply the value at the other end and the
+connecting path, but in this case this is simply $A' \tp \Object$ and $p \tp A
+\equiv A'$ which we have.
+%
+\section{Categories}
+\subsection{Opposite category}
+\label{op-cat}
+The first category I'll present is a pure construction on categories. Given some
+category we can construct it's dual, called the opposite category. Starting with
+a simple example allows us to focus on how we work with equivalences and
+univalence in a very simple category where the structure of the category is
+rather simple.
+
+Let $\bC$ be some category, we then define the opposite category
+$\bC^{\matit{Op}}$. It has the same objects, but the type of arrows are flipped,
+that is to say an arrow from $A$ to $B$ in the opposite category corresponds to
+an arrow from $B$ to $A$ in the underlying category. The identity arrow is the
+same as the one in the underlying category (they have the same type). Function
+composition will be reverse function composition from the underlying category.
+
+Showing that this forms a pre-category is rather straightforward. I'll state the
+laws in terms of the underlying category $\bC$:
+%
+$$
+h \rrr (g \rrr f) \equiv h \rrr g \rrr f
+$$
+%
+Since $\rrr$ is reverse function composition this is just the symmetric version
+of associativity.
+%
+$$
+\matit{identity} \rrr f \equiv f \x f \rrr identity \equiv f
+$$
+%
+This is just the swapped version of identity.
+
+Finally, that the arrows form sets just follows by flipping the order of the
+arguments. Or in other words since $\Hom_{A\ B}$ is a set for all $A\ B \tp
+\Object$ then so is $\Hom_{B\ A}$.
+
+Now, to show that this category is univalent is not as straight-forward. Lucliy
+section \ref{equiv} gave us some tools to work with equivalences. We saw that we
+can prove this category univalent by giving an inverse to
+$\idToIso_{\mathit{Op}} \tp (A \equiv B) \to (A \approxeq_{\mathit{Op}} B)$.
+From the original category we have that $\idToIso \tp (A \equiv B) \to (A \cong
+B)$ is an isomorphism. Let us denote it's inverse with $\eta \tp (A \approxeq B)
+\to (A \equiv B)$. If we squint we can see what we need is a way to go between
+$\approxeq_{\mathit{Op}}$ and $\approxeq$, well, an inhabitant of $A \approxeq
+B$ is simply an arrow $f \tp \mathit{Arrow}\ A\ B$ and it's inverse $g \tp
+\mathit{Arrow}\ B\ A$. In the opposite category $g$ will play the role of the
+isomorphism and $f$ will be the inverse. Similarly we can go in the opposite
+direction. I name these maps $\mathit{shuffle} \tp (A \approxeq B) \to (A
+\approxeq_{\bC} B)$ and $\mathit{shuffle}^{-1} : (A \approxeq_{\bC} B) \to (A
+\approxeq B)$ respectively.
+
+As the inverse of $\idToIso_{\mathit{Op}}$ I will pick $\zeta \defeq \eta \comp
 \mathit{shuffle}$. The proof that they are inverses go as follows:
 %
 \begin{align*}
@@ -345,37 +485,113 @@ As the inverse of $\idToIso$ we will pick $\zeta \defeq \eta \comp
 %%   ≡⟨ (λ i → verso-recto i x) ⟩ \\
 & \equiv
 \identity
-&& \text{$\eta$ is an ismorphism} \\
+&& \text{$\eta$ is an ismorphism}
 \end{align*}
 %
 The other direction is analogous.
 
-The lemma used in this proof show that $\idToIso \equiv \inv{\shuffle} \comp
+The lemma used in this proof states that $\idToIso \equiv \inv{\shuffle} \comp
 \idToIso_{\bC}$ it's a rather straight-forward proof since being-an-inverse-of
 is a proposition.
 
 So, in conclusion, we've shown that the opposite category is indeed a category.
-We can now proceed to show that this construction is an involution, namely:
+
+This finished the proof that the opposite category is in fact a category. Now,
+to prove that that opposite-of is an involution we must show:
 %
 $$
-\prod_{\bC : \Category} \left(\bC^T\right)^T \equiv \bC
+\prod_{\bC \tp \mathit{Category}} \left(\bC^{\matit{Op}}\right)^{\matit{Op}} \equiv \bC
 $$
 %
-As we've seen the laws in $\left(\bC^T\right)^T$ get quite involved.\footnote{We
-  haven't even seen the full story because we've used this `interface' for
-  equivalences.} Luckily they being a category is a proposition, so we need not
-concern ourselves with this bit when proving the above. We can use the equality
-principle for categories that lets us prove an equality just by giving an
-equality on the data-part. So, given a category $\bC$ what we must provide is
-the following proof:
+As we've seen the laws in $\left(\bC^{\mathit{Op}}\right)^{\mathit{Op}}$ get
+quite involved.\footnote{We haven't even seen the full story because we've used
+  this `interface' for equivalences.} Luckily since being-a-category is a mere
+proposition, we need not concern ourselves with this bit when proving the above.
+We can use the equality principle for categories that lets us prove an equality
+just by giving an equality on the data-part. So, given a category $\bC$ all we
+must provide is the following proof:
 %
 $$
-\mathit{raw}\ \left(\bC^T\right)^T \equiv \mathit{raw}\ \bC
+\mathit{raw}\ \left(\bC^{\mathit{Op}}\right)^{\mathit{Op}} \equiv \mathit{raw}\ \bC
 $$
 %
 And these are judgmentally the same. I remind the reader that the left-hand side
-is constructed by flipping the arrows, an action that is certainly an
-involution.
+is constructed by flipping the arrows, which judgmentally is an involution.
+
+\subsection{Category of sets}
+The category of sets has as objects, not types, but only those types that are
+homotopic sets. This is encapsulated in Agda with the following type:
+%
+$$\Set_\ell \defeq \sum_{A \tp \MCU_\ell} \isSet\ A$$
+%
+The more straight-forward notion of a category where the objects are types is
+not a valid (1-)category. Since in cubical Agda types can have higher homotopic
+structure.
+
+Univalence does not follow immediately from univalence for types:
+%
+$$(A \equiv B) \simeq (A \simeq B)$$
+%
+Because here $A\ B \tp \Type$ whereas the objects in this category have the type
+$\Set$ so we cannot form the type $\mathit{hA} \simeq \mathit{hB}$ for objects
+$\mathit{hA}\;\mathit{hB} \tp \Set$. In stead I show that this category
+satisfies:
+%
+$$
+(\mathit{hA} \equiv \mathit{hB}) \simeq (\mathit{hA} \approxeq \mathit{hB})
+$$
+%
+Which, as we saw in section \ref{univalence}, is sufficient to show that the
+category is univalent. The way that I have shown this is with a three-step
+process. For objects $(A, s_A)\; (B, s_B) \tp \Set$ I show that.
+%
+\begin{align*}
+ ((A, s_A) \equiv (B, s_B)) & \simeq (A \equiv B) \\
+ (A \equiv B) & \simeq (\fst A \simeq \fst B) \\
+ (A \simeq B) & \simeq ((A, s_A) \approxeq (B, s_B))
+\end{align*}
+
+And since $\simeq$ is an equivalence relation we can chain these equivalences
+together. Step one will be proven with the following lemma:
+%
+$$
+\left(\prod_{a \tp A} \isProp (P\ a)\right) \to \prod_{x\;y \tp \sum_{a \tp A} P\ a} (x \equiv y) \simeq (\fst\ x \equiv \fst\ y)
+$$
+%
+The lemma states that for pairs whose second component are mere propositions
+equiality is equivalent to equality of the first components. In this case the
+type-family $P$ is $\isSet$ which itself is a proposition for any type $A \tp
+\Type$. Step two is univalence. Step three will be proven with the following
+lemma:
+%
+$$
+\prod_{a \tp A} \left( P\ a \simeq Q\ a \right) \to \sum_{a \tp A} P\ a \simeq \sum_{a \tp A} Q\ a
+$$
+%
+Which says that if two type-families are equivalent at all points, then pairs
+with identitical first components and these families as second components will
+also be equivalent. For our purposes $P \defeq \isEquiv\ A\ B$ and $Q \defeq
+\mathit{Isomorphism}$. So we must finally prove:
+%
+$$
+\prod_{f \tp A \to B} \left( \isEquiv\ A\ B\ f \simeq \mathit{Isomorphism}\ f \right)
+$$
+
+
+\subsection{Categories}
+Note that this category does in fact not exist. In stead I provide the
+definition of the ``raw'' category as well as some of the laws.
+
+Furthermore I provide some helpful lemmas about this raw category. For instance
+I have shown what would be the exponential object in such a category.
+
+These lemmas can be used to provide the actual exponential object in a context
+where we have a witness to this being a category. This is useful if this library
+is later extended to talk about higher categories.
+
+
+\section{Product}
+\section{Monads}
 
 %% \subsubsection{Functors}
 %% Defines the notion of a functor - also split up into data and laws.
@@ -445,50 +661,6 @@ involution.
 %% preceding formulations
 %% \footnote{ TODO: I would like to include in the thesis some motivation for why
 %%   this construction is particularly interesting.}
-
-%% \subsubsection{Homotopy sets}
-%% The typical category of sets where the objects are modelled by an Agda set
-%% (henceforth ``$\Type$'') at a given level is not a valid category in this cubical
-%% settings, we need to restrict the types to be those that are homotopy sets. Thus
-%% the objects of this category are:
-%% %
-%% $$\hSet_\ell \defeq \sum_{A \tp \MCU_\ell} \isSet\ A$$
-%% %
-%% The definition of univalence for categories I have defined is:
-%% %
-%% $$\isEquiv\ (\hA \equiv \hB)\ (\hA \cong \hB)\ \idToIso$$
-%% %
-%% Where $\hA and \hB$ denote objects in the category. Note that this is stronger
-%% than
-%% %
-%% $$(\hA \equiv \hB) \simeq (\hA \cong \hB)$$
-%% %
-%% Because we require that the equivalence is constructed from the witness to:
-%% %
-%% $$\id \comp f \equiv f \x f \comp \id \equiv f$$
-%% %
-%% And indeed univalence does not follow immediately from univalence for types:
-%% %
-%% $$(A \equiv B) \simeq (A \simeq B)$$
-%% %
-%% Because $A\ B \tp \Type$ whereas $\hA\ \hB \tp \hSet$.
-
-%% For this reason I have shown that this category satisfies the following
-%% equivalent formulation of being univalent:
-%% %
-%% $$\prod_{A \tp hSet} \isContr \left( \sum_{X \tp hSet} A \cong X \right)$$
-%% %
-%% But I have not shown that it is indeed equivalent to my former definition.
-%% \subsubsection{Categories}
-%% Note that this category does in fact not exist. In stead I provide the
-%% definition of the ``raw'' category as well as some of the laws.
-
-%% Furthermore I provide some helpful lemmas about this raw category. For instance
-%% I have shown what would be the exponential object in such a category.
-
-%% These lemmas can be used to provide the actual exponential object in a context
-%% where we have a witness to this being a category. This is useful if this library
-%% is later extended to talk about higher categories.
 
 %% \subsubsection{Functors}
 %% The category of functors and natural transformations. An immediate corrolary is
