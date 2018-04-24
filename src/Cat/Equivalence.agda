@@ -10,7 +10,7 @@ open import Cubical.GradLemma hiding (isoToPath)
 open import Cat.Prelude using
   ( lemPropF ; setPi ; lemSig ; propSet
   ; Preorder ; equalityIsEquivalence ; propSig ; id-coe
-  ; Setoid )
+  ; Setoid ; _$_ ; propPi )
 
 import Cubical.Univalence as U
 
@@ -133,7 +133,7 @@ module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
     -- | The other inverse law does not hold in general, it does hold, however,
     -- | if `A` and `B` are sets.
     module _ (sA : isSet A) (sB : isSet B) where
-      module _ {f : A → B} (iso : Isomorphism f) where
+      module _ {f : A → B} where
         module _ (iso-x iso-y : Isomorphism f) where
           open Σ iso-x renaming (fst to x ; snd to inv-x)
           open Σ iso-y renaming (fst to y ; snd to inv-y)
@@ -146,22 +146,18 @@ module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
             y ∎
 
           propInv : ∀ g → isProp (AreInverses f g)
-          propInv g t u i = a i , b i
+          propInv g t u = λ i → a i , b i
             where
             a : (fst t) ≡ (fst u)
-            a i = h
+            a i = funExt hh
               where
               hh : ∀ a → (g ∘ f) a ≡ a
               hh a = sA ((g ∘ f) a) a (λ i → (fst t) i a) (λ i → (fst u) i a) i
-              h : g ∘ f ≡ idFun A
-              h i a = hh a i
             b : (snd t) ≡ (snd u)
-            b i = h
+            b i = funExt hh
               where
               hh : ∀ b → (f ∘ g) b ≡ b
               hh b = sB _ _ (λ i → snd t i b) (λ i → snd u i b) i
-              h : f ∘ g ≡ idFun B
-              h i b = hh b i
 
           inx≡iny : (λ i → AreInverses f (fx≡fy i)) [ inv-x ≡ inv-y ]
           inx≡iny = lemPropF propInv fx≡fy
@@ -169,11 +165,12 @@ module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
           propIso : iso-x ≡ iso-y
           propIso i = fx≡fy i , inx≡iny i
 
-        inverse-to-from-iso : (toIso {f} ∘ fromIso {f}) iso ≡ iso
-        inverse-to-from-iso = begin
-          (toIso ∘ fromIso) iso ≡⟨⟩
-          toIso (fromIso iso)   ≡⟨ propIso _ _ ⟩
-          iso ∎
+        module _ (iso : Isomorphism f) where
+          inverse-to-from-iso : (toIso {f} ∘ fromIso {f}) iso ≡ iso
+          inverse-to-from-iso = begin
+            (toIso ∘ fromIso) iso ≡⟨⟩
+            toIso (fromIso iso)   ≡⟨ propIso _ _ ⟩
+            iso ∎
 
     fromIsomorphism : A ≅ B → A ~ B
     fromIsomorphism (f , iso) = f , fromIso iso
@@ -419,7 +416,7 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
   equivPropSig pA p q = fromIsomorphism _ _ iso
     where
     f : ∀ {p q} → p ≡ q → fst p ≡ fst q
-    f e i = fst (e i)
+    f = cong fst
     g : ∀ {p q} → fst p ≡ fst q → p ≡ q
     g {p} {q} = lemSig pA p q
     ve-re : (e : p ≡ q) → (g ∘ f) e ≡ e
@@ -507,31 +504,26 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
     → ((a : A) → P a ≃ Q a) → Σ A P ≃ Σ A Q
   equivSig {Q = Q} eA = res
     where
+    P≅Q : ∀ {a} → P a ≅ Q a
+    P≅Q {a} = toIsomorphism _ _ (eA a)
     f : Σ A P → Σ A Q
-    f (a , pA) = a , fst (eA a) pA
+    f (a , pA) = a , fst P≅Q pA
     g : Σ A Q → Σ A P
-    g (a , qA) = a , g' qA
-      where
-      k : Isomorphism _
-      k = toIso _ _ (snd (eA a))
-      open Σ k renaming (fst to g')
+    g (a , qA) = a , fst (snd P≅Q) qA
     ve-re : (x : Σ A P) → (g ∘ f) x ≡ x
-    ve-re x i = fst x , eq i
+    ve-re (a , pA) i = a , eq i
       where
-      eq : snd ((g ∘ f) x) ≡ snd x
+      eq : snd ((g ∘ f) (a , pA)) ≡ pA
       eq = begin
-        snd ((g ∘ f) x) ≡⟨⟩
+        snd ((g ∘ f) (a , pA)) ≡⟨⟩
         snd (g (f (a , pA))) ≡⟨⟩
         g' (fst (eA a) pA) ≡⟨ lem ⟩
         pA ∎
         where
-        open Σ x renaming (fst to a ; snd to pA)
-        k : Isomorphism _
-        k = toIso _ _ (snd (eA a))
-        open Σ k renaming (fst to g' ; snd to inv)
+        open Σ (snd P≅Q) renaming (fst to g' ; snd to inv)
         -- anti-funExt
         lem : (g' ∘ (fst (eA a))) pA ≡ pA
-        lem i = fst inv i pA
+        lem = cong (_$ pA) (fst (snd (snd P≅Q)))
     re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
     re-ve x i = fst x , eq i
       where

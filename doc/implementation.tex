@@ -189,7 +189,7 @@ $$
 and one heterogeneous:
 %
 $$
-Path\ (\lambda i \to Univalent_{p\ i})\ \isPreCategory_a\ \isPreCategory_b
+\Path\ (\lambda\; i \mto Univalent_{p\ i})\ \isPreCategory_a\ \isPreCategory_b
 $$
 %
 Which depends on the choice of $p_{\isPreCategory}$. The first of these we can
@@ -203,7 +203,7 @@ path between some two elements in $A$; $p : a_0 \equiv a_1$ then we can built a
 heterogeneous path between any two $b$'s at the endpoints:
 %
 $$
-Path\ (\lambda i \to B\ (p\ i))\ b0\ b1
+\Path\ (\lambda\; i \mto B\ (p\ i))\ b0\ b1
 $$
 %
 where $b_0 \tp B a_0$ and $b_1 \tp B\ a_1$. This is quite a mouthful, but the
@@ -216,7 +216,7 @@ applying using congruence of paths: $\congruence\ \mathit{isIdentity}\
 p_{\isPreCategory}$
 
 When we have a proper category we can make precise the notion of ``identifying
-isomorphic types'' (TODO cite awodey here). That is, we can construct the
+isomorphic types'' \TODO{cite awodey here}. That is, we can construct the
 function:
 %
 $$
@@ -227,11 +227,11 @@ One application of this, and a perhaps somewhat surprising result, is that
 terminal objects are propositional. Intuitively; they do not have any
 interesting structure. The proof of this follows from the usual observation that
 any two terminal objects are isomorphic. The proof is omitted here, but the
-curious reader can check the implementation for the details. (TODO: The proof is
-a bit fun, should I include it?)
+curious reader can check the implementation for the details. \TODO{The proof is
+a bit fun, should I include it?}
 
 \section{Equivalences}
-\label{equiv}
+\label{sec:equiv}
 The usual notion of a function $f : A \to B$ having an inverses is:
 %
 $$
@@ -253,7 +253,7 @@ what an equivalence $\isEquiv : (A \to B) \to \MCU$ must supply:
 %
 Having such an interface gives us both 1) a way to think rather abstractly about
 how to work with equivalences and 2) to use ad-hoc definitions of equivalences.
-The specific instantiation of $\isEquiv$ as defined in \cite{cubical} is:
+The specific instantiation of $\isEquiv$ as defined in \cite{cubical-agda} is:
 %
 $$
 isEquiv\ f \defeq \prod_{b : B} \isContr\ (\fiber\ f\ b)
@@ -269,7 +269,7 @@ once we have shown that this definition actually works as an equivalence.
 
 The first function from the list of requirements we will call
 $\mathit{fromIsomorphism}$, this is known as $\mathit{gradLemma}$ in
-\cite{cubical} the second one we will refer to as $\mathit{toIsmorphism}$. It's
+\cite{cubical-agda} the second one we will refer to as $\mathit{toIsmorphism}$. It's
 implementation can be found in the sources. Likewise the proof that this
 equivalence is propositional can be found in my implementation.
 
@@ -353,7 +353,7 @@ $$
 \isoToId \tp A \approxeq B \to A \equiv B
 $$
 %
-The next few theorems are variations on theorem 9.1.9 from \cite{HoTT-book}. Let
+The next few theorems are variations on theorem 9.1.9 from \cite{hott-2013}. Let
 an isomorphism $A \approxeq B$ in some category $\bC$ be given. Name the
 isomorphism $\iota \tp A \to B$ and its inverse $\widetilde{\iota} \tp B \to A$.
 Since $\bC$ is a category (and therefore univalent) the isomorphism induces a
@@ -425,7 +425,7 @@ univalence in a very simple category where the structure of the category is
 rather simple.
 
 Let $\bC$ be some category, we then define the opposite category
-$\bC^{\matit{Op}}$. It has the same objects, but the type of arrows are flipped,
+$\bC^{\mathit{Op}}$. It has the same objects, but the type of arrows are flipped,
 that is to say an arrow from $A$ to $B$ in the opposite category corresponds to
 an arrow from $B$ to $A$ in the underlying category. The identity arrow is the
 same as the one in the underlying category (they have the same type). Function
@@ -442,7 +442,7 @@ Since $\rrr$ is reverse function composition this is just the symmetric version
 of associativity.
 %
 $$
-\matit{identity} \rrr f \equiv f \x f \rrr identity \equiv f
+\mathit{identity} \rrr f \equiv f \x f \rrr identity \equiv f
 $$
 %
 This is just the swapped version of identity.
@@ -452,7 +452,7 @@ arguments. Or in other words since $\Hom_{A\ B}$ is a set for all $A\ B \tp
 \Object$ then so is $\Hom_{B\ A}$.
 
 Now, to show that this category is univalent is not as straight-forward. Lucliy
-section \ref{equiv} gave us some tools to work with equivalences. We saw that we
+section \ref{sec:equiv} gave us some tools to work with equivalences. We saw that we
 can prove this category univalent by giving an inverse to
 $\idToIso_{\mathit{Op}} \tp (A \equiv B) \to (A \approxeq_{\mathit{Op}} B)$.
 From the original category we have that $\idToIso \tp (A \equiv B) \to (A \cong
@@ -500,7 +500,7 @@ This finished the proof that the opposite category is in fact a category. Now,
 to prove that that opposite-of is an involution we must show:
 %
 $$
-\prod_{\bC \tp \mathit{Category}} \left(\bC^{\matit{Op}}\right)^{\matit{Op}} \equiv \bC
+\prod_{\bC \tp \mathit{Category}} \left(\bC^{\mathit{Op}}\right)^{\mathit{Op}} \equiv \bC
 $$
 %
 As we've seen the laws in $\left(\bC^{\mathit{Op}}\right)^{\mathit{Op}}$ get
@@ -543,20 +543,23 @@ $$
 %
 Which, as we saw in section \ref{univalence}, is sufficient to show that the
 category is univalent. The way that I have shown this is with a three-step
-process. For objects $(A, s_A)\; (B, s_B) \tp \Set$ I show that.
+process. For objects $(A, s_A)\; (B, s_B) \tp \Set$ I show the following chain
+of equivalences:
 %
 \begin{align*}
- ((A, s_A) \equiv (B, s_B)) & \simeq (A \equiv B) \\
- (A \equiv B) & \simeq (\fst A \simeq \fst B) \\
- (A \simeq B) & \simeq ((A, s_A) \approxeq (B, s_B))
+((A, s_A) \equiv (B, s_B))
+ & \simeq (A \equiv B) && \ref{eq:equivPropSig} \\
+ & \simeq (A \simeq B) && \text{Univalence} \\
+ & \simeq ((A, s_A) \approxeq (B, s_B)) && \text{\ref{eq:equivSig} and \ref{eq:equivIso}}
 \end{align*}
 
 And since $\simeq$ is an equivalence relation we can chain these equivalences
 together. Step one will be proven with the following lemma:
 %
-$$
+\begin{align}
+  \label{eq:equivPropSig}
 \left(\prod_{a \tp A} \isProp (P\ a)\right) \to \prod_{x\;y \tp \sum_{a \tp A} P\ a} (x \equiv y) \simeq (\fst\ x \equiv \fst\ y)
-$$
+\end{align}
 %
 The lemma states that for pairs whose second component are mere propositions
 equiality is equivalent to equality of the first components. In this case the
@@ -564,21 +567,105 @@ type-family $P$ is $\isSet$ which itself is a proposition for any type $A \tp
 \Type$. Step two is univalence. Step three will be proven with the following
 lemma:
 %
-$$
+\begin{align}
+  \label{eq:equivSig}
 \prod_{a \tp A} \left( P\ a \simeq Q\ a \right) \to \sum_{a \tp A} P\ a \simeq \sum_{a \tp A} Q\ a
-$$
+\end{align}
 %
 Which says that if two type-families are equivalent at all points, then pairs
 with identitical first components and these families as second components will
 also be equivalent. For our purposes $P \defeq \isEquiv\ A\ B$ and $Q \defeq
 \mathit{Isomorphism}$. So we must finally prove:
 %
-$$
+\begin{align}
+  \label{eq:equivIso}
 \prod_{f \tp A \to B} \left( \isEquiv\ A\ B\ f \simeq \mathit{Isomorphism}\ f \right)
-$$
+\end{align}
 
+First, lets proove \ref{eq:equivPropSig}: Let $propP \tp \prod_{a \tp A} \isProp (P\ a)$ and $x\;y \tp \sum_{a \tp A} P\ a$ be given. Because
+of $\mathit{fromIsomorphism}$ it suffices to give an isomorphism between
+$x \equiv y$ and $\fst\ x \equiv \fst\ y$:
+%
+\begin{align*}
+  f & \defeq \congruence\ \fst \tp x \equiv y \to \fst\ x \equiv \fst\ y \\
+  g & \defeq \mathit{lemSig}\ \mathit{propP}\ x\ y \tp \fst\ x \equiv \fst\ y \to x \equiv y
+\end{align*}
+%
+\TODO{Is it confusing that I use point-free style here?}
+Here $\mathit{lemSig}$ is a lemma that says that if the second component of a
+pair is a proposition, it suffices to give a path between it's first components
+to construct an equality of the two pairs:
+%
+\begin{align*}
+\mathit{lemSig} \tp \left( \prod_{x \tp A} \isProp\ (B\ x) \right) \to
+\prod_{u\; v \tp \sum_{a \tp A} B\ a}
+  \left( \fst\ u \equiv \fst\ v \right) \to u \equiv v
+\end{align*}
+%
+The proof that these are indeed inverses has been omitted. \TODO{Do I really
+  want to ommit it?}\QED
 
-\subsection{Categories}
+Now to prove \ref{eq:equivSig}: Let $e \tp \prod_{a \tp A} \left( P\ a \simeq
+Q\ a \right)$ be given. To prove the equivalence, it suffices to give an
+isomorphism between $\sum_{a \tp A} P\ a$ and $\sum_{a \tp A} Q\ a$, but since
+they have identical first components it suffices to give an isomorphism between
+$P\ a$ and $Q\ a$ for all $a \tp A$. This is exactly what we can get from
+the equivalence $e$.\QED
+
+Lastly we prove \ref{eq:equivIso}. Let $f \tp A \to B$ be given. For the maps we
+choose:
+%
+\begin{align*}
+\mathit{toIso}
+  & \tp \isEquiv\ f             \to \mathit{Isomorphism}\ f \\
+\mathit{fromIso}
+  & \tp \mathit{Isomorphism}\ f \to \isEquiv\ f
+\end{align*}
+%
+As mentioned in section \ref{sec:equiv}. These maps are not in general inverses
+of each other. In stead, we will use the fact that $A$ and $B$ are sets. The first thing we must prove is:
+%
+\begin{align*}
+  \mathit{fromIso} \comp \mathit{toIso} \equiv \identity_{\isEquiv\ f}
+\end{align*}
+%
+For this we can use the fact that being-an-equivalence is a mere proposition.
+For the other direction:
+%
+\begin{align*}
+  \mathit{toIso} \comp \mathit{fromIso} \equiv \identity_{\mathit{Isomorphism}\ f}
+\end{align*}
+%
+We will show that $\mathit{Isomorphism}\ f$ is also a mere proposition. To this
+end, let $X\;Y \tp \mathit{Isomorphism}\ f$ be given. Name the maps $x\;y \tp B
+\to A$ respectively. Now, the proof that $X$ and $Y$ are the same is a pair of
+paths: $p \tp x \equiv y$ and $\Path\ (\lambda\; i \mto
+\mathit{AreInverses}\ f\ (p\ i))\ \mathcal{X}\ \mathcal{Y}$ where $\mathcal{X}$
+and $\mathcal{Y}$ denotes the witnesses that $x$ (respectively $y$) is an
+inverse to $f$. $p$ is inhabited by:
+%
+\begin{align*}
+  x
+  & \equiv x \comp \identity \\
+  & \equiv x \comp (f \comp y)
+  && \text{$y$ is an inverse to $f$} \\
+  & \equiv (x \comp f) \comp y \\
+  & \equiv \identity \comp y
+  && \text{$x$ is an inverse to $f$} \\
+  & \equiv y
+\end{align*}
+%
+For the other (dependent) path we can prove that being-an-inverse-of is a
+proposition and then use $\lemPropF$. So we prove the generalization:
+%
+\begin{align*}
+\prod_{g : B \to A} \isProp\ (\mathit{AreInverses}\ f\ g)
+\end{align*}
+%
+But $\mathit{AreInverses}\ f\ g$ is a pair of equations on arrows, so we use
+$\propSig$ and the fact that both $A$ and $B$ are sets to close this proof.
+
+\subsection{Category of categories}
 Note that this category does in fact not exist. In stead I provide the
 definition of the ``raw'' category as well as some of the laws.
 
@@ -589,8 +676,40 @@ These lemmas can be used to provide the actual exponential object in a context
 where we have a witness to this being a category. This is useful if this library
 is later extended to talk about higher categories.
 
-
 \section{Product}
+In the following I'll demonstrate a technique for using categories to prove
+properties. The goal in this section is to show that products are propositions:
+%
+$$
+\prod_{\bC \tp \Category} \prod_{A\;B \tp \Object} \isProp\ (\mathit{Product}\ \bC\ A\ B)
+$$
+%
+Where $\mathit{Product}\ \bC\ A\ B$ denotes the type of products of objects $A$
+and $B$ in the category $\bC$. I do this by constructing a category whose
+terminal objects are equivalent to products in $\bC$, and since terminal objects
+are propositional in a proper category and equivalences preservehomotopy level,
+then we know that products also are propositions. But before we get to that,
+let's recall the definition of products.
+
+Given a category $\bC$ and two objects $A$ and $B$ in $bC$ we define the product
+of $A$ and $B$ to be an object $A \x B$ in $\bC$ and two arrows $\pi_1 \tp A \x
+B \to A$ and $\pi_2 \tp A \x B \to B$ called the projections of the product. The projections must satisfy the following property:
+
+For all $X \tp Object$, $f \tp \Arrow\ X\ A$ and $g \tp \Arrow\ X\ B$ we have
+that there exists a unique arrow $\pi \tp \Arrow\ X\ (A \x B)$ satisfying
+%
+\begin{align}
+\label{eq:umpProduct}
+%% \prod_{X \tp Object} \prod_{f \tp \Arrow\ X\ A} \prod_{g \tp \Arrow\ X\ B}\\
+%% \uexists_{f \x g \tp \Arrow\ X\ (A \x B)}
+\pi_1 \lll \pi \equiv f \x \pi_2 \lll \pi \equiv g
+%% ump : ∀ {X : Object} (f : ℂ [ X , A ]) (g : ℂ [ X , B ])
+%%           → ∃![ f×g ] (ℂ [ fst ∘ f×g ] ≡ f P.× ℂ [ snd ∘ f×g ] ≡ g)
+\end{align*}
+$
+$\pi$ is called the product (arrow) of $f$ and $g$.
+
+
 \section{Monads}
 
 %% \subsubsection{Functors}

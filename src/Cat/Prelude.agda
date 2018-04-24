@@ -62,10 +62,8 @@ module _ (ℓ : Level) where
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
 module _ {ℓa ℓb} {A : Set ℓa} {P : A → Set ℓb} (f g : ∃! P) where
-  open Σ (snd f) renaming (snd to u)
-
   ∃-unique : fst f ≡ fst g
-  ∃-unique = u (fst (snd g))
+  ∃-unique = (snd (snd f)) (fst (snd g))
 
 module _ {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb} {a b : Σ A B}
   (fst≡ : (λ _ → A)            [ fst a ≡ fst b ])

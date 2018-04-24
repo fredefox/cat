@@ -73,12 +73,13 @@ the (left) identity law of the underlying category to proove $\idFun \comp g
 %
 \subsection{Equality of isomorphic types}
 %
-Let $\top$ denote the unit type -- a type with a single constructor. In the
-propositions-as-types interpretation of type theory $\top$ is the proposition
-that is always true. The type $A \x \top$ and $A$ has an element for each $a :
-A$. So in a sense they are the same. The second element of the pair does not add
-any ``interesting information''. It can be useful to identify such types. In
-fact, it is quite commonplace in mathematics. Say we look at a set $\{x \mid
+Let $\top$ denote the unit type -- a type with a single constructor. In
+the propositions-as-types interpretation of type theory $\top$ is the
+proposition that is always true. The type $A \x \top$ and $A$ has an element for
+each $a : A$. So in a sense they are the same. The second element of the pair
+does not add any ``interesting information''. It can be useful to identify such
+types. In fact, it is quite commonplace in mathematics. Say we look at a set
+$\{x \mid
 \phi\ x \land \psi\ x\}$ and somehow conclude that $\psi\ x \equiv \top$ for all
 $x$. A mathematician would immediately conclude $\{x \mid \phi\ x \land
 \psi\ x\} \equiv \{x \mid \phi\ x\}$ without thinking twice. Unfortunately such
@@ -92,8 +93,9 @@ types. The principle of univalence says that:
 %
 $$\mathit{univalence} \tp (A \simeq B) \simeq (A \equiv B)$$
 %
-In particular this allows us to construct an equality from an equivalence $\mathit{ua} \tp
-(A \simeq B) \to (A \equiv B)$ and vice-versa.
+In particular this allows us to construct an equality from an equivalence
+($\mathit{ua} \tp (A \simeq B) \to (A \equiv B)$) and vice-versa.
+
 \section{Formalizing Category Theory}
 %
 The above examples serve to illustrate the limitation of Agda. One case where
@@ -115,20 +117,21 @@ Inspiration:
 \end{verbatim}
 The idea of formalizing Category Theory in proof assistants is not new. There
 are a multitude of these available online. Just as first reference see this
-question on Math Overflow: \cite{mo-formalizations}. Notably these two implementations of category theory in Agda:
+question on Math Overflow: \cite{mo-formalizations}. Notably these
+implementations of category theory in Agda:
 \begin{itemize}
 \item
-\url{https://github.com/copumpkin/categories} - setoid interpretation
+\url{https://github.com/copumpkin/categories} -- setoid interpretation
 \item
-\url{https://github.com/pcapriotti/agda-categories} - homotopic setting with postulates
+\url{https://github.com/pcapriotti/agda-categories} -- homotopic setting with postulates
 \item
-\url{https://github.com/pcapriotti/agda-categories} - homotopic setting in coq
+\url{https://github.com/pcapriotti/agda-categories} -- homotopic setting in coq
 \item
-\url{https://github.com/mortberg/cubicaltt} - homotopic setting in \texttt{cubicaltt}
+\url{https://github.com/mortberg/cubicaltt} -- homotopic setting in \texttt{cubicaltt}
 \end{itemize}
-The contribution of this
-thesis is to explore how working in a cubical setting will make it possible to
-prove more things and to reuse proofs.
+
+The contribution of this thesis is to explore how working in a cubical setting
+will make it possible to prove more things and to reuse proofs.
 
 There are alternative approaches to working in a cubical setting where one can
 still have univalence and functional extensionality. One option is to postulate
