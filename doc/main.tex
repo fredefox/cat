@@ -1,22 +1,34 @@
-\documentclass{report}
+\documentclass[a4paper]{report}
+%% \documentclass[compact,a4paper]{article}
 
 \input{packages.tex}
 \input{macros.tex}
 
-\title{Univalent categories}
+\title{Univalent categories in cubical Agda}
+\subtitle{}
 \author{Frederik Hanghøj Iversen}
 \authoremail{hanghj@student.chalmers.se}
+\newcommand{\chalmers}{Chalmers University of Technology}
 \supervisor{Thierry Coquand}
 \supervisoremail{coquand@chalmers.se}
+\supervisordepartment{\chalmers}
 \cosupervisor{Andrea Vezzosi}
 \cosupervisoremail{vezzosi@chalmers.se}
-\institution{Chalmers University of Technology}
+\cosupervisordepartment{\chalmers}
+\examiner{Andreas Abel}
+\examineremail{abela@chalmers.se}
+\examinerdepartment{\chalmers}
+\institution{\chalmers}
+\department{Department of Computer Science and Engineering}
+\researchgroup{Programming Logic Group}
 
 \begin{document}
 
+\pagenumbering{roman}
 \maketitle
 \tableofcontents
-
+%
+\pagenumbering{arabic}
 \chapter{Introduction}
 \input{introduction.tex}
 
@@ -27,7 +39,10 @@
 \nocite{cubical-demo}
 \nocite{coquand-2013}
 \bibliography{refs}
+
 \begin{appendices}
+\setcounter{page}{1}
+\pagenumbering{roman}
 %% \input{planning.tex}
 %% \input{halftime.tex}
 \end{appendices}

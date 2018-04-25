@@ -4,45 +4,85 @@
 \newcommand*{\authoremail}[1]{\gdef\@authoremail{#1}}
 \newcommand*{\supervisor}[1]{\gdef\@supervisor{#1}}
 \newcommand*{\supervisoremail}[1]{\gdef\@supervisoremail{#1}}
+\newcommand*{\supervisordepartment}[1]{\gdef\@supervisordepartment{#1}}
 \newcommand*{\cosupervisor}[1]{\gdef\@cosupervisor{#1}}
 \newcommand*{\cosupervisoremail}[1]{\gdef\@cosupervisoremail{#1}}
+\newcommand*{\cosupervisordepartment}[1]{\gdef\@cosupervisordepartment{#1}}
+\newcommand*{\examiner}[1]{\gdef\@examiner{#1}}
+\newcommand*{\examineremail}[1]{\gdef\@examineremail{#1}}
+\newcommand*{\examinerdepartment}[1]{\gdef\@examinerdepartment{#1}}
 \newcommand*{\institution}[1]{\gdef\@institution{#1}}
+\newcommand*{\department}[1]{\gdef\@department{#1}}
+\newcommand*{\researchgroup}[1]{\gdef\@researchgroup{#1}}
 
 \renewcommand*{\maketitle}{%
 \begin{titlepage}
 
-
+% TITLE PAGE
+\newpage
+\thispagestyle{empty}
 \begin{center}
+	\textsc{\LARGE Master's thesis \the\year}\\[4cm]		% Report number is currently not in use
+	\textbf{\LARGE \@title} \\[1cm]
+	{\large \@subtitle}\\[1cm]
+	{\large \@author}
+	
+	\vfill	
+	\centering
+	\includegraphics[width=0.2\pdfpagewidth]{logo_eng.pdf}
+  \vspace{5mm}
+	
+	Department of Computer Science and Engineering\\
+	\emph{\@researchgroup}\\
+	%Name of research group (if applicable)\\
+	\textsc{\@institution} \\
+	Gothenburg, Sweden \the\year \\
+\end{center}
 
 
-{\scshape\LARGE Master thesis\\}
+% IMPRINT PAGE (BACK OF TITLE PAGE)
+\newpage
+\thispagestyle{plain}
+\vspace*{4.5cm}
+\@title\\
+\@subtitle\\
+\textbf{Author:}\\
+\@author\\
+\href{mailto:\@authoremail>}{\texttt{<\@authoremail>}}
+\setlength{\parskip}{1cm}
 
-\vspace{0.5cm}
+\copyright ~ \MakeUppercase{\@author}, \the\year.
 
-{\LARGE\bfseries \@title\\}
+\setlength{\parskip}{0.5cm}
+\textbf{Supervisor:}\\
+\@supervisor\\
+\href{mailto:\@supervisoremail>}{\texttt{<\@supervisoremail>}}\\
+\@supervisordepartment
 
-\vspace{2cm}
+\textbf{Co-supervisor:}\\
+\@cosupervisor\\
+\href{mailto:\@cosupervisoremail>}{\texttt{<\@cosupervisoremail>}}\\
+\@cosupervisordepartment
 
-{\Large \@author\\ \href{mailto:\@authoremail>}{\texttt{<\@authoremail>}} \\}
+\textbf{Examiner:}\\
+\@examiner\\
+\href{mailto:\@examineremail>}{\texttt{<\@examineremail>}}\\
+\@examinerdepartment\setlength{\parskip}{1cm}
 
-% \vspace{0.2cm}
-% 
-% {\Large name and email adress of student 2\\}
-
-\vspace{1.0cm}
-
-{\large Supervisor: \@supervisor\\ \href{mailto:\@supervisoremail>}{\texttt{<\@supervisoremail>}}\\}
-
-\vspace{0.2cm}
-
-{\large Co-supervisor: \@cosupervisor\\ \href{mailto:\@cosupervisoremail>}{\texttt{<\@cosupervisoremail>}}\\}
-
-\vspace{1.5cm}
+Master's Thesis \the\year\\	% Report number currently not in use
+\@department\\
+%Division of Division name\\
+%Name of research group (if applicable)\\
+\@institution\\
+SE-412 96 Gothenburg\\
+Telephone +46 31 772 1000 \setlength{\parskip}{0.5cm}
 
 \vfill
+% Caption for cover page figure if used, possibly with reference to further information in the report
+%% Cover: Wind visualization constructed in Matlab showing a surface of constant wind speed along with streamlines of the flow. \setlength{\parskip}{0.5cm}
 
-{\large \@institution\\\today\\}
+%Printed by [Name of printing company]\\
+Gothenburg, Sweden \the\year
 
-\end{center}
-\end{titlepage}
-}
+
+\end{titlepage}}
