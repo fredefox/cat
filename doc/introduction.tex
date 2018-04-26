@@ -30,7 +30,7 @@ which is:
 %
 \newcommand{\suc}[1]{\mathit{suc}\ #1}
 \begin{align*}
-  +           & : \bN \to \bN              \\
+  +           & : \bN \to \bN \to \bN      \\
   n + 0       & \defeq n                   \\
   n + (\suc{m}) & \defeq \suc{(n + m)}
 \end{align*}
@@ -69,7 +69,7 @@ The proof obligation that this satisfies the identity law of functors
 %
 One needs functional extensionality to ``go under'' the function arrow and apply
 the (left) identity law of the underlying category to proove $\idFun \comp g
-\equiv g$ and thus closing the.
+\equiv g$ and thus closing the goal.
 %
 \subsection{Equality of isomorphic types}
 %

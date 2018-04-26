@@ -1,6 +1,29 @@
 % Requires: hypperref
 \ProvidesPackage{chalmerstitle}
 
+%% \RequirePackage{kvoptions}
+
+%% \SetupKeyvalOptions{
+%%   family=ct,
+%%   prefix=ct@
+%% }
+
+%% \DeclareStringOption{authoremail}
+%% \DeclareStringOption{supervisor}
+%% \DeclareStringOption{supervisoremail}
+%% \DeclareStringOption{supervisordepartment}
+%% \DeclareStringOption{cosupervisor}
+%% \DeclareStringOption{cosupervisoremail}
+%% \DeclareStringOption{cosupervisordepartment}
+%% \DeclareStringOption{examiner}
+%% \DeclareStringOption{examineremail}
+%% \DeclareStringOption{examinerdepartment}
+%% \DeclareStringOption{institution}
+%% \DeclareStringOption{department}
+%% \DeclareStringOption{researchgroup}
+%% \DeclareStringOption{subtitle}
+%% \ProcessKeyvalOptions*
+
 \newcommand*{\authoremail}[1]{\gdef\@authoremail{#1}}
 \newcommand*{\supervisor}[1]{\gdef\@supervisor{#1}}
 \newcommand*{\supervisoremail}[1]{\gdef\@supervisoremail{#1}}
@@ -14,6 +37,7 @@
 \newcommand*{\institution}[1]{\gdef\@institution{#1}}
 \newcommand*{\department}[1]{\gdef\@department{#1}}
 \newcommand*{\researchgroup}[1]{\gdef\@researchgroup{#1}}
+\newcommand*{\subtitle}[1]{\gdef\@subtitle{#1}}
 
 \renewcommand*{\maketitle}{%
 \begin{titlepage}
@@ -43,17 +67,16 @@
 % IMPRINT PAGE (BACK OF TITLE PAGE)
 \newpage
 \thispagestyle{plain}
-\vspace*{4.5cm}
-\@title\\
+\textit{\@title}\\
 \@subtitle\\
+\copyright\ \the\year ~ \MakeUppercase{\@author}
+\vspace{4.5cm}
+
+\setlength{\parskip}{0.5cm}
 \textbf{Author:}\\
 \@author\\
 \href{mailto:\@authoremail>}{\texttt{<\@authoremail>}}
-\setlength{\parskip}{1cm}
 
-\copyright ~ \MakeUppercase{\@author}, \the\year.
-
-\setlength{\parskip}{0.5cm}
 \textbf{Supervisor:}\\
 \@supervisor\\
 \href{mailto:\@supervisoremail>}{\texttt{<\@supervisoremail>}}\\
@@ -67,20 +90,18 @@
 \textbf{Examiner:}\\
 \@examiner\\
 \href{mailto:\@examineremail>}{\texttt{<\@examineremail>}}\\
-\@examinerdepartment\setlength{\parskip}{1cm}
+\@examinerdepartment
 
+\vfill
 Master's Thesis \the\year\\	% Report number currently not in use
 \@department\\
 %Division of Division name\\
 %Name of research group (if applicable)\\
 \@institution\\
 SE-412 96 Gothenburg\\
-Telephone +46 31 772 1000 \setlength{\parskip}{0.5cm}
-
-\vfill
+Telephone +46 31 772 1000 \setlength{\parskip}{0.5cm}\\
 % Caption for cover page figure if used, possibly with reference to further information in the report
 %% Cover: Wind visualization constructed in Matlab showing a surface of constant wind speed along with streamlines of the flow. \setlength{\parskip}{0.5cm}
-
 %Printed by [Name of printing company]\\
 Gothenburg, Sweden \the\year
 

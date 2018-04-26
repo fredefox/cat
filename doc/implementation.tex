@@ -66,7 +66,7 @@ $$
 $$
 %
 The two types are logically equivalent, however. One can construct the latter
-from the formerr simply by ``forgetting'' that $\idToIso$ plays the role
+from the former simply by ``forgetting'' that $\idToIso$ plays the role
 of the equivalence. The other direction is more involved.
 
 With all this in place it is now possible to prove that all the laws are indeed
@@ -367,9 +367,10 @@ $$
 $$
 %
 %
-$$
+\begin{align}
+\label{eq:coeCod}
 \mathit{coeCod} \tp \prod_{f \tp A \to X} \mathit{coe}\ p_{\mathit{cod}}\ f \equiv \iota \lll f
-$$
+\end{align}
 %
 I will give the proof of the first theorem here, the second one is analagous.
 \begin{align*}
@@ -452,7 +453,8 @@ arguments. Or in other words since $\Hom_{A\ B}$ is a set for all $A\ B \tp
 \Object$ then so is $\Hom_{B\ A}$.
 
 Now, to show that this category is univalent is not as straight-forward. Lucliy
-section \ref{sec:equiv} gave us some tools to work with equivalences. We saw that we
+section \ref{sec:equiv} gave us some tools to work with equivalences.
+We saw that we
 can prove this category univalent by giving an inverse to
 $\idToIso_{\mathit{Op}} \tp (A \equiv B) \to (A \approxeq_{\mathit{Op}} B)$.
 From the original category we have that $\idToIso \tp (A \equiv B) \to (A \cong
@@ -692,9 +694,10 @@ then we know that products also are propositions. But before we get to that,
 let's recall the definition of products.
 
 \subsection{Products}
-Given a category $\bC$ and two objects $A$ and $B$ in $bC$ we define the product
-of $A$ and $B$ to be an object $A \x B$ in $\bC$ and two arrows $\pi_1 \tp A \x
-B \to A$ and $\pi_2 \tp A \x B \to B$ called the projections of the product. The projections must satisfy the following property:
+Given a category $\bC$ and two objects $A$ and $B$ in $\bC$ we define the
+product of $A$ and $B$ to be an object $A \x B$ in $\bC$ and two arrows $\pi_1
+\tp A \x B \to A$ and $\pi_2 \tp A \x B \to B$ called the projections of the
+product. The projections must satisfy the following property:
 
 For all $X \tp Object$, $f \tp \Arrow\ X\ A$ and $g \tp \Arrow\ X\ B$ we have
 that there exists a unique arrow $\pi \tp \Arrow\ X\ (A \x B)$ satisfying
@@ -706,8 +709,8 @@ that there exists a unique arrow $\pi \tp \Arrow\ X\ (A \x B)$ satisfying
 \pi_1 \lll \pi \equiv f \x \pi_2 \lll \pi \equiv g
 %% ump : ∀ {X : Object} (f : ℂ [ X , A ]) (g : ℂ [ X , B ])
 %%           → ∃![ f×g ] (ℂ [ fst ∘ f×g ] ≡ f P.× ℂ [ snd ∘ f×g ] ≡ g)
-\end{align*}
-$
+\end{align}
+%
 $\pi$ is called the product (arrow) of $f$ and $g$.
 
 \subsection{Pair category}
@@ -715,7 +718,7 @@ $\pi$ is called the product (arrow) of $f$ and $g$.
 \newcommand\pairA{\mathcal{A}}
 \newcommand\pairB{\mathcal{B}}
 Given a base category $\bC$ and two objects in this category $\pairA$ and
-$\pairrB$ we can construct the ``pair category'': \TODO{This is a working title,
+$\pairB$ we can construct the ``pair category'': \TODO{This is a working title,
   it's nice to have a name for this thing to refer back to}
 
 The type objects in this category will be an object in the underlying category,
@@ -731,11 +734,9 @@ category will consist of an arrow from the underlying category $\pairf \tp
 \Arrow\ A\ B$ satisfying:
 %
 \begin{align}
-\begin{split}
 \label{eq:pairArrowLaw}
-b_0 \lll f & \equiv a_0 \\
-b_1 \lll f & \equiv a_1
-\end{split}
+b_0 \lll f \equiv a_0 \x
+b_1 \lll f \equiv a_1
 \end{align}
 
 The identity morphism is the identity morphism from the underlying category.
@@ -758,6 +759,160 @@ choose $g \lll f$ and we must now verify that it satisfies
   a_0
   && \text{$g$ satisfies \ref{eq:pairArrowLaw}} \\
 \end{align*}
+%
+Now we must verify the category-laws. For all the laws we will follow the
+pattern of using the law from the underlying category, and that the type of
+arrows form a set. For instance, to prove associativity we must prove that
+%
+\begin{align}
+\label{eq:productAssoc}
+\overline{h} \lll (\overline{g} \lll \overline{f})
+\equiv
+(\overline{h} \lll \overline{g}) \lll \overline{f}
+\end{align}
+%
+Herer $\lll$ refers to the `embellished' composition abd $\overline{f}$,
+$\overline{g}$ and $\overline{h}$ are triples consisting of arrows from the
+underlying category ($f$, $g$ and $h$) and a pair of witnesses to
+\ref{eq:pairArrowLaw}.
+%% Luckily those winesses are paths in the hom-set of the
+%% underlying category which is a set, so these are mere propositions.
+The proof
+obligations is:
+%
+\begin{align}
+\label{eq:productAssocUnderlying}
+h \lll (g \lll f)
+\equiv
+(h \lll g) \lll f
+\end{align}
+%
+Which is provable by and that the witness to \ref{eq:pairArrowLaw} for the
+left-hand-side and the right-hand-side are the same. The type of this goal is
+quite involved, and I will not write it out in full, but it suffices to show the
+type of the path-space. Note that the arrows in \ref{eq:productAssoc} are arrows
+from $\mathcal{A} = (A , a_\pairA , a_\pairB)$ to $\mathcal{D} = (D , d_\pairA ,
+d_\pairB)$ where $a_\pairA$, $a_\pairB$, $d_\pairA$ and $d_\pairB$ are arrows in
+the underlying category. Given that $p$ is the proof of
+\ref{eq:productAssocUnderlying} we then have that the witness to
+\ref{eq:pairArrowLaw} vary over the type:
+%
+\begin{align}
+\label{eq:productPath}
+λ\ i → d_\pairA \lll p\ i ≡ a_\pairA × d_\pairB \lll p\ i ≡ a_\pairB
+\end{align}
+%
+And these paths are in the type of the hom-set of the underlying category, so
+they are mere propositions. We cannot apply the fact that arrows in $\bC$ are
+sets directly, however, since $\isSet$ only talks about non-dependent paths, in
+stead we generalize \ref{eq:productPath} to:
+%
+\begin{align}
+\label{eq:productEqPrinc}
+\prod_{f \tp \Arrow\ X\ Y} \isProp\ \left( y_\pairA \lll f ≡ x_\pairA × y_\pairB \lll f ≡ x_\pairB \right)
+\end{align}
+%
+For all objects $X , x_\pairA , x_\pairB$ and $Y , y_\pairA , y_\pairB$, but
+this follows from pairs preserving homotopical structure and arrows in the
+underlying category being sets. This gives us an equality principle for arrows
+in this category that says that to prove two arrows $f, f_0, f_1$ and $g, g_0,
+$g_1$ equal it suffices to give a proof that $f$ and $g$ are equal.
+%% %
+%% $$
+%% \prod_{(f, f_0, f_1)\; (g,g_0,g_1) \tp \Arrow\ X\ Y} f \equiv g \to (f, f_0, f_1) \equiv (g,g_0,g_1)
+%% $$
+%% %
+And thus we have proven \ref{eq:productAssoc} simply with
+\ref{eq:productAssocUnderlying}.
+
+Now we must prove that arrows form a set:
+%
+$$
+\isSet\ (\Arrow\ \mathcal{X}\ \mathcal{Y})
+$$
+%
+Since pairs preserve homotopical structure this reduces to:
+%
+$$
+\isSet\ (\Arrow_\bC\ X\ Y)
+$$
+%
+Which holds. And
+%
+$$
+\prod_{f \tp \Arrow\ X\ Y} \isSet\ \left( y_\pairA \lll f ≡ x_\pairA × y_\pairB \lll f ≡ x_\pairB \right)
+$$
+%
+This we get from \ref{eq:productEqPrinc} and the fact that homotopical structure
+is cumulative.
+
+This finishes the proof that this is a valid pre-category.
+
+\subsubsection{Univalence}
+To prove that this is a proper category it must be shown that it is univalent.
+That is, for any two objects $\mathcal{X} = (X, x_\mathcal{A} , x_\mathca{B})$
+and $\mathcal{Y} = Y, y_\mathcal{A}, y_\mathcal{B}$ I will show:
+%
+\begin{align}
+(\mathcal{X} \equiv \mathcal{Y}) \cong (\mathcal{X} \approxeq \mathcal{Y})
+\end{align}
+
+I do this by showing that the following sequence of types are isomorphic.
+
+The first type is:
+%
+\begin{align}
+\label{eq:univ-0}
+(X , x_\mathcal{A} , x_\mathcal{B}) ≡ (Y , y_\mathcal{A} , y_\mathcal{B})
+\end{align}
+%
+The next types will be the triple:
+%
+\begin{align}
+\label{eq:univ-1}
+\begin{split}
+p \tp & X \equiv Y \\
+& \Path\ (λ i → \Arrow\ (p\ i)\ \mathcal{A})\ x_\mathcal{A}\ y_\mathcal{A} \\
+& \Path\ (λ i → \Arrow\ (p\ i)\ \mathcal{B})\ x_\mathcal{B}\ y_\mathcal{B}
+\end{split}
+%% \end{split}
+\end{align}
+
+The next type is very similar, but in stead of a path we will have an
+isomorphism, and create a path from this:
+%
+\begin{align}
+\label{eq:univ-2}
+\begin{split}
+\var{iso} \tp & X \cong Y \\
+& \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ \mathcal{A})\ x_\mathcal{A}\ y_\mathcal{A} \\
+& \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ \mathcal{B})\ x_\mathcal{B}\ y_\mathcal{B}
+\end{split}
+\end{align}
+%
+Where $\widetilde{p} \defeq \var{isoToId}\ \var{iso} \tp X \equiv Y$.
+
+Finally we have the type:
+%
+\begin{align}
+\label{eq:univ-3}
+(X , x_\mathcal{A} , x_\mathcal{B}) ≊ (Y , y_\mathcal{A} , y_\mathcal{B})
+\end{align}
+
+\emph{Proposition} \ref{eq:univ-0} is isomorphic to \ref{eq:univ-1}: This is
+just an application of the fact that a path between two pairs $a_0, a_1$ and
+$b_0, b_1$ corresponds to a pair of paths between $a_0,b_0$ and $a_1,b_1$ (check
+the implementation for the details).
+
+\emph{Proposition} \ref{eq:univ-1} is isomorphic to \ref{eq:univ-2}:
+\TODO{Super complicated}
+
+\emph{Proposition} \ref{eq:univ-2} is isomorphic to \ref{eq:univ-3}:
+For this I will two corrolaries of \ref{eq:coeCod}:
+%
+\begin{align}
+\label{domain-twist}
+\end{align}
 
 \section{Monads}
 

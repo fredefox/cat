@@ -28,15 +28,17 @@
 \usepackage{listings}
 \usepackage{fancyvrb}
 
-\usepackage{chalmerstitle}
-
 \usepackage{mathpazo}
 \usepackage[scaled=0.95]{helvet}
 \usepackage{courier}
 \linespread{1.05} % Palatino looks better with this
 
+\usepackage{lmodern}
+
 \usepackage{fontspec}
-\setmonofont[Mapping=tex-text]{FreeMono.otf}
+\usepackage{sourcecodepro}
+%% \setmonofont{Latin Modern Mono}
+%% \setmonofont[Mapping=tex-text]{FreeMono.otf}
 %% \setmonofont{FreeMono.otf}
 
 
@@ -44,3 +46,9 @@
 \setlength{\headheight}{15pt}
 \renewcommand{\chaptermark}[1]{\markboth{\textsc{Chapter \thechapter. #1}}{}}
 \renewcommand{\sectionmark}[1]{\markright{\textsc{\thesection\ #1}}}
+
+% Allows for the use of unicode-letters:
+\usepackage{unicode-math}
+
+
+%% \RequirePackage{kvoptions}
