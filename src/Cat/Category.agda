@@ -453,8 +453,8 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 
         -- This can probably also just be obtained from the above my taking the
         -- symmetric isomorphism.
-        domain-twist0 : f ≡ g <<< ι
-        domain-twist0 = begin
+        domain-twist-sym : f ≡ g <<< ι
+        domain-twist-sym = begin
           f ≡⟨ sym rightIdentity ⟩
           f <<< identity ≡⟨ cong (f <<<_) (sym (fst inv)) ⟩
           f <<< (ι~ <<< ι) ≡⟨ isAssociative ⟩

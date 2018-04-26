@@ -50,7 +50,7 @@ module _ {ℓa ℓb ℓc} {A : Set ℓa} {B : Set ℓb} (sB : isSet B) {Q : B �
   Σ-fst-map : Σ A (\ a → Q (f a)) → Σ B Q
   Σ-fst-map (x , q) = f x , q
 
-  isoSigFst : Isomorphism f → Σ A (\ a → Q (f a)) ≅ (Σ B Q)
+  isoSigFst : Isomorphism f → Σ A (Q ∘ f) ≅ Σ B Q
   isoSigFst (g , g-f , f-g) = Σ-fst-map
     , (\ { (b , q) → g b , transp (\ i → Q (f-g (~ i) b)) q })
     , funExt (\ { (a , q) → Cat.Prelude.Σ≡ (\ i → g-f i a)

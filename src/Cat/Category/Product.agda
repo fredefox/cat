@@ -125,41 +125,19 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
                   → (xy : ℂ.Arrow X Y) → isProp (ℂ [ ya ∘ xy ] ≡ xa × ℂ [ yb ∘ xy ] ≡ xb)
       propEqs xs = propSig (ℂ.arrowsAreSets _ _) (\ _ → ℂ.arrowsAreSets _ _)
 
+      arrowEq : {X Y : Object} {f g : Arrow X Y} → fst f ≡ fst g → f ≡ g
+      arrowEq {X} {Y} {f} {g} p = λ i → p i , lemPropF propEqs p {snd f} {snd g} i
+
       private
         isAssociative : IsAssociative
-        isAssociative {A'@(A , a0 , a1)} {B , _} {C , c0 , c1} {D'@(D , d0 , d1)} {ff@(f , f0 , f1)} {gg@(g , g0 , g1)} {hh@(h , h0 , h1)} i
-          = s0 i , lemPropF propEqs s0 {P.snd l} {P.snd r} i
-          where
-          l = hh <<< (gg <<< ff)
-          r = hh <<< gg <<< ff
-          -- s0 : h ℂ.<<< (g ℂ.<<< f) ≡ h ℂ.<<< g ℂ.<<< f
-          s0 : fst l ≡ fst r
-          s0 = ℂ.isAssociative {f = f} {g} {h}
-
+        isAssociative {f = f , f0 , f1} {g , g0 , g1} {h , h0 , h1} = arrowEq ℂ.isAssociative
 
         isIdentity : IsIdentity identity
-        isIdentity {AA@(A , a0 , a1)} {BB@(B , b0 , b1)} {f , f0 , f1} = leftIdentity , rightIdentity
-          where
-          leftIdentity : identity <<< (f , f0 , f1) ≡ (f , f0 , f1)
-          leftIdentity i = l i , lemPropF propEqs l {snd L} {snd R} i
-            where
-            L = identity <<< (f , f0 , f1)
-            R : Arrow AA BB
-            R = f , f0 , f1
-            l : fst L ≡ fst R
-            l = ℂ.leftIdentity
-          rightIdentity : (f , f0 , f1) <<< identity ≡ (f , f0 , f1)
-          rightIdentity i = l i , lemPropF propEqs l {snd L} {snd R} i
-            where
-            L = (f , f0 , f1) <<< identity
-            R : Arrow AA BB
-            R = (f , f0 , f1)
-            l : ℂ [ f ∘ ℂ.identity ] ≡ f
-            l = ℂ.rightIdentity
+        isIdentity {AA@(A , a0 , a1)} {BB@(B , b0 , b1)} {f , f0 , f1} = arrowEq ℂ.leftIdentity , arrowEq ℂ.rightIdentity
 
         arrowsAreSets : ArrowsAreSets
         arrowsAreSets {X , x0 , x1} {Y , y0 , y1}
-          = sigPresNType {n = ⟨0⟩} ℂ.arrowsAreSets λ a → propSet (propEqs _)
+          = sigPresSet ℂ.arrowsAreSets λ a → propSet (propEqs _)
 
       isPreCat : IsPreCategory raw
       IsPreCategory.isAssociative isPreCat = isAssociative
@@ -183,24 +161,6 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         , (λ{ (p , q , r) → Σ≡ p λ i → q i , r i})
         , funExt (λ{ p → refl})
         , funExt (λ{ (p , q , r) → refl})
-
-      -- Should follow from c being univalent
-      iso-id-inv : {p : X ≡ Y} → p ≡ ℂ.isoToId (ℂ.idToIso X Y p)
-      iso-id-inv {p} = sym (λ i → fst (ℂ.inverse-from-to-iso' {X} {Y}) i p)
-      id-iso-inv : {iso : X ℂ.≊ Y} → iso ≡ ℂ.idToIso X Y (ℂ.isoToId iso)
-      id-iso-inv {iso} = sym (λ i → snd (ℂ.inverse-from-to-iso' {X} {Y}) i iso)
-
-      lemA : {A B : Object} {f g : Arrow A B} → fst f ≡ fst g → f ≡ g
-      lemA {A} {B} {f = f} {g} p i = p i , h i
-         where
-         h : PathP (λ i →
-           (ℂ [ fst (snd B) ∘ p i ]) ≡ fst (snd A) ×
-           (ℂ [ snd (snd B) ∘ p i ]) ≡ snd (snd A)
-           ) (snd f) (snd g)
-         h = lemPropF (λ a → propSig
-           (ℂ.arrowsAreSets (ℂ [ fst (snd B) ∘ a ]) (fst (snd A)))
-           λ _ → ℂ.arrowsAreSets (ℂ [ snd (snd B) ∘ a ]) (snd (snd A)))
-           p
 
       step1
         : (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) 𝓐) xa ya) × (PathP (λ i → ℂ.Arrow (p i) 𝓑) xb yb))
@@ -231,10 +191,10 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         ≅ ((X , xa , xb) ≊ (Y , ya , yb))
       step2
         = ( λ{ (iso@(f , f~ , inv-f) , p , q)
-            → ( f  , sym (ℂ.domain-twist0 iso p) , sym (ℂ.domain-twist0 iso q))
-            , ( f~ , sym (ℂ.domain-twist iso p) , sym (ℂ.domain-twist iso q))
-            , lemA (fst inv-f)
-            , lemA (snd inv-f)
+            → ( f  , sym (ℂ.domain-twist-sym  iso p) , sym (ℂ.domain-twist-sym iso q))
+            , ( f~ , sym (ℂ.domain-twist      iso p) , sym (ℂ.domain-twist     iso q))
+            , arrowEq (fst inv-f)
+            , arrowEq (snd inv-f)
             }
           )
         , (λ{ (f , f~ , inv-f , inv-f~) →
