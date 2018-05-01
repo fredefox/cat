@@ -87,14 +87,14 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object �
     q = lemPropF propIsProduct p
 
 module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
-  (let module ℂ = Category ℂ) {𝓐 𝓑 : ℂ.Object} where
+  (let module ℂ = Category ℂ) {𝒜 ℬ : ℂ.Object} where
 
   open P
 
   module _ where
     raw : RawCategory _ _
     raw = record
-      { Object = Σ[ X ∈ ℂ.Object ] ℂ.Arrow X 𝓐 × ℂ.Arrow X 𝓑
+      { Object = Σ[ X ∈ ℂ.Object ] ℂ.Arrow X 𝒜 × ℂ.Arrow X ℬ
       ; Arrow = λ{ (A , a0 , a1) (B , b0 , b1)
         → Σ[ f ∈ ℂ.Arrow A B ]
             ℂ [ b0 ∘ f ] ≡ a0
@@ -154,7 +154,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       open import Cat.Equivalence using (composeIso) renaming (_≅_ to _≅_)
       step0
         : ((X , xa , xb) ≡ (Y , ya , yb))
-        ≅ (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) 𝓐) xa ya) × (PathP (λ i → ℂ.Arrow (p i) 𝓑) xb yb))
+        ≅ (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) 𝒜) xa ya) × (PathP (λ i → ℂ.Arrow (p i) ℬ) xb yb))
       step0
         = (λ p → cong fst p , cong-d (fst ∘ snd) p , cong-d (snd ∘ snd) p)
         -- , (λ x  → λ i → fst x i , (fst (snd x) i) , (snd (snd x) i))
@@ -163,12 +163,12 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         , funExt (λ{ (p , q , r) → refl})
 
       step1
-        : (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) 𝓐) xa ya) × (PathP (λ i → ℂ.Arrow (p i) 𝓑) xb yb))
+        : (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) 𝒜) xa ya) × (PathP (λ i → ℂ.Arrow (p i) ℬ) xb yb))
         ≅ Σ (X ℂ.≊ Y) (λ iso
           → let p = ℂ.isoToId iso
           in
-          ( PathP (λ i → ℂ.Arrow (p i) 𝓐) xa ya)
-          × PathP (λ i → ℂ.Arrow (p i) 𝓑) xb yb
+          ( PathP (λ i → ℂ.Arrow (p i) 𝒜) xa ya)
+          × PathP (λ i → ℂ.Arrow (p i) ℬ) xb yb
           )
       step1
         = symIso
@@ -176,7 +176,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
               {A = (X ℂ.≊ Y)}
               {B = (X ≡ Y)}
               (ℂ.groupoidObject _ _)
-              {Q = \ p → (PathP (λ i → ℂ.Arrow (p i) 𝓐) xa ya) × (PathP (λ i → ℂ.Arrow (p i) 𝓑) xb yb)}
+              {Q = \ p → (PathP (λ i → ℂ.Arrow (p i) 𝒜) xa ya) × (PathP (λ i → ℂ.Arrow (p i) ℬ) xb yb)}
               ℂ.isoToId
               (symIso (_ , ℂ.asTypeIso {X} {Y}) .snd)
             )
@@ -185,8 +185,8 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         : Σ (X ℂ.≊ Y) (λ iso
           → let p = ℂ.isoToId iso
           in
-          ( PathP (λ i → ℂ.Arrow (p i) 𝓐) xa ya)
-          × PathP (λ i → ℂ.Arrow (p i) 𝓑) xb yb
+          ( PathP (λ i → ℂ.Arrow (p i) 𝒜) xa ya)
+          × PathP (λ i → ℂ.Arrow (p i) ℬ) xb yb
           )
         ≅ ((X , xa , xb) ≊ (Y , ya , yb))
       step2
@@ -203,10 +203,10 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
             iso = fst f , fst f~ , cong fst inv-f , cong fst inv-f~
             p : X ≡ Y
             p = ℂ.isoToId iso
-            pA : ℂ.Arrow X 𝓐 ≡ ℂ.Arrow Y 𝓐
-            pA = cong (λ x → ℂ.Arrow x 𝓐) p
-            pB : ℂ.Arrow X 𝓑 ≡ ℂ.Arrow Y 𝓑
-            pB = cong (λ x → ℂ.Arrow x 𝓑) p
+            pA : ℂ.Arrow X 𝒜 ≡ ℂ.Arrow Y 𝒜
+            pA = cong (λ x → ℂ.Arrow x 𝒜) p
+            pB : ℂ.Arrow X ℬ ≡ ℂ.Arrow Y ℬ
+            pB = cong (λ x → ℂ.Arrow x ℬ) p
             k0 = begin
               coe pB xb ≡⟨ ℂ.coe-dom iso ⟩
               xb ℂ.<<< fst f~ ≡⟨ snd (snd f~) ⟩
@@ -222,10 +222,10 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
             (Σ≡ refl (ℂ.propIsomorphism _ _ _)))
         , funExt (λ{ (f , _) → lemSig propIsomorphism _ _ (Σ≡ refl (propEqs _ _ _))})
           where
-          prop0 : ∀ {x} → isProp (PathP (λ i → ℂ.Arrow (ℂ.isoToId x i) 𝓐) xa ya)
-          prop0 {x} = pathJ (λ y p → ∀ x → isProp (PathP (λ i → ℂ.Arrow (p i) 𝓐) xa x)) (λ x → ℂ.arrowsAreSets _ _) Y (ℂ.isoToId x) ya
-          prop1 : ∀ {x} → isProp (PathP (λ i → ℂ.Arrow (ℂ.isoToId x i) 𝓑) xb yb)
-          prop1 {x} = pathJ (λ y p → ∀ x → isProp (PathP (λ i → ℂ.Arrow (p i) 𝓑) xb x)) (λ x → ℂ.arrowsAreSets _ _) Y (ℂ.isoToId x) yb
+          prop0 : ∀ {x} → isProp (PathP (λ i → ℂ.Arrow (ℂ.isoToId x i) 𝒜) xa ya)
+          prop0 {x} = pathJ (λ y p → ∀ x → isProp (PathP (λ i → ℂ.Arrow (p i) 𝒜) xa x)) (λ x → ℂ.arrowsAreSets _ _) Y (ℂ.isoToId x) ya
+          prop1 : ∀ {x} → isProp (PathP (λ i → ℂ.Arrow (ℂ.isoToId x i) ℬ) xb yb)
+          prop1 {x} = pathJ (λ y p → ∀ x → isProp (PathP (λ i → ℂ.Arrow (p i) ℬ) xb x)) (λ x → ℂ.arrowsAreSets _ _) Y (ℂ.isoToId x) yb
       -- One thing to watch out for here is that the isomorphisms going forwards
       -- must compose to give idToIso
       iso
@@ -255,34 +255,36 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
 
   open Category cat
 
-  lemma : Terminal ≃ Product ℂ 𝓐 𝓑
-  lemma = fromIsomorphism Terminal (Product ℂ 𝓐 𝓑) (f , g , inv)
+  lemma : Terminal ≃ Product ℂ 𝒜 ℬ
+  lemma = fromIsomorphism Terminal (Product ℂ 𝒜 ℬ) (f , g , inv)
+  -- C-x 8 RET MATHEMATICAL BOLD SCRIPT CAPITAL A
+  -- 𝒜
     where
-    f : Terminal → Product ℂ 𝓐 𝓑
+    f : Terminal → Product ℂ 𝒜 ℬ
     f ((X , x0 , x1) , uniq) = p
       where
-      rawP : RawProduct ℂ 𝓐 𝓑
+      rawP : RawProduct ℂ 𝒜 ℬ
       rawP = record
         { object = X
         ; fst = x0
         ; snd = x1
         }
       -- open RawProduct rawP renaming (fst to x0 ; snd to x1)
-      module _ {Y : ℂ.Object} (p0 : ℂ [ Y , 𝓐 ]) (p1 : ℂ [ Y , 𝓑 ]) where
+      module _ {Y : ℂ.Object} (p0 : ℂ [ Y , 𝒜 ]) (p1 : ℂ [ Y , ℬ ]) where
         uy : isContr (Arrow (Y , p0 , p1) (X , x0 , x1))
         uy = uniq {Y , p0 , p1}
         open Σ uy renaming (fst to Y→X ; snd to contractible)
         open Σ Y→X renaming (fst to p0×p1 ; snd to cond)
         ump : ∃![ f×g ] (ℂ [ x0 ∘ f×g ] ≡ p0 P.× ℂ [ x1 ∘ f×g ] ≡ p1)
         ump = p0×p1 , cond , λ {y} x → let k = contractible (y , x) in λ i → fst (k i)
-      isP : IsProduct ℂ 𝓐 𝓑 rawP
+      isP : IsProduct ℂ 𝒜 ℬ rawP
       isP = record { ump = ump }
-      p : Product ℂ 𝓐 𝓑
+      p : Product ℂ 𝒜 ℬ
       p = record
         { raw = rawP
         ; isProduct = isP
         }
-    g : Product ℂ 𝓐 𝓑 → Terminal
+    g : Product ℂ 𝒜 ℬ → Terminal
     g p = o , t
       where
       module p = Product p
@@ -333,7 +335,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
     inv : AreInverses f g
     inv = funExt ve-re , funExt re-ve
 
-  propProduct : isProp (Product ℂ 𝓐 𝓑)
+  propProduct : isProp (Product ℂ 𝒜 ℬ)
   propProduct = equivPreservesNType {n = ⟨-1⟩} lemma Propositionality.propTerminal
 
 module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object ℂ} where
