@@ -215,8 +215,6 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
               coe pA xa ≡⟨ ℂ.coe-dom iso ⟩
               xa ℂ.<<< fst f~ ≡⟨ fst (snd f~) ⟩
               ya ∎
-            helper : PathP (λ i → pA i) xa ya
-            helper = coe-lem-inv k1
           in iso , coe-lem-inv k1 , coe-lem-inv k0})
         , funExt (λ x → lemSig
             (λ x → propSig prop0 (λ _ → prop1))

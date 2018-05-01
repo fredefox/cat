@@ -50,12 +50,18 @@ record RawMonad : Set ℓ where
 
   -- There may be better names than what I've chosen here.
 
+  -- `pure` is the neutral element for `bind`
   IsIdentity     = {X : Object}
     → bind pure ≡ identity {omap X}
+  -- pure is the left-identity for the kleisli arrow.
   IsNatural      = {X Y : Object}   (f : ℂ [ X , omap Y ])
-    → pure >>> (bind f) ≡ f
+    → pure >=> f ≡ f
+  -- Composition interacts with bind in the following way.
   IsDistributive = {X Y Z : Object} (g : ℂ [ Y , omap Z ]) (f : ℂ [ X , omap Y ])
     → (bind f) >>> (bind g) ≡ bind (f >=> g)
+
+  RightIdentity = {A B : Object} {m : ℂ [ A , omap B ]}
+    → m >=> pure ≡ m
 
   -- | Functor map fusion.
   --
@@ -214,6 +220,13 @@ record IsMonad (raw : RawMonad) : Set ℓ where
         ≡⟨ cong bind ℂ.leftIdentity ⟩
       bind pure ≡⟨ isIdentity ⟩
       identity ∎
+
+  rightIdentity : RightIdentity
+  rightIdentity {m = m} = begin
+    m >=> pure      ≡⟨⟩
+    m >>> bind pure ≡⟨ cong (m >>>_) isIdentity ⟩
+    m >>> identity  ≡⟨ ℂ.leftIdentity ⟩
+    m ∎
 
 record Monad : Set ℓ where
   field
