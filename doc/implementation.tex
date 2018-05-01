@@ -149,7 +149,7 @@ $$
 So to give the continuous function $I \to \IsPreCategory$ that is our goal we
 introduce $i \tp I$ and proceed by constructing an element of $\IsPreCategory$
 by using that all the projections are propositions to generate paths between all
-projections. Once we have such a path e.g. $p : \isIdentity_a \equiv
+projections. Once we have such a path e.g. $p \tp \isIdentity_a \equiv
 \isIdentity_b$ we can elimiate it with $i$ and thus obtaining $p\ i \tp
 \isIdentity_{p\ i}$ and this element satisfies exactly that it corresponds to
 the corresponding projections at either endpoint. Thus the element we construct
@@ -198,9 +198,9 @@ provide since, as we have shown, $\IsPreCategory$ is a proposition. However,
 even though $\Univalent$ is also a proposition, we cannot use this directly to
 show the latter. This is becasue $\isProp$ talks about non-dependent paths. To
 `promote' this to a dependent path we can use another useful combinator;
-$\lemPropF$. Given a type $A \tp \MCU$ and a type family on $A$; $B : A \to
+$\lemPropF$. Given a type $A \tp \MCU$ and a type family on $A$; $B \tp A \to
 \MCU$. Let $P$ be a proposition indexed by an element of $A$ and say we have a
-path between some two elements in $A$; $p : a_0 \equiv a_1$ then we can built a
+path between some two elements in $A$; $p \tp a_0 \equiv a_1$ then we can built a
 heterogeneous path between any two $b$'s at the endpoints:
 %
 $$
@@ -240,15 +240,15 @@ here, but the curious reader can check the implementation for the details.
 
 \section{Equivalences}
 \label{sec:equiv}
-The usual notion of a function $f : A \to B$ having an inverses is:
+The usual notion of a function $f \tp A \to B$ having an inverses is:
 %
 $$
-\sum_{g : B \to A} f \comp g \equiv \identity_{B} \x g \comp f \equiv \identity_{A}
+\sum_{g \tp B \to A} f \comp g \equiv \identity_{B} \x g \comp f \equiv \identity_{A}
 $$
 %
 This is defined in \cite[p. 129]{hott-2013} and is referred to as the a
 quasi-inverse. At the same place \cite{hott-2013} gives an ``interface'' for
-what an equivalence $\isEquiv : (A \to B) \to \MCU$ must supply:
+what an equivalence $\isEquiv \tp (A \to B) \to \MCU$ must supply:
 %
 \begin{itemize}
 \item
@@ -264,11 +264,11 @@ how to work with equivalences and 2) to use ad-hoc definitions of equivalences.
 The specific instantiation of $\isEquiv$ as defined in \cite{cubical-agda} is:
 %
 $$
-isEquiv\ f \defeq \prod_{b : B} \isContr\ (\fiber\ f\ b)
+isEquiv\ f \defeq \prod_{b \tp B} \isContr\ (\fiber\ f\ b)
 $$
 where
 $$
-\fiber\ f\ b \defeq \sum_{a \tp A} b \equiv f\ a
+\fiber\ f\ b \defeq \sum_{a \tp A} \left( b \equiv f\ a \right)
 $$
 %
 I give it's definition here mainly for completeness, because as I stated we can
@@ -473,7 +473,7 @@ B$ is simply an arrow $f \tp \mathit{Arrow}\ A\ B$ and it's inverse $g \tp
 \mathit{Arrow}\ B\ A$. In the opposite category $g$ will play the role of the
 isomorphism and $f$ will be the inverse. Similarly we can go in the opposite
 direction. I name these maps $\mathit{shuffle} \tp (A \approxeq B) \to (A
-\approxeq_{\bC} B)$ and $\mathit{shuffle}^{-1} : (A \approxeq_{\bC} B) \to (A
+\approxeq_{\bC} B)$ and $\mathit{shuffle}^{-1} \tp (A \approxeq_{\bC} B) \to (A
 \approxeq B)$ respectively.
 
 As the inverse of $\idToIso_{\mathit{Op}}$ I will pick $\zeta \defeq \eta \comp
@@ -670,7 +670,7 @@ proposition and then use $\lemPropF$. So we prove the generalization:
 %
 \begin{align}
 \label{eq:propAreInversesGen}
-\prod_{g : B \to A} \isProp\ (\mathit{AreInverses}\ f\ g)
+\prod_{g \tp B \to A} \isProp\ (\mathit{AreInverses}\ f\ g)
 \end{align}
 %
 But $\mathit{AreInverses}\ f\ g$ is a pair of equations on arrows, so we use
@@ -716,8 +716,6 @@ that there exists a unique arrow $\pi \tp \Arrow\ X\ (A \x B)$ satisfying
 %% \prod_{X \tp Object} \prod_{f \tp \Arrow\ X\ A} \prod_{g \tp \Arrow\ X\ B}\\
 %% \uexists_{f \x g \tp \Arrow\ X\ (A \x B)}
 \pi_1 \lll \pi \equiv f \x \pi_2 \lll \pi \equiv g
-%% ump : ∀ {X : Object} (f : ℂ [ X , A ]) (g : ℂ [ X , B ])
-%%           → ∃![ f×g ] (ℂ [ fst ∘ f×g ] ≡ f P.× ℂ [ snd ∘ f×g ] ≡ g)
 \end{align}
 %
 $\pi$ is called the product (arrow) of $f$ and $g$.
