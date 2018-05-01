@@ -6,6 +6,8 @@
   =}
 
 \newcommand{\defeq}{\triangleq}
+%% Alternatively:
+%% \newcommand{\defeq}{≔}
 \newcommand{\bN}{\mathbb{N}}
 \newcommand{\bC}{\mathbb{C}}
 \newcommand{\bX}{\mathbb{X}}
@@ -22,9 +24,20 @@
 \newcommand{\tp}{\;\mathord{:}\;}
 \newcommand{\Type}{\mathcal{U}}
 
+\usepackage{graphicx}
+\makeatletter
+\newcommand{\shorteq}{%
+  \settowidth{\@tempdima}{-}% Width of hyphen
+  \resizebox{\@tempdima}{\height}{=}%
+}
+\makeatother
 \newcommand{\var}[1]{\ensuremath{\mathit{#1}}}
 \newcommand{\Hom}{\var{Hom}}
 \newcommand{\fmap}{\var{fmap}}
+\newcommand{\bind}{\var{bind}}
+\newcommand{\join}{\var{join}}
+\newcommand{\omap}{\var{omap}}
+\newcommand{\pure}{\var{pure}}
 \newcommand{\idFun}{\var{id}}
 \newcommand{\Sets}{\var{Sets}}
 \newcommand{\Set}{\var{Set}}
@@ -57,6 +70,7 @@
 \newcommand\refl{\var{refl}}
 \newcommand\isoToId{\var{isoToId}}
 \newcommand\rrr{\ggg}
+\newcommand\fish{\mathrel{\wideoverbar{\rrr}}}
 \newcommand\fst{\var{fst}}
 \newcommand\snd{\var{snd}}
 \newcommand\Path{\var{Path}}
@@ -65,3 +79,7 @@
 \newcommand*{\QED}{\hfill\ensuremath{\square}}%
 \newcommand\uexists{\exists!}
 \newcommand\Arrow{\var{Arrow}}
+\newcommand\NTsym{\var{NT}}
+\newcommand\NT[2]{\NTsym\ #1\ #2}
+\newcommand\Endo[1]{\var{Endo}\ #1}
+\newcommand\EndoR{\mathcal{R}}

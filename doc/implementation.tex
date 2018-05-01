@@ -1,4 +1,5 @@
-This implementation formalizes the following concepts:
+\chapter{Implementation}
+This implementation formalizes the following concepts $>\!\!>\!\!=$:
 %
 \begin{itemize}
 \item Core categorical concepts
@@ -224,11 +225,18 @@ $$
 $$
 %
 One application of this, and a perhaps somewhat surprising result, is that
-terminal objects are propositional. Intuitively; they do not have any
-interesting structure. The proof of this follows from the usual observation that
-any two terminal objects are isomorphic. The proof is omitted here, but the
-curious reader can check the implementation for the details. \TODO{The proof is
-a bit fun, should I include it?}
+terminal objects are propositional. Intuitively; they do not
+have any interesting structure:
+%
+\begin{align}
+\label{eq:termProp}
+\isProp\ \var{Terminal}
+\end{align}
+%
+The proof of this follows from the usual
+observation that any two terminal objects are isomorphic. The proof is omitted
+here, but the curious reader can check the implementation for the details.
+\TODO{The proof is a bit fun, should I include it?}
 
 \section{Equivalences}
 \label{sec:equiv}
@@ -660,9 +668,10 @@ inverse to $f$. $p$ is inhabited by:
 For the other (dependent) path we can prove that being-an-inverse-of is a
 proposition and then use $\lemPropF$. So we prove the generalization:
 %
-\begin{align*}
+\begin{align}
+\label{eq:propAreInversesGen}
 \prod_{g : B \to A} \isProp\ (\mathit{AreInverses}\ f\ g)
-\end{align*}
+\end{align}
 %
 But $\mathit{AreInverses}\ f\ g$ is a pair of equations on arrows, so we use
 $\propSig$ and the fact that both $A$ and $B$ are sets to close this proof.
@@ -689,7 +698,7 @@ $$
 Where $\mathit{Product}\ \bC\ A\ B$ denotes the type of products of objects $A$
 and $B$ in the category $\bC$. I do this by constructing a category whose
 terminal objects are equivalent to products in $\bC$, and since terminal objects
-are propositional in a proper category and equivalences preservehomotopy level,
+are propositional in a proper category and equivalences preserve homotopy level,
 then we know that products also are propositions. But before we get to that,
 let's recall the definition of products.
 
@@ -721,8 +730,8 @@ Given a base category $\bC$ and two objects in this category $\pairA$ and
 $\pairB$ we can construct the ``pair category'': \TODO{This is a working title,
   it's nice to have a name for this thing to refer back to}
 
-The type objects in this category will be an object in the underlying category,
-$X$, and two arrows (also from the underlying category)
+The type of objects in this category will be an object in the underlying
+category, $X$, and two arrows (also from the underlying category)
 $\Arrow\ X\ \pairA$ and $\Arrow\ X\ \pairB$.
 
 \newcommand\pairf{\ensuremath{f}}
@@ -771,7 +780,7 @@ arrows form a set. For instance, to prove associativity we must prove that
 (\overline{h} \lll \overline{g}) \lll \overline{f}
 \end{align}
 %
-Herer $\lll$ refers to the `embellished' composition abd $\overline{f}$,
+Herer $\lll$ refers to the `embellished' composition and $\overline{f}$,
 $\overline{g}$ and $\overline{h}$ are triples consisting of arrows from the
 underlying category ($f$, $g$ and $h$) and a pair of witnesses to
 \ref{eq:pairArrowLaw}.
@@ -787,15 +796,15 @@ h \lll (g \lll f)
 (h \lll g) \lll f
 \end{align}
 %
-Which is provable by and that the witness to \ref{eq:pairArrowLaw} for the
-left-hand-side and the right-hand-side are the same. The type of this goal is
-quite involved, and I will not write it out in full, but it suffices to show the
-type of the path-space. Note that the arrows in \ref{eq:productAssoc} are arrows
-from $\mathcal{A} = (A , a_\pairA , a_\pairB)$ to $\mathcal{D} = (D , d_\pairA ,
-d_\pairB)$ where $a_\pairA$, $a_\pairB$, $d_\pairA$ and $d_\pairB$ are arrows in
-the underlying category. Given that $p$ is the proof of
-\ref{eq:productAssocUnderlying} we then have that the witness to
-\ref{eq:pairArrowLaw} vary over the type:
+Which is provable by \TODO{What?} and that the witness to \ref{eq:pairArrowLaw}
+for the left-hand-side and the right-hand-side are the same. The type of this
+goal is quite involved, and I will not write it out in full, but at present it
+suffices to show the type of the path-space. Note that the arrows in
+\ref{eq:productAssoc} are arrows from $\mathcal{A} = (A , a_\pairA , a_\pairB)$
+to $\mathcal{D} = (D , d_\pairA , d_\pairB)$ where $a_\pairA$, $a_\pairB$,
+$d_\pairA$ and $d_\pairB$ are arrows in the underlying category. Given that $p$
+is the chosen proof of \ref{eq:productAssocUnderlying} we then have that the
+witness to \ref{eq:pairArrowLaw} vary over the type:
 %
 \begin{align}
 \label{eq:productPath}
@@ -907,156 +916,318 @@ the implementation for the details).
 \emph{Proposition} \ref{eq:univ-1} is isomorphic to \ref{eq:univ-2}:
 \TODO{Super complicated}
 
-\emph{Proposition} \ref{eq:univ-2} is isomorphic to \ref{eq:univ-3}:
-For this I will two corrolaries of \ref{eq:coeCod}:
+\emph{Proposition} \ref{eq:univ-2} is isomorphic to \ref{eq:univ-3}: For this I
+will swho two corrolaries of \ref{eq:coeCod}: For an isomorphism $(\iota,
+\inv{\iota}, \var{inv}) \tp A \cong B$, arrows $f \tp \Arrow\ A\ X$, $g \tp
+\Arrow\ B\ X$ and a heterogeneous path between them, $q \tp \Path\ (\lambda i
+\to p_\var{dom}\ i)\ f\ g$, where $p_\var{dom} \tp \Arrow\ A\ X \equiv
+\Arrow\ B\ X$ is a path induced by $\var{iso}$, we have the following two
+results
 %
 \begin{align}
-\label{domain-twist}
+\label{eq:domain-twist-0}
+f & \equiv g \lll \iota \\
+\label{eq:domain-twist-1}
+g & \equiv f \lll \inv{\iota}
 \end{align}
+%
+Proof: \TODO{\ldots}
 
+Now we can prove the equiavalence in the following way: Given $(f, \inv{f},
+\var{inv}_f) \tp X \cong Y$ and two heterogeneous paths
+%
+\begin{align*}
+p_\mathcal{A} & \tp \Path\ (\lambda i \to p_\var{dom}\ i)\ x_\mathcal{A}\ y_\mathcal{A}\\
+%
+q_\mathcal{B} & \tp \Path\ (\lambda i \to p_\var{dom}\ i)\ x_\mathcal{B}\ y_\mathcal{B}
+\end{align*}
+%
+all as in \ref{eq:univ-2}. I use $p_\var{dom}$ here again to mean the path
+induced by the isomorphism $f, \inv{f}$. I must now construct an isomorphism
+$(X, x_\mathcal{A}, x_\mathcal{B}) \approxeq (Y, y_\mathcal{A}, y_\mathcal{B}$
+as in \ref{eq:univ-3}. That is, an isomorphism in the present category. I remind
+the reader that such a gadget is a triple. The first component shall be:
+%
+\begin{align}
+f \tp \Arrow\ X\ Y
+\end{align}
+%
+To show that this choice fits the bill I must now verify that it satisfies
+\ref{eq:pairArrowLaw}, which in this case becomes:
+%
+\begin{align}
+y_\mathcal{A} \lll f ≡ x_\mathcal{A} × y_\mathcal{B} \lll f ≡ x_\mathcal{B}
+\end{align}
+%
+Which, since $f$ is an isomorphism and $p_\mathcal{A}$ (resp. $p_\mathcal{B}$)
+is a path varying according to a path constructed from this isomorphism, this is
+exactly what \ref{eq:domain-twist-0} gives us.
+%
+The other direction is quite analagous. We choose $\inv{f}$ as the morphism and
+prove that it satisfies \ref{eq:pairArrowLaw} with \ref{eq:domain-twist-1}.
+
+We must now show that this choice of arrows indeed form an isomorphism. Our
+equality principle for arrows in this category (\ref{eq:productEqPrinc}) gives
+us that it suffices to show that $f$ and $\inv{f}$, this is exactly
+$\var{inv}_f$.
+
+This concludes the first direction of the isomorphism that we're constructing.
+For the other direction we're given just given the isomorphism
+%
+$$
+(f, \inv{f}, \var{inv}_f)
+\tp
+(X, x_\mathcal{A}, x_\mathcal{B}) \approxeq (Y, y_\mathcal{A}, y_\mathcal{B})
+$$
+%
+Projecting out the first component gives us the isomorphism
+%
+$$
+(\fst\ f, \fst\ \inv{f}, \congruence\ \fst\ \var{inv}_f, \congruence\ \fst\ \var{inv}_{\inv{f}})
+\tp X \approxeq Y
+$$
+%
+This gives rise to the following paths:
+%
+\begin{align}
+\begin{split}
+\widetilde{p} & \tp X \equiv Y \\
+\widetilde{p}_\mathcal{A} & \tp \Arrow\ X\ \mathcal{A} \equiv \Arrow\ Y\ \mathcal{A} \\
+\widetilde{p}_\mathcal{B} & \tp \Arrow\ X\ \mathcal{B} \equiv \Arrow\ Y\ \mathcal{B}
+\end{split}
+\end{align}
+%
+It then remains to construct the two paths:
+%
+\begin{align}
+\begin{split}
+\label{eq:product-paths}
+& \Path\ (λ i → \widetilde{p}_\mathcal{A}\ i)\ x_\mathcal{A}\ y_\mathcal{A}\\
+& \Path\ (λ i → \widetilde{p}_\mathcal{B}\ i)\ x_\mathcal{B}\ y_\mathcal{B}
+\end{split}
+\end{align}
+%
+This is achieved with the following lemma:
+%
+\begin{align}
+\prod_{a \tp A} \prod_{b \tp B} \prod_{q \tp A \equiv B} \var{coe}\ q\ a ≡ b →
+\Path\ (λ i → q\ i)\ a\ b
+\end{align}
+%
+Which is used without proof. See the implementation for the details.
+
+\ref{eq:product-paths} is the proven with the propositions:
+%
+\begin{align}
+\begin{split}
+\label{eq:product-paths}
+\var{coe}\ \widetilde{p}_\mathcal{A}\ x_\mathcal{A} ≡ y_\mathcal{A}\\
+\var{coe}\ \widetilde{p}_\mathcal{B}\ x_\mathcal{B} ≡ y_\mathcal{B}
+\end{split}
+\end{align}
+%
+The proof of the first one is:
+%
+\begin{align*}
+  \var{coe}\ \widetilde{p}_\mathcal{A}\ x_\mathcal{A}
+  & ≡ x_\mathcal{A} \lll \fst\ \inv{f} && \text{$\mathit{coeDom}$ and the isomorphism $f, \inv{f}$} \\
+  & ≡ y_\mathcal{A} && \text{\ref{eq:pairArrowLaw} for $\inv{f}$}
+\end{align*}
+%
+We have now constructed the maps between \ref{eq:univ-0} and \ref{eq:univ-1}. It
+remains to show that they are inverses of each other. To cut a long story short,
+the proof uses the fact that isomorphism-of is propositional and that arrows (in
+both categories) are sets. The reader is refered to the implementation for the
+gory details.
+%
+\subsection{Propositionality of products}
+%
+Now that we've constructed the ``pair category'' I'll demonstrate how to use
+this to prove that products are propositional. I will do this by showing that
+terminal objects in this category are equivalent to products:
+%
+\begin{align}
+\var{Terminal} ≃ \var{Product}\ ℂ\ \mathcal{A}\ \mathcal{B}
+\end{align}
+%
+And as always we do this by constructing an isomorphism:
+%
+In the direction $\var{Terminal} → \var{Product}\ ℂ\ \mathcal{A}\ \mathcal{B}$
+we're given a terminal object $X, x_𝒜, x_ℬ$. $X$ Will be the product-object and
+$x_𝒜, x_ℬ$ will be the product arrows, so it just remains to verify that this is
+indeed a product. That is, for an object $Y$ and two arrows $y_𝒜 \tp
+\Arrow\ Y\ 𝒜$, $y_ℬ\ \Arrow\ Y\ ℬ$ we must find a unique arrow $f \tp
+\Arrow\ Y\ X$ satisfying:
+%
+\begin{align}
+\label{eq:pairCondRev}
+\begin{split}
+  x_𝒜 \lll f & ≡ y_𝒜 \\
+  x_ℬ \lll f & ≡ y_ℬ
+\end{split}
+\end{align}
+%
+Since $X, x_𝒜, x_ℬ$ is a terminal object there is a \emph{unique} arrow from
+this object to any other object, so also $Y, y_𝒜, y_ℬ$ in particular (which is
+also an object in the pair category). The arrow we will play the role of $f$ and
+it immediately satisfies \ref{eq:pairCondRev}. Any other arrow satisfying these
+conditions will be equal since $f$ is unique.
+
+For the other direction we are now given a product $X, x_𝒜, x_ℬ$. Again this
+will be the terminal object. So now it remains that for any other object there
+is aunique arrow from that object into $X, x_𝒜, x_ℬ$. Let $Y, y_𝒜, y_ℬ$ be
+another object. As the arrow $\Arrow\ Y\ X$ we choose the product-arrow $y_𝒜 \x
+y_ℬ$. Since this is a product-arrow it satisfies \ref{eq:pairCondRev}. Let us
+name the witness to this $\phi_{y_𝒜 \x y_ℬ}$. So we have picked as our center of
+contraction $y_𝒜 \x y_ℬ , \phi_{y_𝒜 \x y_ℬ}$ we must now show that it is
+contractible. So let $f \tp \Arrow\ X\ Y$ and $\phi_f$ be given (here $\phi_f$
+is the proof that $f$ satisfies \ref{eq:pairCondRev}). The proof will be a pair
+of proofs:
+%
+\begin{alignat}{3}
+  p \tp & \Path\ (\lambda i \to \Arrow\ X\ Y)\quad
+    && f\quad          && y_𝒜 \x y_ℬ \\
+  & \Path\ (\lambda i \to \Phi\ (p\ i))\quad
+    && \phi_f\quad     && \phi_{y_𝒜 \x y_ℬ}
+\end{alignat}
+%
+Here $\Phi$ is given as:
+$$
+\prod_{f \tp \Arrow\ Y\ X}
+  x_𝒜 \lll f ≡ y_𝒜
+× x_ℬ \lll f ≡ y_ℬ
+$$
+%
+$p$ follows from the universal property of $y_𝒜 \x y_ℬ$. For the latter we will
+again use the same trick we did in \ref{eq:propAreInversesGen} and prove this
+more general result:
+%
+$$
+\prod_{f \tp \Arrow\ Y\ X} \isProp\ (
+  x_𝒜 \lll f ≡ y_𝒜
+× x_ℬ \lll f ≡ y_ℬ
+)
+$$
+%
+Which follows from arrows being sets and pairs preserving such. Thus we can
+close the final proof with an application of $\lemPropF$.
+
+This concludes the proof $\var{Terminal} ≃
+\var{Product}\ ℂ\ \mathcal{A}\ \mathcal{B}$ and since we have that equivalences
+preserve homotopic levels along with \ref{eq:termProp} we get our final result.
+That in any category:
+%
+\begin{align}
+\prod_{A\ B \tp \Object} \isProp\ (\var{Product}\ \bC\ A\ B)
+\end{align}
+%
 \section{Monads}
+In this section I show two formulations of monads and then show that they are
+the same. The two representations are referred to as the monoidal- and kleisli-
+representation respectively.
 
-%% \subsubsection{Functors}
-%% Defines the notion of a functor - also split up into data and laws.
+We shall let a category $\bC$ be given. In the remainder all objects and arrows
+will implicitly refer to objects and arrows in this category.
+%
+\subsection{Monoidal formulation}
+The monoidal formulation of monads consists of the following data:
+%
+\begin{align}
+\label{eq:monad-monoidal-data}
+\begin{split}
+    \EndoR      & \tp \Endo ℂ \\
+    \var{pure}  & \tp \NT{\EndoR^0}{\EndoR} \\
+    \var{join}  & \tp \NT{\EndoR^2}{\EndoR}
+\end{split}
+\end{align}
+%
+Here $\NTsym$ denotes natural transformations, the super-script in $\EndoR^2$
+Denotes the composition of $\EndoR$ with itself. By the same token $\EndoR^0$ is
+a curious way of denoting the identity functor. This notation has been chosen
+for didactic purposes.
 
-%% Propositionality for being a functor.
+Denote the arrow-map of $\EndoR$ as $\fmap$, then this data must satisfy the
+following laws:
+%
+\begin{align}
+\label{eq:monad-monoidal-laws}
+\begin{split}
+  \var{join} \lll \fmap\ \var{join}
+    & ≡ \var{join} \lll \var{join}\ \fmap \\
+  \var{join} \lll \var{pure}\ \fmap     & ≡ \identity \\
+  \var{join} \lll \fmap\     \var{pure} & ≡ \identity
+\end{split}
+\end{align}
+%
+The implicit arguments to the arrows above have been left out and the objects
+they range over are universally quantified.
 
-%% Composition of functors and the identity functor.
+\subsection{Kleisli formulation}
+%
+The kleisli-formulation consists of the following data:
+%
+\begin{align}
+\label{eq:monad-kleisli-data}
+\begin{split}
+    \EndoR & \tp \Object → \Object \\
+    \pure  & \tp % \prod_{X \tp Object}
+      \Arrow\ X\ (\EndoR\ X) \\
+    \bind  & \tp % \prod_{X\;Y \tp Object} → \Arrow\ X\ (\EndoR\ Y)
+      \Arrow\ (\EndoR\ X)\ (\EndoR\ Y)
+\end{split}
+\end{align}
+%
+The objects $X$ and $Y$ are implicitly universally quantified.
 
-%% \subsubsection{Products}
-%% Definition of what it means for an object to be a product in a given category.
+It's interesting to note here that this formulation does not talk about natural
+transformations or other such constructs from category theory. All we have here
+is a regular maps on objects and a pair of arrows.
+%
+This data must satisfy:
+%
+\begin{align}
+\label{eq:monad-monoidal-laws}
+\begin{split}
+  \bind\ \pure & ≡ \identity_{\EndoR\ X}
+  \\
+  % \prod_{f \tp \Arrow\ X\ (\EndoR\ Y)}
+    \pure \fish f & ≡ f
+    \\
+  % \prod_{\substack{g \tp \Arrow\ Y\ (\EndoR\ Z)\\f \tp \Arrow\ X\ (\EndoR\ Y)}}
+  (\bind\ f) \rrr (\bind\ g) & ≡ \bind\ (f \fish g)
+\end{split}
+\end{align}
+%
+Here likewise the arrows $f \tp \Arrow\ X\ (\EndoR\ Y)$ and $g \tp
+\Arrow\ Y\ (\EndoR\ Z)$ are universally quantified (as well as the objects they
+range over). $\fish$ is the kleisli-arrow which is defined as $f \fish g \defeq
+f \rrr (\bind\ g)$ . (\TODO{Better way to typeset $\fish$?})
 
-%% Definition of what it means for a category to have all products.
+\subsection{Equivalence of formulations}
+%
+In my implementation I proceede to show how the one formulation gives rise to
+the other and vice-versa. For the present purpose I will briefly sketch some
+parts of this construction:
 
-%% \WIP{} Prove propositionality for being a product and having products.
+The notation I have chosen here in the report
+overloads e.g. $\pure$ to both refer to a natural transformation and an arrow.
+This is of course not a coincidence as the arrow in the kleisli formulation
+shall correspond exactly to the map on arrows from the natural transformation
+called $\pure$.
 
-%% \subsubsection{Exponentials}
-%% Definition of what it means to be an exponential object.
+In the monoidal formulation we can define $\bind$:
+%
+\begin{align}
+\bind \defeq \join \lll \fmap\ f
+\end{align}
+%
+And likewise in the kleisli formulation we can define $\join$:
+%
+\begin{align}
+\join \defeq \bind\ \identity
+\end{align}
+%
+Which shall play the role of $\join$.
 
-%% Definition of what it means for a category to have all exponential objects.
-
-%% \subsubsection{Cartesian closed categories}
-%% Definition of what it means for a category to be cartesian closed; namely that
-%% it has all products and all exponentials.
-
-%% \subsubsection{Natural transformations}
-%% Definition of transformations\footnote{Maybe this is a name I made up for a
-%%   family of morphisms} and the naturality condition for these.
-
-%% Proof that naturality is a mere proposition and the accompanying equality
-%% principle. Proof that natural transformations are homotopic sets.
-
-%% The identity natural transformation.
-
-%% \subsubsection{Yoneda embedding}
-
-%% The yoneda embedding is typically presented in terms of the category of
-%% categories (cf. Awodey) \emph however this is not stricly needed - all we need
-%% is what would be the exponential object in that category - this happens to be
-%% functors and so this is how we define the yoneda embedding.
-
-%% \subsubsection{Monads}
-
-%% Defines an equivalence between these two formulations of a monad:
-
-%% \subsubsubsection{Monoidal monads}
-
-%% Defines the standard monoidal representation of a monad:
-
-%% An endofunctor with two natural transformations (called ``pure'' and ``join'')
-%% and some laws about these natural transformations.
-
-%% Propositionality proofs and equality principle is provided.
-
-%% \subsubsubsection{Kleisli monads}
-
-%% A presentation of monads perhaps more familiar to a functional programer:
-
-%% A map on objects and two maps on morphisms (called ``pure'' and ``bind'') and
-%% some laws about these maps.
-
-%% Propositionality proofs and equality principle is provided.
-
-%% \subsubsubsection{Voevodsky's construction}
-
-%% Provides construction 2.3 as presented in an unpublished paper by Vladimir
-%% Voevodsky. This construction is similiar to the equivalence provided for the two
-%% preceding formulations
-%% \footnote{ TODO: I would like to include in the thesis some motivation for why
-%%   this construction is particularly interesting.}
-
-%% \subsubsection{Functors}
-%% The category of functors and natural transformations. An immediate corrolary is
-%% the set of presheaf categories.
-
-%% \WIP{} I have not shown that the category of functors is univalent.
-
-%% \subsubsection{Relations}
-%% The category of relations. \WIP{} I have not shown that this category is
-%% univalent. Not sure I intend to do so either.
-
-%% \subsubsection{Free category}
-%% The free category of a category. \WIP{} I have not shown that this category is
-%% univalent.
-
-%% \subsection{Current Challenges}
-%% Besides the items marked \WIP{} above I still feel a bit unsure about what to
-%% include in my report. Most of my work so far has been specifically about
-%% developing this library. Some ideas:
-%% %
-%% \begin{itemize}
-%% \item
-%%   Modularity properties
-%% \item
-%%   Compare with setoid-approach to solve similiar problems.
-%% \item
-%%   How to structure an implementation to best deal with types that have no
-%%   structure (propositions) and those that do (sets and everything above)
-%% \end{itemize}
-%% %
-%% \subsection{Ideas for future developments}
-%% \subsubsection{Higher categories}
-%% I only have a notion of (1-)categories. Perhaps it would be nice to also
-%% formalize higher categories.
-
-%% \subsubsection{Hierarchy of concepts related to monads}
-%% In Haskell the type-class Monad sits in a hierarchy atop the notion of a functor
-%% and applicative functors. There's probably a similiar notion in the
-%% category-theoretic approach to developing this.
-
-%% As I have already defined monads from these two perspectives, it would be
-%% interesting to take this idea even further and actually show how monads are
-%% related to applicative functors and functors. I'm not entirely sure how this
-%% would look in Agda though.
-
-%% \subsubsection{Use formulation on the standard library}
-%% I also thought it would be interesting to use this library to show certain
-%% properties about functors, applicative functors and monads used in the Agda
-%% Standard library. So I went ahead and tried to show that agda's standard
-%% library's notion of a functor (along with suitable laws) is equivalent to my
-%% formulation (in the category of homotopic sets). I ran into two problems here,
-%% however; the first one is that the standard library's notion of a functor is
-%% indexed by the object map:
-%% %
-%% $$
-%% \Functor \tp (\Type \to \Type) \to \Type
-%% $$
-%% %
-%% Where $\Functor\ F$ has the member:
-%% %
-%% $$
-%% \fmap \tp (A \to B) \to F A \to F B
-%% $$
-%% %
-%% Whereas the object map in my definition is existentially quantified:
-%% %
-%% $$
-%% \Functor \tp \Type
-%% $$
-%% %
-%% And $\Functor$ has these members:
-%% \begin{align*}
-%% F     & \tp \Type \to \Type \\
-%% \fmap & \tp (A \to B) \to F A \to F B\}
-%% \end{align*}
-%% %
+It now remains to show that we can prove the various laws given this choice. I
+refer the reader to my implementation for the details.
