@@ -20,7 +20,7 @@
 {-# OPTIONS --allow-unsolved-metas --cubical #-}
 open import Cat.Prelude
 
-open import Data.Nat using (_≤_ ; z≤n ; s≤s)
+open import Data.Nat using (_≤′_ ; ≤′-refl ; ≤′-step)
 module Nat = Data.Nat
 
 open import Cat.Category
@@ -112,8 +112,8 @@ module Properties where
 
     naturalIsSet : (θ : Transformation F G) → isSet (Natural F G θ)
     naturalIsSet θ =
-      ntypeCommulative
-      (s≤s {n = Nat.suc Nat.zero} z≤n)
+      ntypeCumulative {n = 1}
+      (Data.Nat.≤′-step Data.Nat.≤′-refl)
       (naturalIsProp θ)
 
     naturalTransformationIsSet : isSet (NaturalTransformation F G)
