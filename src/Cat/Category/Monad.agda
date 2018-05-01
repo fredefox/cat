@@ -69,20 +69,22 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       M.RawMonad.joinNT backRaw = joinNT
 
       private
-        open M.RawMonad backRaw
+        open M.RawMonad backRaw renaming
+          ( join to join*
+          ; pure to pure*
+          ; bind to bind*
+          ; fmap to fmap*
+          )
         module R = Functor (M.RawMonad.R backRaw)
 
       backIsMonad : M.IsMonad backRaw
-      M.IsMonad.isAssociative backIsMonad {X} = begin
-        joinT X <<< R.fmap (joinT X)    ≡⟨⟩
-        join <<< fmap (joinT X)         ≡⟨⟩
-        join <<< fmap join              ≡⟨ isNaturalForeign ⟩
-        join <<< join                   ≡⟨⟩
-        joinT X  <<< joinT (R.omap X)   ∎
+      M.IsMonad.isAssociative backIsMonad = begin
+        join* <<< R.fmap join* ≡⟨⟩
+        join  <<< fmap join    ≡⟨ isNaturalForeign ⟩
+        join  <<< join         ∎
       M.IsMonad.isInverse backIsMonad {X} = inv-l , inv-r
         where
         inv-l = begin
-          joinT X <<< pureT (R.omap X) ≡⟨⟩
           join <<< pure                ≡⟨ fst isInverse ⟩
           identity                     ∎
         inv-r = begin
@@ -140,7 +142,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         bindEq : ∀ {X Y} {f : Arrow X (Romap Y)} → KM.bind f ≡ bind f
         bindEq {X} {Y} {f} = begin
           KM.bind f           ≡⟨⟩
-          joinT Y <<< Rfmap f ≡⟨⟩
+          joinT Y <<< fmap f ≡⟨⟩
           bind f              ∎
 
         joinEq : ∀ {X} → KM.join ≡ joinT X
@@ -148,21 +150,21 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
           KM.join                    ≡⟨⟩
           KM.bind identity           ≡⟨⟩
           bind identity              ≡⟨⟩
-          joinT X <<< Rfmap identity ≡⟨ cong (λ φ → _ <<< φ) R.isIdentity ⟩
+          joinT X <<< fmap identity ≡⟨ cong (λ φ → _ <<< φ) R.isIdentity ⟩
           joinT X <<< identity       ≡⟨ ℂ.rightIdentity ⟩
           joinT X                    ∎
 
-        fmapEq : ∀ {A B} → KM.fmap {A} {B} ≡ Rfmap
+        fmapEq : ∀ {A B} → KM.fmap {A} {B} ≡ fmap
         fmapEq {A} {B} = funExt (λ f → begin
           KM.fmap f                                ≡⟨⟩
           KM.bind (f >>> KM.pure)                  ≡⟨⟩
              bind (f >>> pureT _)                  ≡⟨⟩
-             Rfmap (f >>> pureT B) >>> joinT B     ≡⟨⟩
-          Rfmap (f >>> pureT B) >>> joinT B        ≡⟨ cong (λ φ → φ >>> joinT B) R.isDistributive ⟩
-          Rfmap f >>> Rfmap (pureT B) >>> joinT B  ≡⟨ ℂ.isAssociative ⟩
-          joinT B <<< Rfmap (pureT B) <<< Rfmap f  ≡⟨ cong (λ φ → φ <<< Rfmap f) (snd isInverse) ⟩
-          identity <<< Rfmap f                     ≡⟨ ℂ.leftIdentity ⟩
-          Rfmap f                                  ∎
+             fmap (f >>> pureT B) >>> joinT B     ≡⟨⟩
+          fmap (f >>> pureT B) >>> joinT B        ≡⟨ cong (λ φ → φ >>> joinT B) R.isDistributive ⟩
+          fmap f >>> fmap (pureT B) >>> joinT B  ≡⟨ ℂ.isAssociative ⟩
+          joinT B <<< fmap (pureT B) <<< fmap f  ≡⟨ cong (λ φ → φ <<< fmap f) (snd isInverse) ⟩
+          identity <<< fmap f                     ≡⟨ ℂ.leftIdentity ⟩
+          fmap f                                  ∎
           )
 
         rawEq : Functor.raw KM.R ≡ Functor.raw R
@@ -183,7 +185,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       joinTEq = funExt (λ X → begin
         M.RawMonad.joinT (backRaw (forth m)) X ≡⟨⟩
         KM.join ≡⟨⟩
-        joinT X <<< Rfmap identity ≡⟨ cong (λ φ → joinT X <<< φ) R.isIdentity ⟩
+        joinT X <<< fmap identity ≡⟨ cong (λ φ → joinT X <<< φ) R.isIdentity ⟩
         joinT X <<< identity ≡⟨ ℂ.rightIdentity ⟩
         joinT X ∎)
 

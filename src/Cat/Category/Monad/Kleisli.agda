@@ -57,7 +57,8 @@ record RawMonad : Set ℓ where
   IsNatural      = {X Y : Object}   (f : ℂ [ X , omap Y ])
     → pure >=> f ≡ f
   -- Composition interacts with bind in the following way.
-  IsDistributive = {X Y Z : Object} (g : ℂ [ Y , omap Z ]) (f : ℂ [ X , omap Y ])
+  IsDistributive = {X Y Z : Object}
+      (g : ℂ [ Y , omap Z ]) (f : ℂ [ X , omap Y ])
     → (bind f) >>> (bind g) ≡ bind (f >=> g)
 
   RightIdentity = {A B : Object} {m : ℂ [ A , omap B ]}

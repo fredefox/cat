@@ -315,8 +315,8 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
       exponent : Exponential Catℓ ℂ 𝔻
       exponent = record
         { obj           = CatExp.object
-        ; eval          = eval
-        ; isExponential = isExponential
+        ; eval          = {!eval!}
+        ; isExponential = {!isExponential!}
         }
 
   hasExponentials : HasExponentials Catℓ

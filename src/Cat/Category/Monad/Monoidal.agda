@@ -26,35 +26,45 @@ record RawMonad : Set ℓ where
     pureNT : NaturalTransformation Functors.identity R
     joinNT : NaturalTransformation F[ R ∘ R ] R
 
+  Romap = Functor.omap R
+  fmap = Functor.fmap R
+
   -- Note that `pureT` and `joinT` differs from their definition in the
   -- kleisli formulation only by having an explicit parameter.
   pureT : Transformation Functors.identity R
   pureT = fst pureNT
+
+  pure : {X : Object} → ℂ [ X , Romap X ]
+  pure = pureT _
+
   pureN : Natural Functors.identity R pureT
   pureN = snd pureNT
 
   joinT : Transformation F[ R ∘ R ] R
   joinT = fst joinNT
+  join : {X : Object} → ℂ [ Romap (Romap X) , Romap X ]
+  join = joinT _
   joinN : Natural F[ R ∘ R ] R joinT
   joinN = snd joinNT
 
-  Romap = Functor.omap R
-  Rfmap = Functor.fmap R
-
   bind : {X Y : Object} → ℂ [ X , Romap Y ] → ℂ [ Romap X , Romap Y ]
-  bind {X} {Y} f = joinT Y <<< Rfmap f
+  bind {X} {Y} f = join <<< fmap f
 
   IsAssociative : Set _
   IsAssociative = {X : Object}
-    → joinT X <<< Rfmap (joinT X) ≡ joinT X <<< joinT (Romap X)
+    -- R and join commute
+    → joinT X <<< fmap join ≡ join <<< join
   IsInverse : Set _
   IsInverse = {X : Object}
-    → joinT X <<< pureT (Romap X) ≡ identity
-    × joinT X <<< Rfmap (pureT X) ≡ identity
-  IsNatural = ∀ {X Y} f → joinT Y <<< Rfmap f <<< pureT X ≡ f
+    -- Talks about R's action on objects
+    → join <<< pure      ≡ identity {Romap X}
+    -- Talks about R's action on arrows
+    × join <<< fmap pure ≡ identity {Romap X}
+  IsNatural = ∀ {X Y} (f : Arrow X (Romap Y))
+    → join <<< fmap f <<< pure ≡ f
   IsDistributive = ∀ {X Y Z} (g : Arrow Y (Romap Z)) (f : Arrow X (Romap Y))
-    → joinT Z <<< Rfmap g <<< (joinT Y <<< Rfmap f)
-    ≡ joinT Z <<< Rfmap (joinT Z <<< Rfmap g <<< f)
+    → join <<< fmap g <<< (join <<< fmap f)
+    ≡ join <<< fmap (join <<< fmap g <<< f)
 
 record IsMonad (raw : RawMonad) : Set ℓ where
   open RawMonad raw public

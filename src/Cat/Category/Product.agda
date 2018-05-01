@@ -276,7 +276,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         open Σ uy renaming (fst to Y→X ; snd to contractible)
         open Σ Y→X renaming (fst to p0×p1 ; snd to cond)
         ump : ∃![ f×g ] (ℂ [ x0 ∘ f×g ] ≡ p0 P.× ℂ [ x1 ∘ f×g ] ≡ p1)
-        ump = p0×p1 , cond , λ {y} x → let k = contractible (y , x) in λ i → fst (k i)
+        ump = p0×p1 , cond , λ {f} cond-f → cong fst (contractible (f , cond-f))
       isP : IsProduct ℂ 𝒜 ℬ rawP
       isP = record { ump = ump }
       p : Product ℂ 𝒜 ℬ
@@ -285,42 +285,43 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         ; isProduct = isP
         }
     g : Product ℂ 𝒜 ℬ → Terminal
-    g p = o , t
+    g p = 𝒳 , t
       where
+      open Product p renaming (object to X ; fst to x₀ ; snd to x₁) using ()
       module p = Product p
       module isp = IsProduct p.isProduct
-      o : Object
-      o = p.object , p.fst , p.snd
-      module _ {Xx : Object} where
-        open Σ Xx renaming (fst to X ; snd to x)
-        ℂXo : ℂ [ X , isp.object ]
-        ℂXo = isp._P[_×_] (fst x) (snd x)
-        ump = p.ump (fst x) (snd x)
-        Xoo = fst (snd ump)
-        Xo : Arrow Xx o
-        Xo = ℂXo , Xoo
-        contractible : ∀ y → Xo ≡ y
-        contractible (y , yy) = res
+      𝒳 : Object
+      𝒳 = X , x₀ , x₁
+      module _ {𝒴 : Object} where
+        open Σ 𝒴 renaming (fst to Y)
+        open Σ (snd 𝒴) renaming (fst to y₀ ; snd to y₁)
+        ump = p.ump y₀ y₁
+        open Σ ump renaming (fst to f')
+        open Σ (snd ump) renaming (fst to f'-cond)
+        𝒻 : Arrow 𝒴 𝒳
+        𝒻 = f' , {!f'-cond!}
+        contractible : (f : Arrow 𝒴 𝒳) → 𝒻 ≡ f
+        contractible ff@(f , f-cond) = res
           where
-          k : ℂXo ≡ y
-          k = snd (snd ump) (yy)
-          prp : ∀ a → isProp
-            ( (ℂ [ p.fst ∘ a ] ≡ fst x)
-            × (ℂ [ p.snd ∘ a ] ≡ snd x)
+          k : f' ≡ f
+          k = snd (snd ump) f-cond
+          prp : (a : ℂ.Arrow Y X) → isProp
+            ( (ℂ [ x₀ ∘ a ] ≡ y₀)
+            × (ℂ [ x₁ ∘ a ] ≡ y₁)
             )
-          prp ab ac ad i
-            = ℂ.arrowsAreSets _ _ (fst ac) (fst ad) i
-            , ℂ.arrowsAreSets _ _ (snd ac) (snd ad) i
+          prp f f0 f1 = Σ≡
+            (ℂ.arrowsAreSets _ _ (fst f0) (fst f1))
+            (ℂ.arrowsAreSets _ _ (snd f0) (snd f1))
           h :
             ( λ i
-              → ℂ [ p.fst ∘ k i ] ≡ fst x
-              × ℂ [ p.snd ∘ k i ] ≡ snd x
-            ) [ Xoo ≡ yy ]
+              → ℂ [ x₀ ∘ k i ] ≡ y₀
+              × ℂ [ x₁ ∘ k i ] ≡ y₁
+            ) [ f'-cond ≡ f-cond ]
           h = lemPropF prp k
-          res : (ℂXo , Xoo) ≡ (y , yy)
-          res i = k i , h i
-      t : IsTerminal o
-      t {Xx} = Xo , contractible
+          res : (f' , f'-cond) ≡ (f , f-cond)
+          res = Σ≡ k h
+      t : IsTerminal 𝒳
+      t {𝒴} = 𝒻 , contractible
     ve-re : ∀ x → g (f x) ≡ x
     ve-re x = Propositionality.propTerminal _ _
     re-ve : ∀ p → f (g p) ≡ p
