@@ -38,31 +38,18 @@
 \newcommand*{\department}[1]{\gdef\@department{#1}}
 \newcommand*{\researchgroup}[1]{\gdef\@researchgroup{#1}}
 \newcommand*{\subtitle}[1]{\gdef\@subtitle{#1}}
-
-%% \begin{titlepage}
-\newgeometry{top=3cm, bottom=3cm,
-	left=2.25 cm, right=2.25cm}	% Temporarily change margins
-% Cover page background 
-%% \AddToShipoutPicture*{\backgroundpic{-4}{56.7}{figure/auxiliary/frontpage_gu_eng.pdf}}
-%% \AddToShipoutPicture*{\backgroundpic{-4}{56.7}{logo_eng.pdf}}
-%% \includegraphics[width=0.2\pdfpagewidth]{logo_eng.pdf}
-%% \begin{center}
-%%   \includegraphics[width=0.5\paperwidth,height=\paperheight,keepaspectratio]{logo_eng.pdf}%
-%% \end{center}
-%% \addtolength{\voffset}{2cm}
-
-% Cover picture (replace with your own or delete)
+\sffamily
+\newgeometry{top=3cm, bottom=3cm,left=2.25 cm, right=2.25cm}
 {\Huge\@title}\\[.5cm]
-{\Large A formalization of category theory in Cubical Agda}\\[2.5cm]
+{\Large A formalization of category theory in Cubical Agda}\\[.5cm]
+Master's thesis in Computer Science \\[.5cm]
+{\Large\@author}\\[2cm]
 \begin{center}
-\includegraphics[\linewidth,height=0.35\paperheight,keepaspectratio]{isomorphism.png}
+\includegraphics[width=\linewidth,keepaspectratio]{isomorphism.png}
 \end{center}
-
 % Cover text
 \vfill
 %% \renewcommand{\familydefault}{\sfdefault} \normalfont % Set cover page font
-Master's thesis in Computer Science \\[1cm]
-{\Large\@author} \\[2cm]
 \textsc{Department of Computer Science and Engineering}\\
 \textsc{Chalmers University of Technology}\\
 \textsc{University of Gothenburg}\\
