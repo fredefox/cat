@@ -1,5 +1,6 @@
-\chapter{Implementation}
-This implementation formalizes the following concepts $>\!\!>\!\!=$:
+\chapter{Category Theory}
+\label{ch:implementation}
+This implementation formalizes the following concepts:
 %
 \begin{itemize}
 \item Core categorical concepts
@@ -224,19 +225,18 @@ $$
 \isoToId \tp (A \approxeq B) \to (A \equiv B)
 $$
 %
-One application of this, and a perhaps somewhat surprising result, is that
-terminal objects are propositional. Intuitively; they do not
-have any interesting structure:
+A perhaps somewhat surprising application of this is that we can show that
+terminal objects are propositional:
 %
 \begin{align}
 \label{eq:termProp}
 \isProp\ \var{Terminal}
 \end{align}
 %
-The proof of this follows from the usual
-observation that any two terminal objects are isomorphic. The proof is omitted
-here, but the curious reader can check the implementation for the details.
-\TODO{The proof is a bit fun, should I include it?}
+It follows from the usual observation that any two terminal objects are
+isomorphic - and since categories are univalent, so are they equal. The proof is
+omitted here, but the curious reader can check the implementation for the
+details. \TODO{The proof is a bit fun, should I include it?}
 
 \section{Equivalences}
 \label{sec:equiv}
@@ -477,21 +477,21 @@ direction. I name these maps $\mathit{shuffle} \tp (A \approxeq B) \to (A
 \approxeq B)$ respectively.
 
 As the inverse of $\idToIso_{\mathit{Op}}$ I will pick $\zeta \defeq \eta \comp
-\mathit{shuffle}$. The proof that they are inverses go as follows:
+\var{shuffle}$. The proof that they are inverses go as follows:
 %
 \begin{align*}
 \zeta \comp \idToIso & \equiv
-\eta \comp \shuffle \comp \idToIso
+\eta \comp \var{shuffle} \comp \idToIso
 && \text{by definition} \\
 %% ≡⟨ cong (λ φ → φ x) (cong (λ φ → η ⊙ shuffle ⊙ φ) (funExt lem)) ⟩ \\
 %
 & \equiv
-\eta \comp \shuffle \comp \inv{\shuffle} \comp \idToIso
+\eta \comp \var{shuffle} \comp \inv{\var{shuffle}} \comp \idToIso
 && \text{lemma} \\
 %%   ≡⟨⟩ \\
 & \equiv
 \eta \comp \idToIso_{\bC}
-&& \text{$\shuffle$ is an isomorphism} \\
+&& \text{$\var{shuffle}$ is an isomorphism} \\
 %%   ≡⟨ (λ i → verso-recto i x) ⟩ \\
 & \equiv
 \identity
@@ -500,7 +500,7 @@ As the inverse of $\idToIso_{\mathit{Op}}$ I will pick $\zeta \defeq \eta \comp
 %
 The other direction is analogous.
 
-The lemma used in this proof states that $\idToIso \equiv \inv{\shuffle} \comp
+The lemma used in this proof states that $\idToIso \equiv \inv{\var{shuffle}} \comp
 \idToIso_{\bC}$ it's a rather straight-forward proof since being-an-inverse-of
 is a proposition.
 

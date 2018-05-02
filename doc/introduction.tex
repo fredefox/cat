@@ -155,16 +155,3 @@ all judgemental equalites of type theory, is cumbersome to work with in practice
 (\cite[p. 4]{huber-2016}) and makes equational proofs less reusable since
 equational proofs $a \sim_{X} b$ are inherently `local' to the extensional set
 $(X , \sim)$.
-%
-\section{The equality type}
-The usual definition of equality in Agda is an inductive data-type with a single
-constructor:
-%
-%% \VerbatimInput{../libs/main.tex}
-% \def\verbatim@font{xits}
-\begin{verbatim}
-data _≡_ {a} {A : Set a} (x : A) : A → Set a where
-  instance refl : x ≡ x
-\end{verbatim}
-%
-I shall refer to this as the (usual) inductive equality type.
