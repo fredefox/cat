@@ -38,8 +38,10 @@
 \newcommand*{\department}[1]{\gdef\@department{#1}}
 \newcommand*{\researchgroup}[1]{\gdef\@researchgroup{#1}}
 \newcommand*{\subtitle}[1]{\gdef\@subtitle{#1}}
-\sffamily
 \newgeometry{top=3cm, bottom=3cm,left=2.25 cm, right=2.25cm}
+\begingroup
+\usepackage{noto}
+%% \fontfamily{noto}\selectfont
 {\Huge\@title}\\[.5cm]
 {\Large A formalization of category theory in Cubical Agda}\\[.5cm]
 Master's thesis in Computer Science \\[.5cm]
@@ -47,14 +49,13 @@ Master's thesis in Computer Science \\[.5cm]
 \begin{center}
 \includegraphics[width=\linewidth,keepaspectratio]{isomorphism.png}
 \end{center}
+\endgroup
 % Cover text
 \vfill
 %% \renewcommand{\familydefault}{\sfdefault} \normalfont % Set cover page font
 \textsc{Department of Computer Science and Engineering}\\
 \textsc{Chalmers University of Technology}\\
-\textsc{University of Gothenburg}\\
 \textsc{Gothenburg, Sweden \the\year}
-
 %% \renewcommand{\familydefault}{\rmdefault} \normalfont % Reset standard font
 %% \end{titlepage}
 
