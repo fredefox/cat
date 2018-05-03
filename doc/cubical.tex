@@ -192,6 +192,7 @@ of these theorems here, as they will be used later in chapter
 \ref{ch:implementation} throughout.
 
 \subsection{Path induction}
+\label{sec:pathJ}
 The induction principle for paths intuitively gives us a way to reason about a
 type-family indexed by a path by only considering if said path is $\refl$ (the
 ``base-case''). For \emph{based path induction}, that equaility is \emph{based}
@@ -216,6 +217,7 @@ $$
 $$
 %
 \subsection{Paths over propositions}
+\label{sec:lemPropF}
 Another very useful combinator is $\lemPropF$:
 
 To `promote' this to a dependent path we can use another useful combinator;
@@ -258,6 +260,7 @@ $$
 $$
 %
 \subsection{Functions over propositions}
+\label{sec:propPi}
 $\prod$-types preserve propositionality when the co-domain is always a
 proposition.
 %
@@ -265,6 +268,7 @@ $$
 \mathit{propPi} \tp \left(\prod_{a \tp A} \isProp\ (P\ a)\right) \to \isProp\ \left(\prod_{a \tp A} P\ a\right)
 $$
 \subsection{Pairs over propositions}
+\label{sec:propSig}
 %
 $\sum$-types preserve propositionality whenever it's first component is a
 proposition, and it's second component is a proposition for all points of in the

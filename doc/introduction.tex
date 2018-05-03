@@ -70,27 +70,27 @@ The proof obligation that this satisfies the identity law of functors
 %
 One needs functional extensionality to ``go under'' the function arrow and apply
 the (left) identity law of the underlying category to proove $\idFun \comp g
-\equiv g$ and thus closing the goal.
+\equiv g$ and thus close the goal.
 %
 \subsection{Equality of isomorphic types}
 %
-Let $\top$ denote the unit type -- a type with a single constructor. In
-the propositions-as-types interpretation of type theory $\top$ is the
-proposition that is always true. The type $A \x \top$ and $A$ has an element for
-each $a : A$. So in a sense they are the same. The second element of the pair
-does not add any ``interesting information''. It can be useful to identify such
-types. In fact, it is quite commonplace in mathematics. Say we look at a set
-$\{x \mid
-\phi\ x \land \psi\ x\}$ and somehow conclude that $\psi\ x \equiv \top$ for all
-$x$. A mathematician would immediately conclude $\{x \mid \phi\ x \land
-\psi\ x\} \equiv \{x \mid \phi\ x\}$ without thinking twice. Unfortunately such
-an identification can not be performed in ITT.
+Let $\top$ denote the unit type -- a type with a single constructor. In the
+propositions-as-types interpretation of type theory $\top$ is the proposition
+that is always true. The type $A \x \top$ and $A$ has an element for each $a :
+A$. So in a sense they have the same shape (greek; \nomen{isomorphic}). The
+second element of the pair does not add any ``interesting information''. It can
+be useful to identify such types. In fact, it is quite commonplace in
+mathematics. Say we look at a set $\{x \mid \phi\ x \land \psi\ x\}$ and somehow
+conclude that $\psi\ x \equiv \top$ for all $x$. A mathematician would
+immediately conclude $\{x \mid \phi\ x \land \psi\ x\} \equiv \{x \mid
+\phi\ x\}$ without thinking twice. Unfortunately such an identification can not
+be performed in ITT.
 
 More specifically; what we are interested in is a way of identifying
-\nomen{equivalent} types. I will return to the definition of equivalence later,
-but for now, it is sufficient to think of an equivalence as a one-to-one
-correspondence. We write $A \simeq B$ to assert that $A$ and $B$ are equivalent
-types. The principle of univalence says that:
+\nomen{equivalent} types. I will return to the definition of equivalence later
+in section \ref{sec:equiv}, but for now it is sufficient to think of an
+equivalence as a one-to-one correspondence. We write $A \simeq B$ to assert that
+$A$ and $B$ are equivalent types. The principle of univalence says that:
 %
 $$\mathit{univalence} \tp (A \simeq B) \simeq (A \equiv B)$$
 %
@@ -99,14 +99,14 @@ In particular this allows us to construct an equality from an equivalence
 
 \section{Formalizing Category Theory}
 %
-The above examples serve to illustrate the limitation of Agda. One case where
-these limitations are particularly prohibitive is in the study of Category
-Theory. At a glance category theory can be described as ``the mathematical study
-of (abstract) algebras of functions'' (\cite{awodey-2006}). So by that token
+The above examples serve to illustrate a limitation of ITT. One case where these
+limitations are particularly prohibitive is in the study of Category Theory. At
+a glance category theory can be described as ``the mathematical study of
+(abstract) algebras of functions'' (\cite{awodey-2006}). So by that token
 functional extensionality is particularly useful for formulating Category
 Theory. In Category theory it is also common to identify isomorphic structures
-and this is exactly what we get from univalence. In fact we can formulate this
-requirement within our formulation of categories by requiring the
+and univalence gives us a way to make this notion precise. In fact we can
+formulate this requirement within our formulation of categories by requiring the
 \emph{categories} themselves to be univalent as we shall see.
 
 \section{Context}
@@ -117,7 +117,7 @@ Inspiration:
 * HoTT   - sketch of homotopy proofs
 \end{verbatim}
 The idea of formalizing Category Theory in proof assistants is not new. There
-are a multitude of these available online. Just as first reference see this
+are a multitude of these available online. Just as a first reference see this
 question on Math Overflow: \cite{mo-formalizations}. Notably these
 implementations of category theory in Agda:
 \begin{itemize}
@@ -137,17 +137,17 @@ will make it possible to prove more things and to reuse proofs.
 There are alternative approaches to working in a cubical setting where one can
 still have univalence and functional extensionality. One option is to postulate
 these as axioms. This approach, however, has other shortcomings, e.g.; you lose
-\nomen{canonicity} (\cite{huber-2016}). Canonicity means that any well-typed
-term evaluates to a \emph{canonical} form. For example for a closed term $e :
-\bN$ it will be the case that $e$ reduces to $n$ applications of $\mathit{suc}$
-to $0$ for some $n$; $e = \mathit{suc}^n\ 0$. Without canonicity terms in the
-language can get ``stuck'' -- meaning that they do not reduce to a canonical
-form.
+\nomen{canonicity} (\TODO{Pageno!} \cite{huber-2016}). Canonicity means that any
+well-typed term evaluates to a \emph{canonical} form. For example for a closed
+term $e : \bN$ it will be the case that $e$ reduces to $n$ applications of
+$\mathit{suc}$ to $0$ for some $n$; $e = \mathit{suc}^n\ 0$. Without canonicity
+terms in the language can get ``stuck'' -- meaning that they do not reduce to a
+canonical form.
 
 Another approach is to use the \emph{setoid interpretation} of type theory
 (\cite{hofmann-1995,huber-2016}). With this approach one works with
 \nomen{extensionals sets} $(X, \sim)$, that is a type $X \tp \MCU$ and an
-equivalence relation $\sim$.
+equivalence relation $\sim \tp X \to X \to \MCU$.
 
 Types should additionally `carry around' an equivalence relation that serve as
 propositional equality. This approach has other drawbacks; it does not satisfy
