@@ -7,7 +7,6 @@ open import Cat.Prelude as P
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
-open import Cat.Wishlist
 open import Cat.Equivalence
 
 _⊙_ : {ℓa ℓb ℓc : Level} {A : Set ℓa} {B : Set ℓb} {C : Set ℓc} → (A ≃ B) → (B ≃ C) → A ≃ C

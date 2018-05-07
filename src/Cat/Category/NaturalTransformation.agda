@@ -25,7 +25,6 @@ module Nat = Data.Nat
 
 open import Cat.Category
 open import Cat.Category.Functor
-open import Cat.Wishlist
 
 module Cat.Category.NaturalTransformation
   {ℓc ℓc' ℓd ℓd' : Level}

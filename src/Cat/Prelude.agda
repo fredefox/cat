@@ -98,4 +98,10 @@ module _ {ℓ : Level} {A : Set ℓ} {a : A} where
     _ ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
     a ∎
 
-open import Cat.Wishlist public
+module _ {ℓ : Level} {A : Set ℓ} where
+  open import Cubical.NType
+  open import Data.Nat using (_≤′_ ;  ≤′-refl ;  ≤′-step ; zero ; suc)
+  open import Cubical.NType.Properties
+  ntypeCumulative : ∀ {n m} → n ≤′ m → HasLevel ⟨ n ⟩₋₂ A → HasLevel ⟨ m ⟩₋₂ A
+  ntypeCumulative {m}         ≤′-refl      lvl = lvl
+  ntypeCumulative {n} {suc m} (≤′-step le) lvl = HasLevel+1 ⟨ m ⟩₋₂ (ntypeCumulative le lvl)
