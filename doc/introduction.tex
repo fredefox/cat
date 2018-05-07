@@ -24,7 +24,7 @@ $f \defeq (n : \bN) \mapsto (0 + n : \bN)$
 $g \defeq (n : \bN) \mapsto (n + 0 : \bN)$
 \end{multicols}
 %
-$n + 0$ is \nomen{definitionally} equal to $n$ which we write as $n + 0 = n$.
+$n + 0$ is \nomen{definitionally} equal to $n$, which we write as $n + 0 = n$.
 This is also called \nomen{judgmental} equality. We call it definitional
 equality because the \emph{equality} arises from the \emph{definition} of $+$
 which is:
@@ -39,7 +39,7 @@ which is:
 Note that $0 + n$ is \emph{not} definitionally equal to $n$. $0 + n$ is in
 normal form. I.e.; there is no rule for $+$ whose left-hand-side matches this
 expression. We \emph{do}, however, have that they are \nomen{propositionally}
-equal which we write as $n + 0 \equiv n$. Propositional equality means that
+equal, which we write as $n + 0 \equiv n$. Propositional equality means that
 there is a proof that exhibits this relation. Since equality is a transitive
 relation we have that $n + 0 \equiv 0 + n$.
 
@@ -62,7 +62,7 @@ for a category $\bC$ and a fixed object in $A \in \bC$ is defined to be:
 \end{align*}
 %
 The proof obligation that this satisfies the identity law of functors
-($\fmap\ \idFun \equiv \idFun$) becomes:
+($\fmap\ \idFun \equiv \idFun$) thus becomes:
 %
 \begin{align*}
 \Hom(A, \idFun_{\bX}) = (g \mapsto \idFun \comp g) \equiv \idFun_{\Sets}
@@ -86,7 +86,7 @@ immediately conclude $\{x \mid \phi\ x \land \psi\ x\} \equiv \{x \mid
 \phi\ x\}$ without thinking twice. Unfortunately such an identification can not
 be performed in ITT.
 
-More specifically; what we are interested in is a way of identifying
+More specifically what we are interested in is a way of identifying
 \nomen{equivalent} types. I will return to the definition of equivalence later
 in section \ref{sec:equiv}, but for now it is sufficient to think of an
 equivalence as a one-to-one correspondence. We write $A \simeq B$ to assert that
@@ -102,7 +102,7 @@ In particular this allows us to construct an equality from an equivalence
 The above examples serve to illustrate a limitation of ITT. One case where these
 limitations are particularly prohibitive is in the study of Category Theory. At
 a glance category theory can be described as ``the mathematical study of
-(abstract) algebras of functions'' (\cite{awodey-2006}). So by that token
+(abstract) algebras of functions'' (\cite{awodey-2006}). By that token
 functional extensionality is particularly useful for formulating Category
 Theory. In Category theory it is also common to identify isomorphic structures
 and univalence gives us a way to make this notion precise. In fact we can
@@ -111,28 +111,38 @@ formulate this requirement within our formulation of categories by requiring the
 
 \section{Context}
 %
-\begin{verbatim}
-Inspiration:
-* Awodey - formulation of categories
-* HoTT   - sketch of homotopy proofs
-\end{verbatim}
 The idea of formalizing Category Theory in proof assistants is not new. There
 are a multitude of these available online. Just as a first reference see this
 question on Math Overflow: \cite{mo-formalizations}. Notably these
 implementations of category theory in Agda:
+%
 \begin{itemize}
 \item
-\url{https://github.com/copumpkin/categories} -- setoid interpretation
-\item
-\url{https://github.com/pcapriotti/agda-categories} -- homotopic setting with postulates
-\item
-\url{https://github.com/pcapriotti/agda-categories} -- homotopic setting in coq
-\item
-\url{https://github.com/mortberg/cubicaltt} -- homotopic setting in \texttt{cubicaltt}
-\end{itemize}
+  \url{https://github.com/copumpkin/categories}
 
+  A formalization in Agda using the setoid approach
+\item
+  \url{https://github.com/pcapriotti/agda-categories}
+
+  A formalization in Agda with univalence and functional extensionality as
+  postulates.
+\item
+  \url{https://github.com/pcapriotti/agda-categories}
+
+  A formalization in Coq in the homotopic setting
+\item
+  \url{https://github.com/mortberg/cubicaltt}
+
+  A formalization in CubicalTT - a language designed for cubical-type-theory.
+  Formalizes many different things, but only a few concepts from category
+  theory.
+
+\end{itemize}
+%
 The contribution of this thesis is to explore how working in a cubical setting
-will make it possible to prove more things and to reuse proofs.
+will make it possible to prove more things and to reuse proofs and to try and
+compare some aspects of this formalization with the existing ones.\TODO{How can
+  I live up to this?}
 
 There are alternative approaches to working in a cubical setting where one can
 still have univalence and functional extensionality. One option is to postulate
@@ -147,11 +157,44 @@ canonical form.
 Another approach is to use the \emph{setoid interpretation} of type theory
 (\cite{hofmann-1995,huber-2016}). With this approach one works with
 \nomen{extensionals sets} $(X, \sim)$, that is a type $X \tp \MCU$ and an
-equivalence relation $\sim \tp X \to X \to \MCU$.
-
-Types should additionally `carry around' an equivalence relation that serve as
+equivalence relation $\sim \tp X \to X \to \MCU$ on that type. Under the setoid
+interpretation the equivalence relation serve as a sort of ``local''
 propositional equality. This approach has other drawbacks; it does not satisfy
-all judgemental equalites of type theory, is cumbersome to work with in practice
-(\cite[p. 4]{huber-2016}) and makes equational proofs less reusable since
-equational proofs $a \sim_{X} b$ are inherently `local' to the extensional set
-$(X , \sim)$.
+all propositional equalites of type theory (\TODO{Citation needed}, is
+cumbersome to work with in practice (\cite[p. 4]{huber-2016}) and makes
+equational proofs less reusable since equational proofs $a \sim_{X} b$ are
+inherently `local' to the extensional set $(X , \sim)$.
+
+\section{Conventions}
+\TODO{Talk a bit about terminology. Find a good place to stuff this little
+  section.}
+
+In the remainder of this paper I will use the term \nomen{Type} to describe --
+well, types. Thereby diverging from the notation in Agda where the keyword
+\texttt{Set} refers to types. \nomen{Set} on the other hand shall refer to the
+homotopical notion of a set. I will also leave all universe levels implicit.
+
+And I use the term \nomen{arrow} to refer to morphisms in a category, whereas
+the terms morphism, map or function shall be reserved for talking about
+type-theoretic functions; i.e. functions in Agda.
+
+$\defeq$ will be used for introducing definitions. $=$ will be used to for
+judgmental equality and $\equiv$ will be used for propositional equality.
+
+All this is summarized in the following table:
+
+\begin{center}
+\begin{tabular}{ c c c }
+Name & Agda & Notation \\
+\hline
+\nomen{Type}            & \texttt{Set}         & $\Type$            \\
+\nomen{Set}             & \texttt{Σ Set IsSet} & $\Set$             \\
+Function, morphism, map & \texttt{A → B}       & $A → B$            \\
+Dependent- ditto        & \texttt{(a : A) → B} & $∏_{a \tp A} → B$  \\
+\nomen{Arrow}           & \texttt{Arrow A B}   & $\Arrow\ A\ B$     \\
+\nomen{Object}          & \texttt{C.Object}    & $̱ℂ.Object$
+Definition              & \texttt{=}           & $̱\defeq$
+Judgmental equality     & \null                & $̱=$
+Propositional equality  & \null                & $̱\equiv$
+\end{tabular}
+\end{center}
