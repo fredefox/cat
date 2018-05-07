@@ -1,7 +1,7 @@
 \chapter{Introduction}
 Functional extensionality and univalence is not expressible in
 \nomen{Intensional Martin Löf Type Theory} (ITT). This poses a severe limitation
-on both 1) what is \emph{provable} and 2) the \emph{reusability} of proofs.
+on both i. what is \emph{provable} and ii. the \emph{reusability} of proofs.
 Recent developments have, however, resulted in \nomen{Cubical Type Theory} (CTT)
 which permits a constructive proof of these two important notions.
 
@@ -19,9 +19,13 @@ limitations inherent in ITT and -- by extension -- Agda.
 Consider the functions:
 %
 \begin{multicols}{2}
-$f \defeq (n : \bN) \mapsto (0 + n : \bN)$
-
-$g \defeq (n : \bN) \mapsto (n + 0 : \bN)$
+  \noindent
+  \begin{equation*}
+    f \defeq (n : \bN) \mapsto (0 + n : \bN)
+  \end{equation*}
+  \begin{equation*}
+    g \defeq (n : \bN) \mapsto (n + 0 : \bN)
+  \end{equation*}
 \end{multicols}
 %
 $n + 0$ is \nomen{definitionally} equal to $n$, which we write as $n + 0 = n$.
@@ -160,7 +164,7 @@ Another approach is to use the \emph{setoid interpretation} of type theory
 equivalence relation $\sim \tp X \to X \to \MCU$ on that type. Under the setoid
 interpretation the equivalence relation serve as a sort of ``local''
 propositional equality. This approach has other drawbacks; it does not satisfy
-all propositional equalites of type theory (\TODO{Citation needed}, is
+all propositional equalites of type theory (\TODO{Citation needed}), is
 cumbersome to work with in practice (\cite[p. 4]{huber-2016}) and makes
 equational proofs less reusable since equational proofs $a \sim_{X} b$ are
 inherently `local' to the extensional set $(X , \sim)$.
@@ -192,9 +196,9 @@ Name & Agda & Notation \\
 Function, morphism, map & \texttt{A → B}       & $A → B$            \\
 Dependent- ditto        & \texttt{(a : A) → B} & $∏_{a \tp A} → B$  \\
 \nomen{Arrow}           & \texttt{Arrow A B}   & $\Arrow\ A\ B$     \\
-\nomen{Object}          & \texttt{C.Object}    & $̱ℂ.Object$
-Definition              & \texttt{=}           & $̱\defeq$
-Judgmental equality     & \null                & $̱=$
+\nomen{Object}          & \texttt{C.Object}    & $̱ℂ.Object$     \\
+Definition              & \texttt{=}           & $̱\defeq$       \\
+Judgmental equality     & \null                & $̱=$            \\
 Propositional equality  & \null                & $̱\equiv$
 \end{tabular}
 \end{center}

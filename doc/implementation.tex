@@ -208,14 +208,14 @@ corresponding projections at either endpoint. Thus the element we construct at
 $i$ becomes the triple:
 %
 \begin{equation}
-\begin{alignat}{4}
+\begin{aligned}
   & \var{propIsAssociative} && a.\var{isAssociative}\
        && b.\var{isAssociative} && i  \\
   & \var{propIsIdentity}    && a.\var{isIdentity}\
        && b.\var{isIdentity}    && i  \\
   & \var{propArrowsAreSets} && a.\var{arrowsAreSets}\
        && b.\var{arrowsAreSets} && i
-\end{alignat}
+\end{aligned}
 \end{equation}
 %
 I've found this to be a general pattern when proving things in homotopy type
@@ -444,10 +444,10 @@ what we're trying to prove but talks about paths rather than isomorphisms:
 \begin{equation}
 \label{eq:coeDomIso}
 \prod_{f \tp \var{Arrow}\ A\ B} \prod_{p \tp A \equiv B}
-\var{coe}\ p_\var{dom}\ f \equiv f \lll \inv{(\var{idToIso}\ p)}}
+\var{coe}\ p_{\var{dom}}\ f \equiv f \lll \inv{(\var{idToIso}\ p)}
 \end{equation}
 %
-Again $p_\var{dom}$ denotes the path $\var{Arrow}\ A\ X \equiv
+Again $p_{\var{dom}}$ denotes the path $\var{Arrow}\ A\ X \equiv
 \var{Arrow}\ B\ X$ induced by $p$. To prove this statement I let $f$ and $p$
 be given and then invoke based-path-induction. The induction will be based at $A
 \tp \var{Object}$, so let $\widetilde{B} \tp \Object$ and $\widetilde{p} \tp
@@ -652,12 +652,15 @@ First, lets proove \ref{eq:equivPropSig}: Let $propP \tp \prod_{a \tp A} \isProp
 of $\var{fromIsomorphism}$ it suffices to give an isomorphism between
 $x \equiv y$ and $\fst\ x \equiv \fst\ y$:
 %
-\begin{alignat*}{5}
+%% FIXME: Too much alignement?
+\begin{equation*}
+\begin{aligned}
   f & \defeq \congruence\ \fst
-    && \tp x       && \equiv y       && \to \fst\ x && \equiv \fst\ y \\
+    && \tp x       \equiv y       && \to \fst\ x \equiv \fst\ y \\
   g & \defeq \var{lemSig}\ \var{propP}\ x\ y
-    && \tp \fst\ x && \equiv \fst\ y && \to x       && \equiv y
-\end{alignat*}
+    && \tp \fst\ x \equiv \fst\ y && \to x       \equiv y
+\end{aligned}
+\end{equation*}
 %
 \TODO{Is it confusing that I use point-free style here?} Here $\var{lemSig}$ is
 a lemma that says that if the second component of a pair is a proposition, it
@@ -856,15 +859,15 @@ Which is provable by \TODO{What?} and that the witness to \ref{eq:pairArrowLaw}
 for the left-hand-side and the right-hand-side are the same. The type of this
 goal is quite involved, and I will not write it out in full, but at present it
 suffices to show the type of the path-space. Note that the arrows in
-\ref{eq:productAssoc} are arrows from $\mathcal{A} = (A , a_\pairA , a_\pairB)$
-to $\mathcal{D} = (D , d_\pairA , d_\pairB)$ where $a_\pairA$, $a_\pairB$,
-$d_\pairA$ and $d_\pairB$ are arrows in the underlying category. Given that $p$
+\ref{eq:productAssoc} are arrows from $\mathcal{A} = (A , a_{\pairA} , a_{\pairB})$
+to $\mathcal{D} = (D , d_{\pairA} , d_{\pairB})$ where $a_{\pairA}$, $a_{\pairB}$,
+$d_{\pairA}$ and $d_{\pairB}$ are arrows in the underlying category. Given that $p$
 is the chosen proof of \ref{eq:productAssocUnderlying} we then have that the
 witness to \ref{eq:pairArrowLaw} vary over the type:
 %
 \begin{align}
 \label{eq:productPath}
-λ\ i → d_\pairA \lll p\ i ≡ a_\pairA × d_\pairB \lll p\ i ≡ a_\pairB
+λ\ i → d_{\pairA} \lll p\ i ≡ 2 a_{\pairA} × d_{\pairB} \lll p\ i ≡ a_{\pairB}
 \end{align}
 %
 And these paths are in the type of the hom-set of the underlying category, so
@@ -874,14 +877,14 @@ stead we generalize \ref{eq:productPath} to:
 %
 \begin{align}
 \label{eq:productEqPrinc}
-\prod_{f \tp \Arrow\ X\ Y} \isProp\ \left( y_\pairA \lll f ≡ x_\pairA × y_\pairB \lll f ≡ x_\pairB \right)
+\prod_{f \tp \Arrow\ X\ Y} \isProp\ \left( y_{\pairA} \lll f ≡ x_{\pairA} × y_{\pairB} \lll f ≡ x_{\pairB} \right)
 \end{align}
 %
-For all objects $X , x_\pairA , x_\pairB$ and $Y , y_\pairA , y_\pairB$, but
-this follows from pairs preserving homotopical structure and arrows in the
+For all objects $X , x_{\pairA} , x_{\pairB}$ and $Y , y_{\pairA} , y_{\pairB}$,
+but this follows from pairs preserving homotopical structure and arrows in the
 underlying category being sets. This gives us an equality principle for arrows
 in this category that says that to prove two arrows $f, f_0, f_1$ and $g, g_0,
-$g_1$ equal it suffices to give a proof that $f$ and $g$ are equal.
+g_1$ equal it suffices to give a proof that $f$ and $g$ are equal.
 %% %
 %% $$
 %% \prod_{(f, f_0, f_1)\; (g,g_0,g_1) \tp \Arrow\ X\ Y} f \equiv g \to (f, f_0, f_1) \equiv (g,g_0,g_1)
@@ -899,13 +902,16 @@ $$
 Since pairs preserve homotopical structure this reduces to:
 %
 $$
-\isSet\ (\Arrow_\bC\ X\ Y)
+\isSet\ (\Arrow_{\bC}\ X\ Y)
 $$
 %
 Which holds. And
 %
 $$
-\prod_{f \tp \Arrow\ X\ Y} \isSet\ \left( y_\pairA \lll f ≡ x_\pairA × y_\pairB \lll f ≡ x_\pairB \right)
+\prod_{f \tp \Arrow\ X\ Y}
+\isSet\ \left( y_{\pairA} \lll f ≡ x_{\pairA}
+             × y_{\pairB} \lll f ≡ x_{\pairB}
+        \right)
 $$
 %
 This we get from \ref{eq:productEqPrinc} and the fact that homotopical structure
@@ -915,8 +921,8 @@ This finishes the proof that this is a valid pre-category.
 
 \subsubsection{Univalence}
 To prove that this is a proper category it must be shown that it is univalent.
-That is, for any two objects $\mathcal{X} = (X, x_\mathcal{A} , x_\mathca{B})$
-and $\mathcal{Y} = Y, y_\mathcal{A}, y_\mathcal{B}$ I will show:
+That is, for any two objects $\mathcal{X} = (X, x_{\mathcal{A}} , x_{\mathcal{B}})$
+and $\mathcal{Y} = Y, y_{\mathcal{A}}, y_{\mathcal{B}}$ I will show:
 %
 \begin{align}
 (\mathcal{X} \equiv \mathcal{Y}) \cong (\mathcal{X} \approxeq \mathcal{Y})
@@ -928,7 +934,7 @@ The first type is:
 %
 \begin{align}
 \label{eq:univ-0}
-(X , x_\mathcal{A} , x_\mathcal{B}) ≡ (Y , y_\mathcal{A} , y_\mathcal{B})
+(X , x_{\mathcal{A}} , x_{\mathcal{B}}) ≡ (Y , y_{\mathcal{A}} , y_{\mathcal{B}})
 \end{align}
 %
 The next types will be the triple:
@@ -937,8 +943,8 @@ The next types will be the triple:
 \label{eq:univ-1}
 \begin{split}
 p \tp & X \equiv Y \\
-& \Path\ (λ i → \Arrow\ (p\ i)\ \mathcal{A})\ x_\mathcal{A}\ y_\mathcal{A} \\
-& \Path\ (λ i → \Arrow\ (p\ i)\ \mathcal{B})\ x_\mathcal{B}\ y_\mathcal{B}
+& \Path\ (λ i → \Arrow\ (p\ i)\ \mathcal{A})\ x_{\mathcal{A}}\ y_{\mathcal{A}} \\
+& \Path\ (λ i → \Arrow\ (p\ i)\ \mathcal{B})\ x_{\mathcal{B}}\ y_{\mathcal{B}}
 \end{split}
 %% \end{split}
 \end{align}
@@ -950,8 +956,8 @@ isomorphism, and create a path from this:
 \label{eq:univ-2}
 \begin{split}
 \var{iso} \tp & X \cong Y \\
-& \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ \mathcal{A})\ x_\mathcal{A}\ y_\mathcal{A} \\
-& \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ \mathcal{B})\ x_\mathcal{B}\ y_\mathcal{B}
+& \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ \mathcal{A})\ x_{\mathcal{A}}\ y_{\mathcal{A}} \\
+& \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ \mathcal{B})\ x_{\mathcal{B}}\ y_{\mathcal{B}}
 \end{split}
 \end{align}
 %
@@ -961,7 +967,7 @@ Finally we have the type:
 %
 \begin{align}
 \label{eq:univ-3}
-(X , x_\mathcal{A} , x_\mathcal{B}) ≊ (Y , y_\mathcal{A} , y_\mathcal{B})
+(X , x_{\mathcal{A}} , x_{\mathcal{B}}) ≊ (Y , y_{\mathcal{A}} , y_{\mathcal{B}})
 \end{align}
 
 \emph{Proposition} \ref{eq:univ-0} is isomorphic to \ref{eq:univ-1}: This is
@@ -976,7 +982,7 @@ the implementation for the details).
 will swho two corrolaries of \ref{eq:coeCod}: For an isomorphism $(\iota,
 \inv{\iota}, \var{inv}) \tp A \cong B$, arrows $f \tp \Arrow\ A\ X$, $g \tp
 \Arrow\ B\ X$ and a heterogeneous path between them, $q \tp \Path\ (\lambda i
-\to p_\var{dom}\ i)\ f\ g$, where $p_\var{dom} \tp \Arrow\ A\ X \equiv
+\to p_{\var{dom}}\ i)\ f\ g$, where $p_{\var{dom}} \tp \Arrow\ A\ X \equiv
 \Arrow\ B\ X$ is a path induced by $\var{iso}$, we have the following two
 results
 %
@@ -993,14 +999,14 @@ Now we can prove the equiavalence in the following way: Given $(f, \inv{f},
 \var{inv}_f) \tp X \cong Y$ and two heterogeneous paths
 %
 \begin{align*}
-p_\mathcal{A} & \tp \Path\ (\lambda i \to p_\var{dom}\ i)\ x_\mathcal{A}\ y_\mathcal{A}\\
+p_{\mathcal{A}} & \tp \Path\ (\lambda i \to p_{\var{dom}}\ i)\ x_{\mathcal{A}}\ y_{\mathcal{A}}\\
 %
-q_\mathcal{B} & \tp \Path\ (\lambda i \to p_\var{dom}\ i)\ x_\mathcal{B}\ y_\mathcal{B}
+q_{\mathcal{B}} & \tp \Path\ (\lambda i \to p_{\var{dom}}\ i)\ x_{\mathcal{B}}\ y_{\mathcal{B}}
 \end{align*}
 %
-all as in \ref{eq:univ-2}. I use $p_\var{dom}$ here again to mean the path
+all as in \ref{eq:univ-2}. I use $p_{\var{dom}}$ here again to mean the path
 induced by the isomorphism $f, \inv{f}$. I must now construct an isomorphism
-$(X, x_\mathcal{A}, x_\mathcal{B}) \approxeq (Y, y_\mathcal{A}, y_\mathcal{B}$
+$(X, x_{\mathcal{A}}, x_{\mathcal{B}}) \approxeq (Y, y_{\mathcal{A}}, y_{\mathcal{B}})$
 as in \ref{eq:univ-3}. That is, an isomorphism in the present category. I remind
 the reader that such a gadget is a triple. The first component shall be:
 %
@@ -1012,10 +1018,10 @@ To show that this choice fits the bill I must now verify that it satisfies
 \ref{eq:pairArrowLaw}, which in this case becomes:
 %
 \begin{align}
-y_\mathcal{A} \lll f ≡ x_\mathcal{A} × y_\mathcal{B} \lll f ≡ x_\mathcal{B}
+y_{\mathcal{A}} \lll f ≡ x_{\mathcal{A}} × y_{\mathcal{B}} \lll f ≡ x_{\mathcal{B}}
 \end{align}
 %
-Which, since $f$ is an isomorphism and $p_\mathcal{A}$ (resp. $p_\mathcal{B}$)
+Which, since $f$ is an isomorphism and $p_{\mathcal{A}}$ (resp. $p_{\mathcal{B}}$)
 is a path varying according to a path constructed from this isomorphism, this is
 exactly what \ref{eq:domain-twist-0} gives us.
 %
@@ -1033,7 +1039,7 @@ For the other direction we're given just given the isomorphism
 $$
 (f, \inv{f}, \var{inv}_f)
 \tp
-(X, x_\mathcal{A}, x_\mathcal{B}) \approxeq (Y, y_\mathcal{A}, y_\mathcal{B})
+(X, x_{\mathcal{A}}, x_{\mathcal{B}}) \approxeq (Y, y_{\mathcal{A}}, y_{\mathcal{B}})
 $$
 %
 Projecting out the first component gives us the isomorphism
@@ -1048,8 +1054,8 @@ This gives rise to the following paths:
 \begin{align}
 \begin{split}
 \widetilde{p} & \tp X \equiv Y \\
-\widetilde{p}_\mathcal{A} & \tp \Arrow\ X\ \mathcal{A} \equiv \Arrow\ Y\ \mathcal{A} \\
-\widetilde{p}_\mathcal{B} & \tp \Arrow\ X\ \mathcal{B} \equiv \Arrow\ Y\ \mathcal{B}
+\widetilde{p}_{\mathcal{A}} & \tp \Arrow\ X\ \mathcal{A} \equiv \Arrow\ Y\ \mathcal{A} \\
+\widetilde{p}_{\mathcal{B}} & \tp \Arrow\ X\ \mathcal{B} \equiv \Arrow\ Y\ \mathcal{B}
 \end{split}
 \end{align}
 %
@@ -1058,8 +1064,8 @@ It then remains to construct the two paths:
 \begin{align}
 \begin{split}
 \label{eq:product-paths}
-& \Path\ (λ i → \widetilde{p}_\mathcal{A}\ i)\ x_\mathcal{A}\ y_\mathcal{A}\\
-& \Path\ (λ i → \widetilde{p}_\mathcal{B}\ i)\ x_\mathcal{B}\ y_\mathcal{B}
+& \Path\ (λ i → \widetilde{p}_{\mathcal{A}}\ i)\ x_{\mathcal{A}}\ y_{\mathcal{A}}\\
+& \Path\ (λ i → \widetilde{p}_{\mathcal{B}}\ i)\ x_{\mathcal{B}}\ y_{\mathcal{B}}
 \end{split}
 \end{align}
 %
@@ -1077,17 +1083,17 @@ Which is used without proof. See the implementation for the details.
 \begin{align}
 \begin{split}
 \label{eq:product-paths}
-\var{coe}\ \widetilde{p}_\mathcal{A}\ x_\mathcal{A} ≡ y_\mathcal{A}\\
-\var{coe}\ \widetilde{p}_\mathcal{B}\ x_\mathcal{B} ≡ y_\mathcal{B}
+\var{coe}\ \widetilde{p}_{\mathcal{A}}\ x_{\mathcal{A}} ≡ y_{\mathcal{A}}\\
+\var{coe}\ \widetilde{p}_{\mathcal{B}}\ x_{\mathcal{B}} ≡ y_{\mathcal{B}}
 \end{split}
 \end{align}
 %
 The proof of the first one is:
 %
 \begin{align*}
-  \var{coe}\ \widetilde{p}_\mathcal{A}\ x_\mathcal{A}
-  & ≡ x_\mathcal{A} \lll \fst\ \inv{f} && \text{$\var{coeDom}$ and the isomorphism $f, \inv{f}$} \\
-  & ≡ y_\mathcal{A} && \text{\ref{eq:pairArrowLaw} for $\inv{f}$}
+  \var{coe}\ \widetilde{p}_{\mathcal{A}}\ x_{\mathcal{A}}
+  & ≡ x_{\mathcal{A}} \lll \fst\ \inv{f} && \text{$\var{coeDom}$ and the isomorphism $f, \inv{f}$} \\
+  & ≡ y_{\mathcal{A}} && \text{\ref{eq:pairArrowLaw} for $\inv{f}$}
 \end{align*}
 %
 We have now constructed the maps between \ref{eq:univ-0} and \ref{eq:univ-1}. It
