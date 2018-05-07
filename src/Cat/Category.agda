@@ -222,9 +222,9 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
     propIsInverseOf : ∀ {A B f g} → isProp (IsInverseOf {A} {B} f g)
     propIsInverseOf = propSig (arrowsAreSets _ _) (λ _ → arrowsAreSets _ _)
 
-    module _ {A B : Object} (f : Arrow A B) where
-      propIsomorphism : isProp (Isomorphism f)
-      propIsomorphism a@(g , η , ε) a'@(g' , η' , ε') =
+    module _ {A B : Object} where
+      propIsomorphism : (f : Arrow A B) → isProp (Isomorphism f)
+      propIsomorphism f a@(g , η , ε) a'@(g' , η' , ε') =
         lemSig (λ g → propIsInverseOf) a a' geq
           where
             geq : g ≡ g'
@@ -235,6 +235,9 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
               (g <<< f) <<< g'  ≡⟨ cong (λ φ → φ <<< g') η ⟩
               identity <<< g'   ≡⟨ leftIdentity ⟩
               g'                ∎
+
+      isoEq : {a b : A ≊ B} → fst a ≡ fst b → a ≡ b
+      isoEq = lemSig propIsomorphism _ _
 
     propIsInitial : ∀ I → isProp (IsInitial I)
     propIsInitial I x y i {X} = res X i
@@ -673,16 +676,7 @@ module Opposite {ℓa ℓb : Level} where
         -- Shouldn't be necessary to use `arrowsAreSets` here, but we have it,
         -- so why not?
         lem : (p : A ≡ B) → idToIso A B p ≡ shuffle~ (ℂ.idToIso A B p)
-        lem p = Σ≡ refl (Σ≡ refl (Σ≡ (ℂ.arrowsAreSets _ _ l-l r-l) (ℂ.arrowsAreSets _ _ l-r r-r)))
-          where
-          l = idToIso A B p
-          r = shuffle~ (ℂ.idToIso A B p)
-          open Σ l renaming (fst to l-obv ; snd to l-areInv)
-          open Σ l-areInv renaming (fst to l-invs ; snd to l-iso)
-          open Σ l-iso renaming (fst to l-l ; snd to l-r)
-          open Σ r renaming (fst to r-obv ; snd to r-areInv)
-          open Σ r-areInv renaming (fst to r-invs ; snd to r-iso)
-          open Σ r-iso renaming (fst to r-l ; snd to r-r)
+        lem p = isoEq refl
 
         ζ : A ≊ B → A ≡ B
         ζ = η ∘ shuffle
