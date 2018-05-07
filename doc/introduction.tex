@@ -1,7 +1,7 @@
 \chapter{Introduction}
 Functional extensionality and univalence is not expressible in
 \nomen{Intensional Martin Löf Type Theory} (ITT). This poses a severe limitation
-on both i. what is \emph{provable} and ii. the \emph{reusability} of proofs.
+on both i. what is \emph{provable} and ii. the \emph{re-usability} of proofs.
 Recent developments have, however, resulted in \nomen{Cubical Type Theory} (CTT)
 which permits a constructive proof of these two important notions.
 
@@ -54,7 +54,7 @@ not true.} There is no way to construct a proof asserting the obvious
 equivalence of $f$ and $g$ -- even though we can prove them equal for all
 points. This is exactly the notion of equality of functions that we are
 interested in; that they are equal for all inputs. We call this
-\nomen{pointwise equality}, where the \emph{points} of a function refers
+\nomen{point-wise equality}, where the \emph{points} of a function refers
 to it's arguments.
 
 In the context of category theory functional extensionality is e.g. needed to
@@ -73,7 +73,7 @@ The proof obligation that this satisfies the identity law of functors
 \end{align*}
 %
 One needs functional extensionality to ``go under'' the function arrow and apply
-the (left) identity law of the underlying category to proove $\idFun \comp g
+the (left) identity law of the underlying category to prove $\idFun \comp g
 \equiv g$ and thus close the goal.
 %
 \subsection{Equality of isomorphic types}
@@ -81,7 +81,7 @@ the (left) identity law of the underlying category to proove $\idFun \comp g
 Let $\top$ denote the unit type -- a type with a single constructor. In the
 propositions-as-types interpretation of type theory $\top$ is the proposition
 that is always true. The type $A \x \top$ and $A$ has an element for each $a :
-A$. So in a sense they have the same shape (greek; \nomen{isomorphic}). The
+A$. So in a sense they have the same shape (Greek; \nomen{isomorphic}). The
 second element of the pair does not add any ``interesting information''. It can
 be useful to identify such types. In fact, it is quite commonplace in
 mathematics. Say we look at a set $\{x \mid \phi\ x \land \psi\ x\}$ and somehow
@@ -114,6 +114,7 @@ formulate this requirement within our formulation of categories by requiring the
 \emph{categories} themselves to be univalent as we shall see.
 
 \section{Context}
+\label{sec:context}
 %
 The idea of formalizing Category Theory in proof assistants is not new. There
 are a multitude of these available online. Just as a first reference see this
@@ -131,7 +132,7 @@ implementations of category theory in Agda:
   A formalization in Agda with univalence and functional extensionality as
   postulates.
 \item
-  \url{https://github.com/pcapriotti/agda-categories}
+  \url{https://github.com/HoTT/HoTT/tree/master/theories/Categories}
 
   A formalization in Coq in the homotopic setting
 \item
@@ -160,11 +161,11 @@ canonical form.
 
 Another approach is to use the \emph{setoid interpretation} of type theory
 (\cite{hofmann-1995,huber-2016}). With this approach one works with
-\nomen{extensionals sets} $(X, \sim)$, that is a type $X \tp \MCU$ and an
+\nomen{extensional sets} $(X, \sim)$, that is a type $X \tp \MCU$ and an
 equivalence relation $\sim \tp X \to X \to \MCU$ on that type. Under the setoid
 interpretation the equivalence relation serve as a sort of ``local''
 propositional equality. This approach has other drawbacks; it does not satisfy
-all propositional equalites of type theory (\TODO{Citation needed}), is
+all propositional equalities of type theory (\TODO{Citation needed}), is
 cumbersome to work with in practice (\cite[p. 4]{huber-2016}) and makes
 equational proofs less reusable since equational proofs $a \sim_{X} b$ are
 inherently `local' to the extensional set $(X , \sim)$.

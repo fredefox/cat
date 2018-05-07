@@ -1,0 +1,74 @@
+\chapter{Perspectives}
+\section{Discussion}
+In the previous chapter the practical aspects of proving things in Cubical Agda
+were highlighted. I also demonstrated the usefulness of separating ``laws'' from
+``data''. One of the reasons for this is that dependencies within types can lead
+to very complicated goals. One technique for alleviating this was to prove that
+certain types are mere propositions.
+
+\subsection{Computational properties}
+Another aspect (\TODO{That I actually didn't highlight very well in the previous
+  chapter}) is the computational nature of paths. Say we have formalized this
+common result about monads:
+
+\TODO{Some equation\ldots}
+
+By transporting this to the Kleisli formulation we get a result that we can use
+to compute with. This is particularly useful because the Kleisli formulation
+will be more familiar to programmers e.g. those coming from a background in
+Haskell. Whereas the theory usually talks about monoidal monads.
+
+\TODO{Mention that with postulates we cannot do this}
+
+\subsection{Reusability of proofs}
+The previous example also illustrate how univalence unifies two otherwise
+disparate areas: The category-theoretic study of monads; and monads as in
+functional programming. Univalence thus allows one to reuse proofs. You could
+say that univalence gives the developer two proofs for the price of one.
+
+The introduction (section \ref{sec:context}) mentioned an often
+employed-technique for enabling extensional equalities is to use the
+setoid-interpretation. Nowhere in this formalization has this been necessary,
+$\Path$ has been used globally in the project as propositional equality. One
+interesting place where this becomes apparent is in interfacing with the Agda
+standard library. Multiple definitions in the Agda standard library have been
+designed with the setoid-interpretation in mind. E.g. the notion of ``unique
+existential'' is indexed by a relation that should play the role of
+propositional equality. Likewise for equivalence relations, they are indexed,
+not only by the actual equivalence relation, but also by another relation that
+serve as propositional equality.
+%% Unfortunately we cannot use the definition of equivalences found in the
+%% standard library to do equational reasoning directly. The reason for this is
+%% that the equivalence relation defined there must be a homogenous relation,
+%% but paths are heterogeneous relations.
+
+In the formalization at present a significant amount of energy has been put
+towards proving things that would not have been needed in classical Agda. The
+proofs that some given type is a proposition were provided as a strategy to
+simplify some otherwise very complicated proofs (e.g.
+\ref{eq:proof-prop-IsPreCategory} and \label{eq:productPath}). Often these
+proofs would not be this complicated. If the J-rule holds definitionally the
+proof-assistant can help simplify these goals considerably. The lack of the
+J-rule has a significant impact on the complexity of these kinds of proofs.
+
+\TODO{Universe levels.}
+
+\section{Future work}
+\subsection{Agda \texttt{Prop}}
+Jesper Cockx' work extending the universe-level-laws for Agda and the
+\texttt{Prop}-type.
+
+\subsection{Compiling Cubical Agda}
+\label{sec:compiling-cubical-agda}
+Compilation of program written in Cubical Agda is currently not supported. One
+issue here is that the backends does not provide an implementation for the
+cubical primitives (such as the path-type). This means that even though the
+path-type gives us a computational interpretation of functional extensionality,
+univalence, transport, etc., we do not have a way of actually using this to
+compile our programs that use these primitives. It would be interesting to see
+practical applications of this. The path between monads that this library
+exposes could provide one particularly interesting case-study.
+
+\subsection{Higher inductive types}
+This library has not explored the usefulness of higher inductive types in the
+context of Category Theory.

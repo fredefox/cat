@@ -56,7 +56,7 @@ the real numbers from $0$ to $1$. $P$ is a family of types over the index set
 $I$. I will sometimes refer to $P$ as the ``path-space'' of some path $p \tp
 \Path\ P\ a\ b$. By this token $P\ 0$ then corresponds to the type at the
 left-endpoint and $P\ 1$ as the type at the right-endpoint. The type is called
-$\Path$ because it is connected with paths in homotopy thoery. The intuition
+$\Path$ because it is connected with paths in homotopy theory. The intuition
 behind this is that $\Path$ describes paths in $\MCU$ -- i.e. between types. For
 a path $p$ for the point $p\ i$ the index $i$ describes how far along the path
 one has moved. An inhabitant of $\Path\ P\ a_0\ a_1$ is a (dependent-)
@@ -155,7 +155,7 @@ there is the notion of sets from set-theory, in Agda types are denoted
 \texttt{Set}. I will use it consistently to refer to a type $A$ as a set exactly
 if $\isSet\ A$ is inhabited.
 
-The next step in the hierarchy is, as you might've guessed, the type:
+The next step in the hierarchy is, as the reader might've guessed, the type:
 %
 \begin{equation}
 \begin{alignat}{2}
@@ -166,7 +166,7 @@ The next step in the hierarchy is, as you might've guessed, the type:
 %
 And so it continues. In fact we can generalize this family of types by indexing
 them with a natural number. For historical reasons, though, the bottom of the
-hierarchy, the contractible tyes, is said to be a \nomen{-2-type}, propositions
+hierarchy, the contractible types, is said to be a \nomen{-2-type}, propositions
 are \nomen{-1-types}, (homotopical) sets are \nomen{0-types} and so on\ldots
 
 Just as with paths, homotopical sets are not at the center of focus for this
@@ -181,12 +181,12 @@ Proposition: For any homotopic level $n$ this is a mere proposition.
 %
 \section{A few lemmas}
 Rather than getting into the nitty-gritty details of Agda I venture to take a
-more ``combinators-based'' approach. That is, I will use theorems about paths
+more ``combinator-based'' approach. That is, I will use theorems about paths
 already that have already been formalized. Specifically the results come from
 the Agda library \texttt{cubical} (\TODO{Cite}). I have used a handful of
 results from this library as well as contributed a few lemmas myself.\footnote{The module \texttt{Cat.Prelude} lists the upstream dependencies. As well my contribution to \texttt{cubical} can be found in the git logs \TODO{Cite}.}
 
-These theorems are all purely related to homotopy theory and cubical agda and as
+These theorems are all purely related to homotopy theory and cubical Agda and as
 such not specific to the formalization of Category Theory. I will present a few
 of these theorems here, as they will be used later in chapter
 \ref{ch:implementation} throughout.
@@ -195,7 +195,7 @@ of these theorems here, as they will be used later in chapter
 \label{sec:pathJ}
 The induction principle for paths intuitively gives us a way to reason about a
 type-family indexed by a path by only considering if said path is $\refl$ (the
-``base-case''). For \emph{based path induction}, that equaility is \emph{based}
+``base-case''). For \emph{based path induction}, that equality is \emph{based}
 at some element $a \tp A$.
 
 Let a type $A \tp \MCU$ and an element of the type $a \tp A$ be given. $a$ is said to be the base of the induction. Given a family of types:
