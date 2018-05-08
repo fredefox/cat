@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas --cubical #-}
+{-# OPTIONS --cubical #-}
 module Cat.Equivalence where
 
 open import Cubical.Primitives

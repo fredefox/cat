@@ -1,7 +1,7 @@
 {---
 The Kleisli formulation of monads
  ---}
-{-# OPTIONS --cubical --allow-unsolved-metas #-}
+{-# OPTIONS --cubical #-}
 open import Agda.Primitive
 
 open import Cat.Prelude

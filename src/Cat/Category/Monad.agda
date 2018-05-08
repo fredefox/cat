@@ -17,7 +17,7 @@ These two formulations are proven to be equivalent:
 The monoidal representation is exposed by default from this module.
  ---}
 
-{-# OPTIONS --cubical --allow-unsolved-metas #-}
+{-# OPTIONS --cubical #-}
 module Cat.Category.Monad where
 
 open import Cat.Prelude

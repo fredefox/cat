@@ -1,7 +1,7 @@
 {-
 This module provides construction 2.3 in [voe]
 -}
-{-# OPTIONS --cubical --allow-unsolved-metas --caching #-}
+{-# OPTIONS --cubical --caching #-}
 module Cat.Category.Monad.Voevodsky where
 
 open import Cat.Prelude

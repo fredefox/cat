@@ -24,7 +24,7 @@
 -- ------
 --
 -- Propositionality for all laws about the category.
-{-# OPTIONS --allow-unsolved-metas --cubical #-}
+{-# OPTIONS --cubical #-}
 
 module Cat.Category where
 

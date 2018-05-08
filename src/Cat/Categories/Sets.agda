@@ -1,5 +1,5 @@
 -- | The category of homotopy sets
-{-# OPTIONS --allow-unsolved-metas --cubical --caching #-}
+{-# OPTIONS --cubical --caching #-}
 module Cat.Categories.Sets where
 
 open import Cat.Prelude as P

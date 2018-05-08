@@ -17,7 +17,7 @@
 -- Functions for manipulating the above:
 --
 -- * A composition operator.
-{-# OPTIONS --allow-unsolved-metas --cubical #-}
+{-# OPTIONS --cubical #-}
 open import Cat.Prelude
 
 open import Data.Nat using (_≤′_ ; ≤′-refl ; ≤′-step)

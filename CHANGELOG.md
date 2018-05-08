@@ -1,6 +1,32 @@
 Change log
 =========
 
+Version 1.5.0
+-------------
+Prove postulates in `Cat.Wishlist`:
+
+ * `ntypeCommulative : n ≤ m → HasLevel ⟨ n ⟩₋₂ A → HasLevel ⟨ m ⟩₋₂ A`
+
+Prove that these two formulations of univalence are equivalent:
+
+    ∀ A B → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
+    ∀ A   → isContr (Σ[ X ∈ Object ] A ≅ X)
+
+Prove univalence for the category of...
+
+  * the opposite category
+  * sets
+  * "pair" category
+
+Finish the proof that products are propositional:
+
+  * `isProp (Product ...)`
+  * `isProp (HasProducts ...)`
+
+Remove --allow-unsolved-metas pragma from various files
+
+Also renamed a lot of different projections. E.g. arrow-composition, etc..
+
 Version 1.4.1
 -------------
 Defines a module to work with equivalence providing a way to go between

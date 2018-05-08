@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas --cubical --caching #-}
+{-# OPTIONS --cubical --caching #-}
 module Cat.Category.Product where
 
 open import Cat.Prelude as P hiding (_×_ ; fst ; snd)
@@ -299,7 +299,7 @@ module Try0 {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
         open Σ ump renaming (fst to f')
         open Σ (snd ump) renaming (fst to f'-cond)
         𝒻 : Arrow 𝒴 𝒳
-        𝒻 = f' , {!f'-cond!}
+        𝒻 = f' , f'-cond
         contractible : (f : Arrow 𝒴 𝒳) → 𝒻 ≡ f
         contractible ff@(f , f-cond) = res
           where

@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas --cubical #-}
+{-# OPTIONS --cubical #-}
 
 module Cat.Category.Yoneda where
 
