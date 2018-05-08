@@ -1,0 +1,428 @@
+\chapter{Source code}
+\label{ch:app-sources}
+In the following a few of the definitions mentioned in the report are included.
+The following is \emph{not} a verbatim copy of individual modules from the
+implementation. Rather, this is a redacted and pre-formatted designed for
+presentation purposes. It's provided here as a convenience. The actual sources
+are the only authoritative source. Is something is not clear, please refer to
+those.
+\clearpage
+\section{Cubical}
+\label{sec:app-cubical}
+\begin{figure}[h]
+\begin{Verbatim}
+postulate
+  PathP : ∀ {ℓ} (A : I → Set ℓ) → A i0 → A i1 → Set ℓ
+
+module _ {ℓ} {A : Set ℓ} where
+  _≡_ : A → A → Set ℓ
+  _≡_ {A = A} = PathP (λ _ → A)
+
+  refl : {x : A} → x ≡ x
+  refl {x = x} = λ _ → x
+\end{Verbatim}
+\caption{Excerpt from the cubical library. Definition of the path-type.}
+\end{figure}
+%
+\begin{figure}[h]
+\begin{Verbatim}
+module _ {ℓ : Level} (A : Set ℓ) where
+  isContr : Set ℓ
+  isContr = Σ[ x ∈ A ] (∀ y → x ≡ y)
+
+  isProp  : Set ℓ
+  isProp  = (x y : A) → x ≡ y
+
+  isSet   : Set ℓ
+  isSet   = (x y : A) → (p q : x ≡ y) → p ≡ q
+
+  isGrpd  : Set ℓ
+  isGrpd  = (x y : A) → (p q : x ≡ y) → (a b : p ≡ q) → a ≡ b
+\end{Verbatim}
+\caption{Excerpt from the cubical library. Definition of the first few
+  homotopy-levels.}
+\end{figure}
+%
+\begin{figure}[h]
+\begin{Verbatim}
+module _ {ℓ ℓ'} {A : Set ℓ} {x : A}
+         (P : ∀ y → x ≡ y → Set ℓ') (d : P x ((λ i → x))) where
+  pathJ : (y : A) → (p : x ≡ y) → P y p
+  pathJ _ p = transp (λ i → uncurry P (contrSingl p i)) d
+\end{Verbatim}
+\clearpage
+\caption{Excerpt from the cubical library. Definition of based path-induction.}
+\end{figure}
+%
+\begin{figure}[h]
+\begin{Verbatim}
+module _ {ℓ ℓ'} {A : Set ℓ} {B : A → Set ℓ'} where
+  propPi : (h : (x : A) → isProp (B x)) → isProp ((x : A) → B x)
+  propPi h f0 f1  = λ i → λ x → (h x (f0 x) (f1 x)) i
+
+  lemPropF : (P : (x : A) → isProp (B x)) {a0 a1 : A}
+    (p : a0 ≡ a1) {b0 : B a0} {b1 : B a1} → PathP (λ i → B (p i)) b0 b1
+  lemPropF P p {b0} {b1} = λ i → P (p i)
+     (primComp (λ j → B (p (i ∧ j)) ) (~ i) (λ _ →  λ { (i = i0) → b0 }) b0)
+     (primComp (λ j → B (p (i ∨ ~ j)) ) (i) (λ _ → λ{ (i = i1) → b1 }) b1) i
+
+  lemSig : (pB : (x : A) → isProp (B x))
+    (u v : Σ A B) (p : fst u ≡ fst v) → u ≡ v
+  lemSig pB u v p = λ i → (p i) , ((lemPropF pB p) {snd u} {snd v} i)
+
+  propSig : (pA : isProp A) (pB : (x : A) → isProp (B x)) → isProp (Σ A B)
+  propSig pA pB t u = lemSig pB t u (pA (fst t) (fst u))
+\end{Verbatim}
+\caption{Excerpt from the cubical library. A few combinators.}
+\end{figure}
+\clearpage
+\section{Categories}
+\label{sec:app-categories}
+\begin{figure}[h]
+\begin{Verbatim}
+record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
+  field
+    Object   : Set ℓa
+    Arrow    : Object → Object → Set ℓb
+    identity : {A : Object} → Arrow A A
+    _<<<_    : {A B C : Object} → Arrow B C → Arrow A B → Arrow A C
+
+  _>>>_ : {A B C : Object} → (Arrow A B) → (Arrow B C) → Arrow A C
+  f >>> g = g <<< f
+
+  IsAssociative : Set (ℓa ⊔ ℓb)
+  IsAssociative = ∀ {A B C D} {f : Arrow A B} {g : Arrow B C} {h : Arrow C D}
+    → h <<< (g <<< f) ≡ (h <<< g) <<< f
+
+  IsIdentity : ({A : Object} → Arrow A A) → Set (ℓa ⊔ ℓb)
+  IsIdentity id = {A B : Object} {f : Arrow A B}
+    → id <<< f ≡ f × f <<< id ≡ f
+
+  ArrowsAreSets : Set (ℓa ⊔ ℓb)
+  ArrowsAreSets = ∀ {A B : Object} → isSet (Arrow A B)
+
+  IsInverseOf : ∀ {A B} → (Arrow A B) → (Arrow B A) → Set ℓb
+  IsInverseOf = λ f g → g <<< f ≡ identity × f <<< g ≡ identity
+
+  Isomorphism : ∀ {A B} → (f : Arrow A B) → Set ℓb
+  Isomorphism {A} {B} f = Σ[ g ∈ Arrow B A ] IsInverseOf f g
+
+  _≊_ : (A B : Object) → Set ℓb
+  _≊_ A B = Σ[ f ∈ Arrow A B ] (Isomorphism f)
+
+  IsTerminal : Object → Set (ℓa ⊔ ℓb)
+  IsTerminal T = {X : Object} → isContr (Arrow X T)
+
+  Terminal : Set (ℓa ⊔ ℓb)
+  Terminal = Σ Object IsTerminal
+\end{Verbatim}
+\caption{Excerpt from module \texttt{Cat.Category}. The definition of a category.}
+\end{figure}
+\clearpage
+\begin{figure}[h]
+\begin{Verbatim}
+module Univalence (isIdentity : IsIdentity identity) where
+  idIso : (A : Object) → A ≊ A
+  idIso A = identity , identity , isIdentity
+
+  idToIso : (A B : Object) → A ≡ B → A ≊ B
+  idToIso A B eq = subst eq (idIso A)
+
+  Univalent : Set (ℓa ⊔ ℓb)
+  Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≊ B) (idToIso A B)
+\end{Verbatim}
+\caption{Excerpt from module \texttt{Cat.Category}. Continued from previous. Definition of univalence.}
+\end{figure}
+\begin{figure}[h]
+\begin{Verbatim}
+module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
+  record IsPreCategory : Set (lsuc (ℓa ⊔ ℓb)) where
+    open RawCategory ℂ public
+    field
+      isAssociative : IsAssociative
+      isIdentity    : IsIdentity identity
+      arrowsAreSets : ArrowsAreSets
+    open Univalence isIdentity public
+
+  record PreCategory : Set (lsuc (ℓa ⊔ ℓb)) where
+    field
+      isPreCategory  : IsPreCategory
+    open IsPreCategory isPreCategory public
+
+  record IsCategory : Set (lsuc (ℓa ⊔ ℓb)) where
+    field
+      isPreCategory : IsPreCategory
+    open IsPreCategory isPreCategory public
+    field
+      univalent : Univalent
+\end{Verbatim}
+\caption{Excerpt from module \texttt{Cat.Category}. Records with inhabitants for
+  the laws defined in the previous listings.}
+\end{figure}
+\clearpage
+\begin{figure}[h]
+\begin{Verbatim}
+module Opposite {ℓa ℓb : Level} where
+  module _ (ℂ : Category ℓa ℓb) where
+    private
+      module _ where
+        module ℂ = Category ℂ
+        opRaw : RawCategory ℓa ℓb
+        RawCategory.Object   opRaw = ℂ.Object
+        RawCategory.Arrow    opRaw = flip ℂ.Arrow
+        RawCategory.identity opRaw = ℂ.identity
+        RawCategory._<<<_    opRaw = ℂ._>>>_
+
+        open RawCategory opRaw
+
+        isPreCategory : IsPreCategory opRaw
+        IsPreCategory.isAssociative isPreCategory = sym ℂ.isAssociative
+        IsPreCategory.isIdentity    isPreCategory = swap ℂ.isIdentity
+        IsPreCategory.arrowsAreSets isPreCategory = ℂ.arrowsAreSets
+
+      open IsPreCategory isPreCategory
+
+      ----------------------------
+      -- NEXT LISTING GOES HERE --
+      ----------------------------
+
+      isCategory : IsCategory opRaw
+      IsCategory.isPreCategory isCategory = isPreCategory
+      IsCategory.univalent     isCategory
+        = univalenceFromIsomorphism (isoToId* , inv)
+
+    opposite : Category ℓa ℓb
+    Category.raw        opposite = opRaw
+    Category.isCategory opposite = isCategory
+
+  module _ {ℂ : Category ℓa ℓb} where
+    open Category ℂ
+    private
+      rawInv : Category.raw (opposite (opposite ℂ)) ≡ raw
+      RawCategory.Object   (rawInv _) = Object
+      RawCategory.Arrow    (rawInv _) = Arrow
+      RawCategory.identity (rawInv _) = identity
+      RawCategory._<<<_    (rawInv _) = _<<<_
+
+    oppositeIsInvolution : opposite (opposite ℂ) ≡ ℂ
+    oppositeIsInvolution = Category≡ rawInv
+\end{Verbatim}
+\caption{Excerpt from module \texttt{Cat.Category}. Showing that the opposite
+  category is a category. Part of this listing has been cut out and placed in
+  the next listing.}
+\end{figure}
+\clearpage
+For reasons of formatting the following listing is continued from the above with
+fewer levels of indentation.
+%
+\begin{figure}[h]
+\begin{Verbatim}
+module _ {A B : ℂ.Object} where
+  open Σ (toIso _ _ (ℂ.univalent {A} {B}))
+    renaming (fst to idToIso* ; snd to inv*)
+  open AreInverses {f = ℂ.idToIso A B} {idToIso*} inv*
+
+  shuffle : A ≊ B → A ℂ.≊ B
+  shuffle (f , g , inv) = g , f , inv
+
+  shuffle~ : A ℂ.≊ B → A ≊ B
+  shuffle~ (f , g , inv) = g , f , inv
+
+  isoToId* : A ≊ B → A ≡ B
+  isoToId* = idToIso* ∘ shuffle
+
+  inv : AreInverses (idToIso A B) isoToId*
+  inv =
+    ( funExt (λ x → begin
+      (isoToId* ∘ idToIso A B) x
+        ≡⟨⟩
+      (idToIso* ∘ shuffle ∘ idToIso A B) x
+        ≡⟨ cong (λ φ → φ x)
+          (cong (λ φ → idToIso* ∘ shuffle ∘ φ) (funExt (isoEq refl))) ⟩
+      (idToIso* ∘ shuffle ∘ shuffle~ ∘ ℂ.idToIso A B) x
+        ≡⟨⟩
+      (idToIso* ∘ ℂ.idToIso A B) x
+        ≡⟨ (λ i → verso-recto i x) ⟩
+      x ∎)
+    , funExt (λ x → begin
+      (idToIso A B ∘ idToIso* ∘ shuffle) x
+        ≡⟨ cong (λ φ → φ x)
+          (cong (λ φ → φ ∘ idToIso* ∘ shuffle) (funExt (isoEq refl))) ⟩
+      (shuffle~ ∘ ℂ.idToIso A B ∘ idToIso* ∘ shuffle) x
+        ≡⟨ cong (λ φ → φ x)
+          (cong (λ φ → shuffle~ ∘ φ ∘ shuffle) recto-verso) ⟩
+      (shuffle~ ∘ shuffle) x
+        ≡⟨⟩
+      x ∎)
+    )
+\end{Verbatim}
+\caption{Excerpt from module \texttt{Cat.Category}. Proving univalence for the opposite category.}
+\end{figure}
+\clearpage
+\section{Products}
+\label{sec:app-products}
+\begin{figure}[h]
+\begin{Verbatim}
+module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+  open Category ℂ
+
+  module _ (A B : Object) where
+    record RawProduct : Set (ℓa ⊔ ℓb) where
+      no-eta-equality
+      field
+        object : Object
+        fst  : ℂ [ object , A ]
+        snd  : ℂ [ object , B ]
+
+    record IsProduct (raw : RawProduct) : Set (ℓa ⊔ ℓb) where
+      open RawProduct raw public
+      field
+        ump : ∀ {X : Object} (f : ℂ [ X , A ]) (g : ℂ [ X , B ])
+          → ∃![ f×g ] (ℂ [ fst ∘ f×g ] ≡ f P.× ℂ [ snd ∘ f×g ] ≡ g)
+
+    record Product : Set (ℓa ⊔ ℓb) where
+      field
+        raw        : RawProduct
+        isProduct  : IsProduct raw
+
+      open IsProduct isProduct public
+
+\end{Verbatim}
+\caption{Excerpt from module \texttt{Cat.Category.Product}. Definition of products.}
+\end{figure}
+%
+\begin{figure}[h]
+\begin{Verbatim}
+module _{ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
+  (let module ℂ = Category ℂ) {A* B* : ℂ.Object} where
+
+  module _ where
+    raw : RawCategory _ _
+    raw = record
+      { Object = Σ[ X ∈ ℂ.Object ] ℂ.Arrow X A* × ℂ.Arrow X B*
+      ; Arrow = λ{ (A , a0 , a1) (B , b0 , b1)
+        → Σ[ f ∈ ℂ.Arrow A B ]
+            ℂ [ b0 ∘ f ] ≡ a0
+          × ℂ [ b1 ∘ f ] ≡ a1
+          }
+      ; identity = λ{ {X , f , g}
+          → ℂ.identity {X} , ℂ.rightIdentity , ℂ.rightIdentity
+        }
+      ; _<<<_ = λ { {_ , a0 , a1} {_ , b0 , b1} {_ , c0 , c1}
+        (f , f0 , f1) (g , g0 , g1)
+        → (f ℂ.<<< g)
+          , (begin
+              ℂ [ c0 ∘ ℂ [ f ∘ g ] ] ≡⟨ ℂ.isAssociative ⟩
+              ℂ [ ℂ [ c0 ∘ f ] ∘ g ] ≡⟨ cong (λ φ → ℂ [ φ ∘ g ]) f0 ⟩
+              ℂ [ b0 ∘ g ] ≡⟨ g0 ⟩
+              a0 ∎
+            )
+          , (begin
+             ℂ [ c1 ∘ ℂ [ f ∘ g ] ] ≡⟨ ℂ.isAssociative ⟩
+             ℂ [ ℂ [ c1 ∘ f ] ∘ g ] ≡⟨ cong (λ φ → ℂ [ φ ∘ g ]) f1 ⟩
+             ℂ [ b1 ∘ g ] ≡⟨ g1 ⟩
+              a1 ∎
+            )
+        }
+      }
+\end{Verbatim}
+\caption{Excerpt from module \texttt{Cat.Category.Product}. Definition of ``pair category''.}
+\end{figure}
+\clearpage
+\section{Monads}
+\label{sec:app-monads}
+\begin{figure}[h]
+\begin{Verbatim}
+module Cat.Category.Monad.Kleisli
+  {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+
+record RawMonad : Set ℓ where
+  field
+    omap : Object → Object
+    pure : {X : Object}   → ℂ [ X , omap X ]
+    bind : {X Y : Object} → ℂ [ X , omap Y ] → ℂ [ omap X , omap Y ]
+
+  fmap : ∀ {A B} → ℂ [ A , B ] → ℂ [ omap A , omap B ]
+  fmap f = bind (pure <<< f)
+
+  _>=>_ : {A B C : Object}
+    → ℂ [ A , omap B ] → ℂ [ B , omap C ] → ℂ [ A , omap C ]
+  f >=> g = f >>> (bind g)
+
+  join : {A : Object} → ℂ [ omap (omap A) , omap A ]
+  join = bind identity
+
+  IsIdentity     = {X : Object}
+    → bind pure ≡ identity {omap X}
+  IsNatural      = {X Y : Object}   (f : ℂ [ X , omap Y ])
+    → pure >=> f ≡ f
+  IsDistributive = {X Y Z : Object}
+      (g : ℂ [ Y , omap Z ]) (f : ℂ [ X , omap Y ])
+    → (bind f) >>> (bind g) ≡ bind (f >=> g)
+
+record IsMonad (raw : RawMonad) : Set ℓ where
+  open RawMonad raw public
+  field
+    isIdentity     : IsIdentity
+    isNatural      : IsNatural
+    isDistributive : IsDistributive
+\end{Verbatim}
+\caption{Excerpt from module \texttt{Cat.Category.Monad.Kleisli}. Definition of
+  Kleisli monads.}
+\end{figure}
+%
+\begin{figure}[h]
+\begin{Verbatim}
+module Cat.Category.Monad.Monoidal
+  {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+
+private
+  ℓ = ℓa ⊔ ℓb
+
+open Category ℂ using (Object ; Arrow ; identity ; _<<<_)
+
+record RawMonad : Set ℓ where
+  field
+    R      : EndoFunctor ℂ
+    pureNT : NaturalTransformation Functors.identity R
+    joinNT : NaturalTransformation F[ R ∘ R ] R
+
+  Romap = Functor.omap R
+  fmap = Functor.fmap R
+
+  pureT : Transformation Functors.identity R
+  pureT = fst pureNT
+
+  pure : {X : Object} → ℂ [ X , Romap X ]
+  pure = pureT _
+
+  pureN : Natural Functors.identity R pureT
+  pureN = snd pureNT
+
+  joinT : Transformation F[ R ∘ R ] R
+  joinT = fst joinNT
+  join : {X : Object} → ℂ [ Romap (Romap X) , Romap X ]
+  join = joinT _
+  joinN : Natural F[ R ∘ R ] R joinT
+  joinN = snd joinNT
+
+  bind : {X Y : Object} → ℂ [ X , Romap Y ] → ℂ [ Romap X , Romap Y ]
+  bind {X} {Y} f = join <<< fmap f
+
+  IsAssociative : Set _
+  IsAssociative = {X : Object}
+    → joinT X <<< fmap join ≡ join <<< join
+  IsInverse : Set _
+  IsInverse = {X : Object}
+    → join <<< pure      ≡ identity {Romap X}
+    × join <<< fmap pure ≡ identity {Romap X}
+
+record IsMonad (raw : RawMonad) : Set ℓ where
+  open RawMonad raw public
+  field
+    isAssociative : IsAssociative
+    isInverse     : IsInverse
+\end{Verbatim}
+\caption{Excerpt from module \texttt{Cat.Category.Monad.Monoidal}. Definition of
+  Monoidal monads.}
+\end{figure}
