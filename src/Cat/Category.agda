@@ -658,14 +658,9 @@ module Opposite {ℓa ℓb : Level} where
       open IsPreCategory isPreCategory
 
       module _ {A B : ℂ.Object} where
-        k : TypeIsomorphism (ℂ.idToIso A B)
-        k = toIso _ _ ℂ.univalent
-        open Σ k renaming (fst to η ; snd to inv-η)
-        open AreInverses {f = ℂ.idToIso A B} {η} inv-η
-
-        genericly : {ℓa ℓb ℓc : Level} {a : Set ℓa} {b : Set ℓb} {c : Set ℓc}
-          → a × b × c → b × a × c
-        genericly (a , b , c) = (b , a , c)
+        open Σ (toIso _ _ (ℂ.univalent {A} {B}))
+          renaming (fst to idToIso* ; snd to inv*)
+        open AreInverses {f = ℂ.idToIso A B} {idToIso*} inv*
 
         shuffle : A ≊ B → A ℂ.≊ B
         shuffle (f , g , inv) = g , f , inv
@@ -673,37 +668,38 @@ module Opposite {ℓa ℓb : Level} where
         shuffle~ : A ℂ.≊ B → A ≊ B
         shuffle~ (f , g , inv) = g , f , inv
 
-        -- Shouldn't be necessary to use `arrowsAreSets` here, but we have it,
-        -- so why not?
         lem : (p : A ≡ B) → idToIso A B p ≡ shuffle~ (ℂ.idToIso A B p)
         lem p = isoEq refl
 
-        ζ : A ≊ B → A ≡ B
-        ζ = η ∘ shuffle
+        isoToId* : A ≊ B → A ≡ B
+        isoToId* = idToIso* ∘ shuffle
 
-        -- inv : AreInverses (ℂ.idToIso A B) f
-        inv-ζ : AreInverses (idToIso A B) ζ
-        -- recto-verso : ℂ.idToIso A B <<< f ≡ idFun (A ℂ.≊ B)
-        inv-ζ = record
-          { fst = funExt (λ x → begin
-            (ζ ∘ idToIso A B) x                       ≡⟨⟩
-            (η  ∘ shuffle ∘ idToIso A B) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → η ∘ shuffle ∘ φ) (funExt lem)) ⟩
-            (η  ∘ shuffle ∘ shuffle~ ∘ ℂ.idToIso A B) x ≡⟨⟩
-            (η  ∘ ℂ.idToIso A B) x                     ≡⟨ (λ i → verso-recto i x) ⟩
+        inv : AreInverses (idToIso A B) isoToId*
+        inv =
+          ( funExt (λ x → begin
+            (isoToId* ∘ idToIso A B) x
+              ≡⟨⟩
+            (idToIso*  ∘ shuffle ∘ idToIso A B) x
+              ≡⟨ cong (λ φ → φ x) (cong (λ φ → idToIso* ∘ shuffle ∘ φ) (funExt lem)) ⟩
+            (idToIso*  ∘ shuffle ∘ shuffle~ ∘ ℂ.idToIso A B) x
+              ≡⟨⟩
+            (idToIso*  ∘ ℂ.idToIso A B) x
+              ≡⟨ (λ i → verso-recto i x) ⟩
             x ∎)
-          ; snd = funExt (λ x → begin
-            (idToIso A B ∘ η ∘ shuffle) x             ≡⟨ cong (λ φ → φ x) (cong (λ φ → φ ∘ η ∘ shuffle) (funExt lem)) ⟩
-            (shuffle~ ∘ ℂ.idToIso A B ∘ η ∘ shuffle) x ≡⟨ cong (λ φ → φ x) (cong (λ φ → shuffle~ ∘ φ ∘ shuffle) recto-verso) ⟩
-            (shuffle~ ∘ shuffle) x                       ≡⟨⟩
+          , funExt (λ x → begin
+            (idToIso A B ∘ idToIso* ∘ shuffle) x
+              ≡⟨ cong (λ φ → φ x) (cong (λ φ → φ ∘ idToIso* ∘ shuffle) (funExt lem)) ⟩
+            (shuffle~ ∘ ℂ.idToIso A B ∘ idToIso* ∘ shuffle) x
+              ≡⟨ cong (λ φ → φ x) (cong (λ φ → shuffle~ ∘ φ ∘ shuffle) recto-verso) ⟩
+            (shuffle~ ∘ shuffle) x
+              ≡⟨⟩
             x ∎)
-          }
-
-        h : TypeIsomorphism (idToIso A B)
-        h = ζ , inv-ζ
+          )
 
       isCategory : IsCategory opRaw
       IsCategory.isPreCategory isCategory = isPreCategory
-      IsCategory.univalent     isCategory = univalenceFromIsomorphism h
+      IsCategory.univalent     isCategory
+        = univalenceFromIsomorphism (isoToId* , inv)
 
     opposite : Category ℓa ℓb
     Category.raw        opposite = opRaw
