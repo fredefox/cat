@@ -15,10 +15,21 @@ Dependencies
 To succesfully compile the following is needed:
 
 * The Agda release candidate 2.5.4[^1]
-* The experimental branch of [Agda Standard Library](https://github.com/agda/agda-stdlib)
+* [Agda Standard Library](https://github.com/agda/agda-stdlib)
 * [Cubical](https://github.com/Saizan/cubical-demo/)
 
 [^1]: At least version >= [`707ce6042b6a3bdb26521f3fe8dfe5d8a8470a43`](https://github.com/agda/agda/commit/707ce6042b6a3bdb26521f3fe8dfe5d8a8470a43)
+
+The version of the libraries that this depends on can be shown by
+executing the following command in the root directory of the project:
+
+    git submodule foreach git rev-parse HEAD
+
+Unfortunately Agda's module system does not allow us to automatically
+add these dependencies. So you'll have to make sure you're using
+versions of these libraries that are compatible with this
+project. Since this information is only provided as documentation it
+may also noot be up-to-date so beware.
 
 It's important to have the right version of these - but which one is the right
 is in constant flux. It's most likely the newest one.
