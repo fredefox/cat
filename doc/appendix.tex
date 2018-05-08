@@ -1,0 +1,37 @@
+\lstset{basicstyle=\footnotesize\ttfamily,breaklines=true,breakpages=true}
+\def\fileps
+  { ../src/Cat.agda
+  , ../src/Cat/Categories/Cat.agda
+  , ../src/Cat/Categories/Cube.agda
+  , ../src/Cat/Categories/CwF.agda
+  , ../src/Cat/Categories/Fam.agda
+  , ../src/Cat/Categories/Free.agda
+  , ../src/Cat/Categories/Fun.agda
+  , ../src/Cat/Categories/Rel.agda
+  , ../src/Cat/Categories/Sets.agda
+  , ../src/Cat/Category.agda
+  , ../src/Cat/Category/CartesianClosed.agda
+  , ../src/Cat/Category/Exponential.agda
+  , ../src/Cat/Category/Functor.agda
+  , ../src/Cat/Category/Monad.agda
+  , ../src/Cat/Category/Monad/Kleisli.agda
+  , ../src/Cat/Category/Monad/Monoidal.agda
+  , ../src/Cat/Category/Monad/Voevodsky.agda
+  , ../src/Cat/Category/Monoid.agda
+  , ../src/Cat/Category/NaturalTransformation.agda
+  , ../src/Cat/Category/Product.agda
+  , ../src/Cat/Category/Yoneda.agda
+  , ../src/Cat/Equivalence.agda
+  , ../src/Cat/Prelude.agda
+  }
+
+\foreach \filep in \fileps {
+\chapter{\filep}
+     %% \begin{figure}[htpb]
+        \lstinputlisting{\filep}
+     %%    \caption{Source code for \texttt{\filep}}
+     %% \label{fig:\filep}
+   %% \end{figure}
+}
+%% \lstset{framextopmargin=50pt}
+%% \lstinputlisting{../../src/Cat.agda}

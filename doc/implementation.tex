@@ -1,0 +1,1325 @@
+\chapter{Category Theory}
+\label{ch:implementation}
+This implementation formalizes the following concepts:
+%
+\begin{enumerate}[i.]
+\item Categories
+\item Functors
+\item Products
+\item Exponentials
+\item Cartesian closed categories
+\item Natural transformations
+\item Yoneda embedding
+\item Monads
+\item Categories
+  \begin{enumerate}[i.]
+  \item Opposite category
+  \item Category of sets
+  \item ``Pair category''
+  \end{enumerate}
+\end{enumerate}
+%
+Furthermore the following items have been partly formalized:
+%
+\begin{enumerate}[i.]
+\item The (higher) category of categories.
+\item Category of relations
+\item Category of functors and natural transformations -- only as a precategory
+\item Free category
+\item Monoidal objects
+\item Monoidal categories
+\end{enumerate}
+%
+As well as a range of various results about these. E.g. I have shown that the
+category of sets has products. In the following I aim to demonstrate some of the
+techniques employed in this formalization and in the interest of brevity I will
+not detail all the things I have formalized. In stead, I have selected a parts
+of this formalization that highlight some interesting proof techniques relevant
+to doing proofs in Cubical Agda.
+
+One such technique that is pervasive to this formalization is the idea of
+distinguishing types with more or less homotopical structure. To do this I have
+followed the following design-principle: I have split concepts up into things
+that represent ``data'' and ``laws'' about this data. The idea is that we can
+provide a proof that the laws are mere propositions. As an example a category is
+defined to have two members: `raw` which is a collection of the data and
+`isCategory` which asserts some laws about that data.
+
+This allows me to reason about things in a more ``standard mathematical way'',
+where one can reason about two categories by simply focusing on the data. This
+is achieved by creating a function embodying the ``equality principle'' for a
+given type.
+
+For the rest of this chapter I will present some of these results. For didactic
+reasons no source-code has been included in this chapter. To see the formal
+definitions excerpts of the implementation have been included in appendix
+\ref{ch:app-sources}.
+
+\section{Categories}
+The data for a category consist of a type for the sort of objects; a type for
+the sort of arrows; an identity arrow and a composition operation for arrows.
+Another record encapsulates some laws about this data: associativity of
+composition, identity law for the identity morphism. These are standard
+constituents of a category and can be found in typical mathematical expositions
+on the topic. We, however, impose one further requirement on what it means to be
+a category, namely that the type of arrows form a set.
+
+Such categories are called \nomen{1-categories}. It's possible to relax this
+requirement. This would lead to the notion of higher categories (\cite[p.
+  307]{hott-2013}). For the purpose of this project, however, this report will
+restrict itself to 1-categories. Making based on higher categories would be a
+very natural possible extension of this work.
+
+Raw categories satisfying all of the above requirements are called a
+\nomen{pre}-categories. As a further requirement to be a proper category we
+require it to be univalent. Before we can define this, I must introduce two more
+definitions: If we let $p$ be a witness to the identity law, which formally is:
+%
+\begin{equation}
+  \label{eq:identity}
+  \var{IsIdentity} \defeq
+  \prod_{A\ B \tp \Object} \prod_{f \tp A \to B}
+    \id \comp f \equiv f \x f \comp \id \equiv f
+\end{equation}
+%
+Then we can construct the identity isomorphism $\var{idIso} \tp \identity,
+\identity, p \tp A \approxeq A$ for any object $A$. Here $\approxeq$ denotes
+isomorphism on objects (whereas $\cong$ denotes isomorphism of types). This will
+be elaborated further on in sections \ref{sec:equiv} and \ref{sec:univalence}.
+Moreover, due to substitution for paths we can construct an isomorphism from
+\emph{any} path:
+%
+\begin{equation}
+\var{idToIso} \tp A ≡ B → A ≊ B
+\end{equation}
+%
+The univalence criterion for categories states that this map must be an
+equivalence. The requirement is similar to univalence for types, but where
+isomorphism on objects play the role of equivalence on types. Formally:
+%
+\begin{align}
+\label{eq:cat-univ}
+\isEquiv\ (A \equiv B)\ (A \approxeq B)\ \idToIso
+\end{align}
+%
+Note that \ref{eq:cat-univ} is \emph{not} the same as:
+%
+\begin{equation}
+\label{eq:cat-univalence}
+\tag{Univalence, category}
+(A \equiv B) \simeq (A \approxeq B)
+\end{equation}
+%
+However the two are logically equivalent: One can construct the latter from the
+former simply by ``forgetting'' that $\idToIso$ plays the role of the
+equivalence. The other direction is more involved and will be discussed in
+section \ref{sec:univalence}.
+
+In summary, the definition of a category is the following collection of data:
+%
+\begin{align}
+  \Object   & \tp \Type \\
+  \Arrow    & \tp \Object \to \Object \to \Type \\
+  \identity & \tp \Arrow\ A\ A \\
+  \lll      & \tp \Arrow\ B\ C \to \Arrow\ A\ B \to \Arrow\ A\ C
+\end{align}
+%
+And laws:
+%
+\begin{align}
+\tag{associativity}
+h \lll (g \lll f) ≡ (h \lll g) \lll f \\
+\tag{identity}
+\identity \lll f ≡ f \x
+f \lll \identity ≡ f
+\\
+\label{eq:arrows-are-sets}
+\tag{arrows are sets}
+\isSet\ (\Arrow\ A\ B)\\
+\tag{\ref{eq:cat-univ}}
+\isEquiv\ (A \equiv B)\ (A \approxeq B)\ \idToIso
+\end{align}
+%
+$\lll$ denotes arrow composition (right-to-left), and reverse function
+composition (left-to-right, diagrammatic order) is denoted $\rrr$. The objects
+($A$, $B$ and $C$) and arrow ($f$, $g$, $h$) are implicitly universally
+quantified.
+
+With all this in place it is now possible to prove that all the laws are indeed
+mere propositions. Most of the proofs simply use the fact that the type of
+arrows are sets. This is because most of the laws are a collection of equations
+between arrows in the category. And since such a proof does not have any content
+exactly because the type of arrows form a set, two witnesses must be the same.
+All the proofs are really quite mechanical. Lets have a look at one of them.
+Proving that \ref{eq:identity} is a mere proposition:
+%
+\begin{equation}
+  \isProp\ \var{IsIdentity}
+\end{equation}
+%
+There are multiple ways to prove this. Perhaps one of the more intuitive proofs
+is by way of the `combinators' $\propPi$ and $\propSig$ presented in sections
+\ref{sec:propPi} and \ref{sec:propSig}:
+%
+\begin{align*}
+\var{propPi} & \tp \left(\prod_{a \tp A} \isProp\ (P\ a)\right) \to \isProp\ \left(\prod_{a \tp A} P\ a\right)
+  \\
+\var{propSig} & \tp \isProp\ A \to \left(\prod_{a \tp A} \isProp\ (P\ a)\right) \to \isProp\ \left(\sum_{a \tp A} P\ a\right)
+\end{align*}
+%
+So the proof goes like this: We `eliminate' the 3 function abstractions by
+applying $\propPi$ three times. So our proof obligation becomes:
+%
+$$
+\isProp \left( \id \comp f \equiv f \x f \comp \id \equiv f \right)
+$$
+%
+Then we eliminate the (non-dependent) sigma-type by applying $\propSig$ giving
+us the two obligations: $\isProp\ (\id \comp f \equiv f)$ and $\isProp\ (f \comp
+\id \equiv f)$ which follows from the type of arrows being a
+set.
+
+This example illustrates nicely how we can use these combinators to reason about
+`canonical' types like $\sum$ and $\prod$. Similar combinators can be defined
+at the other homotopic levels. These combinators are however not applicable in
+situations where we want to reason about other types - e.g. types we've defined
+ourselves. For instance, after we've proven that all the projections of
+pre-categories are propositions, then we would like to bundle this up to show
+that the type of pre-categories is also a proposition. Formally:
+%
+\begin{equation}
+\label{eq:propIsPreCategory}
+\isProp\ \IsPreCategory
+\end{equation}
+%
+Where The definition of $\IsPreCategory$ is the triple:
+%
+\begin{align*}
+\var{isAssociative} & \tp \var{IsAssociative}\\
+\var{isIdentity}    & \tp \var{IsIdentity}\\
+\var{arrowsAreSets} & \tp \var{ArrowsAreSets}
+\end{align*}
+%
+Each corresponding to the first three laws for categories. Note that since
+$\IsPreCategory$ is not formulated with a chain of sigma-types we wont have any
+combinators available to help us here. In stead we'll have to use the path-type
+directly.
+
+\ref{eq:propIsPreCategory} is judgmentally the same as
+%
+$$
+\prod_{a\ b \tp \IsPreCategory} a \equiv b
+$$
+%
+So let $a\ b \tp \IsPreCategory$ be given. To prove the equality $a \equiv b$ is
+to give a continuous path from the index-type into the path-space. I.e. a
+function $I \to \IsPreCategory$. This path must satisfy being being judgmentally
+the same as $a$ at the left endpoint and $b$ at the right endpoint. We know we
+can form a continuous path between all projections of $a$ and $b$, this follows
+from the type of all the projections being mere propositions. For instance, the
+path between $a.\isIdentity$ and $b.\isIdentity$ is simply formed by:
+%
+$$
+\propIsIdentity\ a.\isIdentity\ b.\isIdentity
+\tp
+a.\isIdentity \equiv b.\isIdentity
+$$
+%
+So to give the continuous function $I \to \IsPreCategory$, which is our goal, we
+introduce $i \tp I$ and proceed by constructing an element of $\IsPreCategory$
+by using the fact that all the projections are propositions to generate paths
+between all projections. Once we have such a path e.g. $p \tp a.\isIdentity
+\equiv b.\isIdentity$ we can eliminate it with $i$ and thus obtain $p\ i \tp
+(p\ i).\isIdentity$. This element satisfies exactly that it corresponds to the
+corresponding projections at either endpoint. Thus the element we construct at
+$i$ becomes the triple:
+%
+\begin{equation}
+\label{eq:proof-prop-IsPreCategory}
+\begin{aligned}
+  & \var{propIsAssociative} && a.\var{isAssociative}\
+       && b.\var{isAssociative} && i  \\
+  & \var{propIsIdentity}    && a.\var{isIdentity}\
+       && b.\var{isIdentity}    && i  \\
+  & \var{propArrowsAreSets} && a.\var{arrowsAreSets}\
+       && b.\var{arrowsAreSets} && i
+\end{aligned}
+\end{equation}
+%
+I've found this to be a general pattern when proving things in homotopy type
+theory, namely that you have to wrap and unwrap equalities at different levels.
+It is worth noting that proving this theorem with the regular inductive equality
+type would already not be possible, since we at least need extensionality (the
+projections are all $\prod$-types). Assuming we had functional extensionality
+available to us as an axiom, we would use functional extensionality (in
+reverse?) to retrieve the equalities in $a$ and $b$, pattern-match on them to
+see that they are both $\var{refl}$ and then close the proof with $\var{refl}$.
+Of course this theorem is not so interesting in the setting of ITT since we know
+a priori that equality proofs are unique.
+
+The situation is a bit more complicated when we have a dependent type. For
+instance, when we want to show that $\IsCategory$ is a mere proposition.
+$\IsCategory$ is a record with two fields, a witness to being a pre-category and
+the univalence condition. Recall that the univalence condition is indexed by the
+identity-proof. So to follow the same recipe as above, let $a\ b \tp
+\IsCategory$ be given, to show them equal, we now need to give two paths. One homogeneous:
+%
+$$
+p \tp a.\isPreCategory \equiv b.\isPreCategory
+$$
+%
+and one heterogeneous:
+%
+$$
+\Path\ (\lambda\; i \to (p\ i).Univalent)\ a.\isPreCategory\ b.\isPreCategory
+$$
+%
+Which depends on the choice of $p$. The first of these we can provide since, as
+we have shown, $\IsPreCategory$ is a proposition. However, even though
+$\Univalent$ is also a proposition, we cannot use this directly to show the
+latter. This is because $\isProp$ talks about non-dependent paths. So we need to
+'promote' the result that univalence is a proposition to a heterogeneous path.
+To this end we can use $\lemPropF$, which was introduced in \ref{sec:lemPropF}.
+
+In this case $A = \var{IsIdentity}\ \identity$ and $B = \var{Univalent}$. We've
+shown that being a category is a proposition, a result that holds for any choice
+of identity proof. Finally we must provide a proof that the identity proofs at
+$a$ and $b$ are indeed the same, this we can extract from $p$ by applying
+congruence of paths:
+%
+$$
+\congruence\ \var{isIdentity}\ p
+$$
+%
+And this finishes the proof that being-a-category is a mere proposition
+(\ref{eq:propIsPreCategory}).
+
+When we have a proper category we can make precise the notion of ``identifying
+isomorphic types'' \TODO{cite Awodey here}. That is, we can construct the
+function:
+%
+$$
+\isoToId \tp (A \approxeq B) \to (A \equiv B)
+$$
+%
+A perhaps somewhat surprising application of this is that we can show that
+terminal objects are propositional:
+%
+\begin{align}
+\label{eq:termProp}
+\isProp\ \var{Terminal}
+\end{align}
+%
+It follows from the usual observation that any two terminal objects are
+isomorphic - and since categories are univalent, so are they equal. The proof is
+omitted here, but the curious reader can check the implementation for the
+details. \TODO{The proof is a bit fun, should I include it?}
+
+\section{Equivalences}
+\label{sec:equiv}
+The usual notion of a function $f \tp A \to B$ having an inverses is:
+%
+\begin{equation}
+\label{eq:isomorphism}
+\sum_{g \tp B \to A} f \comp g \equiv \identity_{B} \x g \comp f \equiv \identity_{A}
+\end{equation}
+%
+This is defined in \cite[p. 129]{hott-2013} where it is referred to as the a
+``quasi-inverse''. We shall refer to the type \ref{eq:isomorphism} as
+$\Isomorphism\ f$. This also gives rise to the following type:
+%
+\begin{equation}
+A \cong B \defeq \sum_{f \tp A \to B} \Isomorphism\ f
+\end{equation}
+%
+At the same place \cite{hott-2013} gives an ``interface'' for what the judgment
+$\isEquiv \tp (A \to B) \to \MCU$ must provide:
+%
+\begin{align}
+\var{fromIso}   & \tp \Isomorphism\ f \to \isEquiv\ f \\
+\var{toIso}     & \tp \isEquiv\ f \to \Isomorphism\ f \\
+\label{eq:propIsEquiv}
+                &\mathrel{\ } \isEquiv\ f
+\end{align}
+%
+The maps $\var{fromIso}$ and $\var{toIso}$ naturally extend to these maps:
+%
+\begin{align}
+\var{fromIsomorphism} & \tp A \cong B \to A \simeq B \\
+\var{toIsomorphism}   & \tp A \simeq B \to A \cong B
+\end{align}
+%
+Having this interface gives us both: a way to think rather abstractly about how
+to work with equivalences and a way to use ad hoc definitions of equivalences.
+The specific instantiation of $\isEquiv$ as defined in \cite{cubical-agda} is:
+%
+$$
+isEquiv\ f \defeq \prod_{b \tp B} \isContr\ (\fiber\ f\ b)
+$$
+where
+$$
+\fiber\ f\ b \defeq \sum_{a \tp A} \left( b \equiv f\ a \right)
+$$
+%
+I give it's definition here mainly for completeness, because as I stated we can
+move away from this specific instantiation and think about it more abstractly
+once we have shown that this definition actually works as an equivalence.
+
+$\var{fromIso}$ can be found in \cite{cubical-agda} where it is known as
+$\var{gradLemma}$. The implementation of $\var{fromIso}$ as well as the proof
+that this equivalence is a proposition (\ref{eq:propIsEquiv}) can be found in my
+implementation.
+
+We say that two types $A\;B \tp \Type$ are equivalent exactly if there exists an
+equivalence between them:
+%
+\begin{equation}
+\label{eq:equivalence}
+A \simeq B \defeq \sum_{f \tp A \to B} \isEquiv\ f
+\end{equation}
+%
+Note that the term equivalence here is overloaded referring both to the map $f
+\tp A \to B$ and the type $A \simeq B$. The notion of an isomorphism is
+similarly conflated as isomorphism can refer to the type $A \cong B$ as well as
+the the map $A \to B$ that witness this. I will use these conflated terms when
+it is clear from the context what is being referred to.
+
+Both $\cong$ and $\simeq$ form equivalence relations (no pun intended).
+
+\section{Univalence}
+\label{sec:univalence}
+As noted in the introduction the univalence for types $A\; B \tp \Type$ states
+that:
+%
+$$
+\var{Univalence} \defeq (A \equiv B) \simeq (A \simeq B)
+$$
+%
+As mentioned the univalence criterion for some category $\bC$ says that for all
+\emph{objects} $A\;B$ we must have:
+$$
+\isEquiv\ (A \equiv B)\ (A \approxeq B)\ \idToIso
+$$
+And I mentioned that this was logically equivalent to
+%
+$$
+(A \equiv B) \simeq (A \approxeq B)
+$$
+%
+Given that we saw in the previous section that we can construct an equivalence
+from an isomorphism it suffices to demonstrate:
+%
+$$
+(A \equiv B) \cong (A \approxeq B)
+$$
+%
+That is, we must demonstrate that there is an isomorphism (on types) between
+equalities and isomorphisms (on arrows). It's worthwhile to dwell on this for a
+few seconds. This type looks very similar to univalence for types and is
+therefore perhaps a bit more intuitive to grasp the implications of. Of course
+univalence for types (which is a proposition -- i.e. provable) does not imply
+univalence of all pre-category since morphisms in a category are not regular
+functions -- in stead they can be thought of as a generalization hereof. The univalence criterion therefore is simply a way of restricting arrows
+to behave similarly to maps.
+
+I will now mention a few helpful theorems that follow from univalence that will
+become useful later.
+
+Obviously univalence gives us an isomorphism between $A \equiv B$ and $A
+\approxeq B$. I will name these for convenience:
+%
+$$
+\idToIso \tp A \equiv B \to A \approxeq B
+$$
+%
+$$
+\isoToId \tp A \approxeq B \to A \equiv B
+$$
+%
+The next few theorems are variations on theorem 9.1.9 from \cite{hott-2013}. Let
+an isomorphism $A \approxeq B$ in some category $\bC$ be given. Name the
+isomorphism $\iota \tp A \to B$ and its inverse $\inv{\iota} \tp B \to A$.
+Since $\bC$ is a category (and therefore univalent) the isomorphism induces a
+path $p \tp A \equiv B$. From this equality we can get two further paths:
+$p_{\var{dom}} \tp \var{Arrow}\ A\ X \equiv \var{Arrow}\ B\ X$ and
+$p_{\var{cod}} \tp \var{Arrow}\ X\ A \equiv \var{Arrow}\ X\ B$. We
+then have the following two theorems:
+%
+\begin{align}
+\label{eq:coeDom}
+\var{coeDom} & \tp \prod_{f \tp A \to X}
+\var{coe}\ p_{\var{dom}}\ f \equiv f \lll \inv{\iota}
+\\
+\label{eq:coeCod}
+\var{coeCod} & \tp \prod_{f \tp A \to X}
+\var{coe}\ p_{\var{cod}}\ f \equiv \iota \lll f
+\end{align}
+%
+I will give the proof of the first theorem here, the second one is analogous.
+%
+\begin{align*}
+\var{coe}\ p_{\var{dom}}\ f
+  & \equiv f \lll \inv{(\var{idToIso}\ p)} && \text{lemma} \\
+  & \equiv f \lll \inv{\iota}
+    && \text{$\var{idToIso}$ and $\var{isoToId}$ are inverses}\\
+\end{align*}
+%
+In the second step we use the fact that $p$ is constructed from the isomorphism
+$\iota$ -- $\inv{(\var{idToIso}\ p)}$ denotes the map $B \to A$ induced by the
+isomorphism $\var{idToIso}\ p \tp A \cong B$. The helper-lemma is similar to
+what we're trying to prove but talks about paths rather than isomorphisms:
+%
+\begin{equation}
+\label{eq:coeDomIso}
+\prod_{f \tp \var{Arrow}\ A\ B} \prod_{p \tp A \equiv B}
+\var{coe}\ p_{\var{dom}}\ f \equiv f \lll \inv{(\var{idToIso}\ p)}
+\end{equation}
+%
+Again $p_{\var{dom}}$ denotes the path $\var{Arrow}\ A\ X \equiv
+\var{Arrow}\ B\ X$ induced by $p$. To prove this statement I let $f$ and $p$
+be given and then invoke based-path-induction. The induction will be based at $A
+\tp \var{Object}$, so let $\widetilde{B} \tp \Object$ and $\widetilde{p} \tp
+A \equiv \widetilde{B}$ be given. The family that we perform induction over will
+be:
+%
+$$
+\var{coe}\ {\widetilde{p}}^*\ f
+\equiv
+f \lll \inv{(\var{idToIso}\ \widetilde{p})}
+$$
+The base-case therefore becomes:
+\begin{align*}
+\var{coe}\ {\widetilde{\refl}}^*\ f
+& \equiv f \\
+& \equiv f \lll \var{identity} \\
+& \equiv f \lll \inv{(\var{idToIso}\ \widetilde{\refl})}
+\end{align*}
+%
+The first step follows because reflexivity is a neutral element for coercion.
+The second step is the identity law in the category. The last step has to do
+with the fact that $\var{idToIso}$ is constructed by substituting according to
+the supplied path and since reflexivity is also the neutral element for
+substitutions we arrive at the desired expression. To close the
+based-path-induction we must supply the value ``at the other''. In this case
+this is simply $B \tp \Object$ and $p \tp A \equiv B$ which we have.
+
+And this finishes the proof of \ref{eq:coeDomIso} and thus \ref{eq:coeDom}.
+%
+\section{Categories}
+\subsection{Opposite category}
+\label{op-cat}
+The first category I'll present is a pure construction on categories. Given some
+category we can construct it's dual, called the opposite category. Starting with
+a simple example allows us to focus on how we work with equivalences and
+univalence in a very simple category where the structure of the category is
+rather simple.
+
+Let $\bC$ be some category, we then define the opposite category
+$\bC^{\var{Op}}$. It has the same objects, but the type of arrows are flipped,
+that is to say an arrow from $A$ to $B$ in the opposite category corresponds to
+an arrow from $B$ to $A$ in the underlying category. The identity arrow is the
+same as the one in the underlying category (they have the same type). Function
+composition will be reverse function composition from the underlying category.
+
+I'll refer to things in terms of the underlying category, unless they have an
+over-bar. So e.g. $\idToIso$ is a function in the underlying category and the
+corresponding thing is denoted $\wideoverbar{\idToIso}$ in the opposite
+category.
+
+Showing that this forms a pre-category is rather straightforward. 
+%
+$$
+h \rrr (g \rrr f) \equiv h \rrr g \rrr f
+$$
+%
+Since $\rrr$ is reverse function composition this is just the symmetric version
+of associativity.
+%
+$$
+\var{identity} \rrr f \equiv f \x f \rrr identity \equiv f
+$$
+%
+This is just the swapped version of identity.
+
+Finally, that the arrows form sets just follows by flipping the order of the
+arguments. Or in other words; since $\Arrow\ A\ B$ is a set for all $A\;B \tp
+\Object$ then so is $Arrow\ B\ A$.
+
+Now, to show that this category is univalent is not as straight-forward. Luckily
+section \ref{sec:equiv} gave us some tools to work with equivalences. We saw
+that we can prove this category univalent by giving an inverse to
+$\wideoverbar{\idToIso} \tp (A \equiv B) \to (A \wideoverbar{\approxeq} B)$.
+From the original category we have that $\idToIso \tp (A \equiv B) \to (A \cong
+B)$ is an isomorphism. Let us denote it's inverse with $\isoToId \tp (A
+\approxeq B) \to (A \equiv B)$. If we squint we can see what we need is a way to
+go between $\wideoverbar{\approxeq}$ and $\approxeq$.
+
+An inhabitant of $A \approxeq B$ is simply an arrow $f \tp \var{Arrow}\ A\ B$
+and it's inverse $g \tp \var{Arrow}\ B\ A$. In the opposite category $g$ will
+play the role of the isomorphism and $f$ will be the inverse. Similarly we can
+go in the opposite direction. I name these maps $\var{shuffle} \tp (A \approxeq
+B) \to (A \wideoverbar{\approxeq} B)$ and $\var{shuffle}^{-1} \tp (A
+\wideoverbar{\approxeq} B) \to (A \approxeq B)$ respectively.
+
+As the inverse of $\wideoverbar{\idToIso}$ I will pick $\wideoverbar{\isoToId}
+\defeq \isoToId \comp \var{shuffle}$. The proof that they are inverses go as
+follows:
+%
+\begin{align*}
+\wideoverbar{\isoToId} \comp \wideoverbar{\idToIso} & =
+\isoToId \comp \var{shuffle} \comp \wideoverbar{\idToIso}
+\\
+%% ≡⟨ cong (λ φ → φ x) (cong (λ φ → η ⊙ shuffle ⊙ φ) (funExt lem)) ⟩ \\
+%
+& \equiv
+\isoToId \comp \var{shuffle} \comp \inv{\var{shuffle}} \comp \idToIso
+&& \text{lemma} \\
+%%   ≡⟨⟩ \\
+& \equiv
+\isoToId \comp \idToIso
+&& \text{$\var{shuffle}$ is an isomorphism} \\
+& \equiv
+\identity
+&& \text{$\isoToId$ is an isomorphism}
+\end{align*}
+%
+The other direction is analogous.
+
+The lemma used in step 2 of this proof states that $\wideoverbar{idToIso} \equiv
+\inv{\var{shuffle}} \comp \idToIso$. This is a rather straight-forward proof
+since being-an-inverse-of is a proposition, so it suffices to show that their
+first components are equal, but this holds judgmentally.
+
+This finished the proof that the opposite category is in fact a category. Now,
+to prove that that opposite-of is an involution we must show:
+%
+$$
+\prod_{\bC \tp \var{Category}} \left(\bC^{\var{Op}}\right)^{\var{Op}} \equiv \bC
+$$
+%
+As we've seen the laws in $\left(\bC^{\var{Op}}\right)^{\var{Op}}$ get quite
+involved.\footnote{We haven't even seen the full story because we've used this
+  `interface' for equivalences.} Luckily since being-a-category is a mere
+proposition, we need not concern ourselves with this bit when proving the above.
+We can use the equality principle for categories that let us prove an equality
+just by giving an equality on the data-part. So, given a category $\bC$ all we
+must provide is the following proof:
+%
+$$
+\var{raw}\ \left(\bC^{\var{Op}}\right)^{\var{Op}} \equiv \var{raw}\ \bC
+$$
+%
+And these are judgmentally the same. I remind the reader that the left-hand side
+is constructed by flipping the arrows, which judgmentally is an involution.
+
+\subsection{Category of sets}
+The category of sets has as objects, not types, but only those types that are
+homotopic sets. This is encapsulated in Agda with the following type:
+%
+$$\Set \defeq \sum_{A \tp \MCU} \isSet\ A$$
+%
+The more straight-forward notion of a category where the objects are types is
+not a valid \mbox{(1-)category}. This stems from the fact that types in cubical
+Agda types can have higher homotopic structure.
+
+Univalence does not follow immediately from univalence for types:
+%
+$$(A \equiv B) \simeq (A \simeq B)$$
+%
+Because here $A\ B \tp \Type$ whereas the objects in this category have the type
+$\Set$ so we cannot form the type $\var{hA} \simeq \var{hB}$ for objects
+$\var{hA}\;\var{hB} \tp \Set$. In stead I show that this category
+satisfies:
+%
+$$
+(\var{hA} \equiv \var{hB}) \simeq (\var{hA} \approxeq \var{hB})
+$$
+%
+Which, as we saw in section \ref{sec:univalence}, is sufficient to show that the
+category is univalent. The way that I have shown this is with a three-step
+process. For objects $(A, s_A)\; (B, s_B) \tp \Set$ I show the following chain
+of equivalences:
+%
+\begin{align*}
+((A, s_A) \equiv (B, s_B))
+ & \simeq (A \equiv B) && \ref{eq:equivPropSig} \\
+ & \simeq (A \simeq B) && \text{Univalence} \\
+ & \simeq ((A, s_A) \approxeq (B, s_B)) && \text{\ref{eq:equivSig} and \ref{eq:equivIso}}
+\end{align*}
+
+And since $\simeq$ is an equivalence relation we can chain these equivalences
+together. Step one will be proven with the following lemma:
+%
+\begin{align}
+  \label{eq:equivPropSig}
+\left(\prod_{a \tp A} \isProp (P\ a)\right) \to \prod_{x\;y \tp \sum_{a \tp A} P\ a} (x \equiv y) \simeq (\fst\ x \equiv \fst\ y)
+\end{align}
+%
+The lemma states that for pairs whose second component are mere propositions
+equality is equivalent to equality of the first components. In this case the
+type-family $P$ is $\isSet$ which itself is a proposition for any type $A \tp
+\Type$. Step two is univalence. Step three will be proven with the following
+lemma:
+%
+\begin{align}
+  \label{eq:equivSig}
+\prod_{a \tp A} \left( P\ a \simeq Q\ a \right) \to \sum_{a \tp A} P\ a \simeq \sum_{a \tp A} Q\ a
+\end{align}
+%
+Which says that if two type-families are equivalent at all points, then pairs
+with identical first components and these families as second components will
+also be equivalent. For our purposes $P \defeq \isEquiv\ A\ B$ and $Q \defeq
+\var{Isomorphism}$. So we must finally prove:
+%
+\begin{align}
+  \label{eq:equivIso}
+\prod_{f \tp A \to B} \left( \isEquiv\ A\ B\ f \simeq \var{Isomorphism}\ f \right)
+\end{align}
+
+First, lets prove \ref{eq:equivPropSig}: Let $propP \tp \prod_{a \tp A} \isProp (P\ a)$ and $x\;y \tp \sum_{a \tp A} P\ a$ be given. Because
+of $\var{fromIsomorphism}$ it suffices to give an isomorphism between
+$x \equiv y$ and $\fst\ x \equiv \fst\ y$:
+%
+%% FIXME: Too much alignement?
+\begin{equation*}
+\begin{aligned}
+  f & \defeq \congruence\ \fst
+    && \tp x       \equiv y       && \to \fst\ x \equiv \fst\ y \\
+  g & \defeq \var{lemSig}\ \var{propP}\ x\ y
+    && \tp \fst\ x \equiv \fst\ y && \to x       \equiv y
+\end{aligned}
+\end{equation*}
+%
+\TODO{Is it confusing that I use point-free style here?} Here $\var{lemSig}$ is
+a lemma that says that if the second component of a pair is a proposition, it
+suffices to give a path between its first components to construct an equality of
+the two pairs:
+%
+\begin{align*}
+\var{lemSig} \tp \left( \prod_{x \tp A} \isProp\ (B\ x) \right) \to
+\prod_{u\; v \tp \sum_{a \tp A} B\ a}
+  \left( \fst\ u \equiv \fst\ v \right) \to u \equiv v
+\end{align*}
+%
+The proof that these are indeed inverses has been omitted. \TODO{Do I really
+  want to omit it?}\QED
+
+Now to prove \ref{eq:equivSig}: Let $e \tp \prod_{a \tp A} \left( P\ a \simeq
+Q\ a \right)$ be given. To prove the equivalence, it suffices to give an
+isomorphism between $\sum_{a \tp A} P\ a$ and $\sum_{a \tp A} Q\ a$, but since
+they have identical first components it suffices to give an isomorphism between
+$P\ a$ and $Q\ a$ for all $a \tp A$. This is exactly what we can get from
+the equivalence $e$.\QED
+
+Lastly we prove \ref{eq:equivIso}. Let $f \tp A \to B$ be given. For the maps we
+choose:
+%
+\begin{align*}
+\var{toIso}
+  & \tp \isEquiv\ f             \to \var{Isomorphism}\ f \\
+\var{fromIso}
+  & \tp \var{Isomorphism}\ f \to \isEquiv\ f
+\end{align*}
+%
+As mentioned in section \ref{sec:equiv}. These maps are not in general inverses
+of each other. In stead, we will use the fact that $A$ and $B$ are sets. The first thing we must prove is:
+%
+\begin{align*}
+  \var{fromIso} \comp \var{toIso} \equiv \identity_{\isEquiv\ f}
+\end{align*}
+%
+For this we can use the fact that being-an-equivalence is a mere proposition.
+For the other direction:
+%
+\begin{align*}
+  \var{toIso} \comp \var{fromIso} \equiv \identity_{\var{Isomorphism}\ f}
+\end{align*}
+%
+We will show that $\var{Isomorphism}\ f$ is also a mere proposition. To this
+end, let $X\;Y \tp \var{Isomorphism}\ f$ be given. Name the maps $x\;y \tp B
+\to A$ respectively. Now, the proof that $X$ and $Y$ are the same is a pair of
+paths: $p \tp x \equiv y$ and $\Path\ (\lambda\; i \to
+\var{AreInverses}\ f\ (p\ i))\ \mathcal{X}\ \mathcal{Y}$ where $\mathcal{X}$
+and $\mathcal{Y}$ denotes the witnesses that $x$ (respectively $y$) is an
+inverse to $f$. $p$ is inhabited by:
+%
+\begin{align*}
+  x
+  & \equiv x \comp \identity \\
+  & \equiv x \comp (f \comp y)
+  && \text{$y$ is an inverse to $f$} \\
+  & \equiv (x \comp f) \comp y \\
+  & \equiv \identity \comp y
+  && \text{$x$ is an inverse to $f$} \\
+  & \equiv y
+\end{align*}
+%
+For the other (dependent) path we can prove that being-an-inverse-of is a
+proposition and then use $\lemPropF$. So we prove the generalization:
+%
+\begin{align}
+\label{eq:propAreInversesGen}
+\prod_{g \tp B \to A} \isProp\ (\var{AreInverses}\ f\ g)
+\end{align}
+%
+But $\var{AreInverses}\ f\ g$ is a pair of equations on arrows, so we use
+$\propSig$ and the fact that both $A$ and $B$ are sets to close this proof.
+
+\subsection{Category of categories}
+Note that this category does in fact not exist. In stead I provide the
+definition of the ``raw'' category as well as some of the laws.
+
+Furthermore I provide some helpful lemmas about this raw category. For instance
+I have shown what would be the exponential object in such a category.
+
+These lemmas can be used to provide the actual exponential object in a context
+where we have a witness to this being a category. This is useful if this library
+is later extended to talk about higher categories.
+
+\section{Products}
+In the following I'll demonstrate a technique for using categories to prove
+properties. The goal in this section is to show that products are propositions:
+%
+$$
+\prod_{\bC \tp \Category} \prod_{A\;B \tp \Object} \isProp\ (\var{Product}\ \bC\ A\ B)
+$$
+%
+Where $\var{Product}\ \bC\ A\ B$ denotes the type of products of objects $A$
+and $B$ in the category $\bC$. I do this by constructing a category whose
+terminal objects are equivalent to products in $\bC$, and since terminal objects
+are propositional in a proper category and equivalences preserve homotopy level,
+then we know that products also are propositions. But before we get to that,
+let's recall the definition of products.
+
+\subsection{Definition of products}
+Given a category $\bC$ and two objects $A$ and $B$ in $\bC$ we define the
+product (object) of $A$ and $B$ to be an object $A \x B$ in $\bC$ and two arrows
+$\pi_1 \tp A \x B \to A$ and $\pi_2 \tp A \x B \to B$ called the projections of
+the product. The projections must satisfy the following property:
+
+For all $X \tp Object$, $f \tp \Arrow\ X\ A$ and $g \tp \Arrow\ X\ B$ we have
+that there exists a unique arrow $\pi \tp \Arrow\ X\ (A \x B)$ satisfying
+%
+\begin{align}
+\label{eq:umpProduct}
+%% \prod_{X \tp Object} \prod_{f \tp \Arrow\ X\ A} \prod_{g \tp \Arrow\ X\ B}\\
+%% \uexists_{f \x g \tp \Arrow\ X\ (A \x B)}
+\pi_1 \lll \pi \equiv f \x \pi_2 \lll \pi \equiv g
+\end{align}
+%
+$\pi$ is called the product (arrow) of $f$ and $g$.
+
+\subsection{Pair category}
+
+\newcommand\pairA{\mathcal{A}}
+\newcommand\pairB{\mathcal{B}}
+Given a base category $\bC$ and two objects in this category $\pairA$ and
+$\pairB$ we can construct the ``pair category'': \TODO{This is a working title,
+  it's nice to have a name for this thing to refer back to}
+
+The type of objects in this category will be an object in the underlying
+category, $X$, and two arrows (also from the underlying category)
+$\Arrow\ X\ \pairA$ and $\Arrow\ X\ \pairB$.
+
+\newcommand\pairf{\ensuremath{f}}
+\newcommand\pairFst{\mathcal{\pi_1}}
+\newcommand\pairSnd{\mathcal{\pi_2}}
+
+An arrow between objects $A ,\ a_0 ,\ a_1$ and $B ,\ b_0 ,\ b_1$ in this
+category will consist of an arrow from the underlying category $\pairf \tp
+\Arrow\ A\ B$ satisfying:
+%
+\begin{align}
+\label{eq:pairArrowLaw}
+b_0 \lll f \equiv a_0 \x
+b_1 \lll f \equiv a_1
+\end{align}
+
+The identity morphism is the identity morphism from the underlying category.
+This choice satisfies \ref{eq:pairArrowLaw} because of the right-identity law
+from the underlying category.
+
+For composition of arrows $f \tp \Arrow\ A\ B$ and $g \tp \Arrow\ B\ C$ we
+choose $g \lll f$ and we must now verify that it satisfies
+\ref{eq:pairArrowLaw}:
+%
+\begin{align*}
+  c_0 \lll (f \lll g)
+  & \equiv
+  (c_0 \lll f) \lll g
+  && \text{Associativity} \\
+  & \equiv
+  b_0 \lll g
+  && \text{$f$ satisfies \ref{eq:pairArrowLaw}} \\
+  & \equiv
+  a_0
+  && \text{$g$ satisfies \ref{eq:pairArrowLaw}} \\
+\end{align*}
+%
+Now we must verify the category-laws. For all the laws we will follow the
+pattern of using the law from the underlying category, and that the type of
+arrows form a set. For instance, to prove associativity we must prove that
+%
+\begin{align}
+\label{eq:productAssoc}
+\overline{h} \lll (\overline{g} \lll \overline{f})
+\equiv
+(\overline{h} \lll \overline{g}) \lll \overline{f}
+\end{align}
+%
+Here $\lll$ refers to the `embellished' composition and $\overline{f}$,
+$\overline{g}$ and $\overline{h}$ are triples consisting of arrows from the
+underlying category ($f$, $g$ and $h$) and a pair of witnesses to
+\ref{eq:pairArrowLaw}.
+%% Luckily those winesses are paths in the hom-set of the
+%% underlying category which is a set, so these are mere propositions.
+The proof obligations is consists of two things. The first one is:
+%
+\begin{align}
+\label{eq:productAssocUnderlying}
+h \lll (g \lll f)
+\equiv
+(h \lll g) \lll f
+\end{align}
+%
+And the other proof obligation is that the witness to \ref{eq:pairArrowLaw} for
+the left-hand-side and the right-hand-side are the same.
+
+The proof of the first goal comes directly from the underlying category. The
+type of the second goal is very complicated. I will not write it out in full
+here, but it suffices to show the type of the path-space. Note that the arrows
+in \ref{eq:productAssoc} are arrows from $\mathcal{A} = (A , a_{\pairA} ,
+a_{\pairB})$ to $\mathcal{D} = (D , d_{\pairA} , d_{\pairB})$ where
+$a_{\pairA}$, $a_{\pairB}$, $d_{\pairA}$ and $d_{\pairB}$ are arrows in the
+underlying category. Given that $p$ is the chosen proof of
+\ref{eq:productAssocUnderlying} we then have that the witness to
+\ref{eq:pairArrowLaw} vary over the type:
+%
+\begin{align}
+\label{eq:productPath}
+λ\ i → d_{\pairA} \lll p\ i ≡ 2 a_{\pairA} × d_{\pairB} \lll p\ i ≡ a_{\pairB}
+\end{align}
+%
+And these paths are in the type of the hom-set of the underlying category, so
+they are mere propositions. We cannot apply the fact that arrows in $\bC$ are
+sets directly, however, since $\isSet$ only talks about non-dependent paths, in
+stead we generalize \ref{eq:productPath} to:
+%
+\begin{align}
+\label{eq:productEqPrinc}
+\prod_{f \tp \Arrow\ X\ Y} \isProp\ \left( y_{\pairA} \lll f ≡ x_{\pairA} × y_{\pairB} \lll f ≡ x_{\pairB} \right)
+\end{align}
+%
+For all objects $X , x_{\pairA} , x_{\pairB}$ and $Y , y_{\pairA} , y_{\pairB}$,
+but this follows from pairs preserving homotopical structure and arrows in the
+underlying category being sets. This gives us an equality principle for arrows
+in this category that says that to prove two arrows $f, f_0, f_1$ and $g, g_0,
+g_1$ equal it suffices to give a proof that $f$ and $g$ are equal.
+%% %
+%% $$
+%% \prod_{(f, f_0, f_1)\; (g,g_0,g_1) \tp \Arrow\ X\ Y} f \equiv g \to (f, f_0, f_1) \equiv (g,g_0,g_1)
+%% $$
+%% %
+And thus we have proven \ref{eq:productAssoc} simply with
+\ref{eq:productAssocUnderlying}.
+
+Now we must prove that arrows form a set:
+%
+$$
+\isSet\ (\Arrow\ \mathcal{X}\ \mathcal{Y})
+$$
+%
+Since pairs preserve homotopical structure this reduces to:
+%
+$$
+\isSet\ (\Arrow_{\bC}\ X\ Y)
+$$
+%
+Which holds. And
+%
+$$
+\prod_{f \tp \Arrow\ X\ Y}
+\isSet\ \left( y_{\pairA} \lll f ≡ x_{\pairA}
+             × y_{\pairB} \lll f ≡ x_{\pairB}
+        \right)
+$$
+%
+This we get from \ref{eq:productEqPrinc} and the fact that homotopical structure
+is cumulative.
+
+This finishes the proof that this is a valid pre-category.
+
+\subsubsection{Univalence}
+To prove that this is a proper category it must be shown that it is univalent.
+That is, for any two objects $\mathcal{X} = (X, x_{\mathcal{A}} , x_{\mathcal{B}})$
+and $\mathcal{Y} = Y, y_{\mathcal{A}}, y_{\mathcal{B}}$ I will show:
+%
+\begin{align}
+(\mathcal{X} \equiv \mathcal{Y}) \cong (\mathcal{X} \approxeq \mathcal{Y})
+\end{align}
+
+I do this by showing that the following sequence of types are isomorphic.
+
+The first type is:
+%
+\begin{align}
+\label{eq:univ-0}
+(X , x_{\mathcal{A}} , x_{\mathcal{B}}) ≡ (Y , y_{\mathcal{A}} , y_{\mathcal{B}})
+\end{align}
+%
+The next types will be the triple:
+%
+\begin{align}
+\label{eq:univ-1}
+\begin{split}
+p \tp & X \equiv Y \\
+& \Path\ (λ i → \Arrow\ (p\ i)\ \mathcal{A})\ x_{\mathcal{A}}\ y_{\mathcal{A}} \\
+& \Path\ (λ i → \Arrow\ (p\ i)\ \mathcal{B})\ x_{\mathcal{B}}\ y_{\mathcal{B}}
+\end{split}
+%% \end{split}
+\end{align}
+
+The next type is very similar, but in stead of a path we will have an
+isomorphism, and create a path from this:
+%
+\begin{align}
+\label{eq:univ-2}
+\begin{split}
+\var{iso} \tp & X \cong Y \\
+& \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ \mathcal{A})\ x_{\mathcal{A}}\ y_{\mathcal{A}} \\
+& \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ \mathcal{B})\ x_{\mathcal{B}}\ y_{\mathcal{B}}
+\end{split}
+\end{align}
+%
+Where $\widetilde{p} \defeq \var{isoToId}\ \var{iso} \tp X \equiv Y$.
+
+Finally we have the type:
+%
+\begin{align}
+\label{eq:univ-3}
+(X , x_{\mathcal{A}} , x_{\mathcal{B}}) ≊ (Y , y_{\mathcal{A}} , y_{\mathcal{B}})
+\end{align}
+
+\emph{Proposition} \ref{eq:univ-0} is isomorphic to \ref{eq:univ-1}: This is
+just an application of the fact that a path between two pairs $a_0, a_1$ and
+$b_0, b_1$ corresponds to a pair of paths between $a_0,b_0$ and $a_1,b_1$ (check
+the implementation for the details).
+
+\emph{Proposition} \ref{eq:univ-1} is isomorphic to \ref{eq:univ-2}:
+\TODO{Super complicated}
+
+\emph{Proposition} \ref{eq:univ-2} is isomorphic to \ref{eq:univ-3}: For this I
+will show two corollaries of \ref{eq:coeCod}: For an isomorphism $(\iota,
+\inv{\iota}, \var{inv}) \tp A \cong B$, arrows $f \tp \Arrow\ A\ X$, $g \tp
+\Arrow\ B\ X$ and a heterogeneous path between them, $q \tp \Path\ (\lambda i
+\to p_{\var{dom}}\ i)\ f\ g$, where $p_{\var{dom}} \tp \Arrow\ A\ X \equiv
+\Arrow\ B\ X$ is a path induced by $\var{iso}$, we have the following two
+results
+%
+\begin{align}
+\label{eq:domain-twist-0}
+f & \equiv g \lll \iota \\
+\label{eq:domain-twist-1}
+g & \equiv f \lll \inv{\iota}
+\end{align}
+%
+Proof: \TODO{\ldots}
+
+Now we can prove the equivalence in the following way: Given $(f, \inv{f},
+\var{inv}_f) \tp X \cong Y$ and two heterogeneous paths
+%
+\begin{align*}
+p_{\mathcal{A}} & \tp \Path\ (\lambda i \to p_{\var{dom}}\ i)\ x_{\mathcal{A}}\ y_{\mathcal{A}}\\
+%
+q_{\mathcal{B}} & \tp \Path\ (\lambda i \to p_{\var{dom}}\ i)\ x_{\mathcal{B}}\ y_{\mathcal{B}}
+\end{align*}
+%
+all as in \ref{eq:univ-2}. I use $p_{\var{dom}}$ here again to mean the path
+induced by the isomorphism $f, \inv{f}$. I must now construct an isomorphism
+$(X, x_{\mathcal{A}}, x_{\mathcal{B}}) \approxeq (Y, y_{\mathcal{A}}, y_{\mathcal{B}})$
+as in \ref{eq:univ-3}. That is, an isomorphism in the present category. I remind
+the reader that such a gadget is a triple. The first component shall be:
+%
+\begin{align}
+f \tp \Arrow\ X\ Y
+\end{align}
+%
+To show that this choice fits the bill I must now verify that it satisfies
+\ref{eq:pairArrowLaw}, which in this case becomes:
+%
+\begin{align}
+y_{\mathcal{A}} \lll f ≡ x_{\mathcal{A}} × y_{\mathcal{B}} \lll f ≡ x_{\mathcal{B}}
+\end{align}
+%
+Which, since $f$ is an isomorphism and $p_{\mathcal{A}}$ (resp. $p_{\mathcal{B}}$)
+is a path varying according to a path constructed from this isomorphism, this is
+exactly what \ref{eq:domain-twist-0} gives us.
+%
+The other direction is quite analogous. We choose $\inv{f}$ as the morphism and
+prove that it satisfies \ref{eq:pairArrowLaw} with \ref{eq:domain-twist-1}.
+
+We must now show that this choice of arrows indeed form an isomorphism. Our
+equality principle for arrows in this category (\ref{eq:productEqPrinc}) gives
+us that it suffices to show that $f$ and $\inv{f}$, this is exactly
+$\var{inv}_f$.
+
+This concludes the first direction of the isomorphism that we're constructing.
+For the other direction we're given just given the isomorphism
+%
+$$
+(f, \inv{f}, \var{inv}_f)
+\tp
+(X, x_{\mathcal{A}}, x_{\mathcal{B}}) \approxeq (Y, y_{\mathcal{A}}, y_{\mathcal{B}})
+$$
+%
+Projecting out the first component gives us the isomorphism
+%
+$$
+(\fst\ f, \fst\ \inv{f}, \congruence\ \fst\ \var{inv}_f, \congruence\ \fst\ \var{inv}_{\inv{f}})
+\tp X \approxeq Y
+$$
+%
+This gives rise to the following paths:
+%
+\begin{align}
+\begin{split}
+\widetilde{p} & \tp X \equiv Y \\
+\widetilde{p}_{\mathcal{A}} & \tp \Arrow\ X\ \mathcal{A} \equiv \Arrow\ Y\ \mathcal{A} \\
+\widetilde{p}_{\mathcal{B}} & \tp \Arrow\ X\ \mathcal{B} \equiv \Arrow\ Y\ \mathcal{B}
+\end{split}
+\end{align}
+%
+It then remains to construct the two paths:
+%
+\begin{align}
+\begin{split}
+\label{eq:product-paths}
+& \Path\ (λ i → \widetilde{p}_{\mathcal{A}}\ i)\ x_{\mathcal{A}}\ y_{\mathcal{A}}\\
+& \Path\ (λ i → \widetilde{p}_{\mathcal{B}}\ i)\ x_{\mathcal{B}}\ y_{\mathcal{B}}
+\end{split}
+\end{align}
+%
+This is achieved with the following lemma:
+%
+\begin{align}
+\prod_{a \tp A} \prod_{b \tp B} \prod_{q \tp A \equiv B} \var{coe}\ q\ a ≡ b →
+\Path\ (λ i → q\ i)\ a\ b
+\end{align}
+%
+Which is used without proof. See the implementation for the details.
+
+\ref{eq:product-paths} is the proven with the propositions:
+%
+\begin{align}
+\begin{split}
+\label{eq:product-paths}
+\var{coe}\ \widetilde{p}_{\mathcal{A}}\ x_{\mathcal{A}} ≡ y_{\mathcal{A}}\\
+\var{coe}\ \widetilde{p}_{\mathcal{B}}\ x_{\mathcal{B}} ≡ y_{\mathcal{B}}
+\end{split}
+\end{align}
+%
+The proof of the first one is:
+%
+\begin{align*}
+  \var{coe}\ \widetilde{p}_{\mathcal{A}}\ x_{\mathcal{A}}
+  & ≡ x_{\mathcal{A}} \lll \fst\ \inv{f} && \text{$\var{coeDom}$ and the isomorphism $f, \inv{f}$} \\
+  & ≡ y_{\mathcal{A}} && \text{\ref{eq:pairArrowLaw} for $\inv{f}$}
+\end{align*}
+%
+We have now constructed the maps between \ref{eq:univ-0} and \ref{eq:univ-1}. It
+remains to show that they are inverses of each other. To cut a long story short,
+the proof uses the fact that isomorphism-of is propositional and that arrows (in
+both categories) are sets. The reader is referred to the implementation for the
+gory details.
+%
+\subsection{Propositionality of products}
+%
+Now that we've constructed the ``pair category'' I'll demonstrate how to use
+this to prove that products are propositional. I will do this by showing that
+terminal objects in this category are equivalent to products:
+%
+\begin{align}
+\var{Terminal} ≃ \var{Product}\ ℂ\ \mathcal{A}\ \mathcal{B}
+\end{align}
+%
+And as always we do this by constructing an isomorphism:
+%
+In the direction $\var{Terminal} → \var{Product}\ ℂ\ \mathcal{A}\ \mathcal{B}$
+we're given a terminal object $X, x_𝒜, x_ℬ$. $X$ Will be the product-object and
+$x_𝒜, x_ℬ$ will be the product arrows, so it just remains to verify that this is
+indeed a product. That is, for an object $Y$ and two arrows $y_𝒜 \tp
+\Arrow\ Y\ 𝒜$, $y_ℬ\ \Arrow\ Y\ ℬ$ we must find a unique arrow $f \tp
+\Arrow\ Y\ X$ satisfying:
+%
+\begin{align}
+\label{eq:pairCondRev}
+\begin{split}
+  x_𝒜 \lll f & ≡ y_𝒜 \\
+  x_ℬ \lll f & ≡ y_ℬ
+\end{split}
+\end{align}
+%
+Since $X, x_𝒜, x_ℬ$ is a terminal object there is a \emph{unique} arrow from
+this object to any other object, so also $Y, y_𝒜, y_ℬ$ in particular (which is
+also an object in the pair category). The arrow we will play the role of $f$ and
+it immediately satisfies \ref{eq:pairCondRev}. Any other arrow satisfying these
+conditions will be equal since $f$ is unique.
+
+For the other direction we are now given a product $X, x_𝒜, x_ℬ$. Again this
+will be the terminal object. So now it remains that for any other object there
+is a unique arrow from that object into $X, x_𝒜, x_ℬ$. Let $Y, y_𝒜, y_ℬ$ be
+another object. As the arrow $\Arrow\ Y\ X$ we choose the product-arrow $y_𝒜 \x
+y_ℬ$. Since this is a product-arrow it satisfies \ref{eq:pairCondRev}. Let us
+name the witness to this $\phi_{y_𝒜 \x y_ℬ}$. So we have picked as our center of
+contraction $y_𝒜 \x y_ℬ , \phi_{y_𝒜 \x y_ℬ}$ we must now show that it is
+contractible. So let $f \tp \Arrow\ X\ Y$ and $\phi_f$ be given (here $\phi_f$
+is the proof that $f$ satisfies \ref{eq:pairCondRev}). The proof will be a pair
+of proofs:
+%
+\begin{alignat}{3}
+  p \tp & \Path\ (\lambda i \to \Arrow\ X\ Y)\quad
+    && f\quad          && y_𝒜 \x y_ℬ \\
+  & \Path\ (\lambda i \to \Phi\ (p\ i))\quad
+    && \phi_f\quad     && \phi_{y_𝒜 \x y_ℬ}
+\end{alignat}
+%
+Here $\Phi$ is given as:
+$$
+\prod_{f \tp \Arrow\ Y\ X}
+  x_𝒜 \lll f ≡ y_𝒜
+× x_ℬ \lll f ≡ y_ℬ
+$$
+%
+$p$ follows from the universal property of $y_𝒜 \x y_ℬ$. For the latter we will
+again use the same trick we did in \ref{eq:propAreInversesGen} and prove this
+more general result:
+%
+$$
+\prod_{f \tp \Arrow\ Y\ X} \isProp\ (
+  x_𝒜 \lll f ≡ y_𝒜
+× x_ℬ \lll f ≡ y_ℬ
+)
+$$
+%
+Which follows from arrows being sets and pairs preserving such. Thus we can
+close the final proof with an application of $\lemPropF$.
+
+This concludes the proof $\var{Terminal} ≃
+\var{Product}\ ℂ\ \mathcal{A}\ \mathcal{B}$ and since we have that equivalences
+preserve homotopic levels along with \ref{eq:termProp} we get our final result.
+That in any category:
+%
+\begin{align}
+\prod_{A\ B \tp \Object} \isProp\ (\var{Product}\ \bC\ A\ B)
+\end{align}
+%
+\section{Monads}
+In this section I present two formulations of monads. The two representations
+are referred to as the monoidal- and Kleisli- representation respectively or
+simply monoidal monads and Kleisli monads for short. We then show that the two
+formulations are equivalent, which due to univalence gives us a path between the
+two types.
+
+Let a category $\bC$ be given. In the remainder of this sections all objects and
+arrows will implicitly refer to objects and arrows in this category.
+%
+\subsection{Monoidal formulation}
+The monoidal formulation of monads consists of the following data:
+%
+\begin{align}
+\label{eq:monad-monoidal-data}
+\begin{split}
+    \EndoR      & \tp \Endo ℂ \\
+    \var{pure}  & \tp \NT{\EndoR^0}{\EndoR} \\
+    \var{join}  & \tp \NT{\EndoR^2}{\EndoR}
+\end{split}
+\end{align}
+%
+Here $\NTsym$ denotes natural transformations, the super-script in $\EndoR^2$
+Denotes the composition of $\EndoR$ with itself. By the same token $\EndoR^0$ is
+a curious way of denoting the identity functor. This notation has been chosen
+for didactic purposes.
+
+Denote the arrow-map of $\EndoR$ as $\fmap$, then this data must satisfy the
+following laws:
+%
+\begin{align}
+\label{eq:monad-monoidal-laws}
+\begin{split}
+  \var{join} \lll \fmap\ \var{join}
+    & ≡ \var{join} \lll \var{join}\ \fmap \\
+  \var{join} \lll \var{pure}\ \fmap     & ≡ \identity \\
+  \var{join} \lll \fmap\     \var{pure} & ≡ \identity
+\end{split}
+\end{align}
+%
+The implicit arguments to the arrows above have been left out and the objects
+they range over are universally quantified.
+
+\subsection{Kleisli formulation}
+%
+The Kleisli-formulation consists of the following data:
+%
+\begin{align}
+\label{eq:monad-kleisli-data}
+\begin{split}
+    \EndoR & \tp \Object → \Object \\
+    \pure  & \tp % \prod_{X \tp Object}
+      \Arrow\ X\ (\EndoR\ X) \\
+    \bind  & \tp % \prod_{X\;Y \tp Object} → \Arrow\ X\ (\EndoR\ Y)
+      \Arrow\ (\EndoR\ X)\ (\EndoR\ Y)
+\end{split}
+\end{align}
+%
+The objects $X$ and $Y$ are implicitly universally quantified.
+
+It's interesting to note here that this formulation does not talk about natural
+transformations or other such constructs from category theory. All we have here
+is a regular maps on objects and a pair of arrows.
+%
+This data must satisfy:
+%
+\begin{align}
+\label{eq:monad-monoidal-laws}
+\begin{split}
+  \bind\ \pure & ≡ \identity_{\EndoR\ X}
+  \\
+  % \prod_{f \tp \Arrow\ X\ (\EndoR\ Y)}
+    \pure \fish f & ≡ f
+    \\
+  % \prod_{\substack{g \tp \Arrow\ Y\ (\EndoR\ Z)\\f \tp \Arrow\ X\ (\EndoR\ Y)}}
+  (\bind\ f) \rrr (\bind\ g) & ≡ \bind\ (f \fish g)
+\end{split}
+\end{align}
+%
+Here likewise the arrows $f \tp \Arrow\ X\ (\EndoR\ Y)$ and $g \tp
+\Arrow\ Y\ (\EndoR\ Z)$ are universally quantified (as well as the objects they
+range over). $\fish$ is the Kleisli-arrow which is defined as $f \fish g \defeq
+f \rrr (\bind\ g)$ . (\TODO{Better way to typeset $\fish$?})
+
+\subsection{Equivalence of formulations}
+%
+In my implementation I proceed to show how the one formulation gives rise to
+the other and vice-versa. For the present purpose I will briefly sketch some
+parts of this construction:
+
+The notation I have chosen here in the report
+overloads e.g. $\pure$ to both refer to a natural transformation and an arrow.
+This is of course not a coincidence as the arrow in the Kleisli formulation
+shall correspond exactly to the map on arrows from the natural transformation
+called $\pure$.
+
+In the monoidal formulation we can define $\bind$:
+%
+\begin{align}
+\bind \defeq \join \lll \fmap\ f
+\end{align}
+%
+And likewise in the Kleisli formulation we can define $\join$:
+%
+\begin{align}
+\join \defeq \bind\ \identity
+\end{align}
+%
+It now remains to show that we can prove the various laws given this choice. I
+refer the reader to my implementation for the details.

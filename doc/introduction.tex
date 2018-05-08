@@ -1,0 +1,205 @@
+\chapter{Introduction}
+Functional extensionality and univalence is not expressible in
+\nomen{Intensional Martin Löf Type Theory} (ITT). This poses a severe limitation
+on both i. what is \emph{provable} and ii. the \emph{re-usability} of proofs.
+Recent developments have, however, resulted in \nomen{Cubical Type Theory} (CTT)
+which permits a constructive proof of these two important notions.
+
+Furthermore an extension has been implemented for the proof assistant Agda
+(\cite{agda}, \cite{cubical-agda}) that allows us to work in such a ``cubical
+setting''. This thesis will explore the usefulness of this extension in the
+context of category theory.
+%
+\section{Motivating examples}
+%
+In the following two sections I present two examples that illustrate some
+limitations inherent in ITT and -- by extension -- Agda.
+%
+\subsection{Functional extensionality}
+Consider the functions:
+%
+\begin{multicols}{2}
+  \noindent
+  \begin{equation*}
+    f \defeq (n \tp \bN) \mapsto (0 + n \tp \bN)
+  \end{equation*}
+  \begin{equation*}
+    g \defeq (n \tp \bN) \mapsto (n + 0 \tp \bN)
+  \end{equation*}
+\end{multicols}
+%
+$n + 0$ is \nomen{definitionally} equal to $n$, which we write as $n + 0 = n$.
+This is also called \nomen{judgmental} equality. We call it definitional
+equality because the \emph{equality} arises from the \emph{definition} of $+$
+which is:
+%
+\newcommand{\suc}[1]{\mathit{suc}\ #1}
+\begin{align*}
+  +           & \tp \bN \to \bN \to \bN      \\
+  n + 0       & \defeq n                   \\
+  n + (\suc{m}) & \defeq \suc{(n + m)}
+\end{align*}
+%
+Note that $0 + n$ is \emph{not} definitionally equal to $n$. $0 + n$ is in
+normal form. I.e.; there is no rule for $+$ whose left-hand-side matches this
+expression. We \emph{do}, however, have that they are \nomen{propositionally}
+equal, which we write as $n + 0 \equiv n$. Propositional equality means that
+there is a proof that exhibits this relation. Since equality is a transitive
+relation we have that $n + 0 \equiv 0 + n$.
+
+Unfortunately we don't have $f \equiv g$.\footnote{Actually showing this is
+outside the scope of this text. Essentially it would involve giving a model
+for our type theory that validates all our axioms but where $f \equiv g$ is
+not true.} There is no way to construct a proof asserting the obvious
+equivalence of $f$ and $g$ -- even though we can prove them equal for all
+points. This is exactly the notion of equality of functions that we are
+interested in; that they are equal for all inputs. We call this
+\nomen{point-wise equality}, where the \emph{points} of a function refers
+to it's arguments.
+
+In the context of category theory functional extensionality is e.g. needed to
+show that representable functors are indeed functors. The representable functor
+for a category $\bC$ and a fixed object in $A \in \bC$ is defined to be:
+%
+\begin{align*}
+\fmap \defeq X \mapsto \Hom_{\bC}(A, X)
+\end{align*}
+%
+The proof obligation that this satisfies the identity law of functors
+($\fmap\ \idFun \equiv \idFun$) thus becomes:
+%
+\begin{align*}
+\Hom(A, \idFun_{\bX}) = (g \mapsto \idFun \comp g) \equiv \idFun_{\Sets}
+\end{align*}
+%
+One needs functional extensionality to ``go under'' the function arrow and apply
+the (left) identity law of the underlying category to prove $\idFun \comp g
+\equiv g$ and thus close the goal.
+%
+\subsection{Equality of isomorphic types}
+%
+Let $\top$ denote the unit type -- a type with a single constructor. In the
+propositions-as-types interpretation of type theory $\top$ is the proposition
+that is always true. The type $A \x \top$ and $A$ has an element for each $a :
+A$. So in a sense they have the same shape (Greek; \nomen{isomorphic}). The
+second element of the pair does not add any ``interesting information''. It can
+be useful to identify such types. In fact, it is quite commonplace in
+mathematics. Say we look at a set $\{x \mid \phi\ x \land \psi\ x\}$ and somehow
+conclude that $\psi\ x \equiv \top$ for all $x$. A mathematician would
+immediately conclude $\{x \mid \phi\ x \land \psi\ x\} \equiv \{x \mid
+\phi\ x\}$ without thinking twice. Unfortunately such an identification can not
+be performed in ITT.
+
+More specifically what we are interested in is a way of identifying
+\nomen{equivalent} types. I will return to the definition of equivalence later
+in section \ref{sec:equiv}, but for now it is sufficient to think of an
+equivalence as a one-to-one correspondence. We write $A \simeq B$ to assert that
+$A$ and $B$ are equivalent types. The principle of univalence says that:
+%
+$$\mathit{univalence} \tp (A \simeq B) \simeq (A \equiv B)$$
+%
+In particular this allows us to construct an equality from an equivalence
+($\mathit{ua} \tp (A \simeq B) \to (A \equiv B)$) and vice-versa.
+
+\section{Formalizing Category Theory}
+%
+The above examples serve to illustrate a limitation of ITT. One case where these
+limitations are particularly prohibitive is in the study of Category Theory. At
+a glance category theory can be described as ``the mathematical study of
+(abstract) algebras of functions'' (\cite{awodey-2006}). By that token
+functional extensionality is particularly useful for formulating Category
+Theory. In Category theory it is also common to identify isomorphic structures
+and univalence gives us a way to make this notion precise. In fact we can
+formulate this requirement within our formulation of categories by requiring the
+\emph{categories} themselves to be univalent as we shall see.
+
+\section{Context}
+\label{sec:context}
+%
+The idea of formalizing Category Theory in proof assistants is not new. There
+are a multitude of these available online. Just as a first reference see this
+question on Math Overflow: \cite{mo-formalizations}. Notably these
+implementations of category theory in Agda:
+%
+\begin{itemize}
+\item
+  \url{https://github.com/copumpkin/categories}
+
+  A formalization in Agda using the setoid approach
+\item
+  \url{https://github.com/pcapriotti/agda-categories}
+
+  A formalization in Agda with univalence and functional extensionality as
+  postulates.
+\item
+  \url{https://github.com/HoTT/HoTT/tree/master/theories/Categories}
+
+  A formalization in Coq in the homotopic setting
+\item
+  \url{https://github.com/mortberg/cubicaltt}
+
+  A formalization in CubicalTT - a language designed for cubical-type-theory.
+  Formalizes many different things, but only a few concepts from category
+  theory.
+
+\end{itemize}
+%
+The contribution of this thesis is to explore how working in a cubical setting
+will make it possible to prove more things and to reuse proofs and to try and
+compare some aspects of this formalization with the existing ones.\TODO{How can
+  I live up to this?}
+
+There are alternative approaches to working in a cubical setting where one can
+still have univalence and functional extensionality. One option is to postulate
+these as axioms. This approach, however, has other shortcomings, e.g.; you lose
+\nomen{canonicity} (\TODO{Pageno!} \cite{huber-2016}). Canonicity means that any
+well-typed term evaluates to a \emph{canonical} form. For example for a closed
+term $e \tp \bN$ it will be the case that $e$ reduces to $n$ applications of
+$\mathit{suc}$ to $0$ for some $n$; $e = \mathit{suc}^n\ 0$. Without canonicity
+terms in the language can get ``stuck'' -- meaning that they do not reduce to a
+canonical form.
+
+Another approach is to use the \emph{setoid interpretation} of type theory
+(\cite{hofmann-1995,huber-2016}). With this approach one works with
+\nomen{extensional sets} $(X, \sim)$, that is a type $X \tp \MCU$ and an
+equivalence relation $\sim \tp X \to X \to \MCU$ on that type. Under the setoid
+interpretation the equivalence relation serve as a sort of ``local''
+propositional equality. This approach has other drawbacks; it does not satisfy
+all propositional equalities of type theory (\TODO{Citation needed}), is
+cumbersome to work with in practice (\cite[p. 4]{huber-2016}) and makes
+equational proofs less reusable since equational proofs $a \sim_{X} b$ are
+inherently `local' to the extensional set $(X , \sim)$.
+
+\section{Conventions}
+\TODO{Talk a bit about terminology. Find a good place to stuff this little
+  section.}
+
+In the remainder of this paper I will use the term \nomen{Type} to describe --
+well, types. Thereby diverging from the notation in Agda where the keyword
+\texttt{Set} refers to types. \nomen{Set} on the other hand shall refer to the
+homotopical notion of a set. I will also leave all universe levels implicit.
+
+And I use the term \nomen{arrow} to refer to morphisms in a category, whereas
+the terms morphism, map or function shall be reserved for talking about
+type-theoretic functions; i.e. functions in Agda.
+
+$\defeq$ will be used for introducing definitions. $=$ will be used to for
+judgmental equality and $\equiv$ will be used for propositional equality.
+
+All this is summarized in the following table:
+
+\begin{center}
+\begin{tabular}{ c c c }
+Name & Agda & Notation \\
+\hline
+\nomen{Type}            & \texttt{Set}         & $\Type$            \\
+\nomen{Set}             & \texttt{Σ Set IsSet} & $\Set$             \\
+Function, morphism, map & \texttt{A → B}       & $A → B$            \\
+Dependent- ditto        & \texttt{(a : A) → B} & $∏_{a \tp A} B$  \\
+\nomen{Arrow}           & \texttt{Arrow A B}   & $\Arrow\ A\ B$     \\
+\nomen{Object}          & \texttt{C.Object}    & $̱ℂ.Object$     \\
+Definition              & \texttt{=}           & $̱\defeq$       \\
+Judgmental equality     & \null                & $̱=$            \\
+Propositional equality  & \null                & $̱\equiv$
+\end{tabular}
+\end{center}

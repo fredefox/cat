@@ -7,7 +7,6 @@ open import Data.Bool hiding (T)
 open import Data.Sum hiding ([_,_])
 open import Data.Unit
 open import Data.Empty
-open import Function
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
 
@@ -19,7 +18,7 @@ open import Cat.Category.Functor
 -- See section 6.8 in Huber's thesis for details on how to implement the
 -- categorical version of CTT
 
-open Category hiding (_∘_)
+open Category hiding (_<<<_)
 open Functor
 
 module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
@@ -67,8 +66,8 @@ module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
     Rawℂ : RawCategory ℓ ℓ -- ℓo (lsuc lzero ⊔ ℓo)
     Raw.Object Rawℂ = FiniteDecidableSubset
     Raw.Arrow Rawℂ = Hom
-    Raw.𝟙 Rawℂ {o} = inj₁ , λ { (i , ii) (j , jj) eq → Σ≡ eq {!refl!} }
-    Raw._∘_ Rawℂ = {!!}
+    Raw.identity Rawℂ {o} = inj₁ , λ { (i , ii) (j , jj) eq → Σ≡ eq {!refl!} }
+    Raw._<<<_ Rawℂ = {!!}
 
     postulate IsCategoryℂ : IsCategory Rawℂ
 

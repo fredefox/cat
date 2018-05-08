@@ -1,0 +1,72 @@
+Andrea Vezzosi <vezzosi@chalmers.se>	Tue, Apr 24, 2018 at 2:02 PM
+To: Frederik Hanghøj Iversen <fhi.1990@gmail.com>
+Cc: Thierry Coquand <coquand@chalmers.se>
+On Tue, Apr 24, 2018 at 12:57 PM, Frederik Hanghøj Iversen
+<fhi.1990@gmail.com> wrote:
+> I've written the first few sections about my implementation. I was wondering
+> if you could have a quick look at it. You don't need to read it
+> word-for-word but I would like some indication from you if this is the sort
+> of thing you would like to see in the final report.
+
+Yes! I would say this very much fits the bill of what the main part of
+the report should be, then you could have a discussion section where
+you might put some analysis of the pros and cons of cubical, design
+choices you made, and your experience overall.
+
+I wonder if there should be some short introduction to Cubical Type
+Theory before this chapter, so you can introduce the Path type by
+itself and show some simple proof with it. e.g. how to get function
+extensionality.
+
+You mention a few "combinators" like propPi and lemPropF, you might
+want to call them just lemmas, so it's clearer that these can be
+proven in --cubical.
+
+>
+> I refer you specifically to "Chapter 2 - Implementation" on p. 6.
+>
+> In this chapter I plan to additionally include some text about the proof we
+> did that products are mere propositions and the proof about the two
+> equivalent notions of a monad.
+
+I've read the chapter up until 2.3 and skimmed the rest for now, but I
+accumulated some editing suggestions I copy here.
+Remember to look for things like these when you proof-read the rest :)
+
+
+You should be careful to properly introduce things before you use
+them, like IsPreCategory (I'd prefer if it took the raw category as
+argument btw) and its fields isIdentity, isAssociative, .. come up a
+bit out of the blue from the end of page 8.
+Maybe the easiest is to show the definition of IsPreCategory.
+
+Maybe give a type for propIsIdentity and mention the other prop* are similar.
+
+Also the notation "isIdentity_a" to apply projections is a bit unusual
+so it needs to be introduced as well.
+To be fair it would be simpler to stick to function application
+(though I see that it would introduce more parentheses),
+
+"The situation is a bit more complicated when we have a dependent
+type" could be more clear by being more specific:
+"The situation is a bit more complicated when the type of a field
+depends on a previous field"
+
+Here too it might be more concrete if you also give the code for IsCategory.
+
+In Path ( λ i → Univalent_{p i} ) isPreCategory_a isPreCategory_b
+I suggest parentheses around (p i), but also you should be consistent
+on whether you want to call the proof "p" or "p_{isPreCategory}",
+finally i'm guessing the two fields should be "isUnivalent" rather
+than "isPreCategory".
+
+You can cite the book on the specific definition of isEquiv,
+"contractible fibers" in section 4.4, the grad lemma is also from
+somewhere but I don't remember off-hand.
+
+You have not defined what you mean by _\~=_ and isomorphism.
+
+
+Cheers,
+Andrea
+[Quoted text hidden]

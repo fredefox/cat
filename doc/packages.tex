@@ -1,0 +1,87 @@
+\usepackage[utf8]{inputenc}
+
+\usepackage{natbib}
+\usepackage[
+  hidelinks,
+  pdfusetitle,
+  pdfsubject={category theory},
+  pdfkeywords={type theory, homotopy theory, category theory, agda}]
+  {hyperref}
+
+\usepackage{graphicx}
+
+\usepackage{parskip}
+\usepackage{multicol}
+\usepackage{amssymb,amsmath,amsthm,stmaryrd,mathrsfs,wasysym}
+\usepackage[toc,page]{appendix}
+\usepackage{xspace}
+\usepackage[a4paper]{geometry}
+
+% \setlength{\parskip}{10pt}
+
+% \usepackage{tikz}
+% \usetikzlibrary{arrows, decorations.markings}
+
+% \usepackage{chngcntr}
+% \counterwithout{figure}{section}
+\numberwithin{equation}{section}
+
+\usepackage{listings}
+\usepackage{fancyvrb}
+
+\usepackage{mathpazo}
+\usepackage[scaled=0.95]{helvet}
+\usepackage{courier}
+\linespread{1.05} % Palatino looks better with this
+
+\usepackage{lmodern}
+
+\usepackage{enumerate}
+\usepackage{verbatim}
+
+\usepackage{fontspec}
+\usepackage[light]{sourcecodepro}
+%% \setmonofont{Latin Modern Mono}
+%% \setmonofont[Mapping=tex-text]{FreeMono.otf}
+%% \setmonofont{FreeMono.otf}
+
+
+%% \pagestyle{fancyplain}
+\setlength{\headheight}{15pt}
+\renewcommand{\chaptermark}[1]{\markboth{\textsc{Chapter \thechapter. #1}}{}}
+\renewcommand{\sectionmark}[1]{\markright{\textsc{\thesection\ #1}}}
+
+% Allows for the use of unicode-letters:
+\usepackage{unicode-math}
+
+%% \RequirePackage{kvoptions}
+
+\usepackage{pgffor}
+\lstset
+  {basicstyle=\ttfamily
+  ,columns=fullflexible
+  ,breaklines=true
+  ,inputencoding=utf8
+  ,extendedchars=true
+  %% ,literate={á}{{\'a}}1 {ã}{{\~a}}1 {é}{{\'e}}1
+  }
+  
+\usepackage{newunicodechar}
+
+%% \setmainfont{PT Serif}
+\newfontfamily{\fallbackfont}{FreeMono.otf}[Scale=MatchLowercase]
+%% \setmonofont[Mapping=tex-text]{FreeMono.otf}
+\DeclareTextFontCommand{\textfallback}{\fallbackfont}
+\newunicodechar{∨}{\textfallback{∨}}
+\newunicodechar{∧}{\textfallback{∧}}
+\newunicodechar{⊔}{\textfallback{⊔}}
+\newunicodechar{≊}{\textfallback{≊}}
+\newunicodechar{∈}{\textfallback{∈}}
+\newunicodechar{ℂ}{\textfallback{ℂ}}
+\newunicodechar{∘}{\textfallback{∘}}
+\newunicodechar{⟨}{\textfallback{⟨}}
+\newunicodechar{⟩}{\textfallback{⟩}}
+\newunicodechar{∎}{\textfallback{∎}}
+\newunicodechar{𝒜}{\textfallback{?}}
+\newunicodechar{ℬ}{\textfallback{?}}
+%% \newunicodechar{≊}{\textfallback{≊}}

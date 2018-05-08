@@ -1,0 +1,76 @@
+\documentclass[a4paper]{report}
+%% \documentclass[compact,a4paper]{article}
+
+\input{packages.tex}
+\input{macros.tex}
+
+\title{Univalent Categories}
+\author{Frederik Hanghøj Iversen}
+
+%% \usepackage[
+%%   subtitle=foo,
+%%   author=Frederik Hanghøj Iversen,
+%%   authoremail=hanghj@student.chalmers.se,
+%%   newcommand=chalmers,=Chalmers University of Technology,
+%%   supervisor=Thierry Coquand,
+%%   supervisoremail=coquand@chalmers.se,
+%%   supervisordepartment=chalmers,
+%%   cosupervisor=Andrea Vezzosi,
+%%   cosupervisoremail=vezzosi@chalmers.se,
+%%   cosupervisordepartment=chalmers,
+%%   examiner=Andreas Abel,
+%%   examineremail=abela@chalmers.se,
+%%   examinerdepartment=chalmers,
+%%   institution=chalmers,
+%%   department=Department of Computer Science and Engineering,
+%%   researchgroup=Programming Logic Group
+%%   ]{chalmerstitle}
+
+\usepackage{chalmerstitle}
+\subtitle{A formalization of category theory in Cubical Agda}
+\authoremail{hanghj@student.chalmers.se}
+\newcommand{\chalmers}{Chalmers University of Technology}
+\supervisor{Thierry Coquand}
+\supervisoremail{coquand@chalmers.se}
+\supervisordepartment{\chalmers}
+\cosupervisor{Andrea Vezzosi}
+\cosupervisoremail{vezzosi@chalmers.se}
+\cosupervisordepartment{\chalmers}
+\examiner{Andreas Abel}
+\examineremail{abela@chalmers.se}
+\examinerdepartment{\chalmers}
+\institution{\chalmers}
+\department{Department of Computer Science and Engineering}
+\researchgroup{Programming Logic Group}
+\bibliographystyle{plain}
+
+%% \newtheorem{prop}{Proposition}
+\makeatletter
+\newcommand*{\rom}[1]{\expandafter\@slowroman\romannumeral #1@}
+\makeatother
+\begin{document}
+\myfrontmatter
+\pagenumbering{roman}
+\maketitle
+\addtocontents{toc}{\protect\thispagestyle{empty}}
+\tableofcontents
+\pagenumbering{arabic}
+%
+\input{introduction.tex}
+\input{cubical.tex}
+\input{implementation.tex}
+\input{discussion.tex}
+\input{conclusion.tex}
+
+\nocite{cubical-demo}
+\nocite{coquand-2013}
+
+\bibliography{refs}
+\begin{appendices}
+\setcounter{page}{1}
+\pagenumbering{roman}
+\input{sources.tex}
+%% \input{planning.tex}
+%% \input{halftime.tex}
+\end{appendices}
+\end{document}

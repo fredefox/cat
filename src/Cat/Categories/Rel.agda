@@ -1,8 +1,7 @@
 {-# OPTIONS --cubical --allow-unsolved-metas #-}
 module Cat.Categories.Rel where
 
-open import Cat.Prelude renaming (proj₁ to fst ; proj₂ to snd)
-open import Function
+open import Cat.Prelude hiding (Rel)
 
 open import Cat.Category
 
@@ -153,14 +152,15 @@ RawRel : RawCategory (lsuc lzero) (lsuc lzero)
 RawRel = record
   { Object = Set
   ; Arrow = λ S R → Subset (S × R)
-  ; 𝟙 = λ {S} → Diag S
-  ; _∘_ = λ {A B C} S R → λ {( a , c ) → Σ[ b ∈ B ] ( (a , b) ∈ R × (b , c) ∈ S )}
+  ; identity = λ {S} → Diag S
+  ; _<<<_ = λ {A B C} S R → λ {( a , c ) → Σ[ b ∈ B ] ( (a , b) ∈ R × (b , c) ∈ S )}
   }
 
-RawIsCategoryRel : IsCategory RawRel
-RawIsCategoryRel = record
-  { isAssociative = funExt is-isAssociative
-  ; isIdentity = funExt ident-l , funExt ident-r
-  ; arrowsAreSets = {!!}
-  ; univalent = {!!}
-  }
+isPreCategory : IsPreCategory RawRel
+
+IsPreCategory.isAssociative isPreCategory = funExt is-isAssociative
+IsPreCategory.isIdentity    isPreCategory = funExt ident-l , funExt ident-r
+IsPreCategory.arrowsAreSets isPreCategory = {!!}
+
+Rel : PreCategory RawRel
+PreCategory.isPreCategory Rel = isPreCategory

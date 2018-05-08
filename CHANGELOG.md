@@ -1,5 +1,31 @@
-Changelog
+Change log
 =========
+
+Version 1.5.0
+-------------
+Prove postulates in `Cat.Wishlist`:
+
+ * `ntypeCommulative : n ≤ m → HasLevel ⟨ n ⟩₋₂ A → HasLevel ⟨ m ⟩₋₂ A`
+
+Prove that these two formulations of univalence are equivalent:
+
+    ∀ A B → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
+    ∀ A   → isContr (Σ[ X ∈ Object ] A ≅ X)
+
+Prove univalence for the category of...
+
+  * the opposite category
+  * sets
+  * "pair" category
+
+Finish the proof that products are propositional:
+
+  * `isProp (Product ...)`
+  * `isProp (HasProducts ...)`
+
+Remove --allow-unsolved-metas pragma from various files
+
+Also renamed a lot of different projections. E.g. arrow-composition, etc..
 
 Version 1.4.1
 -------------
@@ -29,12 +55,12 @@ Adds an "equality principle" for categories and monads.
 Prove that `IsMonad` is a mere proposition.
 
 Provides the yoneda embedding without relying on the existence of a category of
-categories. This is acheived by providing some of the data needed to make a ccc
+categories. This is achieved by providing some of the data needed to make a ccc
 out of the category of categories without actually having such a category.
 
 Renames functors object map and arrow map to `omap` and `fmap`.
 
-Prove that kleisli- and monoidal- monads are equivalent!
+Prove that Kleisli- and monoidal- monads are equivalent!
 
 [WIP] Started working on the proofs for univalence for the category of sets and
 the category of functors.
@@ -42,7 +68,7 @@ the category of functors.
 Version 1.3.0
 -------------
 Removed unused modules and streamlined things more: All specific categories are
-in the namespace `Cat.Categories`.
+in the name space `Cat.Categories`.
 
 Lemmas about categories are now in the appropriate record e.g. `IsCategory`.
 Also changed how category reexports stuff.
@@ -53,7 +79,7 @@ Rename Opposite to opposite
 
 Add documentation in Category-module
 
-Formulation of monads in two ways; the "monoidal-" and "kleisli-" form.
+Formulation of monads in two ways; the "monoidal-" and "Kleisli-" form.
 
 WIP: Equivalence of these two formulations
 

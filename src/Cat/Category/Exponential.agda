@@ -16,11 +16,11 @@ module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{hasProducts : HasProducts ℂ}} 
       field
         uniq
           : ∀ (A : Object) (f : ℂ [ A × B , C ])
-          → ∃![ f~ ] (ℂ [ eval ∘ f~ |×| Category.𝟙 ℂ ] ≡ f)
+          → ∃![ f~ ] (ℂ [ eval ∘ f~ |×| Category.identity ℂ ] ≡ f)
 
     IsExponential : (Cᴮ : Object) → ℂ [ Cᴮ × B , C ] → Set (ℓ ⊔ ℓ')
     IsExponential Cᴮ eval = ∀ (A : Object) (f : ℂ [ A × B , C ])
-      → ∃![ f~ ] (ℂ [ eval ∘ f~ |×| Category.𝟙 ℂ ] ≡ f)
+      → ∃![ f~ ] (ℂ [ eval ∘ f~ |×| Category.identity ℂ ] ≡ f)
 
     record Exponential : Set (ℓ ⊔ ℓ') where
       field
@@ -30,7 +30,7 @@ module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{hasProducts : HasProducts ℂ}} 
         {{isExponential}} : IsExponential obj eval
 
       transpose : (A : Object) → ℂ [ A × B , C ] → ℂ [ A , obj ]
-      transpose A f = proj₁ (isExponential A f)
+      transpose A f = fst (isExponential A f)
 
 record HasExponentials {ℓ ℓ' : Level} (ℂ : Category ℓ ℓ') {{_ : HasProducts ℂ}} : Set (ℓ ⊔ ℓ') where
   open Category ℂ

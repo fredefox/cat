@@ -2,62 +2,60 @@
 module Cat.Categories.Fam where
 
 open import Cat.Prelude
-import Function
 
 open import Cat.Category
 
 module _ (ℓa ℓb : Level) where
   private
-    Object = Σ[ hA ∈ hSet ℓa ] (proj₁ hA → hSet ℓb)
+    Object = Σ[ hA ∈ hSet ℓa ] (fst hA → hSet ℓb)
     Arr : Object → Object → Set (ℓa ⊔ ℓb)
-    Arr ((A , _) , B) ((A' , _) , B') = Σ[ f ∈ (A → A') ] ({x : A} → proj₁ (B x) → proj₁ (B' (f x)))
-    𝟙 : {A : Object} → Arr A A
-    proj₁ 𝟙 = λ x → x
-    proj₂ 𝟙 = λ b → b
-    _∘_ : {a b c : Object} → Arr b c → Arr a b → Arr a c
-    (g , g') ∘ (f , f') = g Function.∘ f , g' Function.∘ f'
+    Arr ((A , _) , B) ((A' , _) , B') = Σ[ f ∈ (A → A') ] ({x : A} → fst (B x) → fst (B' (f x)))
+    identity : {A : Object} → Arr A A
+    fst identity = λ x → x
+    snd identity = λ b → b
+    _<<<_ : {a b c : Object} → Arr b c → Arr a b → Arr a c
+    (g , g') <<< (f , f') = g ∘ f , g' ∘ f'
 
     RawFam : RawCategory (lsuc (ℓa ⊔ ℓb)) (ℓa ⊔ ℓb)
     RawFam = record
       { Object = Object
       ; Arrow = Arr
-      ; 𝟙 = λ { {A} → 𝟙 {A = A}}
-      ; _∘_ = λ {a b c} → _∘_ {a} {b} {c}
+      ; identity = λ { {A} → identity {A = A}}
+      ; _<<<_ = λ {a b c} → _<<<_ {a} {b} {c}
       }
 
-    open RawCategory RawFam hiding (Object ; 𝟙)
+    open RawCategory RawFam hiding (Object ; identity)
 
     isAssociative : IsAssociative
     isAssociative = Σ≡ refl refl
 
-    isIdentity : IsIdentity λ { {A} → 𝟙 {A} }
+    isIdentity : IsIdentity λ { {A} → identity {A} }
     isIdentity = (Σ≡ refl refl) , Σ≡ refl refl
 
-    open import Cubical.NType.Properties
-    open import Cubical.Sigma
-    instance
-      isCategory : IsCategory RawFam
-      isCategory = record
-        { isAssociative = λ {A} {B} {C} {D} {f} {g} {h} → isAssociative {A} {B} {C} {D} {f} {g} {h}
-        ; isIdentity = λ {A} {B} {f} → isIdentity {A} {B} {f = f}
-        ; arrowsAreSets = λ {
-          {((A , hA) , famA)}
-          {((B , hB) , famB)}
-            → setSig
-              {sA = setPi λ _ → hB}
-              {sB = λ f →
-                let
-                  helpr : isSet ((a : A) → proj₁ (famA a) → proj₁ (famB (f a)))
-                  helpr = setPi λ a → setPi λ _ → proj₂ (famB (f a))
-                  -- It's almost like above, but where the first argument is
-                  -- implicit.
-                  res : isSet ({a : A} → proj₁ (famA a) → proj₁ (famB (f a)))
-                  res = {!!}
-                in res
-              }
-          }
-        ; univalent = {!!}
+    isPreCategory : IsPreCategory RawFam
+    IsPreCategory.isAssociative isPreCategory
+      {A} {B} {C} {D} {f} {g} {h} = isAssociative {A} {B} {C} {D} {f} {g} {h}
+    IsPreCategory.isIdentity isPreCategory
+      {A} {B} {f} = isIdentity {A} {B} {f = f}
+    IsPreCategory.arrowsAreSets isPreCategory
+      {(A , hA) , famA} {(B , hB) , famB}
+      = setSig
+        {sA = setPi λ _ → hB}
+        {sB = λ f →
+          let
+            helpr : isSet ((a : A) → fst (famA a) → fst (famB (f a)))
+            helpr = setPi λ a → setPi λ _ → snd (famB (f a))
+            -- It's almost like above, but where the first argument is
+            -- implicit.
+            res : isSet ({a : A} → fst (famA a) → fst (famB (f a)))
+            res = {!!}
+          in res
         }
+
+    isCategory : IsCategory RawFam
+    IsCategory.isPreCategory isCategory = isPreCategory
+    IsCategory.univalent     isCategory = {!!}
 
   Fam : Category (lsuc (ℓa ⊔ ℓb)) (ℓa ⊔ ℓb)
   Category.raw Fam = RawFam
+  Category.isCategory Fam = isCategory

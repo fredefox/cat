@@ -1,0 +1,135 @@
+% Requires: hypperref
+\ProvidesPackage{chalmerstitle}
+
+%% \RequirePackage{kvoptions}
+
+%% \SetupKeyvalOptions{
+%%   family=ct,
+%%   prefix=ct@
+%% }
+
+%% \DeclareStringOption{authoremail}
+%% \DeclareStringOption{supervisor}
+%% \DeclareStringOption{supervisoremail}
+%% \DeclareStringOption{supervisordepartment}
+%% \DeclareStringOption{cosupervisor}
+%% \DeclareStringOption{cosupervisoremail}
+%% \DeclareStringOption{cosupervisordepartment}
+%% \DeclareStringOption{examiner}
+%% \DeclareStringOption{examineremail}
+%% \DeclareStringOption{examinerdepartment}
+%% \DeclareStringOption{institution}
+%% \DeclareStringOption{department}
+%% \DeclareStringOption{researchgroup}
+%% \DeclareStringOption{subtitle}
+%% \ProcessKeyvalOptions*
+
+\newcommand*{\authoremail}[1]{\gdef\@authoremail{#1}}
+\newcommand*{\supervisor}[1]{\gdef\@supervisor{#1}}
+\newcommand*{\supervisoremail}[1]{\gdef\@supervisoremail{#1}}
+\newcommand*{\supervisordepartment}[1]{\gdef\@supervisordepartment{#1}}
+\newcommand*{\cosupervisor}[1]{\gdef\@cosupervisor{#1}}
+\newcommand*{\cosupervisoremail}[1]{\gdef\@cosupervisoremail{#1}}
+\newcommand*{\cosupervisordepartment}[1]{\gdef\@cosupervisordepartment{#1}}
+\newcommand*{\examiner}[1]{\gdef\@examiner{#1}}
+\newcommand*{\examineremail}[1]{\gdef\@examineremail{#1}}
+\newcommand*{\examinerdepartment}[1]{\gdef\@examinerdepartment{#1}}
+\newcommand*{\institution}[1]{\gdef\@institution{#1}}
+\newcommand*{\department}[1]{\gdef\@department{#1}}
+\newcommand*{\researchgroup}[1]{\gdef\@researchgroup{#1}}
+\newcommand*{\subtitle}[1]{\gdef\@subtitle{#1}}
+%% FRONTMATTER
+\newcommand*{\myfrontmatter}{%
+\newgeometry{top=3cm, bottom=3cm,left=2.25 cm, right=2.25cm}
+\begingroup
+\thispagestyle{empty}
+{\Huge\@title}\\[.5cm]
+{\Large A formalization of category theory in Cubical Agda}\\[2.5cm]
+\begin{center}
+\includegraphics[width=\linewidth,keepaspectratio]{isomorphism.png}
+\end{center}
+% Cover text
+\vfill
+%% \renewcommand{\familydefault}{\sfdefault} \normalfont % Set cover page font
+{\Large\@author}\\[.5cm]
+Master's thesis in Computer Science
+\endgroup
+%% \end{titlepage}
+
+
+% BACK OF COVER PAGE (BLANK PAGE)
+\newpage
+%% \newgeometry{a4paper}	% Temporarily change margins
+%% \restoregeometry
+\thispagestyle{empty}
+\null
+}
+
+\renewcommand*{\maketitle}{%
+\begin{titlepage}
+
+% TITLE PAGE
+\newpage
+\thispagestyle{empty}
+\begin{center}
+	\textsc{\LARGE Master's thesis \the\year}\\[4cm]		% Report number is currently not in use
+	\textbf{\LARGE \@title} \\[1cm]
+	{\large \@subtitle}\\[1cm]
+	{\large \@author}
+	
+	\vfill	
+	\centering
+	\includegraphics[width=0.2\pdfpagewidth]{logo_eng.pdf}
+  \vspace{5mm}
+	
+	\textsc{Department of Computer Science and Engineering}\\
+	\textsc{{\@researchgroup}}\\
+	%Name of research group (if applicable)\\
+	\textsc{\@institution} \\
+	\textsc{Gothenburg, Sweden \the\year}\\
+\end{center}
+
+
+% IMPRINT PAGE (BACK OF TITLE PAGE)
+\newpage
+\thispagestyle{plain}
+\textit{\@title}\\
+\@subtitle\\
+\copyright\ \the\year ~ \textsc{\@author}
+\vspace{4.5cm}
+
+\setlength{\parskip}{0.5cm}
+\textbf{Author:}\\
+\@author\\
+\href{mailto:\@authoremail>}{\texttt{<\@authoremail>}}
+
+\textbf{Supervisor:}\\
+\@supervisor\\
+\href{mailto:\@supervisoremail>}{\texttt{<\@supervisoremail>}}\\
+\@supervisordepartment
+
+\textbf{Co-supervisor:}\\
+\@cosupervisor\\
+\href{mailto:\@cosupervisoremail>}{\texttt{<\@cosupervisoremail>}}\\
+\@cosupervisordepartment
+
+\textbf{Examiner:}\\
+\@examiner\\
+\href{mailto:\@examineremail>}{\texttt{<\@examineremail>}}\\
+\@examinerdepartment
+
+\vfill
+Master's Thesis \the\year\\	% Report number currently not in use
+\@department\\
+%Division of Division name\\
+%Name of research group (if applicable)\\
+\@institution\\
+SE-412 96 Gothenburg\\
+Telephone +46 31 772 1000 \setlength{\parskip}{0.5cm}\\
+% Caption for cover page figure if used, possibly with reference to further information in the report
+%% Cover: Wind visualization constructed in Matlab showing a surface of constant wind speed along with streamlines of the flow. \setlength{\parskip}{0.5cm}
+%Printed by [Name of printing company]\\
+Gothenburg, Sweden \the\year
+
+\restoregeometry
+\end{titlepage}}

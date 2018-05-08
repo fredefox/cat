@@ -3,42 +3,22 @@
 
 module Cat.Categories.Cat where
 
-open import Cat.Prelude renaming (proj₁ to fst ; proj₂ to snd)
+open import Cat.Prelude renaming (fst to fst ; snd to snd)
 
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
 open import Cat.Category.Exponential hiding (_×_ ; product)
-open import Cat.Category.NaturalTransformation
+import Cat.Category.NaturalTransformation
 open import Cat.Categories.Fun
 
 -- The category of categories
 module _ (ℓ ℓ' : Level) where
-  private
-    module _ {𝔸 𝔹 ℂ 𝔻 : Category ℓ ℓ'} {F : Functor 𝔸 𝔹} {G : Functor 𝔹 ℂ} {H : Functor ℂ 𝔻} where
-      assc : F[ H ∘ F[ G ∘ F ] ] ≡ F[ F[ H ∘ G ] ∘ F ]
-      assc = Functor≡ refl
-
-    module _ {ℂ 𝔻 : Category ℓ ℓ'} {F : Functor ℂ 𝔻} where
-      ident-r : F[ F ∘ identity ] ≡ F
-      ident-r = Functor≡ refl
-
-      ident-l : F[ identity ∘ F ] ≡ F
-      ident-l = Functor≡ refl
-
   RawCat : RawCategory (lsuc (ℓ ⊔ ℓ')) (ℓ ⊔ ℓ')
-  RawCategory.Object RawCat = Category ℓ ℓ'
-  RawCategory.Arrow  RawCat = Functor
-  RawCategory.𝟙      RawCat = identity
-  RawCategory._∘_    RawCat = F[_∘_]
-
-  private
-    open RawCategory RawCat
-    isAssociative : IsAssociative
-    isAssociative {f = F} {G} {H} = assc {F = F} {G = G} {H = H}
-
-    isIdentity : IsIdentity identity
-    isIdentity = ident-l , ident-r
+  RawCategory.Object   RawCat = Category ℓ ℓ'
+  RawCategory.Arrow    RawCat = Functor
+  RawCategory.identity RawCat = Functors.identity
+  RawCategory._<<<_    RawCat = F[_∘_]
 
   -- NB! `ArrowsAreSets RawCat` is *not* provable. The type of functors,
   -- however, form a groupoid! Therefore there is no (1-)category of
@@ -68,51 +48,55 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
         Obj = ℂ.Object × 𝔻.Object
         Arr  : Obj → Obj → Set ℓ'
         Arr (c , d) (c' , d') = ℂ [ c , c' ] × 𝔻 [ d , d' ]
-        𝟙 : {o : Obj} → Arr o o
-        𝟙 = ℂ.𝟙 , 𝔻.𝟙
-        _∘_ :
+        identity : {o : Obj} → Arr o o
+        identity = ℂ.identity , 𝔻.identity
+        _<<<_ :
           {a b c : Obj} →
           Arr b c →
           Arr a b →
           Arr a c
-        _∘_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → ℂ [ bc∈C ∘ ab∈C ] , 𝔻 [ bc∈D ∘ ab∈D ]}
+        _<<<_ = λ { (bc∈C , bc∈D) (ab∈C , ab∈D) → ℂ [ bc∈C ∘ ab∈C ] , 𝔻 [ bc∈D ∘ ab∈D ]}
 
       rawProduct : RawCategory ℓ ℓ'
-      RawCategory.Object rawProduct = Obj
-      RawCategory.Arrow  rawProduct = Arr
-      RawCategory.𝟙      rawProduct = 𝟙
-      RawCategory._∘_    rawProduct = _∘_
+      RawCategory.Object   rawProduct = Obj
+      RawCategory.Arrow    rawProduct = Arr
+      RawCategory.identity rawProduct = identity
+      RawCategory._<<<_    rawProduct = _<<<_
 
     open RawCategory rawProduct
 
     arrowsAreSets : ArrowsAreSets
     arrowsAreSets = setSig {sA = ℂ.arrowsAreSets} {sB = λ x → 𝔻.arrowsAreSets}
-    isIdentity : IsIdentity 𝟙
+    isIdentity : IsIdentity identity
     isIdentity
       = Σ≡ (fst ℂ.isIdentity) (fst 𝔻.isIdentity)
       , Σ≡ (snd ℂ.isIdentity) (snd 𝔻.isIdentity)
 
+    isPreCategory : IsPreCategory rawProduct
+    IsPreCategory.isAssociative isPreCategory = Σ≡ ℂ.isAssociative 𝔻.isAssociative
+    IsPreCategory.isIdentity    isPreCategory = isIdentity
+    IsPreCategory.arrowsAreSets isPreCategory = arrowsAreSets
+
     postulate univalent : Univalence.Univalent isIdentity
-    instance
-      isCategory : IsCategory rawProduct
-      IsCategory.isAssociative isCategory = Σ≡ ℂ.isAssociative 𝔻.isAssociative
-      IsCategory.isIdentity    isCategory = isIdentity
-      IsCategory.arrowsAreSets isCategory = arrowsAreSets
-      IsCategory.univalent     isCategory = univalent
+
+    isCategory : IsCategory rawProduct
+    IsCategory.isPreCategory isCategory = isPreCategory
+    IsCategory.univalent     isCategory = univalent
 
   object : Category ℓ ℓ'
   Category.raw object = rawProduct
+  Category.isCategory object = isCategory
 
-  proj₁ : Functor object ℂ
-  proj₁ = record
+  fstF : Functor object ℂ
+  fstF = record
     { raw = record
       { omap = fst ; fmap = fst }
     ; isFunctor = record
       { isIdentity = refl ; isDistributive = refl }
     }
 
-  proj₂ : Functor object 𝔻
-  proj₂ = record
+  sndF : Functor object 𝔻
+  sndF = record
     { raw = record
       { omap = snd ; fmap = snd }
     ; isFunctor = record
@@ -136,17 +120,27 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
           open module x₁ = Functor x₁
           open module x₂ = Functor x₂
 
-      isUniqL : F[ proj₁ ∘ x ] ≡ x₁
+      isUniqL : F[ fstF ∘ x ] ≡ x₁
       isUniqL = Functor≡ refl
 
-      isUniqR : F[ proj₂ ∘ x ] ≡ x₂
+      isUniqR : F[ sndF ∘ x ] ≡ x₂
       isUniqR = Functor≡ refl
 
-      isUniq : F[ proj₁ ∘ x ] ≡ x₁ × F[ proj₂ ∘ x ] ≡ x₂
+      isUniq : F[ fstF ∘ x ] ≡ x₁ × F[ sndF ∘ x ] ≡ x₂
       isUniq = isUniqL , isUniqR
 
-    isProduct : ∃![ x ] (F[ proj₁ ∘ x ] ≡ x₁ × F[ proj₂ ∘ x ] ≡ x₂)
-    isProduct = x , isUniq
+    isProduct : ∃![ x ] (F[ fstF ∘ x ] ≡ x₁ × F[ sndF ∘ x ] ≡ x₂)
+    isProduct = x , isUniq , uq
+      where
+      module _ {y : Functor X object} (eq : F[ fstF ∘ y ] ≡ x₁ × F[ sndF ∘ y ] ≡ x₂) where
+        omapEq : Functor.omap x ≡ Functor.omap y
+        omapEq = {!!}
+        -- fmapEq : (λ i → {!{A B : ?} → Arrow A B → 𝔻 [ ? A , ? B ]!}) [ Functor.fmap x ≡ Functor.fmap y ]
+        -- fmapEq = {!!}
+        rawEq : Functor.raw x ≡ Functor.raw y
+        rawEq = {!!}
+        uq : x ≡ y
+        uq = Functor≡ rawEq
 
 module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
   private
@@ -158,8 +152,8 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
 
       rawProduct : RawProduct Catℓ ℂ 𝔻
       RawProduct.object rawProduct = P.object
-      RawProduct.proj₁  rawProduct = P.proj₁
-      RawProduct.proj₂  rawProduct = P.proj₂
+      RawProduct.fst  rawProduct = P.fstF
+      RawProduct.snd  rawProduct = P.sndF
 
       isProduct : IsProduct Catℓ _ _ rawProduct
       IsProduct.ump isProduct = P.isProduct
@@ -175,6 +169,9 @@ module _ {ℓ ℓ' : Level} (unprovable : IsCategory (RawCat ℓ ℓ')) where
 -- | The category of categories have expoentntials - and because it has products
 -- it is therefory also cartesian closed.
 module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
+  open Cat.Category.NaturalTransformation ℂ 𝔻
+    renaming (identity to identityNT)
+    using ()
   private
     module ℂ = Category ℂ
     module 𝔻 = Category 𝔻
@@ -189,8 +186,8 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
   object = Fun
 
   module _ {dom cod : Functor ℂ 𝔻 × ℂ.Object} where
-    open Σ dom renaming (proj₁ to F ; proj₂ to A)
-    open Σ cod renaming (proj₁ to G ; proj₂ to B)
+    open Σ dom renaming (fst to F ; snd to A)
+    open Σ cod renaming (fst to G ; snd to B)
     private
       module F = Functor F
       module G = Functor G
@@ -207,23 +204,23 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
   open CatProduct renaming (object to _⊗_) using ()
 
   module _ {c : Functor ℂ 𝔻 × ℂ.Object} where
-    open Σ c renaming (proj₁ to F ; proj₂ to C)
+    open Σ c renaming (fst to F ; snd to C)
 
-    ident : fmap {c} {c} (NT.identity F , ℂ.𝟙 {A = snd c}) ≡ 𝔻.𝟙
+    ident : fmap {c} {c} (identityNT F , ℂ.identity {A = snd c}) ≡ 𝔻.identity
     ident = begin
-      fmap {c} {c} (Category.𝟙 (object ⊗ ℂ) {c})        ≡⟨⟩
-      fmap {c} {c} (idN F , ℂ.𝟙)               ≡⟨⟩
-      𝔻 [ identityTrans F C ∘ F.fmap ℂ.𝟙 ]    ≡⟨⟩
-      𝔻 [ 𝔻.𝟙 ∘ F.fmap ℂ.𝟙 ]                  ≡⟨ 𝔻.leftIdentity ⟩
-      F.fmap ℂ.𝟙                               ≡⟨ F.isIdentity ⟩
-      𝔻.𝟙                                       ∎
+      fmap {c} {c} (Category.identity (object ⊗ ℂ) {c}) ≡⟨⟩
+      fmap {c} {c} (idN F , ℂ.identity)                 ≡⟨⟩
+      𝔻 [ identityTrans F C ∘ F.fmap ℂ.identity ]       ≡⟨⟩
+      𝔻 [ 𝔻.identity ∘ F.fmap ℂ.identity ]              ≡⟨ 𝔻.leftIdentity ⟩
+      F.fmap ℂ.identity                                 ≡⟨ F.isIdentity ⟩
+      𝔻.identity                                        ∎
       where
         module F = Functor F
 
   module _ {F×A G×B H×C : Functor ℂ 𝔻 × ℂ.Object} where
-    open Σ F×A renaming (proj₁ to F ; proj₂ to A)
-    open Σ G×B renaming (proj₁ to G ; proj₂ to B)
-    open Σ H×C renaming (proj₁ to H ; proj₂ to C)
+    open Σ F×A renaming (fst to F ; snd to A)
+    open Σ G×B renaming (fst to G ; snd to B)
+    open Σ H×C renaming (fst to H ; snd to C)
     private
       module F = Functor F
       module G = Functor G
@@ -232,14 +229,14 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
     module _
       {θ×f : NaturalTransformation F G × ℂ [ A , B ]}
       {η×g : NaturalTransformation G H × ℂ [ B , C ]} where
-      open Σ θ×f renaming (proj₁ to θNT ; proj₂ to f)
-      open Σ θNT renaming (proj₁ to θ   ; proj₂ to θNat)
-      open Σ η×g renaming (proj₁ to ηNT ; proj₂ to g)
-      open Σ ηNT renaming (proj₁ to η   ; proj₂ to ηNat)
+      open Σ θ×f renaming (fst to θNT ; snd to f)
+      open Σ θNT renaming (fst to θ   ; snd to θNat)
+      open Σ η×g renaming (fst to ηNT ; snd to g)
+      open Σ ηNT renaming (fst to η   ; snd to ηNat)
       private
         ηθNT : NaturalTransformation F H
         ηθNT = NT[_∘_] {F} {G} {H} ηNT θNT
-      open Σ ηθNT renaming (proj₁ to ηθ   ; proj₂ to ηθNat)
+      open Σ ηθNT renaming (fst to ηθ   ; snd to ηθNat)
 
       isDistributive :
           𝔻 [ 𝔻 [ η C ∘ θ C ] ∘ F.fmap ( ℂ [ g ∘ f ] ) ]
@@ -283,18 +280,18 @@ module CatExponential {ℓ : Level} (ℂ 𝔻 : Category ℓ ℓ) where
         : Functor 𝔸 object → Functor ℂ ℂ
         → Functor (𝔸 ⊗ ℂ) (object ⊗ ℂ)
       transpose : Functor 𝔸 object
-      eq : F[ eval ∘ (parallelProduct transpose (identity {C = ℂ})) ] ≡ F
+      eq : F[ eval ∘ (parallelProduct transpose (Functors.identity {ℂ = ℂ})) ] ≡ F
       -- eq : F[ :eval: ∘ {!!} ] ≡ F
-      -- eq : Catℓ [ :eval: ∘ (HasProducts._|×|_ hasProducts transpose (𝟙 Catℓ {o = ℂ})) ] ≡ F
+      -- eq : Catℓ [ :eval: ∘ (HasProducts._|×|_ hasProducts transpose (identity Catℓ {o = ℂ})) ] ≡ F
       -- eq' : (Catℓ [ :eval: ∘
       --   (record { product = product } HasProducts.|×| transpose)
-      --   (𝟙 Catℓ)
+      --   (identity Catℓ)
       --   ])
       --   ≡ F
 
     -- For some reason after `e8215b2c051062c6301abc9b3f6ec67106259758`
     -- `catTranspose` makes Agda hang. catTranspose : ∃![ F~ ] (Catℓ [
-    -- :eval: ∘ (parallelProduct F~ (𝟙 Catℓ {o = ℂ}))] ≡ F) catTranspose =
+    -- :eval: ∘ (parallelProduct F~ (identity Catℓ {o = ℂ}))] ≡ F) catTranspose =
     -- transpose , eq
 
 -- We don't care about filling out the holes below since they are anyways hidden
@@ -318,8 +315,8 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
       exponent : Exponential Catℓ ℂ 𝔻
       exponent = record
         { obj           = CatExp.object
-        ; eval          = eval
-        ; isExponential = isExponential
+        ; eval          = {!eval!}
+        ; isExponential = {!isExponential!}
         }
 
   hasExponentials : HasExponentials Catℓ

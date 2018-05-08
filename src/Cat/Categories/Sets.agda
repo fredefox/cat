@@ -1,23 +1,13 @@
 -- | The category of homotopy sets
-{-# OPTIONS --allow-unsolved-metas --cubical --caching #-}
+{-# OPTIONS --cubical --caching #-}
 module Cat.Categories.Sets where
 
-open import Cat.Prelude hiding (_≃_)
-import Data.Product
-
-open import Function using (_∘_ ; _∘′_)
-
-open import Cubical.Univalence using (univalence ; con ; _≃_ ; idtoeqv ; ua)
+open import Cat.Prelude as P
 
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
-open import Cat.Wishlist
-open import Cat.Equivalence as Eqv using (AreInverses ; module Equiv≃ ; module NoEta)
-
-open NoEta
-
-module Equivalence = Equivalence′
+open import Cat.Equivalence
 
 _⊙_ : {ℓa ℓb ℓc : Level} {A : Set ℓa} {B : Set ℓb} {C : Set ℓc} → (A ≃ B) → (B ≃ C) → A ≃ C
 eqA ⊙ eqB = Equivalence.compose eqA eqB
@@ -27,268 +17,46 @@ sym≃ = Equivalence.symmetry
 
 infixl 10 _⊙_
 
-module _ {ℓ : Level} {A : Set ℓ} {a : A} where
-  id-coe : coe refl a ≡ a
-  id-coe = begin
-    coe refl a                 ≡⟨⟩
-    pathJ (λ y x → A) _ A refl ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
-    _ ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
-    a ∎
-
-module _ {ℓ : Level} {A B : Set ℓ} {a : A} where
-  inv-coe : (p : A ≡ B) → coe (sym p) (coe p a) ≡ a
-  inv-coe p =
-    let
-      D : (y : Set ℓ) → _ ≡ y → Set _
-      D _ q = coe (sym q) (coe q a) ≡ a
-      d : D A refl
-      d = begin
-        coe (sym refl) (coe refl a) ≡⟨⟩
-        coe refl (coe refl a)       ≡⟨ id-coe ⟩
-        coe refl a                  ≡⟨ id-coe ⟩
-        a ∎
-    in pathJ D d B p
-  inv-coe' : (p : B ≡ A) → coe p (coe (sym p) a) ≡ a
-  inv-coe' p =
-    let
-      D : (y : Set ℓ) → _ ≡ y → Set _
-      D _ q = coe (sym q) (coe q a) ≡ a
-      k : coe p (coe (sym p) a) ≡ a
-      k = pathJ D (trans id-coe id-coe) B (sym p)
-    in k
-
 module _ (ℓ : Level) where
   private
     SetsRaw : RawCategory (lsuc ℓ) ℓ
-    RawCategory.Object SetsRaw = hSet ℓ
-    RawCategory.Arrow  SetsRaw (T , _) (U , _) = T → U
-    RawCategory.𝟙      SetsRaw = Function.id
-    RawCategory._∘_    SetsRaw = Function._∘′_
+    RawCategory.Object   SetsRaw = hSet ℓ
+    RawCategory.Arrow    SetsRaw (T , _) (U , _) = T → U
+    RawCategory.identity SetsRaw = idFun _
+    RawCategory._<<<_    SetsRaw = _∘′_
 
-    open RawCategory SetsRaw hiding (_∘_)
+    module _ where
+      private
+        open RawCategory SetsRaw hiding (_<<<_)
 
-    isIdentity : IsIdentity Function.id
-    proj₁ isIdentity = funExt λ _ → refl
-    proj₂ isIdentity = funExt λ _ → refl
+        isIdentity : IsIdentity (idFun _)
+        fst isIdentity = funExt λ _ → refl
+        snd isIdentity = funExt λ _ → refl
 
-    open Univalence (λ {A} {B} {f} → isIdentity {A} {B} {f})
+        arrowsAreSets : ArrowsAreSets
+        arrowsAreSets {B = (_ , s)} = setPi λ _ → s
 
-    arrowsAreSets : ArrowsAreSets
-    arrowsAreSets {B = (_ , s)} = setPi λ _ → s
+      isPreCat : IsPreCategory SetsRaw
+      IsPreCategory.isAssociative isPreCat         = refl
+      IsPreCategory.isIdentity    isPreCat {A} {B} = isIdentity    {A} {B}
+      IsPreCategory.arrowsAreSets isPreCat {A} {B} = arrowsAreSets {A} {B}
 
-    isIso = Eqv.Isomorphism
-    module _ {hA hB : hSet ℓ} where
-      open Σ hA renaming (proj₁ to A ; proj₂ to sA)
-      open Σ hB renaming (proj₁ to B ; proj₂ to sB)
-      lem1 : (f : A → B) → isSet A → isSet B → isProp (isIso f)
-      lem1 f sA sB = res
-        where
-        module _ (x y : isIso f) where
-          module x = Σ x renaming (proj₁ to inverse ; proj₂ to areInverses)
-          module y = Σ y renaming (proj₁ to inverse ; proj₂ to areInverses)
-          module xA = AreInverses x.areInverses
-          module yA = AreInverses y.areInverses
-          -- I had a lot of difficulty using the corresponding proof where
-          -- AreInverses is defined. This is sadly a bit anti-modular. The
-          -- reason for my troubles is probably related to the type of objects
-          -- being hSet's rather than sets.
-          p : ∀ {f} g → isProp (AreInverses {A = A} {B} f g)
-          p {f} g xx yy i = record
-            { verso-recto = ve-re
-            ; recto-verso = re-ve
-            }
-            where
-            module xxA = AreInverses xx
-            module yyA = AreInverses yy
-            ve-re : g ∘ f ≡ Function.id
-            ve-re = arrowsAreSets {A = hA} {B = hA} _ _ xxA.verso-recto yyA.verso-recto i
-            re-ve : f ∘ g ≡ Function.id
-            re-ve = arrowsAreSets {A = hB} {B = hB} _ _ xxA.recto-verso yyA.recto-verso i
-          1eq : x.inverse ≡ y.inverse
-          1eq = begin
-            x.inverse                   ≡⟨⟩
-            x.inverse ∘ Function.id     ≡⟨ cong (λ φ → x.inverse ∘ φ) (sym yA.recto-verso) ⟩
-            x.inverse ∘ (f ∘ y.inverse) ≡⟨⟩
-            (x.inverse ∘ f) ∘ y.inverse ≡⟨ cong (λ φ → φ ∘ y.inverse) xA.verso-recto ⟩
-            Function.id ∘ y.inverse     ≡⟨⟩
-            y.inverse                   ∎
-          2eq : (λ i → AreInverses f (1eq i)) [ x.areInverses ≡ y.areInverses ]
-          2eq = lemPropF p 1eq
-          res : x ≡ y
-          res i = 1eq i , 2eq i
-    module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
-      lem2 : ((x : A) → isProp (P x)) → (p q : Σ A P)
-        → (p ≡ q) ≃ (proj₁ p ≡ proj₁ q)
-      lem2 pA p q = fromIsomorphism iso
-        where
-        f : ∀ {p q} → p ≡ q → proj₁ p ≡ proj₁ q
-        f e i = proj₁ (e i)
-        g : ∀ {p q} → proj₁ p ≡ proj₁ q → p ≡ q
-        g {p} {q} = lemSig pA p q
-        ve-re : (e : p ≡ q) → (g ∘ f) e ≡ e
-        ve-re = pathJ (\ q (e : p ≡ q) → (g ∘ f) e ≡ e)
-                  (\ i j → p .proj₁ , propSet (pA (p .proj₁)) (p .proj₂) (p .proj₂) (λ i → (g {p} {p} ∘ f) (λ i₁ → p) i .proj₂) (λ i → p .proj₂) i j ) q
-        re-ve : (e : proj₁ p ≡ proj₁ q) → (f {p} {q} ∘ g {p} {q}) e ≡ e
-        re-ve e = refl
-        inv : AreInverses (f {p} {q}) (g {p} {q})
-        inv = record
-          { verso-recto = funExt ve-re
-          ; recto-verso = funExt re-ve
-          }
-        iso : (p ≡ q) Eqv.≅ (proj₁ p ≡ proj₁ q)
-        iso = f , g , inv
-
-      lem3 : ∀ {ℓc} {Q : A → Set (ℓc ⊔ ℓb)}
-        → ((a : A) → P a ≃ Q a) → Σ A P ≃ Σ A Q
-      lem3 {Q = Q} eA = res
-        where
-        f : Σ A P → Σ A Q
-        f (a , pA) = a , _≃_.eqv (eA a) pA
-        g : Σ A Q → Σ A P
-        g (a , qA) = a , g' qA
-          where
-          k : Eqv.Isomorphism _
-          k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
-          open Σ k renaming (proj₁ to g')
-        ve-re : (x : Σ A P) → (g ∘ f) x ≡ x
-        ve-re x i = proj₁ x , eq i
-          where
-          eq : proj₂ ((g ∘ f) x) ≡ proj₂ x
-          eq = begin
-            proj₂ ((g ∘ f) x) ≡⟨⟩
-            proj₂ (g (f (a , pA))) ≡⟨⟩
-            g' (_≃_.eqv (eA a) pA) ≡⟨ lem ⟩
-            pA ∎
-            where
-            open Σ x renaming (proj₁ to a ; proj₂ to pA)
-            k : Eqv.Isomorphism _
-            k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
-            open Σ k renaming (proj₁ to g' ; proj₂ to inv)
-            module A = AreInverses inv
-            -- anti-funExt
-            lem : (g' ∘ (_≃_.eqv (eA a))) pA ≡ pA
-            lem i = A.verso-recto i pA
-        re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
-        re-ve x i = proj₁ x , eq i
-          where
-          open Σ x renaming (proj₁ to a ; proj₂ to qA)
-          eq = begin
-            proj₂ ((f ∘ g) x)                 ≡⟨⟩
-            _≃_.eqv (eA a) (g' qA)            ≡⟨ (λ i → A.recto-verso i qA) ⟩
-            qA                                ∎
-            where
-            k : Eqv.Isomorphism _
-            k = Equiv≃.toIso _ _ (_≃_.isEqv (eA a))
-            open Σ k renaming (proj₁ to g' ; proj₂ to inv)
-            module A = AreInverses inv
-        inv : AreInverses f g
-        inv = record
-          { verso-recto = funExt ve-re
-          ; recto-verso = funExt re-ve
-          }
-        iso : Σ A P Eqv.≅ Σ A Q
-        iso = f , g , inv
-        res : Σ A P ≃ Σ A Q
-        res = fromIsomorphism iso
-
-    module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
-      lem4 : isSet A → isSet B → (f : A → B)
-        → isEquiv A B f ≃ isIso f
-      lem4 sA sB f =
-        let
-          obv : isEquiv A B f → isIso f
-          obv = Equiv≃.toIso A B
-          inv : isIso f → isEquiv A B f
-          inv = Equiv≃.fromIso A B
-          re-ve : (x : isEquiv A B f) → (inv ∘ obv) x ≡ x
-          re-ve = Equiv≃.inverse-from-to-iso A B
-          ve-re : (x : isIso f)       → (obv ∘ inv) x ≡ x
-          ve-re = Equiv≃.inverse-to-from-iso A B sA sB
-          iso : isEquiv A B f Eqv.≅ isIso f
-          iso = obv , inv ,
-            record
-              { verso-recto = funExt re-ve
-              ; recto-verso = funExt ve-re
-              }
-        in fromIsomorphism iso
-
+    open IsPreCategory isPreCat
     module _ {hA hB : Object} where
-      open Σ hA renaming (proj₁ to A ; proj₂ to sA)
-      open Σ hB renaming (proj₁ to B ; proj₂ to sB)
+      open Σ hA renaming (fst to A ; snd to sA)
+      open Σ hB renaming (fst to B ; snd to sB)
 
-      -- lem3 and the equivalence from lem4
-      step0 : Σ (A → B) isIso ≃ Σ (A → B) (isEquiv A B)
-      step0 = lem3 {ℓc = lzero} (λ f → sym≃ (lem4 sA sB f))
-
-      -- univalence
-      step1 : Σ (A → B) (isEquiv A B) ≃ (A ≡ B)
-      step1 = hh ⊙ h
-        where
-          h : (A ≃ B) ≃ (A ≡ B)
-          h = sym≃ (univalence {A = A} {B})
-          obv : Σ (A → B) (isEquiv A B) → A ≃ B
-          obv = Eqv.deEta
-          inv : A ≃ B → Σ (A → B) (isEquiv A B)
-          inv = Eqv.doEta
-          re-ve : (x : _) → (inv ∘ obv) x ≡ x
-          re-ve x = refl
-          -- Because _≃_ does not have eta equality!
-          ve-re : (x : _) → (obv ∘ inv) x ≡ x
-          ve-re (con eqv isEqv) i = con eqv isEqv
-          areInv : AreInverses obv inv
-          areInv = record { verso-recto = funExt re-ve ; recto-verso = funExt ve-re }
-          eqv : Σ (A → B) (isEquiv A B) Eqv.≅ (A ≃ B)
-          eqv = obv , inv , areInv
-          hh : Σ (A → B) (isEquiv A B) ≃ (A ≃ B)
-          hh = fromIsomorphism eqv
-
-      -- lem2 with propIsSet
-      step2 : (A ≡ B) ≃ (hA ≡ hB)
-      step2 = sym≃ (lem2 (λ A → isSetIsProp) hA hB)
-
-      -- Go from an isomorphism on sets to an isomorphism on homotopic sets
-      trivial? : (hA ≅ hB) ≃ (A Eqv.≅ B)
-      trivial? = sym≃ (fromIsomorphism res)
-        where
-        fwd : Σ (A → B) isIso → hA ≅ hB
-        fwd (f , g , inv) = f , g , inv.toPair
-          where
-          module inv = AreInverses inv
-        bwd : hA ≅ hB → Σ (A → B) isIso
-        bwd (f , g , x , y) = f , g , record { verso-recto = x ; recto-verso = y }
-        res : Σ (A → B) isIso Eqv.≅ (hA ≅ hB)
-        res = fwd , bwd , record { verso-recto = refl ; recto-verso = refl }
-
-      conclusion : (hA ≅ hB) ≃ (hA ≡ hB)
-      conclusion = trivial? ⊙ step0 ⊙ step1 ⊙ step2
-
-      univ≃ : (hA ≅ hB) ≃ (hA ≡ hB)
-      univ≃ = trivial? ⊙ step0 ⊙ step1 ⊙ step2
-
-    module _ (hA : Object) where
-      open Σ hA renaming (proj₁ to A)
-
-      eq1 : (Σ[ hB ∈ Object ] hA ≅ hB) ≡ (Σ[ hB ∈ Object ] hA ≡ hB)
-      eq1 = ua (lem3 (\ hB → univ≃))
-
-      univalent[Contr] : isContr (Σ[ hB ∈ Object ] hA ≅ hB)
-      univalent[Contr] = subst {P = isContr} (sym eq1) tres
-        where
-        module _ (y : Σ[ hB ∈ Object ] hA ≡ hB) where
-          open Σ y renaming (proj₁ to hB ; proj₂ to hA≡hB)
-          qres : (hA , refl) ≡ (hB , hA≡hB)
-          qres = contrSingl hA≡hB
-
-        tres : isContr (Σ[ hB ∈ Object ] hA ≡ hB)
-        tres = (hA , refl) , qres
+      univ≃ : (hA ≡ hB) ≃ (hA ≊ hB)
+      univ≃
+        = equivSigProp (λ A → isSetIsProp)
+        ⊙ univalence
+        ⊙ equivSig {P = isEquiv A B} {Q = TypeIsomorphism} (equiv≃iso sA sB)
 
     univalent : Univalent
-    univalent = from[Contr] univalent[Contr]
+    univalent = univalenceFrom≃ univ≃
 
     SetsIsCategory : IsCategory SetsRaw
-    IsCategory.isAssociative SetsIsCategory = refl
-    IsCategory.isIdentity    SetsIsCategory {A} {B} = isIdentity    {A} {B}
-    IsCategory.arrowsAreSets SetsIsCategory {A} {B} = arrowsAreSets {A} {B}
+    IsCategory.isPreCategory SetsIsCategory = isPreCat
     IsCategory.univalent     SetsIsCategory = univalent
 
   𝓢𝓮𝓽 Sets : Category (lsuc ℓ) ℓ
@@ -300,11 +68,10 @@ module _ {ℓ : Level} where
   private
     𝓢 = 𝓢𝓮𝓽 ℓ
     open Category 𝓢
-    open import Cubical.Sigma
 
     module _ (hA hB : Object) where
-      open Σ hA renaming (proj₁ to A ; proj₂ to sA)
-      open Σ hB renaming (proj₁ to B ; proj₂ to sB)
+      open Σ hA renaming (fst to A ; snd to sA)
+      open Σ hB renaming (fst to B ; snd to sB)
 
       private
         productObject : Object
@@ -315,20 +82,32 @@ module _ {ℓ : Level} where
           _&&&_ x = f x , g x
 
         module _ (hX : Object) where
-          open Σ hX renaming (proj₁ to X)
+          open Σ hX renaming (fst to X)
           module _ (f : X → A ) (g : X → B) where
-            ump : proj₁ Function.∘′ (f &&& g) ≡ f × proj₂ Function.∘′ (f &&& g) ≡ g
-            proj₁ ump = refl
-            proj₂ ump = refl
+            ump : fst ∘′ (f &&& g) ≡ f × snd ∘′ (f &&& g) ≡ g
+            fst ump = refl
+            snd ump = refl
 
         rawProduct : RawProduct 𝓢 hA hB
         RawProduct.object rawProduct = productObject
-        RawProduct.proj₁  rawProduct = Data.Product.proj₁
-        RawProduct.proj₂  rawProduct = Data.Product.proj₂
+        RawProduct.fst    rawProduct = fst
+        RawProduct.snd    rawProduct = snd
 
         isProduct : IsProduct 𝓢 _ _ rawProduct
         IsProduct.ump isProduct {X = hX} f g
-          = (f &&& g) , ump hX f g
+          = f &&& g , ump hX f g , λ eq → funExt (umpUniq eq)
+          where
+          open Σ hX renaming (fst to X) using ()
+          module _ {y : X → A × B} (eq : fst ∘′ y ≡ f × snd ∘′ y ≡ g) (x : X) where
+            p1 : fst ((f &&& g) x) ≡ fst (y x)
+            p1 = begin
+              fst ((f &&& g) x) ≡⟨⟩
+              f x ≡⟨ (λ i → sym (fst eq) i x) ⟩
+              fst (y x) ∎
+            p2 : snd ((f &&& g) x) ≡ snd (y x)
+            p2 = λ i → sym (snd eq) i x
+            umpUniq : (f &&& g) x ≡ y x
+            umpUniq i = p1 i , p2 i
 
       product : Product 𝓢 hA hB
       Product.raw       product = rawProduct

@@ -1,25 +1,24 @@
 {-
 This module provides construction 2.3 in [voe]
 -}
-{-# OPTIONS --cubical --allow-unsolved-metas --caching #-}
+{-# OPTIONS --cubical --caching #-}
 module Cat.Category.Monad.Voevodsky where
 
 open import Cat.Prelude
-open import Function
 
 open import Cat.Category
 open import Cat.Category.Functor as F
-open import Cat.Category.NaturalTransformation
+import Cat.Category.NaturalTransformation
 open import Cat.Category.Monad
 open import Cat.Categories.Fun
 open import Cat.Equivalence
 
 module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
+  open Cat.Category.NaturalTransformation ℂ ℂ
   private
     ℓ = ℓa ⊔ ℓb
     module ℂ = Category ℂ
     open ℂ using (Object ; Arrow)
-    open NaturalTransformation ℂ ℂ
     module M = Monoidal ℂ
     module K = Kleisli  ℂ
 
@@ -50,9 +49,9 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       pureT X = pure {X}
 
       field
-        pureN : Natural F.identity R pureT
+        pureN : Natural Functors.identity R pureT
 
-      pureNT : NaturalTransformation F.identity R
+      pureNT : NaturalTransformation Functors.identity R
       pureNT = pureT , pureN
 
       joinT : (A : Object) → ℂ [ omap (omap A) , omap A ]
@@ -72,12 +71,12 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         }
 
       field
-        isMnd : IsMonad rawMnd
+        isMonad : IsMonad rawMnd
 
       toMonad : Monad
       toMonad = record
         { raw     = rawMnd
-        ; isMonad = isMnd
+        ; isMonad = isMonad
         }
 
     record §2 : Set ℓ where
@@ -94,43 +93,37 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         }
 
       field
-        isMnd : IsMonad rawMnd
+        isMonad : IsMonad rawMnd
 
       toMonad : Monad
       toMonad = record
         { raw     = rawMnd
-        ; isMonad = isMnd
+        ; isMonad = isMonad
         }
 
   §1-fromMonad : (m : M.Monad) → §2-3.§1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
-  -- voe-2-3-1-fromMonad : (m : M.Monad) → voe.§2-3.§1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
   §1-fromMonad m = record
-    { fmap = Functor.fmap R
+    { fmap       = Functor.fmap R
     ; RisFunctor = Functor.isFunctor R
-    ; pureN = pureN
-    ; join = λ {X} → joinT X
-    ; joinN = joinN
-    ; isMnd = M.Monad.isMonad m
+    ; pureN      = pureN
+    ; join       = λ {X} → joinT X
+    ; joinN      = joinN
+    ; isMonad    = M.Monad.isMonad m
     }
     where
-    raw = M.Monad.raw m
-    R   = M.RawMonad.R raw
-    pureT = M.RawMonad.pureT raw
-    pureN = M.RawMonad.pureN raw
-    joinT = M.RawMonad.joinT raw
-    joinN = M.RawMonad.joinN raw
+    open M.Monad m
 
   §2-fromMonad : (m : K.Monad) → §2-3.§2 (K.Monad.omap m) (K.Monad.pure m)
   §2-fromMonad m = record
-    { bind  = K.Monad.bind    m
-    ; isMnd = K.Monad.isMonad m
+    { bind    = K.Monad.bind    m
+    ; isMonad = K.Monad.isMonad m
     }
 
   -- | In the following we seek to transform the equivalence `Monoidal≃Kleisli`
   -- | to talk about voevodsky's construction.
   module _ (omap : Omap ℂ ℂ) (pure : {X : Object} → Arrow X (omap X)) where
     private
-      module E = AreInverses (Monoidal≅Kleisli ℂ .proj₂ .proj₂)
+      module E = AreInverses {f = (fst (Monoidal≊Kleisli ℂ))} {fst (snd (Monoidal≊Kleisli ℂ))}(Monoidal≊Kleisli ℂ .snd .snd)
 
       Monoidal→Kleisli : M.Monad → K.Monad
       Monoidal→Kleisli = E.obverse
@@ -138,10 +131,10 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       Kleisli→Monoidal : K.Monad → M.Monad
       Kleisli→Monoidal = E.reverse
 
-      ve-re : Kleisli→Monoidal ∘ Monoidal→Kleisli ≡ Function.id
+      ve-re : Kleisli→Monoidal ∘ Monoidal→Kleisli ≡ idFun _
       ve-re = E.verso-recto
 
-      re-ve : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ Function.id
+      re-ve : Monoidal→Kleisli ∘ Kleisli→Monoidal ≡ idFun _
       re-ve = E.recto-verso
 
       forth : §2-3.§1 omap pure → §2-3.§2 omap pure
@@ -178,9 +171,6 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         where
         t' : ((Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad {omap} {pure})
           ≡ §2-3.§2.toMonad
-        cong-d : ∀ {ℓ} {A : Set ℓ} {ℓ'} {B : A → Set ℓ'} {x y : A}
-          → (f : (x : A) → B x) → (eq : x ≡ y) → PathP (\ i → B (eq i)) (f x) (f y)
-        cong-d f p = λ i → f (p i)
         t' = cong (\ φ → φ ∘ §2-3.§2.toMonad) re-ve
         t : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad {omap} {pure})
           ≡ (§2-fromMonad ∘ §2-3.§2.toMonad)

@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --allow-unsolved-metas --cubical #-}
 module Cat.Categories.Free where
 
 open import Cat.Prelude hiding (Path ; empty)
@@ -27,10 +27,10 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     module ℂ = Category ℂ
 
     RawFree : RawCategory ℓa (ℓa ⊔ ℓb)
-    RawCategory.Object RawFree = ℂ.Object
-    RawCategory.Arrow  RawFree = Path ℂ.Arrow
-    RawCategory.𝟙      RawFree = empty
-    RawCategory._∘_    RawFree = concatenate
+    RawCategory.Object   RawFree = ℂ.Object
+    RawCategory.Arrow    RawFree = Path ℂ.Arrow
+    RawCategory.identity RawFree = empty
+    RawCategory._<<<_    RawFree = concatenate
 
     open RawCategory RawFree
 
@@ -52,7 +52,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     ident-l : ∀ {A} {B} {p : Path ℂ.Arrow A B} → concatenate empty p ≡ p
     ident-l = refl
 
-    isIdentity : IsIdentity 𝟙
+    isIdentity : IsIdentity identity
     isIdentity = ident-l , ident-r
 
     open Univalence isIdentity
@@ -61,16 +61,20 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       arrowsAreSets : isSet (Path ℂ.Arrow A B)
       arrowsAreSets a b p q = {!!}
 
-      eqv : isEquiv (A ≡ B) (A ≅ B) (Univalence.id-to-iso isIdentity A B)
+    isPreCategory : IsPreCategory RawFree
+    IsPreCategory.isAssociative isPreCategory {f = f} {g} {h} = isAssociative {r = f} {g} {h}
+    IsPreCategory.isIdentity    isPreCategory = isIdentity
+    IsPreCategory.arrowsAreSets isPreCategory = arrowsAreSets
+
+    module _ {A B : ℂ.Object} where
+      eqv : isEquiv (A ≡ B) (A ≊ B) (Univalence.idToIso isIdentity A B)
       eqv = {!!}
 
     univalent : Univalent
     univalent = eqv
 
     isCategory : IsCategory RawFree
-    IsCategory.isAssociative isCategory {f = f} {g} {h} = isAssociative {r = f} {g} {h}
-    IsCategory.isIdentity    isCategory = isIdentity
-    IsCategory.arrowsAreSets isCategory = arrowsAreSets
+    IsCategory.isPreCategory isCategory = isPreCategory
     IsCategory.univalent     isCategory = univalent
 
   Free : Category _ _

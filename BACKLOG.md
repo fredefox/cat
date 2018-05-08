@@ -1,21 +1,12 @@
 Backlog
 =======
 
-Prove postulates in `Cat.Wishlist`:
- * `ntypeCommulative : n ≤ m → HasLevel ⟨ n ⟩₋₂ A → HasLevel ⟨ m ⟩₋₂ A`
-
-Prove that these two formulations of univalence are equivalent:
-
-    ∀ A B → isEquiv (A ≡ B) (A ≅ B) (id-to-iso A B)
-    ∀ A   → isContr (Σ[ X ∈ Object ] A ≅ X)
-
 Prove univalence for the category of
-  * the opposite category
   * functors and natural transformations
 
-Prove:
-  * `isProp (Product ...)`
-  * `isProp (HasProducts ...)`
+In AreInverses, dont use the "point-free" version. I.e.:
+
+  `∀ x → f x ≡ g x` rather than `f ≡ g`
 
 Ideas for future work
 ---------------------

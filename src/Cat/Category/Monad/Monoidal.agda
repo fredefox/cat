@@ -1,14 +1,13 @@
 {---
 Monoidal formulation of monads
  ---}
-{-# OPTIONS --cubical --allow-unsolved-metas #-}
+{-# OPTIONS --cubical #-}
 open import Agda.Primitive
 
 open import Cat.Prelude
 
 open import Cat.Category
 open import Cat.Category.Functor as F
-open import Cat.Category.NaturalTransformation
 open import Cat.Categories.Fun
 
 module Cat.Category.Monad.Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
@@ -17,43 +16,55 @@ module Cat.Category.Monad.Monoidal {ℓa ℓb : Level} (ℂ : Category ℓa ℓb
 private
   ℓ = ℓa ⊔ ℓb
 
-open Category ℂ using (Object ; Arrow ; 𝟙 ; _∘_)
-open NaturalTransformation ℂ ℂ
+open Category ℂ using (Object ; Arrow ; identity ; _<<<_)
+open import Cat.Category.NaturalTransformation ℂ ℂ
+  using (NaturalTransformation ; Transformation ; Natural)
+
 record RawMonad : Set ℓ where
   field
     R      : EndoFunctor ℂ
-    pureNT : NaturalTransformation F.identity R
+    pureNT : NaturalTransformation Functors.identity R
     joinNT : NaturalTransformation F[ R ∘ R ] R
+
+  Romap = Functor.omap R
+  fmap = Functor.fmap R
 
   -- Note that `pureT` and `joinT` differs from their definition in the
   -- kleisli formulation only by having an explicit parameter.
-  pureT : Transformation F.identity R
-  pureT = proj₁ pureNT
-  pureN : Natural F.identity R pureT
-  pureN = proj₂ pureNT
+  pureT : Transformation Functors.identity R
+  pureT = fst pureNT
+
+  pure : {X : Object} → ℂ [ X , Romap X ]
+  pure = pureT _
+
+  pureN : Natural Functors.identity R pureT
+  pureN = snd pureNT
 
   joinT : Transformation F[ R ∘ R ] R
-  joinT = proj₁ joinNT
+  joinT = fst joinNT
+  join : {X : Object} → ℂ [ Romap (Romap X) , Romap X ]
+  join = joinT _
   joinN : Natural F[ R ∘ R ] R joinT
-  joinN = proj₂ joinNT
-
-  Romap = Functor.omap R
-  Rfmap = Functor.fmap R
+  joinN = snd joinNT
 
   bind : {X Y : Object} → ℂ [ X , Romap Y ] → ℂ [ Romap X , Romap Y ]
-  bind {X} {Y} f = joinT Y ∘ Rfmap f
+  bind {X} {Y} f = join <<< fmap f
 
   IsAssociative : Set _
   IsAssociative = {X : Object}
-    → joinT X ∘ Rfmap (joinT X) ≡ joinT X ∘ joinT (Romap X)
+    -- R and join commute
+    → joinT X <<< fmap join ≡ join <<< join
   IsInverse : Set _
   IsInverse = {X : Object}
-    → joinT X ∘ pureT (Romap X) ≡ 𝟙
-    × joinT X ∘ Rfmap (pureT X) ≡ 𝟙
-  IsNatural = ∀ {X Y} f → joinT Y ∘ Rfmap f ∘ pureT X ≡ f
+    -- Talks about R's action on objects
+    → join <<< pure      ≡ identity {Romap X}
+    -- Talks about R's action on arrows
+    × join <<< fmap pure ≡ identity {Romap X}
+  IsNatural = ∀ {X Y} (f : Arrow X (Romap Y))
+    → join <<< fmap f <<< pure ≡ f
   IsDistributive = ∀ {X Y Z} (g : Arrow Y (Romap Z)) (f : Arrow X (Romap Y))
-    → joinT Z ∘ Rfmap g ∘ (joinT Y ∘ Rfmap f)
-    ≡ joinT Z ∘ Rfmap (joinT Z ∘ Rfmap g ∘ f)
+    → join <<< fmap g <<< (join <<< fmap f)
+    ≡ join <<< fmap (join <<< fmap g <<< f)
 
 record IsMonad (raw : RawMonad) : Set ℓ where
   open RawMonad raw public
@@ -67,48 +78,48 @@ record IsMonad (raw : RawMonad) : Set ℓ where
 
   isNatural : IsNatural
   isNatural {X} {Y} f = begin
-    joinT Y ∘ R.fmap f ∘ pureT X     ≡⟨ sym ℂ.isAssociative ⟩
-    joinT Y ∘ (R.fmap f ∘ pureT X)   ≡⟨ cong (λ φ → joinT Y ∘ φ) (sym (pureN f)) ⟩
-    joinT Y ∘ (pureT (R.omap Y) ∘ f) ≡⟨ ℂ.isAssociative ⟩
-    joinT Y ∘ pureT (R.omap Y) ∘ f   ≡⟨ cong (λ φ → φ ∘ f) (proj₁ isInverse) ⟩
-    𝟙 ∘ f                            ≡⟨ ℂ.leftIdentity ⟩
-    f                                ∎
+    joinT Y <<< R.fmap f <<< pureT X     ≡⟨ sym ℂ.isAssociative ⟩
+    joinT Y <<< (R.fmap f <<< pureT X)   ≡⟨ cong (λ φ → joinT Y <<< φ) (sym (pureN f)) ⟩
+    joinT Y <<< (pureT (R.omap Y) <<< f) ≡⟨ ℂ.isAssociative ⟩
+    joinT Y <<< pureT (R.omap Y) <<< f   ≡⟨ cong (λ φ → φ <<< f) (fst isInverse) ⟩
+    identity <<< f                       ≡⟨ ℂ.leftIdentity ⟩
+    f                                    ∎
 
   isDistributive : IsDistributive
   isDistributive {X} {Y} {Z} g f = sym aux
     where
     module R² = Functor F[ R ∘ R ]
     distrib3 : ∀ {A B C D} {a : Arrow C D} {b : Arrow B C} {c : Arrow A B}
-      → R.fmap (a ∘ b ∘ c)
-      ≡ R.fmap a ∘ R.fmap b ∘ R.fmap c
+      → R.fmap (a <<< b <<< c)
+      ≡ R.fmap a <<< R.fmap b <<< R.fmap c
     distrib3 {a = a} {b} {c} = begin
-      R.fmap (a ∘ b ∘ c)               ≡⟨ R.isDistributive ⟩
-      R.fmap (a ∘ b) ∘ R.fmap c       ≡⟨ cong (_∘ _) R.isDistributive ⟩
-      R.fmap a ∘ R.fmap b ∘ R.fmap c ∎
+      R.fmap (a <<< b <<< c)              ≡⟨ R.isDistributive ⟩
+      R.fmap (a <<< b) <<< R.fmap c       ≡⟨ cong (_<<< _) R.isDistributive ⟩
+      R.fmap a <<< R.fmap b <<< R.fmap c  ∎
     aux = begin
-      joinT Z ∘ R.fmap (joinT Z ∘ R.fmap g ∘ f)
-        ≡⟨ cong (λ φ → joinT Z ∘ φ) distrib3 ⟩
-      joinT Z ∘ (R.fmap (joinT Z) ∘ R.fmap (R.fmap g) ∘ R.fmap f)
+      joinT Z <<< R.fmap (joinT Z <<< R.fmap g <<< f)
+        ≡⟨ cong (λ φ → joinT Z <<< φ) distrib3 ⟩
+      joinT Z <<< (R.fmap (joinT Z) <<< R.fmap (R.fmap g) <<< R.fmap f)
         ≡⟨⟩
-      joinT Z ∘ (R.fmap (joinT Z) ∘ R².fmap g ∘ R.fmap f)
-        ≡⟨ cong (_∘_ (joinT Z)) (sym ℂ.isAssociative) ⟩
-      joinT Z ∘ (R.fmap (joinT Z) ∘ (R².fmap g ∘ R.fmap f))
+      joinT Z <<< (R.fmap (joinT Z) <<< R².fmap g <<< R.fmap f)
+        ≡⟨ cong (_<<<_ (joinT Z)) (sym ℂ.isAssociative) ⟩
+      joinT Z <<< (R.fmap (joinT Z) <<< (R².fmap g <<< R.fmap f))
         ≡⟨ ℂ.isAssociative ⟩
-      (joinT Z ∘ R.fmap (joinT Z)) ∘ (R².fmap g ∘ R.fmap f)
-        ≡⟨ cong (λ φ → φ ∘ (R².fmap g ∘ R.fmap f)) isAssociative ⟩
-      (joinT Z ∘ joinT (R.omap Z)) ∘ (R².fmap g ∘ R.fmap f)
+      (joinT Z <<< R.fmap (joinT Z)) <<< (R².fmap g <<< R.fmap f)
+        ≡⟨ cong (λ φ → φ <<< (R².fmap g <<< R.fmap f)) isAssociative ⟩
+      (joinT Z <<< joinT (R.omap Z)) <<< (R².fmap g <<< R.fmap f)
         ≡⟨ ℂ.isAssociative ⟩
-      joinT Z ∘ joinT (R.omap Z) ∘ R².fmap g ∘ R.fmap f
+      joinT Z <<< joinT (R.omap Z) <<< R².fmap g <<< R.fmap f
         ≡⟨⟩
-      ((joinT Z ∘ joinT (R.omap Z)) ∘ R².fmap g) ∘ R.fmap f
-        ≡⟨ cong (_∘ R.fmap f) (sym ℂ.isAssociative) ⟩
-      (joinT Z ∘ (joinT (R.omap Z) ∘ R².fmap g)) ∘ R.fmap f
-        ≡⟨ cong (λ φ → φ ∘ R.fmap f) (cong (_∘_ (joinT Z)) (joinN g)) ⟩
-      (joinT Z ∘ (R.fmap g ∘ joinT Y)) ∘ R.fmap f
-        ≡⟨ cong (_∘ R.fmap f) ℂ.isAssociative ⟩
-      joinT Z ∘ R.fmap g ∘ joinT Y ∘ R.fmap f
+      ((joinT Z <<< joinT (R.omap Z)) <<< R².fmap g) <<< R.fmap f
+        ≡⟨ cong (_<<< R.fmap f) (sym ℂ.isAssociative) ⟩
+      (joinT Z <<< (joinT (R.omap Z) <<< R².fmap g)) <<< R.fmap f
+        ≡⟨ cong (λ φ → φ <<< R.fmap f) (cong (_<<<_ (joinT Z)) (joinN g)) ⟩
+      (joinT Z <<< (R.fmap g <<< joinT Y)) <<< R.fmap f
+        ≡⟨ cong (_<<< R.fmap f) ℂ.isAssociative ⟩
+      joinT Z <<< R.fmap g <<< joinT Y <<< R.fmap f
         ≡⟨ sym (Category.isAssociative ℂ) ⟩
-      joinT Z ∘ R.fmap g ∘ (joinT Y ∘ R.fmap f)
+      joinT Z <<< R.fmap g <<< (joinT Y <<< R.fmap f)
         ∎
 
 record Monad : Set ℓ where
@@ -128,8 +139,8 @@ private
       where
       xX = x {X}
       yX = y {X}
-      e1 = Category.arrowsAreSets ℂ _ _ (proj₁ xX) (proj₁ yX)
-      e2 = Category.arrowsAreSets ℂ _ _ (proj₂ xX) (proj₂ yX)
+      e1 = Category.arrowsAreSets ℂ _ _ (fst xX) (fst yX)
+      e2 = Category.arrowsAreSets ℂ _ _ (snd xX) (snd yX)
 
   open IsMonad
   propIsMonad : (raw : _) → isProp (IsMonad raw)

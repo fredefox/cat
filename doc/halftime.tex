@@ -1,4 +1,4 @@
-\section{Halftime report}
+\chapter{Halftime report}
 I've written this as an appendix because 1) the aim of the thesis changed
 drastically from the planning report/proposal 2) partly I'm not sure how to
 structure my thesis.
@@ -8,7 +8,7 @@ unclear to me at this point what I should have in the final report. Here I will
 describe what I have managed to formalize so far and what outstanding challenges
 I'm facing.
 
-\subsection{Implementation overview}
+\section{Implementation overview}
 The overall structure of my project is as follows:
 
 \begin{itemize}
@@ -50,7 +50,7 @@ creating a function embodying the ``equality principle'' for a given record. In
 the case of monads, to prove two categories propositionally equal it enough to
 provide a proof that their data is equal.
 
-\subsubsection{Categories}
+\subsection{Categories}
 Defines the basic notion of a category. This definition closely follows that of
 [HoTT]: That is, the standard definition of a category (data; objects, arrows,
 composition and identity, laws; preservation of identity and composition) plus
@@ -69,30 +69,30 @@ shown that univalence holds for such a construction)
 
 I also show that taking the opposite is an involution.
 
-\subsubsection{Functors}
+\subsection{Functors}
 Defines the notion of a functor - also split up into data and laws.
 
 Propositionality for being a functor.
 
 Composition of functors and the identity functor.
 
-\subsubsection{Products}
+\subsection{Products}
 Definition of what it means for an object to be a product in a given category.
 
 Definition of what it means for a category to have all products.
 
-\WIP Prove propositionality for being a product and having products.
+\WIP{} Prove propositionality for being a product and having products.
 
-\subsubsection{Exponentials}
+\subsection{Exponentials}
 Definition of what it means to be an exponential object.
 
 Definition of what it means for a category to have all exponential objects.
 
-\subsubsection{Cartesian closed categories}
+\subsection{Cartesian closed categories}
 Definition of what it means for a category to be cartesian closed; namely that
 it has all products and all exponentials.
 
-\subsubsection{Natural transformations}
+\subsection{Natural transformations}
 Definition of transformations\footnote{Maybe this is a name I made up for a
   family of morphisms} and the naturality condition for these.
 
@@ -101,18 +101,18 @@ principle. Proof that natural transformations are homotopic sets.
 
 The identity natural transformation.
 
-\subsubsection{Yoneda embedding}
+\subsection{Yoneda embedding}
 
 The yoneda embedding is typically presented in terms of the category of
 categories (cf. Awodey) \emph however this is not stricly needed - all we need
 is what would be the exponential object in that category - this happens to be
 functors and so this is how we define the yoneda embedding.
 
-\subsubsection{Monads}
+\subsection{Monads}
 
 Defines an equivalence between these two formulations of a monad:
 
-\subsubsubsection{Monoidal monads}
+\subsubsection{Monoidal monads}
 
 Defines the standard monoidal representation of a monad:
 
@@ -121,7 +121,7 @@ and some laws about these natural transformations.
 
 Propositionality proofs and equality principle is provided.
 
-\subsubsubsection{Kleisli monads}
+\subsubsection{Kleisli monads}
 
 A presentation of monads perhaps more familiar to a functional programer:
 
@@ -130,28 +130,48 @@ some laws about these maps.
 
 Propositionality proofs and equality principle is provided.
 
-\subsubsubsection{Voevodsky's construction}
+\subsubsection{Voevodsky's construction}
 
-Provides construction 2.3 as presented in an unpublished paper by the late
-Vladimir Voevodsky. This construction is similiar to the equivalence provided
-for the two preceding formulations
+Provides construction 2.3 as presented in an unpublished paper by Vladimir
+Voevodsky. This construction is similiar to the equivalence provided for the two
+preceding formulations
 \footnote{ TODO: I would like to include in the thesis some motivation for why
   this construction is particularly interesting.}
 
-\subsubsection{Homotopy sets}
+\subsection{Homotopy sets}
 The typical category of sets where the objects are modelled by an Agda set
-(henceforth ``type'') at a given level is not a valid category in this cubical
-settings, we need to restrict the types to be those that are homotopy sets. Thus the objects of this category are:
+(henceforth ``$\Type$'') at a given level is not a valid category in this cubical
+settings, we need to restrict the types to be those that are homotopy sets. Thus
+the objects of this category are:
 %
-$$\Set_\ell \defeq \sum_{A \tp \MCU_\ell} \isSet\ A$$
+$$\hSet_\ell \defeq \sum_{A \tp \MCU_\ell} \isSet\ A$$
 %
-\WIP{} I'm still missing a few details for the proof that this category is
-univalent. Indeed this doesn't not follow immediately from
+The definition of univalence for categories I have defined is:
 %
-$$\mathit{univalence} \tp (A \cong B) \simeq (A \simeq B)$$
+$$\isEquiv\ (\hA \equiv \hB)\ (\hA \cong \hB)\ \idToIso$$
 %
-since $A$ and $B$ are of type $\MCU \neq \Set$.
-\subsubsection{Categories}
+Where $\hA and \hB$ denote objects in the category. Note that this is stronger
+than
+%
+$$(\hA \equiv \hB) \simeq (\hA \cong \hB)$$
+%
+Because we require that the equivalence is constructed from the witness to:
+%
+$$\id \comp f \equiv f \x f \comp \id \equiv f$$
+%
+And indeed univalence does not follow immediately from univalence for types:
+%
+$$(A \equiv B) \simeq (A \simeq B)$$
+%
+Because $A\ B \tp \Type$ whereas $\hA\ \hB \tp \hSet$.
+
+For this reason I have shown that this category satisfies the following
+equivalent formulation of being univalent:
+%
+$$\prod_{A \tp hSet} \isContr \left( \sum_{X \tp hSet} A \cong X \right)$$
+%
+But I have not shown that it is indeed equivalent to my former definition.
+\subsection{Categories}
 Note that this category does in fact not exist. In stead I provide the
 definition of the ``raw'' category as well as some of the laws.
 
@@ -162,16 +182,78 @@ These lemmas can be used to provide the actual exponential object in a context
 where we have a witness to this being a category. This is useful if this library
 is later extended to talk about higher categories.
 
-\subsubsection{Functors}
+\subsection{Functors}
 The category of functors and natural transformations. An immediate corrolary is
 the set of presheaf categories.
 
 \WIP{} I have not shown that the category of functors is univalent.
 
-\subsubsection{Relations}
-The category of relations. \WIP I have not shown that this category is
+\subsection{Relations}
+The category of relations. \WIP{} I have not shown that this category is
 univalent. Not sure I intend to do so either.
 
-\subsubsection{Free category}
-The free category of a category. \WIP I have not shown that this category is
+\subsection{Free category}
+The free category of a category. \WIP{} I have not shown that this category is
 univalent.
+
+\section{Current Challenges}
+Besides the items marked \WIP{} above I still feel a bit unsure about what to
+include in my report. Most of my work so far has been specifically about
+developing this library. Some ideas:
+%
+\begin{itemize}
+\item
+  Modularity properties
+\item
+  Compare with setoid-approach to solve similiar problems.
+\item
+  How to structure an implementation to best deal with types that have no
+  structure (propositions) and those that do (sets and everything above)
+\end{itemize}
+%
+\section{Ideas for future developments}
+\subsection{Higher categories}
+I only have a notion of (1-)categories. Perhaps it would be nice to also
+formalize higher categories.
+
+\subsection{Hierarchy of concepts related to monads}
+In Haskell the type-class Monad sits in a hierarchy atop the notion of a functor
+and applicative functors. There's probably a similiar notion in the
+category-theoretic approach to developing this.
+
+As I have already defined monads from these two perspectives, it would be
+interesting to take this idea even further and actually show how monads are
+related to applicative functors and functors. I'm not entirely sure how this
+would look in Agda though.
+
+\subsection{Use formulation on the standard library}
+I also thought it would be interesting to use this library to show certain
+properties about functors, applicative functors and monads used in the Agda
+Standard library. So I went ahead and tried to show that agda's standard
+library's notion of a functor (along with suitable laws) is equivalent to my
+formulation (in the category of homotopic sets). I ran into two problems here,
+however; the first one is that the standard library's notion of a functor is
+indexed by the object map:
+%
+$$
+\Functor \tp (\Type \to \Type) \to \Type
+$$
+%
+Where $\Functor\ F$ has the member:
+%
+$$
+\fmap \tp (A \to B) \to F A \to F B
+$$
+%
+Whereas the object map in my definition is existentially quantified:
+%
+$$
+\Functor \tp \Type
+$$
+%
+And $\Functor$ has these members:
+\begin{align*}
+F     & \tp \Type \to \Type \\
+\fmap & \tp (A \to B) \to F A \to F B\}
+\end{align*}
+%
