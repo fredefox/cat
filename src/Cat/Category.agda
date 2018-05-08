@@ -137,11 +137,10 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
       Univalent[Contr] : Set _
       Univalent[Contr] = ∀ A → isContr (Σ[ X ∈ Object ] A ≊ X)
 
-      -- From: Thierry Coquand <Thierry.Coquand@cse.gu.se>
-      -- Date: Wed, Mar 21, 2018 at 3:12 PM
-      --
-      -- This is not so straight-forward so you can assume it
-      postulate from[Contr] : Univalent[Contr] → Univalent
+      from[Contr] : Univalent[Contr] → Univalent
+      from[Contr] = ContrToUniv.lemma _ _
+        where
+        open import Cubical.Fiberwise
 
     univalenceFrom≃ : Univalent≃ → Univalent
     univalenceFrom≃ = from[Contr] ∘ step
