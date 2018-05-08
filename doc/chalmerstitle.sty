@@ -38,12 +38,11 @@
 \newcommand*{\department}[1]{\gdef\@department{#1}}
 \newcommand*{\researchgroup}[1]{\gdef\@researchgroup{#1}}
 \newcommand*{\subtitle}[1]{\gdef\@subtitle{#1}}
+%% FRONTMATTER
+\newcommand*{\myfrontmatter}{%
 \newgeometry{top=3cm, bottom=3cm,left=2.25 cm, right=2.25cm}
 \begingroup
 \thispagestyle{empty}
-\usepackage{noto}
-\fontseries{sb}
-%% \fontfamily{noto}\selectfont
 {\Huge\@title}\\[.5cm]
 {\Large A formalization of category theory in Cubical Agda}\\[2.5cm]
 \begin{center}
@@ -55,17 +54,16 @@
 {\Large\@author}\\[.5cm]
 Master's thesis in Computer Science
 \endgroup
-%% \renewcommand{\familydefault}{\rmdefault} \normalfont % Reset standard font
 %% \end{titlepage}
 
 
 % BACK OF COVER PAGE (BLANK PAGE)
 \newpage
-\newgeometry{a4paper}	% Temporarily change margins
-\restoregeometry
+%% \newgeometry{a4paper}	% Temporarily change margins
+%% \restoregeometry
 \thispagestyle{empty}
 \null
-
+}
 
 \renewcommand*{\maketitle}{%
 \begin{titlepage}

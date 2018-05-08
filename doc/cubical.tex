@@ -89,10 +89,12 @@ interest.
 With this definition we can also recover reflexivity. That is, for any $A \tp
 \MCU$ and $a \tp A$:
 %
-\begin{align}
+\begin{equation}
+\begin{aligned}
 \refl & \tp \Path (\lambda i \to A)\ a\ a \\
 \refl & \defeq \lambda i \to a
-\end{align}
+\end{aligned}
+\end{equation}
 %
 Or, in other terms; reflexivity is the path in $A$ that is $a$ at the left
 endpoint as well as at the right endpoint. It is inhabited by the path which
@@ -113,10 +115,12 @@ structure''. At the bottom of this hierarchy we have the set of contractible
 types:
 %
 \begin{equation}
-\begin{alignat}{2}
+\begin{aligned}
+%% \begin{split}
 & \isContr    && \tp \MCU \to \MCU \\
 & \isContr\ A && \defeq \sum_{c \tp A} \prod_{a \tp A} a \equiv c
-\end{alignedat}
+%% \end{split}
+\end{aligned}
 \end{equation}
 %
 The first component of $\isContr\ A$ is called ``the center of contraction''.
@@ -127,10 +131,10 @@ contractible, then it is isomorphic to the unit-type $\top$.
 The next step in the hierarchy is the set of mere propositions:
 %
 \begin{equation}
-\begin{alignat}{2}
+\begin{aligned}
 & \isProp    && \tp \MCU \to \MCU \\
 & \isProp\ A && \defeq \prod_{a_0, a_1 \tp A} a_0 \equiv a_1
-\end{alignedat}
+\end{aligned}
 \end{equation}
 %
 $\isProp\ A$ can be thought of as the set of true and false propositions. It is
@@ -144,10 +148,10 @@ stress that we have $\isProp\ A$.
 Then comes the set of homotopical sets:
 %
 \begin{equation}
-\begin{alignat}{2}
+\begin{aligned}
 & \isSet    && \tp \MCU \to \MCU \\
 & \isSet\ A && \defeq \prod_{a_0, a_1 \tp A} \isProp\ (a_0 \equiv a_1)
-\end{alignedat}
+\end{aligned}
 \end{equation}
 %
 At this point it should be noted that the term ``set'' is somewhat conflated;
@@ -158,10 +162,10 @@ if $\isSet\ A$ is inhabited.
 The next step in the hierarchy is, as the reader might've guessed, the type:
 %
 \begin{equation}
-\begin{alignat}{2}
+\begin{aligned}
 & \isGroupoid    && \tp \MCU \to \MCU \\
 & \isGroupoid\ A && \defeq \prod_{a_0, a_1 \tp A} \isSet\ (a_0 \equiv a_1)
-\end{alignedat}
+\end{aligned}
 \end{equation}
 %
 And so it continues. In fact we can generalize this family of types by indexing
