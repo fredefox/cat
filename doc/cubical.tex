@@ -47,7 +47,7 @@ heterogeneous paths respectively.
 In Cubical Agda judgmental equality is encapsulated with the type:
 %
 $$
-\Path \tp (P : I → \MCU) → P\ 0 → P\ 1 → \MCU
+\Path \tp (P \tp I → \MCU) → P\ 0 → P\ 1 → \MCU
 $$
 %
 $I$ is a special data-type (\TODO{that also has special computational properties
@@ -244,7 +244,7 @@ $\lemPropF$ can be used to boil this complexity down to showing that the
 dependent parts of the type are mere propositions. For instance, saw we have a type:
 %
 $$
-T \defeq \sum_{a : A} P\ a
+T \defeq \sum_{a \tp A} P\ a
 $$
 %
 For some proposition $P \tp A \to \MCU$. If we want to prove $t_0 \equiv t_1$
