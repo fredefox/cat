@@ -70,7 +70,7 @@ constituents of a category and can be found in typical mathematical expositions
 on the topic. We, however, impose one further requirement on what it means to be
 a category, namely that the type of arrows form a set.
 
-Such categories are called \nomen{1-categories}. It's possible to relax this
+Such categories are called \nomen{1-categories}. It is possible to relax this
 requirement. This would lead to the notion of higher categories (\cite[p.
   307]{hott-2013}). For the purpose of this project, however, this report will
 restrict itself to 1-categories. Making based on higher categories would be a
@@ -367,7 +367,7 @@ $$
 \fiber\ f\ b \defeq \sum_{a \tp A} \left( b \equiv f\ a \right)
 $$
 %
-I give it's definition here mainly for completeness, because as I stated we can
+I give its definition here mainly for completeness, because as I stated we can
 move away from this specific instantiation and think about it more abstractly
 once we have shown that this definition actually works as an equivalence.
 
@@ -420,7 +420,7 @@ $$
 $$
 %
 That is, we must demonstrate that there is an isomorphism (on types) between
-equalities and isomorphisms (on arrows). It's worthwhile to dwell on this for a
+equalities and isomorphisms (on arrows). It is worthwhile to dwell on this for a
 few seconds. This type looks very similar to univalence for types and is
 therefore perhaps a bit more intuitive to grasp the implications of. Of course
 univalence for types (which is a proposition -- i.e. provable) does not imply
@@ -525,7 +525,7 @@ And this finishes the proof of \ref{eq:coeDomIso} and thus \ref{eq:coeDom}.
 \subsection{Opposite category}
 \label{op-cat}
 The first category I'll present is a pure construction on categories. Given some
-category we can construct it's dual, called the opposite category. Starting with
+category we can construct its dual, called the opposite category. Starting with
 a simple example allows us to focus on how we work with equivalences and
 univalence in a very simple category where the structure of the category is
 rather simple.
@@ -566,12 +566,12 @@ section \S\ref{sec:equiv} gave us some tools to work with equivalences. We saw
 that we can prove this category univalent by giving an inverse to
 $\wideoverbar{\idToIso} \tp (A \equiv B) \to (A \wideoverbar{\approxeq} B)$.
 From the original category we have that $\idToIso \tp (A \equiv B) \to (A \cong
-B)$ is an isomorphism. Let us denote it's inverse with $\isoToId \tp (A
+B)$ is an isomorphism. Let us denote its inverse with $\isoToId \tp (A
 \approxeq B) \to (A \equiv B)$. If we squint we can see what we need is a way to
 go between $\wideoverbar{\approxeq}$ and $\approxeq$.
 
 An inhabitant of $A \approxeq B$ is simply an arrow $f \tp \Arrow\ A\ B$
-and it's inverse $g \tp \Arrow\ B\ A$. In the opposite category $g$ will
+and its inverse $g \tp \Arrow\ B\ A$. In the opposite category $g$ will
 play the role of the isomorphism and $f$ will be the inverse. Similarly we can
 go in the opposite direction. I name these maps $\shuffle \tp (A \approxeq
 B) \to (A \wideoverbar{\approxeq} B)$ and $\shuffle^{-1} \tp (A
@@ -832,7 +832,7 @@ $\pi$ is called the product (arrow) of $f$ and $g$.
 \newcommand\pairB{\mathcal{B}}
 Given a base category $\bC$ and two objects in this category $\pairA$ and
 $\pairB$ we can construct the ``pair category'': \TODO{This is a working title,
-  it's nice to have a name for this thing to refer back to}
+  it is nice to have a name for this thing to refer back to}
 
 The type of objects in this category will be an object in the underlying
 category, $X$, and two arrows (also from the underlying category)
@@ -1291,7 +1291,7 @@ The Kleisli-formulation consists of the following data:
 %
 The objects $X$ and $Y$ are implicitly universally quantified.
 
-It's interesting to note here that this formulation does not talk about natural
+It is interesting to note here that this formulation does not talk about natural
 transformations or other such constructs from category theory. All we have here
 is a regular maps on objects and a pair of arrows.
 %
