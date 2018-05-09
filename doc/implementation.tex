@@ -53,9 +53,15 @@ given type.
 For the rest of this chapter I will present some of these results. For didactic
 reasons no source-code has been included in this chapter. To see the formal
 definitions excerpts of the implementation have been included in appendix
-\ref{ch:app-sources}.
+\S\ref{ch:app-sources}:
+Appendix
+\S\ref{sec:app-categories} corresponds to section \S\ref{sec:categories},
+appendix \S\ref{sec:app-products} to section \S\ref{sec:products}
+and appendix \S\ref{sec:app-monads} to section \S\ref{sec:monads}.
+
 
 \section{Categories}
+\label{sec:categories}
 The data for a category consist of a type for the sort of objects; a type for
 the sort of arrows; an identity arrow and a composition operation for arrows.
 Another record encapsulates some laws about this data: associativity of
@@ -85,9 +91,9 @@ definitions: If we let $p$ be a witness to the identity law, which formally is:
 Then we can construct the identity isomorphism $\var{idIso} \tp \identity,
 \identity, p \tp A \approxeq A$ for any object $A$. Here $\approxeq$ denotes
 isomorphism on objects (whereas $\cong$ denotes isomorphism of types). This will
-be elaborated further on in sections \ref{sec:equiv} and \ref{sec:univalence}.
-Moreover, due to substitution for paths we can construct an isomorphism from
-\emph{any} path:
+be elaborated further on in sections \S\ref{sec:equiv} and
+\S\ref{sec:univalence}. Moreover, due to substitution for paths we can construct
+an isomorphism from \emph{any} path:
 %
 \begin{equation}
 \var{idToIso} \tp A ≡ B → A ≊ B
@@ -106,14 +112,14 @@ Note that \ref{eq:cat-univ} is \emph{not} the same as:
 %
 \begin{equation}
 \label{eq:cat-univalence}
-\tag{Univalence, category}
+%% \tag{Univalence, category}
 (A \equiv B) \simeq (A \approxeq B)
 \end{equation}
 %
 However the two are logically equivalent: One can construct the latter from the
 former simply by ``forgetting'' that $\idToIso$ plays the role of the
 equivalence. The other direction is more involved and will be discussed in
-section \ref{sec:univalence}.
+section \S\ref{sec:univalence}.
 
 In summary, the definition of a category is the following collection of data:
 %
@@ -127,14 +133,14 @@ In summary, the definition of a category is the following collection of data:
 And laws:
 %
 \begin{align}
-\tag{associativity}
+%% \tag{associativity}
 h \lll (g \lll f) ≡ (h \lll g) \lll f \\
-\tag{identity}
+%% \tag{identity}
 \identity \lll f ≡ f \x
 f \lll \identity ≡ f
 \\
 \label{eq:arrows-are-sets}
-\tag{arrows are sets}
+%% \tag{arrows are sets}
 \isSet\ (\Arrow\ A\ B)\\
 \tag{\ref{eq:cat-univ}}
 \isEquiv\ (A \equiv B)\ (A \approxeq B)\ \idToIso
@@ -159,7 +165,7 @@ Proving that \ref{eq:identity} is a mere proposition:
 %
 There are multiple ways to prove this. Perhaps one of the more intuitive proofs
 is by way of the `combinators' $\propPi$ and $\propSig$ presented in sections
-\ref{sec:propPi} and \ref{sec:propSig}:
+\S\ref{sec:propPi} and \S\ref{sec:propSig}:
 %
 \begin{align*}
 \var{propPi} & \tp \left(\prod_{a \tp A} \isProp\ (P\ a)\right) \to \isProp\ \left(\prod_{a \tp A} P\ a\right)
@@ -279,7 +285,7 @@ we have shown, $\IsPreCategory$ is a proposition. However, even though
 $\Univalent$ is also a proposition, we cannot use this directly to show the
 latter. This is because $\isProp$ talks about non-dependent paths. So we need to
 'promote' the result that univalence is a proposition to a heterogeneous path.
-To this end we can use $\lemPropF$, which was introduced in \ref{sec:lemPropF}.
+To this end we can use $\lemPropF$, which was introduced in \S\ref{sec:lemPropF}.
 
 In this case $A = \var{IsIdentity}\ \identity$ and $B = \var{Univalent}$. We've
 shown that being a category is a proposition, a result that holds for any choice
@@ -476,33 +482,43 @@ what we're trying to prove but talks about paths rather than isomorphisms:
 \end{equation}
 %
 Again $p_{\var{dom}}$ denotes the path $\var{Arrow}\ A\ X \equiv
-\var{Arrow}\ B\ X$ induced by $p$. To prove this statement I let $f$ and $p$
-be given and then invoke based-path-induction. The induction will be based at $A
-\tp \var{Object}$, so let $\widetilde{B} \tp \Object$ and $\widetilde{p} \tp
-A \equiv \widetilde{B}$ be given. The family that we perform induction over will
+\var{Arrow}\ B\ X$ induced by $p$. To prove this statement I let $f$ and $p$ be
+given and then invoke based-path-induction. The induction will be based at $A
+\tp \var{Object}$ Let $\widetilde{B} \tp \Object$ and $\widetilde{p} \tp A
+\equiv \widetilde{B}$ be given. The family that we perform induction over will
 be:
 %
-$$
-\var{coe}\ {\widetilde{p}}^*\ f
+\begin{align}
+D\ \widetilde{B}\ \widetilde{p} \defeq
+  %% \prod_{\widetilde{B} \tp \Object}
+  %% \prod_{\widetilde{p} \tp A \equiv \widetilde{B}}
+  \var{coe}\ {\widetilde{p}}^*\ f
 \equiv
 f \lll \inv{(\var{idToIso}\ \widetilde{p})}
-$$
-The base-case therefore becomes:
+\end{align}
+The base-case therefore becomes
+$d \tp \var{coe}\ \refl^*\ f \equiv f \lll \inv{(\var{idToIso}\ \refl)}$
+and is inhabited by:
 \begin{align*}
-\var{coe}\ {\widetilde{\refl}}^*\ f
-& \equiv f \\
+\var{coe}\ \refl^*\ f
+& \equiv f
+  && \text{$\refl$ is a neutral element for $\var{coe}$}\\
 & \equiv f \lll \var{identity} \\
-& \equiv f \lll \inv{(\var{idToIso}\ \widetilde{\refl})}
+& \equiv f \lll \var{subst}\ \var{refl}\ \var{identity}
+  && \text{$\refl$ is a neutral element for $\var{subst}$}\\
+& \equiv f \lll \inv{(\var{idToIso}\ \refl)}
+  && \text{By definition of $\var{idToIso}$}\\
 \end{align*}
 %
-The first step follows because reflexivity is a neutral element for coercion.
-The second step is the identity law in the category. The last step has to do
-with the fact that $\var{idToIso}$ is constructed by substituting according to
-the supplied path and since reflexivity is also the neutral element for
-substitutions we arrive at the desired expression. To close the
-based-path-induction we must supply the value ``at the other''. In this case
-this is simply $B \tp \Object$ and $p \tp A \equiv B$ which we have.
-
+To close the based-path-induction we must supply the value ``at the other''. In
+this case this is simply $B \tp \Object$ and $p \tp A \equiv B$ which we have.
+In summary the proof of \ref{eq:coeDomIso} is the term:
+%
+\begin{equation}
+\label{eq:pathJ-example}
+\var{pathJ}\ D\ d\ B\ p
+\end{equation}
+%
 And this finishes the proof of \ref{eq:coeDomIso} and thus \ref{eq:coeDom}.
 %
 \section{Categories}
@@ -546,7 +562,7 @@ arguments. Or in other words; since $\Arrow\ A\ B$ is a set for all $A\;B \tp
 \Object$ then so is $Arrow\ B\ A$.
 
 Now, to show that this category is univalent is not as straight-forward. Luckily
-section \ref{sec:equiv} gave us some tools to work with equivalences. We saw
+section \S\ref{sec:equiv} gave us some tools to work with equivalences. We saw
 that we can prove this category univalent by giving an inverse to
 $\wideoverbar{\idToIso} \tp (A \equiv B) \to (A \wideoverbar{\approxeq} B)$.
 From the original category we have that $\idToIso \tp (A \equiv B) \to (A \cong
@@ -635,7 +651,7 @@ $$
 (\var{hA} \equiv \var{hB}) \simeq (\var{hA} \approxeq \var{hB})
 $$
 %
-Which, as we saw in section \ref{sec:univalence}, is sufficient to show that the
+Which, as we saw in section \S\ref{sec:univalence}, is sufficient to show that the
 category is univalent. The way that I have shown this is with a three-step
 process. For objects $(A, s_A)\; (B, s_B) \tp \Set$ I show the following chain
 of equivalences:
@@ -721,7 +737,7 @@ choose:
   & \tp \var{Isomorphism}\ f \to \isEquiv\ f
 \end{align*}
 %
-As mentioned in section \ref{sec:equiv}. These maps are not in general inverses
+As mentioned in section \S\ref{sec:equiv}. These maps are not in general inverses
 of each other. In stead, we will use the fact that $A$ and $B$ are sets. The first thing we must prove is:
 %
 \begin{align*}
@@ -777,6 +793,7 @@ where we have a witness to this being a category. This is useful if this library
 is later extended to talk about higher categories.
 
 \section{Products}
+\label{sec:products}
 In the following I'll demonstrate a technique for using categories to prove
 properties. The goal in this section is to show that products are propositions:
 %
@@ -1214,6 +1231,7 @@ That in any category:
 \end{align}
 %
 \section{Monads}
+\label{sec:monads}
 In this section I present two formulations of monads. The two representations
 are referred to as the monoidal- and Kleisli- representation respectively or
 simply monoidal monads and Kleisli monads for short. We then show that the two
