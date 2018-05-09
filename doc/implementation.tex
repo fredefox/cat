@@ -186,11 +186,11 @@ us the two obligations: $\isProp\ (\id \comp f \equiv f)$ and $\isProp\ (f \comp
 set.
 
 This example illustrates nicely how we can use these combinators to reason about
-`canonical' types like $\sum$ and $\prod$. Similar combinators can be defined
-at the other homotopic levels. These combinators are however not applicable in
-situations where we want to reason about other types - e.g. types we've defined
-ourselves. For instance, after we've proven that all the projections of
-pre-categories are propositions, then we would like to bundle this up to show
+`canonical' types like $\sum$ and $\prod$. Similar combinators can be defined at
+the other homotopic levels. These combinators are however not applicable in
+situations where we want to reason about other types - e.g. types we have
+defined ourselves. For instance, after we have proven that all the projections
+of pre-categories are propositions, then we would like to bundle this up to show
 that the type of pre-categories is also a proposition. Formally:
 %
 \begin{equation}
@@ -208,8 +208,7 @@ Where The definition of $\IsPreCategory$ is the triple:
 %
 Each corresponding to the first three laws for categories. Note that since
 $\IsPreCategory$ is not formulated with a chain of sigma-types we wont have any
-combinators available to help us here. In stead we'll have to use the path-type
-directly.
+combinators available to help us here. In stead the paths must be used directly.
 
 \ref{eq:propIsPreCategory} is judgmentally the same as
 %
@@ -252,7 +251,7 @@ $i$ becomes the triple:
 \end{aligned}
 \end{equation}
 %
-I've found this to be a general pattern when proving things in homotopy type
+I have found this to be a general pattern when proving things in homotopy type
 theory, namely that you have to wrap and unwrap equalities at different levels.
 It is worth noting that proving this theorem with the regular inductive equality
 type would already not be possible, since we at least need extensionality (the
@@ -287,7 +286,7 @@ latter. This is because $\isProp$ talks about non-dependent paths. So we need to
 'promote' the result that univalence is a proposition to a heterogeneous path.
 To this end we can use $\lemPropF$, which was introduced in \S\ref{sec:lemPropF}.
 
-In this case $A = \var{IsIdentity}\ \identity$ and $B = \Univalent$. We've
+In this case $A = \var{IsIdentity}\ \identity$ and $B = \Univalent$. We have
 shown that being a category is a proposition, a result that holds for any choice
 of identity proof. Finally we must provide a proof that the identity proofs at
 $a$ and $b$ are indeed the same, this we can extract from $p$ by applying
@@ -473,7 +472,7 @@ I will give the proof of the first theorem here, the second one is analogous.
 In the second step we use the fact that $p$ is constructed from the isomorphism
 $\iota$ -- $\inv{(\idToIso\ p)}$ denotes the map $B \to A$ induced by the
 isomorphism $\idToIso\ p \tp A \cong B$. The helper-lemma is similar to
-what we're trying to prove but talks about paths rather than isomorphisms:
+what we are trying to prove but talks about paths rather than isomorphisms:
 %
 \begin{equation}
 \label{eq:coeDomIso}
@@ -524,9 +523,9 @@ And this finishes the proof of \ref{eq:coeDomIso} and thus \ref{eq:coeDom}.
 \section{Categories}
 \subsection{Opposite category}
 \label{op-cat}
-The first category I'll present is a pure construction on categories. Given some
-category we can construct its dual, called the opposite category. Starting with
-a simple example allows us to focus on how we work with equivalences and
+The first category I will present is a pure construction on categories. Given
+some category we can construct its dual, called the opposite category. Starting
+with a simple example allows us to focus on how we work with equivalences and
 univalence in a very simple category where the structure of the category is
 rather simple.
 
@@ -537,7 +536,7 @@ an arrow from $B$ to $A$ in the underlying category. The identity arrow is the
 same as the one in the underlying category (they have the same type). Function
 composition will be reverse function composition from the underlying category.
 
-I'll refer to things in terms of the underlying category, unless they have an
+I will refer to things in terms of the underlying category, unless they have an
 over-bar. So e.g. $\idToIso$ is a function in the underlying category and the
 corresponding thing is denoted $\wideoverbar{\idToIso}$ in the opposite
 category.
@@ -613,9 +612,9 @@ $$
 \prod_{\bC \tp \Category} \left(\bC^{\var{Op}}\right)^{\var{Op}} \equiv \bC
 $$
 %
-As we've seen the laws in $\left(\bC^{\var{Op}}\right)^{\var{Op}}$ get quite
-involved.\footnote{We haven't even seen the full story because we've used this
-  `interface' for equivalences.} Luckily since being-a-category is a mere
+As we have seen the laws in $\left(\bC^{\var{Op}}\right)^{\var{Op}}$ get quite
+involved.\footnote{We have not even seen the full story because we have used
+  this `interface' for equivalences.} Luckily since being-a-category is a mere
 proposition, we need not concern ourselves with this bit when proving the above.
 We can use the equality principle for categories that let us prove an equality
 just by giving an equality on the data-part. So, given a category $\bC$ all we
@@ -794,8 +793,9 @@ is later extended to talk about higher categories.
 
 \section{Products}
 \label{sec:products}
-In the following I'll demonstrate a technique for using categories to prove
-properties. The goal in this section is to show that products are propositions:
+In the following a technique for using categories to prove properties will be
+demonstrated. The goal in this section is to show that products are
+propositions:
 %
 $$
 \prod_{\bC \tp \Category} \prod_{A\;B \tp \Object} \isProp\ (\var{Product}\ \bC\ A\ B)
@@ -806,7 +806,7 @@ and $B$ in the category $\bC$. I do this by constructing a category whose
 terminal objects are equivalent to products in $\bC$, and since terminal objects
 are propositional in a proper category and equivalences preserve homotopy level,
 then we know that products also are propositions. But before we get to that,
-let's recall the definition of products.
+we recall the definition of products.
 
 \subsection{Definition of products}
 Given a category $\bC$ and two objects $A$ and $B$ in $\bC$ we define the
@@ -1080,8 +1080,8 @@ equality principle for arrows in this category (\ref{eq:productEqPrinc}) gives
 us that it suffices to show that $f$ and $\inv{f}$, this is exactly
 $\var{inv}_f$.
 
-This concludes the first direction of the isomorphism that we're constructing.
-For the other direction we're given just given the isomorphism
+This concludes the first direction of the isomorphism that we are constructing.
+For the other direction we are given the isomorphism:
 %
 $$
 (f, \inv{f}, \var{inv}_f)
@@ -1151,7 +1151,7 @@ gory details.
 %
 \subsection{Propositionality of products}
 %
-Now that we've constructed the ``pair category'' I'll demonstrate how to use
+Now that we have constructed the ``pair category'' I will demonstrate how to use
 this to prove that products are propositional. I will do this by showing that
 terminal objects in this category are equivalent to products:
 %
@@ -1162,7 +1162,7 @@ terminal objects in this category are equivalent to products:
 And as always we do this by constructing an isomorphism:
 %
 In the direction $\var{Terminal} → \var{Product}\ ℂ\ \mathcal{A}\ \mathcal{B}$
-we're given a terminal object $X, x_𝒜, x_ℬ$. $X$ Will be the product-object and
+we are given a terminal object $X, x_𝒜, x_ℬ$. $X$ Will be the product-object and
 $x_𝒜, x_ℬ$ will be the product arrows, so it just remains to verify that this is
 indeed a product. That is, for an object $Y$ and two arrows $y_𝒜 \tp
 \Arrow\ Y\ 𝒜$, $y_ℬ\ \Arrow\ Y\ ℬ$ we must find a unique arrow $f \tp

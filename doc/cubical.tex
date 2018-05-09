@@ -149,7 +149,7 @@ this thesis. \TODO{Refer the reader somewhere for more info.}
 \section{Homotopy levels}
 In ITT all equality proofs are identical (in a closed context). This means that,
 in some sense, any two inhabitants of $a \equiv b$ are ``equally good'' -- they
-don't have any interesting structure. This is referred to as Uniqueness of
+do not have any interesting structure. This is referred to as Uniqueness of
 Identity Proofs (UIP). Unfortunately it is not possible to have a type-theory
 with both univalence and UIP. In stead we have a hierarchy of types with an
 increasing amount of homotopic structure. At the bottom of this hierarchy we
@@ -192,9 +192,9 @@ indeed both $\top$ and $\bot$ are propositions:
 λ\varnothing\ \varnothing   & \tp \isProp\ ⊥
 \end{align*}
 %
-I've used $\varnothing$ here to denote an impossible pattern. It is a theorem
-that if a mere proposition $A$ is inhabited, then so is it contractible. If it
-is not inhabited it is equivalent to the empty-type (or false
+$\varnothing$ is used here to denote an impossible pattern. It is a theorem that
+if a mere proposition $A$ is inhabited, then so is it contractible. If it is not
+inhabited it is equivalent to the empty-type (or false
 proposition).\TODO{Cite!!}
 
 I will refer to a type $A \tp \MCU$ as a \emph{mere} proposition if I want to
@@ -209,15 +209,15 @@ Then comes the set of homotopical sets:
 \end{aligned}
 \end{equation}
 %
-I won't give an example of a set at this point. It turns out that proving e.g.
-$\isProp\ \bN$ is not so straight-forward (see \cite[\S3.1.4]{hott-2013}).
+I will not give an example of a set at this point. It turns out that proving
+e.g. $\isProp\ \bN$ is not so straight-forward (see \cite[\S3.1.4]{hott-2013}).
 There will be examples of sets later in this report. At this point it should be
 noted that the term ``set'' is somewhat conflated; there is the notion of sets
 from set-theory, in Agda types are denoted \texttt{Set}. I will use it
-consistently to refer to a type $A$ as a set exactly if $\isSet\ A$ is
-a proposition.
+consistently to refer to a type $A$ as a set exactly if $\isSet\ A$ is a
+proposition.
 
-The next step in the hierarchy is, as the reader might've guessed, the type:
+As the reader may have guessed the next step in the hierarchy is the type:
 %
 \begin{equation}
 \begin{aligned}
@@ -278,8 +278,8 @@ We have the function:
 \pathJ\ P\ p \tp \prod_{a' \tp A} \prod_{p \tp a ≡ a'} P\ a\ p
 \end{equation}
 %
-I will not give an example of using $\pathJ$ here. But we'll see an application
-of it in \ref{eq:pathJ-example}.
+I will not give an example of using $\pathJ$ here. An application can be found
+later in \ref{eq:pathJ-example}.
 
 \subsection{Paths over propositions}
 \label{sec:lemPropF}
