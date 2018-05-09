@@ -88,7 +88,7 @@ definitions: If we let $p$ be a witness to the identity law, which formally is:
     \id \comp f \equiv f \x f \comp \id \equiv f
 \end{equation}
 %
-Then we can construct the identity isomorphism $\var{idIso} \tp \identity,
+Then we can construct the identity isomorphism $\idIso \tp \identity,
 \identity, p \tp A \approxeq A$ for any object $A$. Here $\approxeq$ denotes
 isomorphism on objects (whereas $\cong$ denotes isomorphism of types). This will
 be elaborated further on in sections \S\ref{sec:equiv} and
@@ -96,7 +96,7 @@ be elaborated further on in sections \S\ref{sec:equiv} and
 an isomorphism from \emph{any} path:
 %
 \begin{equation}
-\var{idToIso} \tp A ≡ B → A ≊ B
+\idToIso \tp A ≡ B → A ≊ B
 \end{equation}
 %
 The univalence criterion for categories states that this map must be an
@@ -168,9 +168,9 @@ is by way of the `combinators' $\propPi$ and $\propSig$ presented in sections
 \S\ref{sec:propPi} and \S\ref{sec:propSig}:
 %
 \begin{align*}
-\var{propPi} & \tp \left(\prod_{a \tp A} \isProp\ (P\ a)\right) \to \isProp\ \left(\prod_{a \tp A} P\ a\right)
+\propPi & \tp \left(\prod_{a \tp A} \isProp\ (P\ a)\right) \to \isProp\ \left(\prod_{a \tp A} P\ a\right)
   \\
-\var{propSig} & \tp \isProp\ A \to \left(\prod_{a \tp A} \isProp\ (P\ a)\right) \to \isProp\ \left(\sum_{a \tp A} P\ a\right)
+\propSig & \tp \isProp\ A \to \left(\prod_{a \tp A} \isProp\ (P\ a)\right) \to \isProp\ \left(\sum_{a \tp A} P\ a\right)
 \end{align*}
 %
 So the proof goes like this: We `eliminate' the 3 function abstractions by
@@ -202,7 +202,7 @@ Where The definition of $\IsPreCategory$ is the triple:
 %
 \begin{align*}
 \var{isAssociative} & \tp \var{IsAssociative}\\
-\var{isIdentity}    & \tp \var{IsIdentity}\\
+\isIdentity    & \tp \var{IsIdentity}\\
 \var{arrowsAreSets} & \tp \var{ArrowsAreSets}
 \end{align*}
 %
@@ -245,8 +245,8 @@ $i$ becomes the triple:
 \begin{aligned}
   & \var{propIsAssociative} && a.\var{isAssociative}\
        && b.\var{isAssociative} && i  \\
-  & \var{propIsIdentity}    && a.\var{isIdentity}\
-       && b.\var{isIdentity}    && i  \\
+  & \propIsIdentity    && a.\isIdentity\
+       && b.\isIdentity    && i  \\
   & \var{propArrowsAreSets} && a.\var{arrowsAreSets}\
        && b.\var{arrowsAreSets} && i
 \end{aligned}
@@ -259,7 +259,7 @@ type would already not be possible, since we at least need extensionality (the
 projections are all $\prod$-types). Assuming we had functional extensionality
 available to us as an axiom, we would use functional extensionality (in
 reverse?) to retrieve the equalities in $a$ and $b$, pattern-match on them to
-see that they are both $\var{refl}$ and then close the proof with $\var{refl}$.
+see that they are both $\refl$ and then close the proof with $\refl$.
 Of course this theorem is not so interesting in the setting of ITT since we know
 a priori that equality proofs are unique.
 
@@ -287,14 +287,14 @@ latter. This is because $\isProp$ talks about non-dependent paths. So we need to
 'promote' the result that univalence is a proposition to a heterogeneous path.
 To this end we can use $\lemPropF$, which was introduced in \S\ref{sec:lemPropF}.
 
-In this case $A = \var{IsIdentity}\ \identity$ and $B = \var{Univalent}$. We've
+In this case $A = \var{IsIdentity}\ \identity$ and $B = \Univalent$. We've
 shown that being a category is a proposition, a result that holds for any choice
 of identity proof. Finally we must provide a proof that the identity proofs at
 $a$ and $b$ are indeed the same, this we can extract from $p$ by applying
 congruence of paths:
 %
 $$
-\congruence\ \var{isIdentity}\ p
+\congruence\ \isIdentity\ p
 $$
 %
 And this finishes the proof that being-a-category is a mere proposition
@@ -447,8 +447,8 @@ an isomorphism $A \approxeq B$ in some category $\bC$ be given. Name the
 isomorphism $\iota \tp A \to B$ and its inverse $\inv{\iota} \tp B \to A$.
 Since $\bC$ is a category (and therefore univalent) the isomorphism induces a
 path $p \tp A \equiv B$. From this equality we can get two further paths:
-$p_{\var{dom}} \tp \var{Arrow}\ A\ X \equiv \var{Arrow}\ B\ X$ and
-$p_{\var{cod}} \tp \var{Arrow}\ X\ A \equiv \var{Arrow}\ X\ B$. We
+$p_{\var{dom}} \tp \Arrow\ A\ X \equiv \Arrow\ B\ X$ and
+$p_{\var{cod}} \tp \Arrow\ X\ A \equiv \Arrow\ X\ B$. We
 then have the following two theorems:
 %
 \begin{align}
@@ -465,26 +465,26 @@ I will give the proof of the first theorem here, the second one is analogous.
 %
 \begin{align*}
 \var{coe}\ p_{\var{dom}}\ f
-  & \equiv f \lll \inv{(\var{idToIso}\ p)} && \text{lemma} \\
+  & \equiv f \lll \inv{(\idToIso\ p)} && \text{lemma} \\
   & \equiv f \lll \inv{\iota}
-    && \text{$\var{idToIso}$ and $\var{isoToId}$ are inverses}\\
+    && \text{$\idToIso$ and $\isoToId$ are inverses}\\
 \end{align*}
 %
 In the second step we use the fact that $p$ is constructed from the isomorphism
-$\iota$ -- $\inv{(\var{idToIso}\ p)}$ denotes the map $B \to A$ induced by the
-isomorphism $\var{idToIso}\ p \tp A \cong B$. The helper-lemma is similar to
+$\iota$ -- $\inv{(\idToIso\ p)}$ denotes the map $B \to A$ induced by the
+isomorphism $\idToIso\ p \tp A \cong B$. The helper-lemma is similar to
 what we're trying to prove but talks about paths rather than isomorphisms:
 %
 \begin{equation}
 \label{eq:coeDomIso}
-\prod_{f \tp \var{Arrow}\ A\ B} \prod_{p \tp A \equiv B}
-\var{coe}\ p_{\var{dom}}\ f \equiv f \lll \inv{(\var{idToIso}\ p)}
+\prod_{f \tp \Arrow\ A\ B} \prod_{p \tp A \equiv B}
+\var{coe}\ p_{\var{dom}}\ f \equiv f \lll \inv{(\idToIso\ p)}
 \end{equation}
 %
-Again $p_{\var{dom}}$ denotes the path $\var{Arrow}\ A\ X \equiv
-\var{Arrow}\ B\ X$ induced by $p$. To prove this statement I let $f$ and $p$ be
+Again $p_{\var{dom}}$ denotes the path $\Arrow\ A\ X \equiv
+\Arrow\ B\ X$ induced by $p$. To prove this statement I let $f$ and $p$ be
 given and then invoke based-path-induction. The induction will be based at $A
-\tp \var{Object}$ Let $\widetilde{B} \tp \Object$ and $\widetilde{p} \tp A
+\tp \Object$ Let $\widetilde{B} \tp \Object$ and $\widetilde{p} \tp A
 \equiv \widetilde{B}$ be given. The family that we perform induction over will
 be:
 %
@@ -494,20 +494,20 @@ D\ \widetilde{B}\ \widetilde{p} \defeq
   %% \prod_{\widetilde{p} \tp A \equiv \widetilde{B}}
   \var{coe}\ {\widetilde{p}}^*\ f
 \equiv
-f \lll \inv{(\var{idToIso}\ \widetilde{p})}
+f \lll \inv{(\idToIso\ \widetilde{p})}
 \end{align}
 The base-case therefore becomes
-$d \tp \var{coe}\ \refl^*\ f \equiv f \lll \inv{(\var{idToIso}\ \refl)}$
+$d \tp \var{coe}\ \refl^*\ f \equiv f \lll \inv{(\idToIso\ \refl)}$
 and is inhabited by:
 \begin{align*}
 \var{coe}\ \refl^*\ f
 & \equiv f
   && \text{$\refl$ is a neutral element for $\var{coe}$}\\
-& \equiv f \lll \var{identity} \\
-& \equiv f \lll \var{subst}\ \var{refl}\ \var{identity}
+& \equiv f \lll \identity \\
+& \equiv f \lll \var{subst}\ \refl\ \identity
   && \text{$\refl$ is a neutral element for $\var{subst}$}\\
-& \equiv f \lll \inv{(\var{idToIso}\ \refl)}
-  && \text{By definition of $\var{idToIso}$}\\
+& \equiv f \lll \inv{(\idToIso\ \refl)}
+  && \text{By definition of $\idToIso$}\\
 \end{align*}
 %
 To close the based-path-induction we must supply the value ``at the other''. In
@@ -516,7 +516,7 @@ In summary the proof of \ref{eq:coeDomIso} is the term:
 %
 \begin{equation}
 \label{eq:pathJ-example}
-\var{pathJ}\ D\ d\ B\ p
+\pathJ\ D\ d\ B\ p
 \end{equation}
 %
 And this finishes the proof of \ref{eq:coeDomIso} and thus \ref{eq:coeDom}.
@@ -552,7 +552,7 @@ Since $\rrr$ is reverse function composition this is just the symmetric version
 of associativity.
 %
 $$
-\var{identity} \rrr f \equiv f \x f \rrr identity \equiv f
+\identity \rrr f \equiv f \x f \rrr identity \equiv f
 $$
 %
 This is just the swapped version of identity.
@@ -570,30 +570,30 @@ B)$ is an isomorphism. Let us denote it's inverse with $\isoToId \tp (A
 \approxeq B) \to (A \equiv B)$. If we squint we can see what we need is a way to
 go between $\wideoverbar{\approxeq}$ and $\approxeq$.
 
-An inhabitant of $A \approxeq B$ is simply an arrow $f \tp \var{Arrow}\ A\ B$
-and it's inverse $g \tp \var{Arrow}\ B\ A$. In the opposite category $g$ will
+An inhabitant of $A \approxeq B$ is simply an arrow $f \tp \Arrow\ A\ B$
+and it's inverse $g \tp \Arrow\ B\ A$. In the opposite category $g$ will
 play the role of the isomorphism and $f$ will be the inverse. Similarly we can
-go in the opposite direction. I name these maps $\var{shuffle} \tp (A \approxeq
-B) \to (A \wideoverbar{\approxeq} B)$ and $\var{shuffle}^{-1} \tp (A
+go in the opposite direction. I name these maps $\shuffle \tp (A \approxeq
+B) \to (A \wideoverbar{\approxeq} B)$ and $\shuffle^{-1} \tp (A
 \wideoverbar{\approxeq} B) \to (A \approxeq B)$ respectively.
 
 As the inverse of $\wideoverbar{\idToIso}$ I will pick $\wideoverbar{\isoToId}
-\defeq \isoToId \comp \var{shuffle}$. The proof that they are inverses go as
+\defeq \isoToId \comp \shuffle$. The proof that they are inverses go as
 follows:
 %
 \begin{align*}
 \wideoverbar{\isoToId} \comp \wideoverbar{\idToIso} & =
-\isoToId \comp \var{shuffle} \comp \wideoverbar{\idToIso}
+\isoToId \comp \shuffle \comp \wideoverbar{\idToIso}
 \\
 %% ≡⟨ cong (λ φ → φ x) (cong (λ φ → η ⊙ shuffle ⊙ φ) (funExt lem)) ⟩ \\
 %
 & \equiv
-\isoToId \comp \var{shuffle} \comp \inv{\var{shuffle}} \comp \idToIso
+\isoToId \comp \shuffle \comp \inv{\shuffle} \comp \idToIso
 && \text{lemma} \\
 %%   ≡⟨⟩ \\
 & \equiv
 \isoToId \comp \idToIso
-&& \text{$\var{shuffle}$ is an isomorphism} \\
+&& \text{$\shuffle$ is an isomorphism} \\
 & \equiv
 \identity
 && \text{$\isoToId$ is an isomorphism}
@@ -602,7 +602,7 @@ follows:
 The other direction is analogous.
 
 The lemma used in step 2 of this proof states that $\wideoverbar{idToIso} \equiv
-\inv{\var{shuffle}} \comp \idToIso$. This is a rather straight-forward proof
+\inv{\shuffle} \comp \idToIso$. This is a rather straight-forward proof
 since being-an-inverse-of is a proposition, so it suffices to show that their
 first components are equal, but this holds judgmentally.
 
@@ -610,7 +610,7 @@ This finished the proof that the opposite category is in fact a category. Now,
 to prove that that opposite-of is an involution we must show:
 %
 $$
-\prod_{\bC \tp \var{Category}} \left(\bC^{\var{Op}}\right)^{\var{Op}} \equiv \bC
+\prod_{\bC \tp \Category} \left(\bC^{\var{Op}}\right)^{\var{Op}} \equiv \bC
 $$
 %
 As we've seen the laws in $\left(\bC^{\var{Op}}\right)^{\var{Op}}$ get quite
@@ -685,11 +685,11 @@ lemma:
 Which says that if two type-families are equivalent at all points, then pairs
 with identical first components and these families as second components will
 also be equivalent. For our purposes $P \defeq \isEquiv\ A\ B$ and $Q \defeq
-\var{Isomorphism}$. So we must finally prove:
+\Isomorphism$. So we must finally prove:
 %
 \begin{align}
   \label{eq:equivIso}
-\prod_{f \tp A \to B} \left( \isEquiv\ A\ B\ f \simeq \var{Isomorphism}\ f \right)
+\prod_{f \tp A \to B} \left( \isEquiv\ A\ B\ f \simeq \Isomorphism\ f \right)
 \end{align}
 
 First, lets prove \ref{eq:equivPropSig}: Let $propP \tp \prod_{a \tp A} \isProp (P\ a)$ and $x\;y \tp \sum_{a \tp A} P\ a$ be given. Because
@@ -732,9 +732,9 @@ choose:
 %
 \begin{align*}
 \var{toIso}
-  & \tp \isEquiv\ f             \to \var{Isomorphism}\ f \\
+  & \tp \isEquiv\ f             \to \Isomorphism\ f \\
 \var{fromIso}
-  & \tp \var{Isomorphism}\ f \to \isEquiv\ f
+  & \tp \Isomorphism\ f \to \isEquiv\ f
 \end{align*}
 %
 As mentioned in section \S\ref{sec:equiv}. These maps are not in general inverses
@@ -748,11 +748,11 @@ For this we can use the fact that being-an-equivalence is a mere proposition.
 For the other direction:
 %
 \begin{align*}
-  \var{toIso} \comp \var{fromIso} \equiv \identity_{\var{Isomorphism}\ f}
+  \var{toIso} \comp \var{fromIso} \equiv \identity_{\Isomorphism\ f}
 \end{align*}
 %
-We will show that $\var{Isomorphism}\ f$ is also a mere proposition. To this
-end, let $X\;Y \tp \var{Isomorphism}\ f$ be given. Name the maps $x\;y \tp B
+We will show that $\Isomorphism\ f$ is also a mere proposition. To this
+end, let $X\;Y \tp \Isomorphism\ f$ be given. Name the maps $x\;y \tp B
 \to A$ respectively. Now, the proof that $X$ and $Y$ are the same is a pair of
 paths: $p \tp x \equiv y$ and $\Path\ (\lambda\; i \to
 \var{AreInverses}\ f\ (p\ i))\ \mathcal{X}\ \mathcal{Y}$ where $\mathcal{X}$
@@ -1008,7 +1008,7 @@ isomorphism, and create a path from this:
 \end{split}
 \end{align}
 %
-Where $\widetilde{p} \defeq \var{isoToId}\ \var{iso} \tp X \equiv Y$.
+Where $\widetilde{p} \defeq \isoToId\ \var{iso} \tp X \equiv Y$.
 
 Finally we have the type:
 %
@@ -1248,8 +1248,8 @@ The monoidal formulation of monads consists of the following data:
 \label{eq:monad-monoidal-data}
 \begin{split}
     \EndoR      & \tp \Endo ℂ \\
-    \var{pure}  & \tp \NT{\EndoR^0}{\EndoR} \\
-    \var{join}  & \tp \NT{\EndoR^2}{\EndoR}
+    \pure  & \tp \NT{\EndoR^0}{\EndoR} \\
+    \join  & \tp \NT{\EndoR^2}{\EndoR}
 \end{split}
 \end{align}
 %
@@ -1264,10 +1264,10 @@ following laws:
 \begin{align}
 \label{eq:monad-monoidal-laws}
 \begin{split}
-  \var{join} \lll \fmap\ \var{join}
-    & ≡ \var{join} \lll \var{join}\ \fmap \\
-  \var{join} \lll \var{pure}\ \fmap     & ≡ \identity \\
-  \var{join} \lll \fmap\     \var{pure} & ≡ \identity
+  \join \lll \fmap\ \join
+    & ≡ \join \lll \join\ \fmap \\
+  \join \lll \pure\ \fmap     & ≡ \identity \\
+  \join \lll \fmap\     \pure & ≡ \identity
 \end{split}
 \end{align}
 %
