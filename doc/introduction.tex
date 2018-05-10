@@ -1,22 +1,11 @@
 \chapter{Introduction}
-Functional extensionality and univalence is not expressible in
-\nomen{Intensional Martin Löf Type Theory} (ITT). This poses a severe limitation
-on both what is \emph{provable} and the \emph{re-usability} of proofs. Recent
-developments have, however, resulted in \nomen{Cubical Type Theory} (CTT) which
-permits a constructive proof of these two important notions.
-
-Furthermore an extension has been implemented for the proof assistant Agda
-(\cite{agda}, \cite{cubical-agda}) that allows us to work in such a ``cubical
-setting''. This thesis will explore the usefulness of this extension in the
-context of category theory.
-%
 \section{Motivating examples}
 %
 In the following two sections I present two examples that illustrate some
 limitations inherent in ITT and -- by extension -- Agda.
 %
 \subsection{Functional extensionality}
-\label{sec:functional-extensionality}
+\label{sec:functional-extensionality}%
 Consider the functions:
 %
 \begin{multicols}{2}
@@ -30,11 +19,10 @@ Consider the functions:
 \end{multicols}
 %
 $n + 0$ is \nomen{definitionally} equal to $n$, which we write as $n + 0 = n$.
-This is also \called \nomen{judgmental} equality. We call it definitional
+This is also called \nomen{judgmental} equality. We call it definitional
 equality because the \emph{equality} arises from the \emph{definition} of $+$
 which is:
 %
-\newcommand{\suc}[1]{\mathit{suc}\ #1}
 \begin{align*}
   +           & \tp \bN \to \bN \to \bN      \\
   n + 0       & \defeq n                   \\
