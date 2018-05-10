@@ -43,19 +43,14 @@
 \department{Department of Computer Science and Engineering}
 \researchgroup{Programming Logic Group}
 
-%% \newtheorem{prop}{Proposition}
-\makeatletter
-\newcommand*{\rom}[1]{\expandafter\@slowroman\romannumeral #1@}
-\makeatother
-
 \begin{document}
 
+\frontmatter
 \myfrontmatter
-\pagenumbering{roman}
 \maketitle
 \addtocontents{toc}{\protect\thispagestyle{empty}}
 \tableofcontents
-\pagenumbering{arabic}
+\mainmatter
 %
 \input{introduction.tex}
 \input{cubical.tex}
@@ -67,7 +62,6 @@
 \nocite{coquand-2013}
 
 \bibliography{refs}
-%% \printindex
 \begin{appendices}
 \setcounter{page}{1}
 \pagenumbering{roman}
@@ -75,4 +69,5 @@
 %% \input{planning.tex}
 %% \input{halftime.tex}
 \end{appendices}
+\printindex
 \end{document}
