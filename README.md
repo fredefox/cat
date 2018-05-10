@@ -2,10 +2,16 @@ Description
 ===========
 This project aims to formalize some parts of category theory using cubical agda
 &mdash; an extension to agda permitting univalence. To learn more about this
-[readthedocs](https://agda.readthedocs.io/en/latest/language/cubical.html).
+[read the docs](https://agda.readthedocs.io/en/latest/language/cubical.html).
 
 This project draws a lot of inspiration from [the
 HoTT-book](https://homotopytypetheory.org/book/).
+
+If you want more information about this project, then you're in luck. This is my
+masters thesis. Go ahead and read it:
+
+    cd doc/
+    make read
 
 Installation
 ============
@@ -18,7 +24,8 @@ To succesfully compile the following is needed:
 * [Agda Standard Library](https://github.com/agda/agda-stdlib)
 * [Cubical](https://github.com/Saizan/cubical-demo/)
 
-[^1]: At least version >= [`707ce6042b6a3bdb26521f3fe8dfe5d8a8470a43`](https://github.com/agda/agda/commit/707ce6042b6a3bdb26521f3fe8dfe5d8a8470a43)
+[^1]: At least version >=
+  [`707ce6042`](https://github.com/agda/agda/commit/707ce6042b6a3bdb26521f3fe8dfe5d8a8470a43)
 
 The version of the libraries that this depends on can be shown by
 executing the following command in the root directory of the project:
@@ -30,13 +37,6 @@ add these dependencies. So you'll have to make sure you're using
 versions of these libraries that are compatible with this
 project. Since this information is only provided as documentation it
 may also noot be up-to-date so beware.
-
-It's important to have the right version of these - but which one is the right
-is in constant flux. It's most likely the newest one.
-
-I've used git submodules to manage dependencies. Unfortunately Agda does not
-allow specifying libraries to be used only as local dependencies. So the
-submodules are mostly used for documentation.
 
 You can let Agda know about these libraries by appending them to your global
 libraries file like so: (NB!: There is a good reason this is not in a

@@ -48,3 +48,6 @@ cleanall:
 
 clean:
 	latexmk -c
+
+read: all
+	xdg-open $(PROJNAME).pdf

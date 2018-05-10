@@ -1,6 +1,8 @@
 \usepackage[utf8]{inputenc}
 
 \usepackage{natbib}
+\bibliographystyle{plain}
+
 \usepackage[
   hidelinks,
   pdfusetitle,
@@ -15,8 +17,9 @@
 \usepackage{amssymb,amsmath,amsthm,stmaryrd,mathrsfs,wasysym}
 \usepackage[toc,page]{appendix}
 \usepackage{xspace}
-\usepackage[a4paper]{geometry}
-
+\usepackage[a4paper,top=3cm,bottom=3cm]{geometry}
+\usepackage{makeidx}
+\makeindex
 % \setlength{\parskip}{10pt}
 
 % \usepackage{tikz}
@@ -85,3 +88,28 @@
 \newunicodechar{𝒜}{\textfallback{?}}
 \newunicodechar{ℬ}{\textfallback{?}}
 %% \newunicodechar{≊}{\textfallback{≊}}
+\makeatletter
+\newcommand*{\rom}[1]{\expandafter\@slowroman\romannumeral #1@}
+\makeatother
+\makeatletter
+
+\newcommand\frontmatter{%
+    \cleardoublepage
+  %\@mainmatterfalse
+  \pagenumbering{roman}}
+
+\newcommand\mainmatter{%
+    \cleardoublepage
+ % \@mainmattertrue
+  \pagenumbering{arabic}}
+
+\newcommand\backmatter{%
+  \if@openright
+    \cleardoublepage
+  \else
+    \clearpage
+  \fi
+ % \@mainmatterfalse
+   }
+
+\makeatother

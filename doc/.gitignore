@@ -7,3 +7,6 @@
 *.bbl
 *.blg
 *.toc
+*.idx
+*.ilg
+*.ind

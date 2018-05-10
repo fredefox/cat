@@ -1,3 +1,55 @@
 \chapter{Conclusion}
+This thesis highlighted some issues with the standard inductive definition of
+propositional equality used in Agda. Functional extensionality and univalence
+are examples of two propositions not admissible in Intensional Type Theory
+(ITT). This has a big impact on what is provable and the reusability of proofs.
+This issue is overcome with an extension to Agda's type system called Cubical
+Agda. With Cubical Agda both functional extensionality and univalence are
+admissible. Cubical Agda is more expressive, but there are certain issues that
+arise that are not present in standard Agda. For one thing ITT and standard Agda
+enjoys Uniqueness of Identity Proofs (UIP). This is not the case in Cubical
+Agda. In stead there exists a hierarchy of types with increasing
+\nomen{homotopical structure}. It turns out to be useful to built the
+formalization with this hierarchy in mind as it can simplify proofs
+considerably. Another issue one must overcome in Cubical Agda is when a type has
+a field whose type depends on a previous field. In this case paths between such
+types will be heterogeneous paths. This problem is related to Cubical Agda not
+having the K-rule \TODO{Not mentioned anywhere in the report}. In practice it
+turns out to be considerably more difficult to work heterogeneous paths than
+with homogeneous paths. The thesis demonstrated some techniques to overcome
+these difficulties, such as based path-induction.
 
-\TODO{\ldots}
+This thesis formalized some of the core concepts from category theory including;
+categories, functors, products, exponentials, Cartesian closed categories,
+natural transformations, the yoneda embedding, monads and more. Category theory
+is an interesting case-study for the application of Cubical Agda for two reasons
+in particular: Because category theory is the study of abstract algebra of
+functions, meaning that functional extensionality is particularly relevant.
+Another reason is that in category theory it is commonplace to identify
+isomorphic structures and univalence allows for making this notion precise. This
+thesis also demonstrated another technique that is common in category theory;
+namely to define categories to prove properties of other structures.
+Specifically a category was defined to demonstrate that any two product objects
+in a category are isomorphic. Furthermore the thesis showed two formulations of
+monads and proved that they indeed are equivalent: Namely monads in the
+monoidal- and Kleisli- form. The monoidal formulation is more typical to
+category theoretic formulations and the Kleisli formulation will be more
+familiar to functional programmers. In the formulation we also saw how paths can
+be used to extract functions. A path between two types induce an isomorphism
+between the two types. This e.g. permits developers to write a monad instance
+for a given type using the Kleisli formulation. By transporting along the path
+between the monoidal- and Kleisli- formulation one can reuse all the operations
+and results shown for monoidal- monads in the context of kleisli monads.
+%%
+%% problem with inductive type
+%% overcome with cubical
+%% the path type
+%% homotopy levels
+%% depdendent paths
+%%
+%% category theory
+%% algebra of functions ~ funExt
+%% identify isomorphic types ~ univalence
+%% using categories to prove properties
+%% computational properties
+%% reusability, compositional

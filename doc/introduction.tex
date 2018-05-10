@@ -1,30 +1,20 @@
 \chapter{Introduction}
-Functional extensionality and univalence is not expressible in
-\nomen{Intensional Martin Löf Type Theory} (ITT). This poses a severe limitation
-on both i. what is \emph{provable} and ii. the \emph{re-usability} of proofs.
-Recent developments have, however, resulted in \nomen{Cubical Type Theory} (CTT)
-which permits a constructive proof of these two important notions.
-
-Furthermore an extension has been implemented for the proof assistant Agda
-(\cite{agda}, \cite{cubical-agda}) that allows us to work in such a ``cubical
-setting''. This thesis will explore the usefulness of this extension in the
-context of category theory.
-%
 \section{Motivating examples}
 %
 In the following two sections I present two examples that illustrate some
 limitations inherent in ITT and -- by extension -- Agda.
 %
 \subsection{Functional extensionality}
+\label{sec:functional-extensionality}%
 Consider the functions:
 %
 \begin{multicols}{2}
   \noindent
   \begin{equation*}
-    f \defeq (n \tp \bN) \mapsto (0 + n \tp \bN)
+    f \defeq (n \tp \bN) \mto (0 + n \tp \bN)
   \end{equation*}
   \begin{equation*}
-    g \defeq (n \tp \bN) \mapsto (n + 0 \tp \bN)
+    g \defeq (n \tp \bN) \mto (n + 0 \tp \bN)
   \end{equation*}
 \end{multicols}
 %
@@ -33,7 +23,6 @@ This is also called \nomen{judgmental} equality. We call it definitional
 equality because the \emph{equality} arises from the \emph{definition} of $+$
 which is:
 %
-\newcommand{\suc}[1]{\mathit{suc}\ #1}
 \begin{align*}
   +           & \tp \bN \to \bN \to \bN      \\
   n + 0       & \defeq n                   \\
@@ -55,21 +44,21 @@ equivalence of $f$ and $g$ -- even though we can prove them equal for all
 points. This is exactly the notion of equality of functions that we are
 interested in; that they are equal for all inputs. We call this
 \nomen{point-wise equality}, where the \emph{points} of a function refers
-to it's arguments.
+to its arguments.
 
 In the context of category theory functional extensionality is e.g. needed to
 show that representable functors are indeed functors. The representable functor
 for a category $\bC$ and a fixed object in $A \in \bC$ is defined to be:
 %
 \begin{align*}
-\fmap \defeq X \mapsto \Hom_{\bC}(A, X)
+\fmap \defeq X \mto \Hom_{\bC}(A, X)
 \end{align*}
 %
 The proof obligation that this satisfies the identity law of functors
 ($\fmap\ \idFun \equiv \idFun$) thus becomes:
 %
 \begin{align*}
-\Hom(A, \idFun_{\bX}) = (g \mapsto \idFun \comp g) \equiv \idFun_{\Sets}
+\Hom(A, \idFun_{\bX}) = (g \mto \idFun \comp g) \equiv \idFun_{\Sets}
 \end{align*}
 %
 One needs functional extensionality to ``go under'' the function arrow and apply
@@ -92,7 +81,7 @@ be performed in ITT.
 
 More specifically what we are interested in is a way of identifying
 \nomen{equivalent} types. I will return to the definition of equivalence later
-in section \ref{sec:equiv}, but for now it is sufficient to think of an
+in section \S\ref{sec:equiv}, but for now it is sufficient to think of an
 equivalence as a one-to-one correspondence. We write $A \simeq B$ to assert that
 $A$ and $B$ are equivalent types. The principle of univalence says that:
 %

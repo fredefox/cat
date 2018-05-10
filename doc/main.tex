@@ -42,19 +42,15 @@
 \institution{\chalmers}
 \department{Department of Computer Science and Engineering}
 \researchgroup{Programming Logic Group}
-\bibliographystyle{plain}
 
-%% \newtheorem{prop}{Proposition}
-\makeatletter
-\newcommand*{\rom}[1]{\expandafter\@slowroman\romannumeral #1@}
-\makeatother
 \begin{document}
+
+\frontmatter
 \myfrontmatter
-\pagenumbering{roman}
 \maketitle
-\addtocontents{toc}{\protect\thispagestyle{empty}}
+\input{abstract.tex}
 \tableofcontents
-\pagenumbering{arabic}
+\mainmatter
 %
 \input{introduction.tex}
 \input{cubical.tex}
@@ -73,4 +69,5 @@
 %% \input{planning.tex}
 %% \input{halftime.tex}
 \end{appendices}
+\printindex
 \end{document}
