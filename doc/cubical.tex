@@ -288,7 +288,7 @@ The proof will be by induction on $p$ and will be based at $a$. That is, $D$
 will be the family:
 %
 \begin{align*}
-D         & \tp \prod_{b' \tp A} \prod_{p \tp a ≡ b'ma} \MCU \\
+D         & \tp \prod_{b' \tp A} \prod_{p \tp a ≡ b'} \MCU \\
 D\ b'\ p' & \defeq \var{sym}\ (\var{sym}\ p') ≡ p'
 \end{align*}
 %
@@ -303,9 +303,43 @@ The reason $\refl$ proves this is that $\var{sym}\ \refl = \refl$ holds
 definitionally. In summary \ref{eq:sym-invol} is inhabited by the term:
 %
 \begin{align*}
-  \pathJ\ (λ\ b'\ p' → \var{sym}\ (\var{sym}\ p') ≡ p')\ \var{refl}\ b\ p
+  \pathJ\ D\ d\ b\ p
   \tp
   \var{sym}\ (\var{sym}\ p) ≡ p
+\end{align*}
+%
+Another application of $\pathJ$ is for proving associativity of $\trans$. That
+is, given a type $A \tp \MCU$, elements of $A$, $a, b, c, d \tp A$ and paths
+between them, $p \tp a \equiv b$, $q \tp b \equiv c$ and $r \tp c \equiv d$ we
+have the following:
+%
+\begin{equation}
+  \label{eq:cum-trans}
+  \trans\ p\ (\trans\ q\ r) ≡ \trans\ (\trans\ p\ q)\ r
+\end{equation}
+%
+In this case the induction will be based at $c$ (the left-endpoint of $r$) and
+over the family:
+%
+\begin{align*}
+  T       & \tp \prod_{d' \tp A} \prod_{r' \tp c ≡ d'} \MCU \\
+  T\ d'\ r' & \defeq \trans\ p\ (\trans\ q\ r') ≡ \trans\ (\trans\ p\ q)\ r'
+\end{align*}
+%
+So the base-case is proven with $t$ which is defined as:
+%
+\begin{align*}
+  \trans\ p\ (\trans\ q\ \refl) & ≡
+  \trans\ p\ q \\
+   & ≡
+  \trans\ (\trans\ p\ q)\ \refl
+\end{align*}
+%
+Here we have used the proposition $\trans\ p\ \refl \equiv p$ without proof. In
+conclusion \ref{eq:cum-trans} is inhabited by the term:
+%
+\begin{align*}
+\pathJ\ T\ t\ d\ r
 \end{align*}
 %
 We shall see another application on path-induction in \ref{eq:pathJ-example}.
