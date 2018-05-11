@@ -10,6 +10,8 @@ open import Cat.Category
 open import Cat.Category.Functor as F
 import Cat.Category.NaturalTransformation
 open import Cat.Category.Monad
+import Cat.Category.Monad.Monoidal as Monoidal
+import Cat.Category.Monad.Kleisli as Kleisli
 open import Cat.Categories.Fun
 open import Cat.Equivalence
 
