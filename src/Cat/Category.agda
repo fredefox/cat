@@ -44,7 +44,7 @@ open Cat.Equivalence
 -- about these. The laws defined are the types the propositions - not the
 -- witnesses to them!
 record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
-  no-eta-equality
+--  no-eta-equality
   field
     Object   : Set ℓa
     Arrow    : Object → Object → Set ℓb
