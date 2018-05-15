@@ -8,6 +8,7 @@ This implementation formalizes the following concepts:
 \begin{tabular}{ l l }
 Name & Link \\
 \hline
+Equivalences & \sourcelink{Cat.Equivalence} \\
 Categories & \sourcelink{Cat.Category} \\
 Functors & \sourcelink{Cat.Category.Functor} \\
 Products & \sourcelink{Cat.Category.Product} \\
@@ -19,12 +20,9 @@ Monads & \sourcelink{Cat.Category.Monad} \\
 Kleisli Monads & \sourcelink{Cat.Category.Monad.Kleisli} \\
 Monoidal Monads & \sourcelink{Cat.Category.Monad.Monoidal} \\
 Voevodsky's construction & \sourcelink{Cat.Category.Monad.Voevodsky} \\
-%% Categories & \null \\
-%%
 Opposite category & \sourcelink{Cat.Categories.Opposite} \\
 Category of sets & \sourcelink{Cat.Categories.Sets} \\
 Span category & \sourcelink{Cat.Categories.Span} \\
-  %%
 \end{tabular}
 \end{center}
 %
@@ -42,12 +40,16 @@ Monoids & \sourcelink{Cat.Category.Monoid} \\
 \end{tabular}
 \end{center}
 %
-As well as a range of various results about these. E.g. I have shown that the
-category of sets has products. In the following I aim to demonstrate some of the
-techniques employed in this formalization and in the interest of brevity I will
-not detail all the things I have formalized. In stead, I have selected a parts
-of this formalization that highlight some interesting proof techniques relevant
-to doing proofs in Cubical Agda.
+As well as a range of various results about these. E.g. I have shown
+that the category of sets has products. In the following I aim to
+demonstrate some of the techniques employed in this formalization and
+in the interest of brevity I will not detail all the things I have
+formalized. In stead, I have selected parts of this formalization that
+highlight some interesting proof techniques relevant to doing proofs
+in Cubical Agda. This chapter will focus on the definition of
+\emph{categories}, \emph{equivalences}, the \emph{opposite category},
+the \emph{category of sets}, \emph{products}, the \emph{span category}
+and the two formulations of \emph{monads}.
 
 One such technique that is pervasive to this formalization is the idea of
 distinguishing types with more or less homotopical structure. To do this I have
@@ -792,16 +794,19 @@ proposition and then use $\lemPropF$. So we prove the generalization:
 But $\var{AreInverses}\ f\ g$ is a pair of equations on arrows, so we use
 $\propSig$ and the fact that both $A$ and $B$ are sets to close this proof.
 
-\subsection{Category of categories}
-Note that this category does in fact not exist. In stead I provide the
-definition of the ``raw'' category as well as some of the laws.
+%% \subsection{Category of categories}
 
-Furthermore I provide some helpful lemmas about this raw category. For instance
-I have shown what would be the exponential object in such a category.
+%% Note that this category does in fact not exist. In stead I provide
+%% the definition of the ``raw'' category as well as some of the laws.
 
-These lemmas can be used to provide the actual exponential object in a context
-where we have a witness to this being a category. This is useful if this library
-is later extended to talk about higher categories.
+%% Furthermore I provide some helpful lemmas about this raw category.
+%% For instance I have shown what would be the exponential object in
+%% such a category.
+
+%% These lemmas can be used to provide the actual exponential object
+%% in a context where we have a witness to this being a category. This
+%% is useful if this library is later extended to talk about higher
+%% categories.
 
 \section{Products}
 \label{sec:products}
