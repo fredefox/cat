@@ -29,7 +29,7 @@ which is:
   n + (\suc{m}) & \defeq \suc{(n + m)}
 \end{align*}
 %
-Note that $0 + n$ is \emph{not} definitionally equal to $n$. $0 + n$ is in
+Note that $0 + n$ is \emph{not} definitionally equal to $n$. The term $0 + n$ is in
 normal form. I.e.; there is no rule for $+$ whose left-hand-side matches this
 expression. We \emph{do}, however, have that they are \nomen{propositionally}
 equal, which we write as $n + 0 \equiv n$. Propositional equality means that
@@ -46,7 +46,7 @@ interested in; that they are equal for all inputs. We call this
 \nomen{point-wise equality}, where the \emph{points} of a function refers
 to its arguments.
 
-In the context of category theory functional extensionality is e.g. needed to
+In the context of category theory functional extensionality is e.g.\ needed to
 show that representable functors are indeed functors. The representable functor
 for a category $\bC$ and a fixed object in $A \in \bC$ is defined to be:
 %
@@ -151,7 +151,7 @@ canonical form.
 Another approach is to use the \emph{setoid interpretation} of type theory
 (\cite{hofmann-1995,huber-2016}). With this approach one works with
 \nomen{extensional sets} $(X, \sim)$, that is a type $X \tp \MCU$ and an
-equivalence relation $\sim \tp X \to X \to \MCU$ on that type. Under the setoid
+equivalence relation $\mathord{\sim} \tp X \to X \to \MCU$ on that type. Under the setoid
 interpretation the equivalence relation serve as a sort of ``local''
 propositional equality. This approach has other drawbacks; it does not satisfy
 all propositional equalities of type theory (\TODO{Citation needed}), is

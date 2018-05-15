@@ -107,8 +107,8 @@ definitionally. So to inhabit it, is to give a path $I \to A$ which is
 judgmentally $a$ at either endpoint. This is satisfied by the constant path;
 i.e. the path that stays at $a$ at any index $i$.
 
-It is also surpisingly easy to show functional extensionality with which we can
-construct a path between $f$ and $g$ -- the function defined in the introduction
+It is also surprisingly easy to show functional extensionality with which we can
+construct a path between $f$ and $g$ --- the function defined in the introduction
 (section \S\ref{sec:functional-extensionality}).
 %% module _ {ℓa ℓb} {A : Set ℓa} {B : A → Set ℓb} where
 %%   funExt : {f g : (x : A) → B x} → ((x : A) → f x ≡ g x) → f ≡ g
@@ -167,15 +167,16 @@ have the set of contractible types:
 The first component of $\isContr\ A$ is called ``the center of contraction''.
 Under the propositions-as-types interpretation of type-theory $\isContr\ A$ can
 be thought of as ``the true proposition $A$''. And indeed $\top$ is
-contractible:
+contractible, as witness by the following pair:
 \begin{equation*}
-\var{tt} , \lambda x \to \refl \tp \isContr\ \top
+(\var{tt} , \lambda x \to \refl) \tp \isContr\ \top
 \end{equation*}
 %
 It is a theorem that if a type is contractible, then it is isomorphic to the
 unit-type.
 
-The next step in the hierarchy is the set of mere propositions:
+The next step in the hierarchy is the set of mere propositions.  These
+are types whose inhabitants are all equal:
 %
 \begin{equation}
 \begin{aligned}
@@ -188,7 +189,7 @@ $\isProp\ A$ can be thought of as the set of true and false propositions. And
 indeed both $\top$ and $\bot$ are propositions:
 %
 \begin{align*}
-λ \var{tt}\ \var{tt} → refl & \tp \isProp\ ⊤ \\
+λ \var{tt}\ \var{tt} → \refl & \tp \isProp\ ⊤ \\
 λ\varnothing\ \varnothing   & \tp \isProp\ ⊥
 \end{align*}
 %
