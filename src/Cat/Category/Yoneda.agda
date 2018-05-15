@@ -9,9 +9,9 @@ open import Cat.Category.Functor
 open import Cat.Category.NaturalTransformation
   renaming (module Properties to F)
   using ()
-
-open import Cat.Categories.Fun using (module Fun)
+open import Cat.Categories.Opposite
 open import Cat.Categories.Sets hiding (presheaf)
+open import Cat.Categories.Fun using (module Fun)
 
 -- There is no (small) category of categories. So we won't use _⇑_ from
 -- `HasExponential`

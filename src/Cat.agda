@@ -14,6 +14,7 @@ open import Cat.Category.Monad.Monoidal
 open import Cat.Category.Monad.Kleisli
 open import Cat.Category.Monad.Voevodsky
 
+open import Cat.Categories.Opposite
 open import Cat.Categories.Sets
 open import Cat.Categories.Cat
 open import Cat.Categories.Rel

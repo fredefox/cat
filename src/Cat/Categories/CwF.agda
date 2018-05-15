@@ -5,6 +5,7 @@ open import Cat.Prelude
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Categories.Fam
+open import Cat.Categories.Opposite
 
 module _ {ℓa ℓb : Level} where
   record CwF : Set (lsuc (ℓa ⊔ ℓb)) where

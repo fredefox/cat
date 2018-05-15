@@ -3,11 +3,11 @@ module Cat.Categories.Fun where
 
 open import Cat.Prelude
 open import Cat.Equivalence
-
 open import Cat.Category
 open import Cat.Category.Functor
 import Cat.Category.NaturalTransformation
   as NaturalTransformation
+open import Cat.Categories.Opposite
 
 module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : Category ℓd ℓd') where
   open NaturalTransformation ℂ 𝔻 public hiding (module Properties)
