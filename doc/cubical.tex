@@ -1,13 +1,13 @@
 \chapter{Cubical Agda}
 \section{Propositional equality}
-Judgmental equality in Agda is a feature of the type-system. Its something that
-can be checked automatically by the type-checker: In the example from the
+Judgmental equality in Agda is a feature of the type system. Its something that
+can be checked automatically by the type checker: In the example from the
 introduction $n + 0$ can be judged to be equal to $n$ simply by expanding the
 definition of $+$.
 
 On the other hand, propositional equality is something defined within the
 language itself. Propositional equality cannot be derived automatically. The
-normal definition of judgmental equality is an inductive data-type. Cubical Agda
+normal definition of judgmental equality is an inductive data type. Cubical Agda
 discards this type in favor of a new primitives that has certain computational
 properties exclusive to it.
 
@@ -22,15 +22,13 @@ two points of $A$; $a_0, a_1 \tp A$ we can form the type:
   a_0 \equiv a_1 \tp \MCU
 \end{align}
 %
-In Agda this is defined as an inductive data-type with the single constructor
+In Agda this is defined as an inductive data type with the single constructor
 for any $a \tp A$:
 %
 \begin{align}
   \refl \tp a \equiv a
 \end{align}
 %
-For any $a \tp A$.
-
 There also exist a related notion of \emph{heterogeneous} equality which allows
 for equating points of different types. In this case given two types $A, B \tp
 \MCU$ and two points $a \tp A$, $b \tp B$ we can construct the type:
@@ -39,7 +37,7 @@ for equating points of different types. In this case given two types $A, B \tp
   a \cong b \tp \MCU
 \end{align}
 %
-This is likewise defined as an inductive data-type with a single constructors
+This is likewise defined as an inductive data type with a single constructors
 for any $a \tp A$:
 %
 \begin{align}
@@ -56,17 +54,17 @@ Judgmental equality in Cubical Agda is encapsulated with the type:
 \Path \tp (P \tp I → \MCU) → P\ 0 → P\ 1 → \MCU
 \end{equation}
 %
-$I$ is a special data-type (\TODO{that also has special computational properties
+$I$ is a special data type (\TODO{that also has special computational properties
   AFAIK}) called the index set. $I$ can be thought of simply as the interval on
 the real numbers from $0$ to $1$. $P$ is a family of types over the index set
-$I$. I will sometimes refer to $P$ as the ``path-space'' of some path $p \tp
+$I$. I will sometimes refer to $P$ as the \nomenindex{path space} of some path $p \tp
 \Path\ P\ a\ b$. By this token $P\ 0$ then corresponds to the type at the
 left-endpoint and $P\ 1$ as the type at the right-endpoint. The type is called
 $\Path$ because it is connected with paths in homotopy theory. The intuition
 behind this is that $\Path$ describes paths in $\MCU$ -- i.e. between types. For
 a path $p$ for the point $p\ i$ the index $i$ describes how far along the path
 one has moved. An inhabitant of $\Path\ P\ a_0\ a_1$ is a (dependent-) function,
-$p$, from the index-space to the path-space:
+$p$, from the index-space to the path space:
 %
 $$
 p \tp \prod_{i \tp I} P\ i
@@ -80,16 +78,17 @@ endpoints. I.e.:
   p\ 1 & = a_1
 \end{align*}
 %
-The notion of ``homogeneous equalities'' is recovered when $P$ does not depend
-on its argument:
+The notion of \nomenindex{homogeneous equalities} is recovered when $P$ does not
+depend on its argument. That is for $A \tp \MCU$, $a_0, a_1 \tp A$ the
+homogenous equality between $a_0$ and $a_1$ is the type:
 %
 $$
 a_0 \equiv a_1 \defeq \Path\ (\lambda i \to A)\ a_0\ a_1
 $$
 %
-For $A \tp \MCU$, $a_0, a_1 \tp A$. I will generally prefer to use the notation
+I will generally prefer to use the notation
 $a \equiv b$ when talking about non-dependent paths and use the notation
-$\Path\ (\lambda i \to P\ i)\ a\ b$ when the path-space is of particular
+$\Path\ (\lambda i \to P\ i)\ a\ b$ when the path space is of particular
 interest.
 
 With this definition we can also recover reflexivity. That is, for any $A \tp
@@ -102,7 +101,7 @@ With this definition we can also recover reflexivity. That is, for any $A \tp
 \end{aligned}
 \end{equation}
 %
-Here the path-space is $P \defeq \lambda i \to A$ and it satsifies $P\ i = A$
+Here the path space is $P \defeq \lambda i \to A$ and it satsifies $P\ i = A$
 definitionally. So to inhabit it, is to give a path $I \to A$ which is
 judgmentally $a$ at either endpoint. This is satisfied by the constant path;
 i.e. the path that stays at $a$ at any index $i$.
@@ -143,11 +142,12 @@ With this we can now prove the desired equality $f \equiv g$ from section
 %
 Paths have some other important properties, but they are not the focus of
 this thesis. \TODO{Refer the reader somewhere for more info.}
+%
 \section{Homotopy levels}
 In ITT all equality proofs are identical (in a closed context). This means that,
 in some sense, any two inhabitants of $a \equiv b$ are ``equally good'' -- they
 do not have any interesting structure. This is referred to as Uniqueness of
-Identity Proofs (UIP). Unfortunately it is not possible to have a type-theory
+Identity Proofs (UIP). Unfortunately it is not possible to have a type theory
 with both univalence and UIP. In stead we have a hierarchy of types with an
 increasing amount of homotopic structure. At the bottom of this hierarchy we
 have the set of contractible types:
@@ -162,7 +162,7 @@ have the set of contractible types:
 \end{equation}
 %
 The first component of $\isContr\ A$ is called ``the center of contraction''.
-Under the propositions-as-types interpretation of type-theory $\isContr\ A$ can
+Under the propositions-as-types interpretation of type theory $\isContr\ A$ can
 be thought of as ``the true proposition $A$''. And indeed $\top$ is
 contractible:
 \begin{equation*}
@@ -181,7 +181,7 @@ The next step in the hierarchy is the set of mere propositions:
 \end{aligned}
 \end{equation}
 %
-$\isProp\ A$ can be thought of as the set of true and false propositions. And
+One can think of $\isProp\ A$ as the set of true and false propositions. And
 indeed both $\top$ and $\bot$ are propositions:
 %
 \begin{align*}
@@ -189,9 +189,9 @@ indeed both $\top$ and $\bot$ are propositions:
 λ\varnothing\ \varnothing   & \tp \isProp\ ⊥
 \end{align*}
 %
-$\varnothing$ is used here to denote an impossible pattern. It is a theorem that
-if a mere proposition $A$ is inhabited, then so is it contractible. If it is not
-inhabited it is equivalent to the empty-type (or false
+The term $\varnothing$ is used here to denote an impossible pattern. It is a
+theorem that if a mere proposition $A$ is inhabited, then so is it contractible.
+If it is not inhabited it is equivalent to the empty-type (or false
 proposition).\TODO{Cite!!}
 
 I will refer to a type $A \tp \MCU$ as a \emph{mere} proposition if I want to
@@ -225,8 +225,9 @@ As the reader may have guessed the next step in the hierarchy is the type:
 %
 And so it continues. In fact we can generalize this family of types by indexing
 them with a natural number. For historical reasons, though, the bottom of the
-hierarchy, the contractible types, is said to be a \nomen{-2-type}, propositions
-are \nomen{-1-types}, (homotopical) sets are \nomen{0-types} and so on\ldots
+hierarchy, the contractible types, is said to be a \nomen{-2-type}{homotopy
+  levels}, propositions are \nomen{-1-types}{homotopy levels}, (homotopical)
+sets are \nomen{0-types}{homotopy levels} and so on\ldots
 
 Just as with paths, homotopical sets are not at the center of focus for this
 thesis. But I mention here some properties that will be relevant for this
@@ -253,8 +254,8 @@ of these theorems here, as they will be used later in chapter
 \subsection{Path induction}
 \label{sec:pathJ}
 The induction principle for paths intuitively gives us a way to reason about a
-type-family indexed by a path by only considering if said path is $\refl$ (the
-``base-case''). For \emph{based path induction}, that equality is \emph{based}
+type family indexed by a path by only considering if said path is $\refl$ (the
+\nomen{base case}{path induction}). For \emph{based path induction}, that equality is \emph{based}
 at some element $a \tp A$.
 
 Let a type $A \tp \MCU$ and an element of the type $a \tp A$ be given. $a$ is said to be the base of the induction. Given a family of types:
@@ -292,7 +293,7 @@ D         & \tp \prod_{b' \tp A} \prod_{p \tp a ≡ b'} \MCU \\
 D\ b'\ p' & \defeq \var{sym}\ (\var{sym}\ p') ≡ p'
 \end{align*}
 %
-The base-case will then be:
+The base case will then be:
 %
 \begin{align*}
 d & \tp \var{sym}\ (\var{sym}\ \refl) ≡ \refl \\
@@ -326,7 +327,7 @@ over the family:
   T\ d'\ r' & \defeq \trans\ p\ (\trans\ q\ r') ≡ \trans\ (\trans\ p\ q)\ r'
 \end{align*}
 %
-So the base-case is proven with $t$ which is defined as:
+So the base case is proven with $t$ which is defined as:
 %
 \begin{align*}
   \trans\ p\ (\trans\ q\ \refl) & ≡
@@ -342,7 +343,7 @@ conclusion \ref{eq:cum-trans} is inhabited by the term:
 \pathJ\ T\ t\ d\ r
 \end{align*}
 %
-We shall see another application on path-induction in \ref{eq:pathJ-example}.
+We shall see another application on path induction in \ref{eq:pathJ-example}.
 
 \subsection{Paths over propositions}
 \label{sec:lemPropF}
@@ -357,7 +358,7 @@ a heterogeneous path between any two elements of $p_0 \tp P\ a_0$ and $p_1 \tp
 P\ a_1$:
 %
 $$
-\lemPropF\ \var{propP}\ p \defeq \Path\ (\lambda\; i \mto P\ (p\ i))\ p_0\ p_1
+\lemPropF\ \var{propP}\ p \tp \Path\ (\lambda\; i \mto P\ (p\ i))\ p_0\ p_1
 $$
 %
 This is quite a mouthful. So let me try to show how this is a very general and

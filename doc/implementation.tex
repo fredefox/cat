@@ -2,33 +2,44 @@
 \label{ch:implementation}
 This implementation formalizes the following concepts:
 %
-\begin{enumerate}[i.]
-\item Categories
-\item Functors
-\item Products
-\item Exponentials
-\item Cartesian closed categories
-\item Natural transformations
-\item Yoneda embedding
-\item Monads
-\item Categories
-  \begin{enumerate}[i.]
-  \item Opposite category
-  \item Category of sets
-  \item ``Pair category''
-  \end{enumerate}
-\end{enumerate}
+\newcommand{\sourcebasepath}{http://web.student.chalmers.se/~hanghj/cat/doc/html/}
+\newcommand{\sourcelink}[1]{\href{\sourcebasepath#1.html}{\texttt{#1}}}
+\begin{center}
+\begin{tabular}{ l l }
+Name & Link \\
+\hline
+Categories & \sourcelink{Cat.Category} \\
+Functors & \sourcelink{Cat.Category.Functor} \\
+Products & \sourcelink{Cat.Category.Products} \\
+Exponentials & \sourcelink{Cat.Category.Exponentials} \\
+Cartesian closed categories & \sourcelink{Cat.Category.CartesianClosed} \\
+Natural transformations & \sourcelink{Cat.Category.NaturalTransformation} \\
+Yoneda embedding & \sourcelink{Cat.Category.Yoneda} \\
+Monads & \sourcelink{Cat.Category.Monads} \\
+%% Categories & \null \\
+%%
+Opposite category &
+\href{\sourcebasepath Cat.Category.html#22744}{\texttt{Cat.Category.Opposite}} \\
+Category of sets & \sourcelink{Cat.Categories.Sets} \\
+Span category &
+\href{\sourcebasepath Cat.Category.Product.html#2919}{\texttt{Cat.Category.Product.Span}} \\
+  %%
+\end{tabular}
+\end{center}
 %
 Furthermore the following items have been partly formalized:
 %
-\begin{enumerate}[i.]
-\item The (higher) category of categories.
-\item Category of relations
-\item Category of functors and natural transformations -- only as a precategory
-\item Free category
-\item Monoidal objects
-\item Monoidal categories
-\end{enumerate}
+\begin{center}
+\begin{tabular}{ l l }
+Name & Link \\
+\hline
+Category of categories & \sourcelink{Cat.Categories.Cat} \\
+Category of relations & \sourcelink{Cat.Categories.Rel} \\
+Category of functors & \sourcelink{Cat.Categories.Fun} \\
+Free category & \sourcelink{Cat.Categories.Free} \\
+Monoids & \sourcelink{Cat.Category.Monoid} \\
+\end{tabular}
+\end{center}
 %
 As well as a range of various results about these. E.g. I have shown that the
 category of sets has products. In the following I aim to demonstrate some of the
@@ -70,22 +81,22 @@ constituents of a category and can be found in typical mathematical expositions
 on the topic. We, however, impose one further requirement on what it means to be
 a category, namely that the type of arrows form a set.
 
-Such categories are called \nomen{1-categories}. It is possible to relax this
-requirement. This would lead to the notion of higher categories (\cite[p.
+Such categories are called \nomen{1-categories}{1-category}. It is possible to relax
+this requirement. This would lead to the notion of higher categories (\cite[p.
   307]{hott-2013}). For the purpose of this project, however, this report will
-restrict itself to 1-categories. Making based on higher categories would be a
-very natural possible extension of this work.
+restrict itself to 1-categories\index{1-category}. Generalizing this work to
+higher categories would be a very natural possible extension of this work.
 
 Raw categories satisfying all of the above requirements are called a
-\nomen{pre}-categories. As a further requirement to be a proper category we
+\nomenindex{pre categories}. As a further requirement to be a proper category we
 require it to be univalent. Before we can define this, I must introduce two more
 definitions: If we let $p$ be a witness to the identity law, which formally is:
 %
 \begin{equation}
   \label{eq:identity}
   \var{IsIdentity} \defeq
-  \prod_{A\ B \tp \Object} \prod_{f \tp A \to B}
-    \id \comp f \equiv f \x f \comp \id \equiv f
+  \prod_{A\ B \tp \Object} \prod_{f \tp \Arrow\ A\ B}
+    \id \lll f \equiv f \x f \lll \id \equiv f
 \end{equation}
 %
 Then we can construct the identity isomorphism $\idIso \tp \identity,
@@ -190,8 +201,8 @@ This example illustrates nicely how we can use these combinators to reason about
 the other homotopic levels. These combinators are however not applicable in
 situations where we want to reason about other types - e.g. types we have
 defined ourselves. For instance, after we have proven that all the projections
-of pre-categories are propositions, then we would like to bundle this up to show
-that the type of pre-categories is also a proposition. Formally:
+of pre categories are propositions, then we would like to bundle this up to show
+that the type of pre categories is also a proposition. Formally:
 %
 \begin{equation}
 \label{eq:propIsPreCategory}
@@ -264,7 +275,7 @@ a priori that equality proofs are unique.
 
 The situation is a bit more complicated when we have a dependent type. For
 instance, when we want to show that $\IsCategory$ is a mere proposition.
-$\IsCategory$ is a record with two fields, a witness to being a pre-category and
+$\IsCategory$ is a record with two fields, a witness to being a pre category and
 the univalence condition. Recall that the univalence condition is indexed by the
 identity-proof. So to follow the same recipe as above, let $a\ b \tp
 \IsCategory$ be given, to show them equal, we now need to give two paths. One homogeneous:
@@ -423,7 +434,7 @@ equalities and isomorphisms (on arrows). It is worthwhile to dwell on this for a
 few seconds. This type looks very similar to univalence for types and is
 therefore perhaps a bit more intuitive to grasp the implications of. Of course
 univalence for types (which is a proposition -- i.e. provable) does not imply
-univalence of all pre-category since morphisms in a category are not regular
+univalence of all pre category since morphisms in a category are not regular
 functions -- in stead they can be thought of as a generalization hereof. The univalence criterion therefore is simply a way of restricting arrows
 to behave similarly to maps.
 
@@ -541,7 +552,7 @@ over-bar. So e.g. $\idToIso$ is a function in the underlying category and the
 corresponding thing is denoted $\wideoverbar{\idToIso}$ in the opposite
 category.
 
-Showing that this forms a pre-category is rather straightforward. 
+Showing that this forms a pre category is rather straightforward. 
 %
 $$
 h \rrr (g \rrr f) \equiv h \rrr g \rrr f
@@ -826,13 +837,12 @@ that there exists a unique arrow $\pi \tp \Arrow\ X\ (A \x B)$ satisfying
 %
 $\pi$ is called the product (arrow) of $f$ and $g$.
 
-\subsection{Pair category}
+\subsection{Span category}
 
 \newcommand\pairA{\mathcal{A}}
 \newcommand\pairB{\mathcal{B}}
 Given a base category $\bC$ and two objects in this category $\pairA$ and
-$\pairB$ we can construct the ``pair category'': \TODO{This is a working title,
-  it is nice to have a name for this thing to refer back to}
+$\pairB$ we can construct the \nomenindex{span category}:
 
 The type of objects in this category will be an object in the underlying
 category, $X$, and two arrows (also from the underlying category)
@@ -964,7 +974,7 @@ $$
 This we get from \ref{eq:productEqPrinc} and the fact that homotopical structure
 is cumulative.
 
-This finishes the proof that this is a valid pre-category.
+This finishes the proof that this is a valid pre category.
 
 \subsubsection{Univalence}
 To prove that this is a proper category it must be shown that it is univalent.
@@ -1151,9 +1161,10 @@ gory details.
 %
 \subsection{Propositionality of products}
 %
-Now that we have constructed the ``pair category'' I will demonstrate how to use
-this to prove that products are propositional. I will do this by showing that
-terminal objects in this category are equivalent to products:
+Now that we have constructed the span category\index{span category} I will
+    demonstrate how to use this to prove that products are propositional. I will
+    do this by showing that terminal objects in this category are equivalent to
+    products:
 %
 \begin{align}
 \var{Terminal} ≃ \var{Product}\ ℂ\ \mathcal{A}\ \mathcal{B}
@@ -1178,7 +1189,7 @@ indeed a product. That is, for an object $Y$ and two arrows $y_𝒜 \tp
 %
 Since $X, x_𝒜, x_ℬ$ is a terminal object there is a \emph{unique} arrow from
 this object to any other object, so also $Y, y_𝒜, y_ℬ$ in particular (which is
-also an object in the pair category). The arrow we will play the role of $f$ and
+also an object in the span category). The arrow we will play the role of $f$ and
 it immediately satisfies \ref{eq:pairCondRev}. Any other arrow satisfying these
 conditions will be equal since $f$ is unique.
 
@@ -1262,14 +1273,15 @@ Denote the arrow-map of $\EndoR$ as $\fmap$, then this data must satisfy the
 following laws:
 %
 \begin{align}
-\label{eq:monad-monoidal-laws}
-\begin{split}
+\label{eq:monad-monoidal-laws-0}
   \join \lll \fmap\ \join
-    & ≡ \join \lll \join\ \fmap \\
-  \join \lll \pure\ \fmap     & ≡ \identity \\
+    & ≡ \join \lll \join \\
+\label{eq:monad-monoidal-laws-1}
+  \join \lll \pure\           & ≡ \identity \\
+\label{eq:monad-monoidal-laws-2}
   \join \lll \fmap\     \pure & ≡ \identity
-\end{split}
 \end{align}
+\newcommand\monoidallaws{\ref{eq:monad-monoidal-laws-0}, \ref{eq:monad-monoidal-laws-1} and \ref{eq:monad-monoidal-laws-2}}%
 %
 The implicit arguments to the arrows above have been left out and the objects
 they range over are universally quantified.
@@ -1279,13 +1291,13 @@ they range over are universally quantified.
 The Kleisli-formulation consists of the following data:
 %
 \begin{align}
-\label{eq:monad-kleisli-data}
 \begin{split}
-    \EndoR & \tp \Object → \Object \\
-    \pure  & \tp % \prod_{X \tp Object}
+\label{eq:monad-kleisli-data}
+\EndoR & \tp \Object → \Object \\
+\pure  & \tp % \prod_{X \tp Object}
       \Arrow\ X\ (\EndoR\ X) \\
     \bind  & \tp % \prod_{X\;Y \tp Object} → \Arrow\ X\ (\EndoR\ Y)
-      \Arrow\ (\EndoR\ X)\ (\EndoR\ Y)
+    \Arrow\ (\EndoR\ X)\ (\EndoR\ Y)
 \end{split}
 \end{align}
 %
@@ -1298,17 +1310,14 @@ is a regular maps on objects and a pair of arrows.
 This data must satisfy:
 %
 \begin{align}
-\label{eq:monad-monoidal-laws}
-\begin{split}
-  \bind\ \pure & ≡ \identity_{\EndoR\ X}
-  \\
-  % \prod_{f \tp \Arrow\ X\ (\EndoR\ Y)}
-    \pure \fish f & ≡ f
-    \\
-  % \prod_{\substack{g \tp \Arrow\ Y\ (\EndoR\ Z)\\f \tp \Arrow\ X\ (\EndoR\ Y)}}
+\label{eq:monad-kleisli-laws-0}
+\bind\ \pure & ≡ \identity_{\EndoR\ X} \\
+\label{eq:monad-kleisli-laws-1}
+\pure \fish f & ≡ f \\
+\label{eq:monad-kleisli-laws-2}
   (\bind\ f) \rrr (\bind\ g) & ≡ \bind\ (f \fish g)
-\end{split}
 \end{align}
+\newcommand\kleislilaws{\ref{eq:monad-kleisli-laws-0}, \ref{eq:monad-kleisli-laws-1} and \ref{eq:monad-kleisli-laws-2}}%
 %
 Here likewise the arrows $f \tp \Arrow\ X\ (\EndoR\ Y)$ and $g \tp
 \Arrow\ Y\ (\EndoR\ Z)$ are universally quantified (as well as the objects they
@@ -1317,10 +1326,6 @@ f \rrr (\bind\ g)$ . (\TODO{Better way to typeset $\fish$?})
 
 \subsection{Equivalence of formulations}
 %
-In my implementation I proceed to show how the one formulation gives rise to
-the other and vice-versa. For the present purpose I will briefly sketch some
-parts of this construction:
-
 The notation I have chosen here in the report
 overloads e.g. $\pure$ to both refer to a natural transformation and an arrow.
 This is of course not a coincidence as the arrow in the Kleisli formulation
@@ -1329,15 +1334,141 @@ called $\pure$.
 
 In the monoidal formulation we can define $\bind$:
 %
+\newcommand\joinX{\wideoverbar{\join}}%
+\newcommand\bindX{\wideoverbar{\bind}}%
+\newcommand\EndoRX{\wideoverbar{\EndoR}}%
+\newcommand\pureX{\wideoverbar{\pure}}%
+\newcommand\fmapX{\wideoverbar{\fmap}}%
 \begin{align}
-\bind \defeq \join \lll \fmap\ f
+\bind\ f \defeq \joinX \lll \fmap\ f
 \end{align}
 %
 And likewise in the Kleisli formulation we can define $\join$:
 %
 \begin{align}
-\join \defeq \bind\ \identity
+\join \defeq \bindX\ \identity
 \end{align}
 %
-It now remains to show that we can prove the various laws given this choice. I
-refer the reader to my implementation for the details.
+Here $\joinX$ corresponds to the arrow from the natural
+transformation $\join$. $\bindX$ on the other hand corresponds to a
+natural transformation constructed from $\bind$. It now remains to show that
+this construction indeed gives rise to a monad. This will be done in two steps.
+First we will assume that we have a monad in the monoidal form; $(\EndoR, \pure,
+\join)$ and then show that $\EndoR, \pure, \bind$ is indeed a monad in the
+Kleisli form. In the second part we will show the other direction.
+
+\subsubsection{Monoidal to Kleisli}
+Let $(\EndoR, \pure, \join)$ be given as in \ref{eq:monad-monoidal-data}
+satisfying the laws \monoidallaws. For the data of the Kleisli
+formulation we pick:
+%
+\begin{align}
+\begin{split}
+    \EndoR   & \defeq \EndoRX \\
+    \pure    & \defeq \pureX \\
+    \bind\ f & \tp \joinX \lll \fmapX\ f
+\end{split}
+\end{align}
+%
+$\EndoRX$ is the object map of the endo-functor $\EndoR$,
+$\pureX$ and $\joinX$ are the arrows from the natural
+transformations $\pure$ and $\join$ respectively. $\fmapX$ is the
+arrow map of the endo-functor $\EndoR$. It now just remains to verify
+the laws \kleislilaws. For \ref{eq:monad-kleisli-laws-0}:
+%
+\begin{align*}
+\bind\ \pure & ≡
+\join \lll (\fmap\ \pure) && \text{By definition} \\
+& ≡ \identity && \text{By \ref{eq:monad-monoidal-laws-2}}
+\end{align*}
+%
+For \ref{eq:monad-kleisli-laws-1}:
+%
+\begin{align*}
+\pure \fish f
+& \equiv %%%
+\pure \ggg \bind\ f && \text{By definition} \\ & ≡
+\bind\ f \lll \pure && \text{By definition} \\ & ≡
+\joinX \lll \fmapX\ f \lll \pureX   && \text{By definition} \\ & ≡
+\joinX \lll \pureX \lll f          && \text{$\pure$ is a natural transformation} \\ & ≡
+\identity \lll f                 && \text{By \ref{eq:monad-monoidal-laws-1}} \\ & ≡
+f                                && \text{Left identity}
+\end{align*}
+%
+For \ref{eq:monad-kleisli-laws-2}:
+\begin{align*}
+\bind\ g \rrr \bind\ f & ≡
+\bind\ f \lll \bind\ g
+ \\ & ≡
+%% %%%%
+\joinX \lll \fmapX\ g \lll \joinX \lll \fmapX\ f
+&& \text{\dots} \\ & ≡
+\joinX \lll \joinX \lll \fmapX^2\ g \lll \fmapX\ f
+&& \text{$\join$ is a natural transformation} \\ & ≡
+\joinX\  \lll \fmapX\ \joinX \lll \fmapX^2\ g \lll \fmapX\ f
+&& \text{By \ref{eq:monad-monoidal-laws-0}} \\ & ≡
+\joinX\  \lll \fmapX\  \joinX\  \lll \fmapX\  (\fmapX\  g) \lll \fmapX\  f
+&& \text{} \\ & ≡
+\joinX \lll \fmapX\  (\joinX \lll \fmapX\  g \lll f)
+&& \text{Distributive law for functors} \\ & \equiv
+%%%%
+\bind\ (g \fish f)
+\end{align*}
+\subsubsection{Kleisli to Monoidal}
+For the other direction we are given $(\EndoR, \pure, \bind)$ as in
+\ref{eq:monad-kleisli-data} satisfying the laws \kleislilaws. For the data of
+the monoidal formulation we pick:
+%
+\begin{align}
+\begin{split}
+    \EndoR & \defeq \EndoRX \\
+    \pure  & \defeq \pureX \\
+    \join  & \defeq \bind\ \identity
+\end{split}
+\end{align}
+%
+Where $\EndoRX \defeq (\bind\ (\pure \lll f), \EndoR)$ and $\pureX \defeq
+\bind\ \identity$. We must now show the laws \monoidallaws, but we must also
+verify that our choice of $\EndoRX$ actually is a functor. I will ommit this
+here. In stead we shall see how these two mappings are indeed inverses.
+
+\subsubsection{Equivalence}
+To prove that the two formulations are equivalent we must demonstrate that the
+two mappings sketched above are indeed inverses of each other. If we name the
+first mapping $\toKleisli$ and it's proposed inverse $\toMonoidal$
+then we must show:
+%
+\begin{align}
+  \label{eq:monad-forwards}
+  \toKleisli \comp \toMonoidal & ≡ \identity \\
+  \label{eq:monad-backwards}
+  \toMonoidal \comp \toKleisli & ≡ \identity
+\end{align}
+%
+For \ref{eq:monad-forwards} let $(\EndoR, \pure, \join)$ be a monad in the
+monoidal form. In my formulation the proof that being-a-monad is a proposition
+can be found. With this result in place we get an equality principle for
+kleisli-monads that say that to equate two such monads it suffices to equate
+their data-part. So it suffices to equate the data-parts of the
+\ref{eq:monad-forwards}. Such a proof is a triple equation the three projections
+of \ref{eq:monad-kleisli-data}. The first two hold definitionally -- essentially
+one just wraps and unwraps the morphism in a functor. For the last equation a
+little more work is required:
+%
+\begin{align*}
+\join \lll \fmap\ f & ≡
+\fmap\ f \rrr \join \\ & ≡
+\bind\ (f \rrr \pure) \rrr \bind\ \identity
+  && \text{By definition of $\fmap$ and $\join$} \\ & ≡
+\bind\ (f \rrr \pure \fish \identity)
+  && \text{By \ref{eq:monad-kleisli-laws-2}} \\ & ≡
+\bind\ (f \rrr \identity)
+  && \text{By \ref{eq:monad-kleisli-laws-1}} \\ & ≡
+\bind\ f
+\end{align*}
+%
+For the other direction we can likewise verify that the maps $\EndoR$, $\bind$,
+$\join$, and $\fmap$ are equal. The equality principle for functors gives us
+that this is enough to show that the the functor $\EndoR$ we construct is
+identical. Similarly for the natural transformations we have that the naturality
+condition is a proposition so the paths between the maps are sufficient.
