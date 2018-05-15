@@ -1,8 +1,44 @@
 \chapter{Introduction}
+This thesis is a case-study in the application of Cubical Agda in the
+context of category theory. At the center of this is the notion of
+\nomenindex{equality}. In type-theory there are two pervasive notions
+of equality: \nomenindex{judgmental equality} and
+\nomenindex{propositional equality}. Judgmental equality is a property
+of the type system, it is a property that is automatically checked by
+a type checker. As such there are some properties judgmental
+equalities must crucially have. It must be \nomenindex{decidable},
+\nomenindex{sound}, enjoy \nomenindex{canonicity} and be a
+\nomen{congruence relation}. Being decidable simply means that that an
+algorithm exists to decide whether two terms are equal. For any
+practical implementation the decidability must also be effectively
+computable. Soundness means that things judged to be equal actually
+\emph{are} considered equal. It must be a congruence relation because
+otherwise the relation certainly does not adhere to our notion of
+equality. One would be able to conclude things like: $x \nequiv y
+\rightarrow f\ x \equiv f\ y$. Canonicity will be explained later in
+this introduction after we've seen an example of judgmental- and
+propositional equality at play for a simple example.\TODO{How to
+  motivate canonicity for equality}.
+
+For propositional equality the decidability requirement is relaxed. It
+is not in general possible to decide the correctness of logical
+propositions (cf. Hilbert's \nomen{entscheidigungsproblem}).
+Propositional equality are provided by the developer. When introducing
+definitions this report will use the notation $\defeq$. Judgmental
+equalities written $=$. For propositional equalities the notation
+$\equiv$ is used.
+
+The usual notion of propositional equality in \nomen{Intensional Type
+  Theory} (ITT) is quite restrictive. In the next section a few
+motivating examples will highlight this. There exist techniques to
+circumvent these problems, as we shall see. This thesis will explore
+an extension to Agda that redefines the notion of propositional
+equality and as such is an alternative to these other techniques.
+%
 \section{Motivating examples}
 %
-In the following two sections I present two examples that illustrate some
-limitations inherent in ITT and -- by extension -- Agda.
+In the following two sections I present two examples that illustrate
+some limitations inherent in ITT and -- by extension -- Agda.
 %
 \subsection{Functional extensionality}
 \label{sec:functional-extensionality}%
@@ -18,9 +54,9 @@ Consider the functions:
   \end{equation*}%
 \end{multicols}%
 %
-The term $n + 0$ is 
+The term $n + 0$ is
 \nomenindex{definitionally} equal to $n$, which we
-write as $n + 0 = n$. This is also called 
+write as $n + 0 = n$. This is also called
 \nomenindex{judgmental equality}.
 We call it definitional equality because the \emph{equality} arises
 from the \emph{definition} of $+$ which is:
@@ -39,35 +75,43 @@ as $n + 0 \equiv n$. Propositional equality means that there is a
 proof that exhibits this relation. Since equality is a transitive
 relation we have that $n + 0 \equiv 0 + n$.
 
-Unfortunately we don't have $f \equiv g$.\footnote{Actually showing this is
-outside the scope of this text. Essentially it would involve giving a model
-for our type theory that validates all our axioms but where $f \equiv g$ is
-not true.} There is no way to construct a proof asserting the obvious
-equivalence of $f$ and $g$ -- even though we can prove them equal for all
-points. This is exactly the notion of equality of functions that we are
-interested in; that they are equal for all inputs. We call this
+Unfortunately we don't have $f \equiv g$. There is no way to construct
+a proof asserting the obvious equivalence of $f$ and $g$. Actually
+showing this is outside the scope of this text. Essentially it would
+involve giving a model for our type theory that validates all our
+axioms but where $f \equiv g$ is not true. We cannot show that they
+are equal, even though we can prove them equal for all points. For
+functions this is exactly the notion of equality that we are
+interested in: Functions are considered equal when they are equal for
+all inputs. This is called \nomenindex{point wise equality}, where the
+\emph{points} of a function refer to its arguments.
 
-\nomenindex{point-wise equality}, where the \emph{points} of a function refers
-to its arguments.
-
-In the context of category theory functional extensionality is e.g. needed to
-show that representable functors are indeed functors. The representable functor
-for a category $\bC$ and a fixed object in $A \in \bC$ is defined to be:
-%
-\begin{align*}
-\fmap \defeq \lambda\ X \to \Hom_{\bC}(A, X)
-\end{align*}
-%
-The proof obligation that this satisfies the identity law of functors
-($\fmap\ \idFun \equiv \idFun$) thus becomes:
-%
-\begin{align*}
-\Hom(A, \idFun_{\bX}) = (\lambda\ g \to \idFun \comp g) \equiv \idFun_{\Sets}
-\end{align*}
-%
-One needs functional extensionality to ``go under'' the function arrow and apply
-the (left) identity law of the underlying category to prove $\idFun \comp g
-\equiv g$ and thus close the goal.
+%% In the context of category theory functional extensionality is e.g.
+%% needed to show that representable functors are indeed functors. The
+%% representable functor is defined for a fixed category $\bC$ and an
+%% object $X \in \bC$. It's map on objects is defined thus:
+%% %
+%% \begin{align*}
+%% \lambda\ A \to \Arrow\ X\ A
+%% \end{align*}
+%% %
+%% That is, it maps objects to arrows. So, it's map on arrows must map an arrow $\Arrow\ A\ B$ to an
+%% The map on objects is defined thus:
+%% %
+%% \begin{align*}
+%% \lambda f \to
+%% \end{align*}
+%% %
+%% The proof obligation that this satisfies the identity law of functors
+%% ($\fmap\ \idFun \equiv \idFun$) thus becomes:
+%% %
+%% \begin{align*}
+%% \Hom(A, \idFun_{\bX}) = (\lambda\ g \to \idFun \comp g) \equiv \idFun_{\Sets}
+%% \end{align*}
+%% %
+%% One needs functional extensionality to ``go under'' the function arrow and apply
+%% the (left) identity law of the underlying category to prove $\idFun \comp g
+%% \equiv g$ and thus close the goal.
 %
 \subsection{Equality of isomorphic types}
 %
@@ -75,7 +119,7 @@ Let $\top$ denote the unit type -- a type with a single constructor.
 In the propositions as types interpretation of type theory $\top$ is
 the proposition that is always true. The type $A \x \top$ and $A$ has
 an element for each $a \tp A$. So in a sense they have the same shape
-(Greek; 
+(Greek;
 \nomenindex{isomorphic}). The second element of the pair does not
 add any ``interesting information''. It can be useful to identify such
 types. In fact, it is quite commonplace in mathematics. Say we look at
@@ -87,10 +131,11 @@ be performed in ITT.
 
 More specifically what we are interested in is a way of identifying
 
-\nomenindex{equivalent} types. I will return to the definition of equivalence later
-in section \S\ref{sec:equiv}, but for now it is sufficient to think of an
-equivalence as a one-to-one correspondence. We write $A \simeq B$ to assert that
-$A$ and $B$ are equivalent types. The principle of univalence says that:
+\nomenindex{equivalent} types. I will return to the definition of
+equivalence later in section \S\ref{sec:equiv}, but for now it is
+sufficient to think of an equivalence as a one-to-one correspondence.
+We write $A \simeq B$ to assert that $A$ and $B$ are equivalent types.
+The principle of univalence says that:
 %
 $$\mathit{univalence} \tp (A \simeq B) \simeq (A \equiv B)$$
 %
@@ -119,25 +164,20 @@ implementations of category theory in Agda:
 %
 \begin{itemize}
 \item
+  A formalization in Agda using the setoid approach:
   \url{https://github.com/copumpkin/categories}
-
-  A formalization in Agda using the setoid approach
 \item
+  A formalization in Agda with univalence and functional
+  extensionality as postulates:
   \url{https://github.com/pcapriotti/agda-categories}
-
-  A formalization in Agda with univalence and functional extensionality as
-  postulates.
 \item
+  A formalization in Coq in the homotopic setting:
   \url{https://github.com/HoTT/HoTT/tree/master/theories/Categories}
-
-  A formalization in Coq in the homotopic setting
 \item
-  \url{https://github.com/mortberg/cubicaltt}
-
   A formalization in CubicalTT - a language designed for cubical type theory.
   Formalizes many different things, but only a few concepts from category
-  theory.
-
+  theory:
+  \url{https://github.com/mortberg/cubicaltt}
 \end{itemize}
 %
 The contribution of this thesis is to explore how working in a cubical setting
@@ -158,7 +198,7 @@ canonical form.
 
 Another approach is to use the \emph{setoid interpretation} of type
 theory (\cite{hofmann-1995,huber-2016}). With this approach one works
-with 
+with
 \nomenindex{extensional sets} $(X, \sim)$, that is a type $X \tp \MCU$
 and an equivalence relation $\sim\ \tp X \to X \to \MCU$ on that type.
 Under the setoid interpretation the equivalence relation serve as a
@@ -178,18 +218,18 @@ inherently `local' to the extensional set $(X , \sim)$.
 \TODO{Talk a bit about terminology. Find a good place to stuff this little
   section.}
 
-In the remainder of this paper I will use the term 
+In the remainder of this paper I will use the term
 \nomenindex{Type} to describe --
 well, types. Thereby diverging from the notation in Agda where the keyword
-\texttt{Set} refers to types. 
+\texttt{Set} refers to types.
 \nomenindex{Set} on the other hand shall refer to the
 homotopical notion of a set. I will also leave all universe levels implicit.
 
-And I use the term 
+And I use the term
 \nomenindex{arrow} to refer to morphisms in a category,
-whereas the terms 
-\nomenindex{morphism}, 
-\nomenindex{map} or 
+whereas the terms
+\nomenindex{morphism},
+\nomenindex{map} or
 \nomenindex{function}
 shall be reserved for talking about type theoretic functions; i.e.
 functions in Agda.
