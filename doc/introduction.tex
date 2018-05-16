@@ -22,20 +22,21 @@ propositional equality at play for a simple example.\TODO{How to
 
 For propositional equality the decidability requirement is relaxed. It
 is not in general possible to decide the correctness of logical
-propositions (cf. Hilbert's \nomen{entscheidigungsproblem}).
+propositions (cf.\ Hilbert's \emph{entscheidigungsproblem}).
 Propositional equality are provided by the developer. When introducing
 definitions this report will use the notation $\defeq$. Judgmental
 equalities written $=$. For propositional equalities the notation
 $\equiv$ is used.
 
-The usual notion of propositional equality in \nomen{Intensional Type
-  Theory} (ITT) is quite restrictive. In the next section a few
+The usual notion of propositional equality in \nomenindex{Intensional
+  Type Theory} (ITT) is quite restrictive. In the next section a few
 motivating examples will highlight this. There exist techniques to
 circumvent these problems, as we shall see. This thesis will explore
 an extension to Agda that redefines the notion of propositional
 equality and as such is an alternative to these other techniques. What
 makes this extension particularly interesting is that it gives a
-\emph{constructive} interpretation of univalence.
+\emph{constructive} interpretation of univalence. What this means will
+be elaborated in the following sections.
 %
 \section{Motivating examples}
 %
@@ -176,9 +177,9 @@ implementations of category theory in Agda:
   A formalization in Coq in the homotopic setting:
   \url{https://github.com/HoTT/HoTT/tree/master/theories/Categories}
 \item
-  A formalization in CubicalTT - a language designed for cubical type theory.
-  Formalizes many different things, but only a few concepts from category
-  theory:
+  A formalization in \emph{CubicalTT} -- a language designed for
+  cubical type theory. Formalizes many different things, but only a
+  few concepts from category theory:
   \url{https://github.com/mortberg/cubicaltt}
 \end{itemize}
 %
@@ -206,7 +207,7 @@ and an equivalence relation $\sim\ \tp X \to X \to \MCU$ on that type.
 Under the setoid interpretation the equivalence relation serve as a
 sort of ``local'' propositional equality. Since the developer gets to
 pick this relation it is not guaranteed to be a congruence relation
-apriori. So this must be verified manually by the developer.
+a priori. So this must be verified manually by the developer.
 Furthermore, functions between different setoids must be shown to be
 setoid homomorphism, that is; they preserve the relation.
 
