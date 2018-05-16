@@ -25,6 +25,7 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
   module §2-3 (omap : Object → Object) (pure : {X : Object} → Arrow X (omap X)) where
     record §1 : Set ℓ where
+      no-eta-equality
       open M
 
       field
@@ -75,12 +76,11 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         isMonad : IsMonad rawMnd
 
       toMonad : Monad
-      toMonad = record
-        { raw     = rawMnd
-        ; isMonad = isMonad
-        }
+      toMonad .Monad.raw = rawMnd
+      toMonad .Monad.isMonad = isMonad
 
     record §2 : Set ℓ where
+      no-eta-equality
       open K
 
       field
@@ -97,28 +97,24 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         isMonad : IsMonad rawMnd
 
       toMonad : Monad
-      toMonad = record
-        { raw     = rawMnd
-        ; isMonad = isMonad
-        }
+      toMonad .Monad.raw     = rawMnd
+      toMonad .Monad.isMonad = isMonad
 
-  §1-fromMonad : (m : M.Monad) → §2-3.§1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
-  §1-fromMonad m = record
-    { fmap       = Functor.fmap R
-    ; RisFunctor = Functor.isFunctor R
-    ; pureN      = pureN
-    ; join       = λ {X} → joinT X
-    ; joinN      = joinN
-    ; isMonad    = M.Monad.isMonad m
-    }
-    where
+  module _ (m : M.Monad) where
     open M.Monad m
 
+    §1-fromMonad : §2-3.§1 (M.Monad.Romap m) (λ {X} → M.Monad.pureT m X)
+    §1-fromMonad .§2-3.§1.fmap       = Functor.fmap R
+    §1-fromMonad .§2-3.§1.RisFunctor = Functor.isFunctor R
+    §1-fromMonad .§2-3.§1.pureN      = pureN
+    §1-fromMonad .§2-3.§1.join      {X} = joinT X
+    §1-fromMonad .§2-3.§1.joinN      = joinN
+    §1-fromMonad .§2-3.§1.isMonad    = M.Monad.isMonad m
+
+
   §2-fromMonad : (m : K.Monad) → §2-3.§2 (K.Monad.omap m) (K.Monad.pure m)
-  §2-fromMonad m = record
-    { bind    = K.Monad.bind    m
-    ; isMonad = K.Monad.isMonad m
-    }
+  §2-fromMonad m .§2-3.§2.bind    = K.Monad.bind    m
+  §2-fromMonad m  .§2-3.§2.isMonad = K.Monad.isMonad m
 
   -- | In the following we seek to transform the equivalence `Monoidal≃Kleisli`
   -- | to talk about voevodsky's construction.
@@ -145,65 +141,43 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       back = §1-fromMonad ∘ Kleisli→Monoidal ∘ §2-3.§2.toMonad
 
       forthEq : ∀ m → (forth ∘ back) m ≡ m
-      forthEq m = begin
-        (forth ∘ back) m ≡⟨⟩
-        -- In full gory detail:
-        ( §2-fromMonad
-        ∘ Monoidal→Kleisli
-        ∘ §2-3.§1.toMonad
-        ∘ §1-fromMonad
-        ∘ Kleisli→Monoidal
-        ∘ §2-3.§2.toMonad
-        ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
-        ( §2-fromMonad
-        ∘ Monoidal→Kleisli
-        ∘ Kleisli→Monoidal
-        ∘ §2-3.§2.toMonad
-        ) m ≡⟨ cong (λ φ → φ m) t ⟩
-        -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
-        -- I should be able to prove this using congruence and `lem` below.
-        ( §2-fromMonad
-        ∘ §2-3.§2.toMonad
-        ) m ≡⟨⟩
-        (  §2-fromMonad
-        ∘ §2-3.§2.toMonad
-        ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
-        m ∎
+      forthEq m = trans
+                  (trans (cong-d (§2-fromMonad ∘ Monoidal→Kleisli) (lemmaz (Kleisli→Monoidal (§2-3.§2.toMonad m))))
+                         (cong-d (\ φ → §2-fromMonad (φ (§2-3.§2.toMonad m))) re-ve))
+                         lemma
         where
-        t' : ((Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad {omap} {pure})
-          ≡ §2-3.§2.toMonad
-        t' = cong (\ φ → φ ∘ §2-3.§2.toMonad) re-ve
-        t : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad {omap} {pure})
-          ≡ (§2-fromMonad ∘ §2-3.§2.toMonad)
-        t = cong-d (\ f → §2-fromMonad ∘ f) t'
-        u : (§2-fromMonad ∘ (Monoidal→Kleisli ∘ Kleisli→Monoidal) ∘ §2-3.§2.toMonad) m
-          ≡ (§2-fromMonad ∘ §2-3.§2.toMonad) m
-        u = cong (\ φ → φ m) t
+        lemma : (§2-fromMonad ∘ §2-3.§2.toMonad) m ≡ m
+        §2-3.§2.bind (lemma i) = §2-3.§2.bind m
+        §2-3.§2.isMonad (lemma i) = §2-3.§2.isMonad m
+        lemmaz : ∀ m → §2-3.§1.toMonad (§1-fromMonad m) ≡ m
+        M.Monad.raw (lemmaz m i) = M.Monad.raw m
+        M.Monad.isMonad (lemmaz m i) = M.Monad.isMonad m
 
       backEq : ∀ m → (back ∘ forth) m ≡ m
-      backEq m = begin
-        (back ∘ forth) m ≡⟨⟩
-        ( §1-fromMonad
-        ∘ Kleisli→Monoidal
-        ∘ §2-3.§2.toMonad
-        ∘ §2-fromMonad
-        ∘ Monoidal→Kleisli
-        ∘ §2-3.§1.toMonad
-        ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
-        ( §1-fromMonad
-        ∘ Kleisli→Monoidal
-        ∘ Monoidal→Kleisli
-        ∘ §2-3.§1.toMonad
-        ) m ≡⟨ cong (λ φ → φ m) t ⟩ -- Monoidal→Kleisli and Kleisli→Monoidal are inverses
-        ( §1-fromMonad
-        ∘ §2-3.§1.toMonad
-        ) m ≡⟨⟩ -- fromMonad and toMonad are inverses
-        m ∎
-        where
-        t : §1-fromMonad ∘ Kleisli→Monoidal ∘ Monoidal→Kleisli ∘ §2-3.§1.toMonad
-          ≡ §1-fromMonad ∘ §2-3.§1.toMonad
-        -- Why does `re-ve` not satisfy this goal?
-        t i m = §1-fromMonad (ve-re i (§2-3.§1.toMonad m))
+      backEq m = trans (cong-d (§1-fromMonad ∘ Kleisli→Monoidal) (lemma (Monoidal→Kleisli (§2-3.§1.toMonad m))))
+                 (trans (cong-d (\ φ → §1-fromMonad (φ (§2-3.§1.toMonad m))) ve-re)
+                        lemmaz)
+       where
+        -- rhs = §1-fromMonad (Kleisli→Monoidal ((Monoidal→Kleisli (§2-3.§1.toMonad m))))
+        -- foo : §1-fromMonad (Kleisli→Monoidal (§2-3.§2.toMonad (§2-fromMonad (Monoidal→Kleisli (§2-3.§1.toMonad m)))))
+        --     ≡ §1-fromMonad (Kleisli→Monoidal ((Monoidal→Kleisli (§2-3.§1.toMonad m))))
+        -- §2-3.§1.fmap (foo i) = §2-3.§1.fmap rhs
+        -- §2-3.§1.join (foo i) = §2-3.§1.join rhs
+        -- §2-3.§1.RisFunctor (foo i) = §2-3.§1.RisFunctor rhs
+        -- §2-3.§1.pureN (foo i) = §2-3.§1.pureN rhs
+        -- §2-3.§1.joinN (foo i) = §2-3.§1.joinN  rhs
+        -- §2-3.§1.isMonad (foo i) = §2-3.§1.isMonad rhs
+
+        lemmaz : §1-fromMonad (§2-3.§1.toMonad m) ≡ m
+        §2-3.§1.fmap (lemmaz i) = §2-3.§1.fmap m
+        §2-3.§1.join (lemmaz i) = §2-3.§1.join m
+        §2-3.§1.RisFunctor (lemmaz i) = §2-3.§1.RisFunctor m
+        §2-3.§1.pureN (lemmaz i) = §2-3.§1.pureN m
+        §2-3.§1.joinN (lemmaz i) = §2-3.§1.joinN m
+        §2-3.§1.isMonad (lemmaz i) = §2-3.§1.isMonad m
+        lemma : ∀ m → §2-3.§2.toMonad (§2-fromMonad m) ≡ m
+        K.Monad.raw (lemma m i) = K.Monad.raw m
+        K.Monad.isMonad (lemma m i) = K.Monad.isMonad m
 
       voe-isEquiv : isEquiv (§2-3.§1 omap pure) (§2-3.§2 omap pure) forth
       voe-isEquiv = gradLemma forth back forthEq backEq

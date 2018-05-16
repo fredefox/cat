@@ -123,6 +123,7 @@ record IsMonad (raw : RawMonad) : Set ℓ where
         ∎
 
 record Monad : Set ℓ where
+  no-eta-equality
   field
     raw     : RawMonad
     isMonad : IsMonad raw
