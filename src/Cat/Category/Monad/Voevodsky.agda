@@ -141,10 +141,19 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       back = §1-fromMonad ∘ Kleisli→Monoidal ∘ §2-3.§2.toMonad
 
       forthEq : ∀ m → (forth ∘ back) m ≡ m
-      forthEq m = trans
-                  (trans (cong-d (§2-fromMonad ∘ Monoidal→Kleisli) (lemmaz (Kleisli→Monoidal (§2-3.§2.toMonad m))))
-                         (cong-d (\ φ → §2-fromMonad (φ (§2-3.§2.toMonad m))) re-ve))
-                         lemma
+      forthEq m = begin
+       §2-fromMonad
+         (Monoidal→Kleisli
+          (§2-3.§1.toMonad
+           (§1-fromMonad (Kleisli→Monoidal (§2-3.§2.toMonad m)))))
+         ≡⟨ cong-d (§2-fromMonad ∘ Monoidal→Kleisli) (lemmaz (Kleisli→Monoidal (§2-3.§2.toMonad m))) ⟩
+       §2-fromMonad
+         ((Monoidal→Kleisli ∘ Kleisli→Monoidal)
+          (§2-3.§2.toMonad m))
+         ≡⟨ (cong-d (\ φ → §2-fromMonad (φ (§2-3.§2.toMonad m))) re-ve) ⟩
+       (§2-fromMonad ∘ §2-3.§2.toMonad) m
+         ≡⟨ lemma ⟩
+       m ∎
         where
         lemma : (§2-fromMonad ∘ §2-3.§2.toMonad) m ≡ m
         §2-3.§2.bind (lemma i) = §2-3.§2.bind m
@@ -154,10 +163,23 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         M.Monad.isMonad (lemmaz m i) = M.Monad.isMonad m
 
       backEq : ∀ m → (back ∘ forth) m ≡ m
-      backEq m = trans (cong-d (§1-fromMonad ∘ Kleisli→Monoidal) (lemma (Monoidal→Kleisli (§2-3.§1.toMonad m))))
-                 (trans (cong-d (\ φ → §1-fromMonad (φ (§2-3.§1.toMonad m))) ve-re)
-                        lemmaz)
+      backEq m = begin
+        §1-fromMonad
+        (Kleisli→Monoidal
+        (§2-3.§2.toMonad
+        (§2-fromMonad (Monoidal→Kleisli (§2-3.§1.toMonad m)))))
+          ≡⟨ cong-d (§1-fromMonad ∘ Kleisli→Monoidal) (lemma (Monoidal→Kleisli (§2-3.§1.toMonad m))) ⟩
+        §1-fromMonad
+        ((Kleisli→Monoidal ∘ Monoidal→Kleisli)
+        (§2-3.§1.toMonad m))
+          ≡⟨ (cong-d (\ φ → §1-fromMonad (φ (§2-3.§1.toMonad m))) ve-re) ⟩
+        §1-fromMonad (§2-3.§1.toMonad m)
+          ≡⟨ lemmaz ⟩
+        m ∎
        where
+        -- having eta equality on causes roughly the same work as checking this proof of foo,
+        -- which is quite expensive because it ends up reducing complex terms.
+
         -- rhs = §1-fromMonad (Kleisli→Monoidal ((Monoidal→Kleisli (§2-3.§1.toMonad m))))
         -- foo : §1-fromMonad (Kleisli→Monoidal (§2-3.§2.toMonad (§2-fromMonad (Monoidal→Kleisli (§2-3.§1.toMonad m)))))
         --     ≡ §1-fromMonad (Kleisli→Monoidal ((Monoidal→Kleisli (§2-3.§1.toMonad m))))
