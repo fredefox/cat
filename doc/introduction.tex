@@ -185,16 +185,16 @@ will make it possible to prove more things and to reuse proofs and to try and
 compare some aspects of this formalization with the existing ones.\TODO{How can
   I live up to this?}
 
-There are alternative approaches to working in a cubical setting where one can
-still have univalence and functional extensionality. One option is to postulate
-these as axioms. This approach, however, has other shortcomings, e.g.; you lose
-
-\nomenindex{canonicity} (\TODO{Pageno!} \cite{huber-2016}). Canonicity means that any
-well typed term evaluates to a \emph{canonical} form. For example for a closed
-term $e \tp \bN$ it will be the case that $e$ reduces to $n$ applications of
-$\mathit{suc}$ to $0$ for some $n$; $e = \mathit{suc}^n\ 0$. Without canonicity
-terms in the language can get ``stuck'' -- meaning that they do not reduce to a
-canonical form.
+There are alternative approaches to working in a cubical setting where
+one can still have univalence and functional extensionality. One
+option is to postulate these as axioms. This approach, however, has
+other shortcomings, e.g. you lose \nomenindex{canonicity}
+(\TODO{Pageno!} \cite{huber-2016}). Canonicity means that any well
+typed term evaluates to a \emph{canonical} form. For example for a
+closed term $e \tp \bN$ it will be the case that $e$ reduces to $n$
+applications of $\mathit{suc}$ to $0$ for some $n$; $e =
+\mathit{suc}^n\ 0$. Without canonicity terms in the language can get
+``stuck'' -- meaning that they do not reduce to a canonical form.
 
 Another approach is to use the \emph{setoid interpretation} of type
 theory (\cite{hofmann-1995,huber-2016}). With this approach one works

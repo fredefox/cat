@@ -1,0 +1,236 @@
+\documentclass[a4paper,handout]{beamer}
+\input{packages.tex}
+\input{macros.tex}
+\title{Univalent Categories}
+\author{Frederik Hangh{\o}j Iversen}
+\institute{Chalmers University of Technology}
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}
+  \frametitle{Motivating example}
+  \framesubtitle{Functional extensionality}
+Consider the functions
+\begin{align*}
+  \var{zeroLeft} & \defeq (n \tp \bN) \mto (0 + n \tp \bN) \\
+  \var{zeroRight} & \defeq (n \tp \bN) \mto (n + 0 \tp \bN)
+\end{align*}
+\pause
+We have
+%
+$$
+\prod_{n \tp \bN} n + 0 \equiv 0 + n
+$$
+%
+\pause
+But not
+%
+$$
+\var{zeroLeft} \equiv \var{zeroRight}
+$$
+%
+\pause
+We need
+%
+$$
+\funExt \tp \prod_{a \tp A} f\ a \equiv g\ a \to f \equiv g
+$$
+
+\end{frame}
+\begin{frame}
+  \frametitle{Motivating example}
+  \framesubtitle{Univalence}
+  Consider the set
+  $\{x \mid \phi\ x \land \psi\ x\}$
+  \pause
+
+  If we show $\forall x . \psi\ x \equiv \top$
+  then we want to conclude
+  $\{x \mid \phi\ x \land \psi\ x\} \equiv \{x \mid \phi\ x\}$
+  \pause
+
+  We need univalence:
+  $$(A \simeq B) \simeq (A \equiv B)$$
+  \pause
+%
+  We will return to $\simeq$, but for not, think of it as an
+  isomorphism, so it induces maps:
+  \begin{align*}
+    \var{toPath}  & \tp (A \simeq B) \to (A \equiv B) \\
+    \var{toEquiv} & \tp (A \equiv B) \to (A \simeq B)
+  \end{align*}
+\end{frame}
+\begin{frame}
+  \frametitle{Paths}
+  \framesubtitle{Definition}
+Heterogeneous paths
+\begin{equation*}
+  \Path \tp (P \tp I → \MCU) → P\ 0 → P\ 1 → \MCU
+\end{equation*}
+\pause
+  For $P \tp I \to \MCU$, $A \tp \MCU$ and $a_0, a_1 \tp A$
+  inhabitants of $\Path\ P\ a_0\ a_1$ are like functions
+%
+$$
+p \tp \prod_{i \tp I} P\ i
+$$
+%
+Which satisfy $p\ 0 & = a_0$ and $p\ 1 & = a_1$
+\pause
+
+Homogenous paths
+$$
+a_0 \equiv a_1 \defeq \Path\ (\var{const}\ A)\ a_0\ a_1
+$$
+\end{frame}
+\begin{frame}
+\frametitle{Paths}
+\framesubtitle{Functional extenstionality}
+$$
+\funExt & \tp \prod_{a \tp A} f\ a \equiv g\ a \to f \equiv g
+$$
+\pause
+$$
+\funExt\ p \defeq λ i\ a → p\ a\ i
+$$
+\pause
+$$
+\funExt\ (\var{const}\ \refl)
+\tp
+\var{zeroLeft} \equiv \var{zeroRight}
+$$
+\end{frame}
+\begin{frame}
+  \frametitle{Paths}
+  \framesubtitle{Homotopy levels}
+\begin{align*}
+& \isContr    && \tp    \MCU \to \MCU \\
+& \isContr\ A && \defeq \sum_{c \tp A} \prod_{a \tp A} a \equiv c
+\end{align*}
+\pause
+\begin{align*}
+& \isProp    && \tp \MCU \to \MCU \\
+& \isProp\ A && \defeq \prod_{a_0, a_1 \tp A} a_0 \equiv a_1
+\end{align*}
+\pause
+\begin{align*}
+& \isSet    && \tp \MCU \to \MCU \\
+& \isSet\ A && \defeq \prod_{a_0, a_1 \tp A} \isProp\ (a_0 \equiv a_1)
+\end{align*}
+\pause
+\end{frame}
+\begin{frame}
+\frametitle{Paths}
+\framesubtitle{A few lemmas}
+Let $D$ be a type-family:
+$$
+D \tp \prod_{b \tp A} \prod_{p \tp a ≡ b} \MCU
+$$
+%
+\pause
+And $d$ and in inhabitant of $D$ at $\refl$:
+%
+$$
+d \tp D\ a\ \refl
+$$
+%
+\pause
+We then have the function:
+%
+\begin{equation}
+\pathJ\ D\ d \tp \prod_{b \tp A} \prod_{p \tp a ≡ b} D\ a\ p
+\end{equation}
+\end{frame}
+\begin{frame}
+\frametitle{Paths}
+\framesubtitle{A few lemmas}
+Given
+\begin{align*}
+  A           & \tp \MCU \\
+  P           & \tp A \to \MCU \\
+  \var{propP} & \tp \prod_{x \tp A} \isProp\ (P\ x) \\
+  p           & \tp a_0 \equiv a_1 \\
+  p_0         & \tp P\ a_0 \\
+  p_1         & \tp P\ a_1
+\end{align*}
+%
+We have
+$$
+\lemPropF\ \var{propP}\ p
+\tp
+\Path\ (\lambda\; i \mto P\ (p\ i))\ p_0\ p_1
+$$
+%
+\end{frame}
+\begin{frame}
+\frametitle{Paths}
+\framesubtitle{A few lemmas}
+$\prod$ preserves $\isProp$:
+$$
+\mathit{propPi}
+\tp
+\left(\prod_{a \tp A} \isProp\ (P\ a)\right)
+\to \isProp\ \left(\prod_{a \tp A} P\ a\right)
+$$
+\pause
+$\sum$ preserves $\isProp$:
+$$
+\mathit{propSig} \tp \isProp\ A \to \left(\prod_{a \tp A} \isProp\ (P\ a)\right) \to \isProp\ \left(\sum_{a \tp A} P\ a\right)
+$$
+\end{frame}
+\begin{frame}
+\frametitle{Categories}
+\framesubtitle{Definition}
+Data:
+\begin{align*}
+  \Object   & \tp \Type \\
+  \Arrow    & \tp \Object \to \Object \to \Type \\
+  \identity & \tp \Arrow\ A\ A \\
+  \lll      & \tp \Arrow\ B\ C \to \Arrow\ A\ B \to \Arrow\ A\ C
+\end{align*}
+%
+Laws:
+%
+$$
+h \lll (g \lll f) ≡ (h \lll g) \lll f
+$$
+$$
+\identity \lll f ≡ f \x
+f \lll \identity ≡ f
+$$
+\pause
+1-categories:
+$$
+\isSet\ (\Arrow\ A\ B)
+$$
+\pause
+Univalent categories:
+$$
+\isEquiv\ (A \equiv B)\ (A \approxeq B)\ \idToIso
+$$
+\end{frame}
+\begin{frame}
+\frametitle{Categories}
+\framesubtitle{Univalence}
+\begin{align*}
+\var{IsIdentity} & \defeq
+\prod_{A\ B \tp \Object} \prod_{f \tp \Arrow\ A\ B} \phi\ f
+%% \\
+%%   & \mathrel{\ } \identity \lll f \equiv f \x f \lll \identity \equiv f
+\end{align*}
+where
+$$
+\phi\ f \defeq \identity \lll f \equiv f \x f \lll \identity \equiv f
+$$
+Let $\approxeq$ denote ismorphism of objects. We can then construct
+the identity isomorphism in any category:
+$$
+\identity , \identity , \var{isIdentity} \tp A \approxeq A
+$$
+Likewise since paths are substitutive we can promote a path to an isomorphism:
+$$
+\idToIso \tp A ≡ B → A ≊ B
+$$
+For a category to be univalent we require this to be an equivalence: 
+\end{frame}
+\end{document}
