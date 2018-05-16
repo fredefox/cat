@@ -1,6 +1,7 @@
 {-# OPTIONS --allow-unsolved-metas --cubical --caching #-}
 module Cat.Categories.Fun where
 
+
 open import Cat.Prelude
 open import Cat.Equivalence
 open import Cat.Category
@@ -52,14 +53,14 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
           lem : coe (pp {C}) 𝔻.identity ≡ f→g
           lem = trans (𝔻.9-1-9-right {b = Functor.omap F C} 𝔻.identity p*) 𝔻.rightIdentity
 
-      idToNatTrans : NaturalTransformation F G
-      idToNatTrans = (λ C → coe pp 𝔻.identity) , λ f → begin
-        coe pp 𝔻.identity 𝔻.<<< F.fmap f ≡⟨ cong (𝔻._<<< F.fmap f) lem ⟩
-        -- Just need to show that f→g is a natural transformation
-        -- I know that it has an inverse; g→f
-        f→g 𝔻.<<< F.fmap f ≡⟨ {!lem!} ⟩
-        G.fmap f 𝔻.<<< f→g ≡⟨ cong (G.fmap f 𝔻.<<<_) (sym lem) ⟩
-        G.fmap f 𝔻.<<< coe pp 𝔻.identity ∎
+      -- idToNatTrans : NaturalTransformation F G
+      -- idToNatTrans = (λ C → coe pp 𝔻.identity) , λ f → begin
+      --   coe pp 𝔻.identity 𝔻.<<< F.fmap f ≡⟨ cong (𝔻._<<< F.fmap f) lem ⟩
+      --   -- Just need to show that f→g is a natural transformation
+      --   -- I know that it has an inverse; g→f
+      --   f→g 𝔻.<<< F.fmap f ≡⟨ {!lem!} ⟩
+      --   G.fmap f 𝔻.<<< f→g ≡⟨ cong (G.fmap f 𝔻.<<<_) (sym lem) ⟩
+      --   G.fmap f 𝔻.<<< coe pp 𝔻.identity ∎
 
     module _ {A B : Functor ℂ 𝔻} where
       module A = Functor A
@@ -92,70 +93,70 @@ module Fun {ℓc ℓc' ℓd ℓd' : Level} (ℂ : Category ℓc ℓc') (𝔻 : C
         U : (F : ℂ.Object → 𝔻.Object) → Set _
         U F = {A B : ℂ.Object} → ℂ [ A , B ] → 𝔻 [ F A , F B ]
 
-        module _
-          (omap : ℂ.Object → 𝔻.Object)
-          (p    : A.omap ≡ omap)
-          where
-          D : Set _
-          D = ( fmap : U omap)
-            → ( let
-                 raw-B : RawFunctor ℂ 𝔻
-                 raw-B = record { omap = omap ; fmap = fmap }
-              )
-            → (isF-B' : IsFunctor ℂ 𝔻 raw-B)
-            → ( let
-                B' : Functor ℂ 𝔻
-                B' = record { raw = raw-B ; isFunctor = isF-B' }
-              )
-            → (iso' : A ≊ B') → PathP (λ i → U (p i)) A.fmap fmap
-          -- D : Set _
-          -- D = PathP (λ i → U (p i)) A.fmap fmap
-          -- eeq : (λ f → A.fmap f) ≡ fmap
-          -- eeq = funExtImp (λ A → funExtImp (λ B → funExt (λ f → isofmap {A} {B} f)))
-          --   where
-          --   module _ {X : ℂ.Object} {Y : ℂ.Object} (f : ℂ [ X , Y ]) where
-          --     isofmap : A.fmap f ≡ fmap f
-          --     isofmap = {!ap!}
-        d : D A.omap refl
-        d = res
-          where
-          module _
-            ( fmap : U A.omap )
-            ( let
-              raw-B : RawFunctor ℂ 𝔻
-              raw-B = record { omap = A.omap ; fmap = fmap }
-            )
-            ( isF-B' : IsFunctor ℂ 𝔻 raw-B )
-            ( let
-              B' : Functor ℂ 𝔻
-              B' = record { raw = raw-B ; isFunctor = isF-B' }
-            )
-            ( iso' : A ≊ B' )
-            where
-            module _ {X Y : ℂ.Object} (f : ℂ [ X , Y ]) where
-              step : {!!} 𝔻.≊ {!!}
-              step = {!!}
-              resres : A.fmap {X} {Y} f ≡ fmap {X} {Y} f
-              resres = {!!}
-            res : PathP (λ i → U A.omap) A.fmap fmap
-            res i {X} {Y} f = resres f i
+      --   module _
+      --     (omap : ℂ.Object → 𝔻.Object)
+      --     (p    : A.omap ≡ omap)
+      --     where
+      --     D : Set _
+      --     D = ( fmap : U omap)
+      --       → ( let
+      --            raw-B : RawFunctor ℂ 𝔻
+      --            raw-B = record { omap = omap ; fmap = fmap }
+      --         )
+      --       → (isF-B' : IsFunctor ℂ 𝔻 raw-B)
+      --       → ( let
+      --           B' : Functor ℂ 𝔻
+      --           B' = record { raw = raw-B ; isFunctor = isF-B' }
+      --         )
+      --       → (iso' : A ≊ B') → PathP (λ i → U (p i)) A.fmap fmap
+      --     -- D : Set _
+      --     -- D = PathP (λ i → U (p i)) A.fmap fmap
+      --     -- eeq : (λ f → A.fmap f) ≡ fmap
+      --     -- eeq = funExtImp (λ A → funExtImp (λ B → funExt (λ f → isofmap {A} {B} f)))
+      --     --   where
+      --     --   module _ {X : ℂ.Object} {Y : ℂ.Object} (f : ℂ [ X , Y ]) where
+      --     --     isofmap : A.fmap f ≡ fmap f
+      --     --     isofmap = {!ap!}
+      --   d : D A.omap refl
+      --   d = res
+      --     where
+      --     module _
+      --       ( fmap : U A.omap )
+      --       ( let
+      --         raw-B : RawFunctor ℂ 𝔻
+      --         raw-B = record { omap = A.omap ; fmap = fmap }
+      --       )
+      --       ( isF-B' : IsFunctor ℂ 𝔻 raw-B )
+      --       ( let
+      --         B' : Functor ℂ 𝔻
+      --         B' = record { raw = raw-B ; isFunctor = isF-B' }
+      --       )
+      --       ( iso' : A ≊ B' )
+      --       where
+      --       module _ {X Y : ℂ.Object} (f : ℂ [ X , Y ]) where
+      --         step : {!!} 𝔻.≊ {!!}
+      --         step = {!!}
+      --         resres : A.fmap {X} {Y} f ≡ fmap {X} {Y} f
+      --         resres = {!!}
+      --       res : PathP (λ i → U A.omap) A.fmap fmap
+      --       res i {X} {Y} f = resres f i
 
-        fmapEq : PathP (λ i → U (omapEq i)) A.fmap B.fmap
-        fmapEq = pathJ D d B.omap omapEq B.fmap B.isFunctor iso
+      --   fmapEq : PathP (λ i → U (omapEq i)) A.fmap B.fmap
+      --   fmapEq = pathJ D d B.omap omapEq B.fmap B.isFunctor iso
 
-        rawEq : A.raw ≡ B.raw
-        rawEq i = record { omap = omapEq i ; fmap = fmapEq i }
+      --   rawEq : A.raw ≡ B.raw
+      --   rawEq i = record { omap = omapEq i ; fmap = fmapEq i }
 
-      private
-        f : (A ≡ B) → (A ≊ B)
-        f p = idToNatTrans p , idToNatTrans (sym p) , NaturalTransformation≡ A A (funExt (λ C → {!!})) , {!!}
-        g : (A ≊ B) → (A ≡ B)
-        g = Functor≡ ∘ rawEq
-        inv : AreInverses f g
-        inv = {!funExt λ p → ?!} , {!!}
-
-      iso : (A ≡ B) ≅ (A ≊ B)
-      iso = f , g , inv
+      -- private
+      --   f : (A ≡ B) → (A ≊ B)
+      --   f p = idToNatTrans p , idToNatTrans (sym p) , NaturalTransformation≡ A A (funExt (λ C → {!!})) , {!!}
+      --   g : (A ≊ B) → (A ≡ B)
+      --   g = Functor≡ ∘ rawEq
+      --   inv : AreInverses f g
+      --   inv = {!funExt λ p → ?!} , {!!}
+      postulate
+        iso : (A ≡ B) ≅ (A ≊ B)
+--      iso = f , g , inv
 
       univ : (A ≡ B) ≃ (A ≊ B)
       univ = fromIsomorphism _ _ iso

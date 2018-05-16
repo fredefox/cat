@@ -122,6 +122,7 @@ record IsMonad (raw : RawMonad) : Set ℓ where
       R.fmap a <<< R.fmap b <<< R.fmap c  ∎
 
 record Monad : Set ℓ where
+  no-eta-equality
   field
     raw     : RawMonad
     isMonad : IsMonad raw

@@ -1,6 +1,7 @@
 {-# OPTIONS --cubical --caching #-}
 module Cat.Category.Product where
 
+
 open import Cat.Prelude as P hiding (_×_ ; fst ; snd)
 open import Cat.Equivalence
 
@@ -11,7 +12,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
   module _ (A B : Object) where
     record RawProduct : Set (ℓa ⊔ ℓb) where
-      no-eta-equality
+    --  no-eta-equality
       field
         object : Object
         fst  : ℂ [ object , A ]
