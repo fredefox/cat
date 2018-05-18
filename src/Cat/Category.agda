@@ -55,14 +55,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   -- infixl 8 _>>>_
   infixl 10 _<<<_ _>>>_
 
-  -- | Operations on data
-
-  domain : {a b : Object} → Arrow a b → Object
-  domain {a} _ = a
-
-  codomain : {a b : Object} → Arrow a b → Object
-  codomain {b = b} _ = b
-
+  -- | Reverse arrow composition
   _>>>_ : {A B C : Object} → (Arrow A B) → (Arrow B C) → Arrow A C
   f >>> g = g <<< f
 

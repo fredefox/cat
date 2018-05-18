@@ -11,8 +11,8 @@ normal definition of judgmental equality is an inductive data type. Cubical Agda
 discards this type in favor of a new primitives that has certain computational
 properties exclusive to it.
 
-Exceprts of the source code relevant to this section can be found in appendix
-\S\ref{sec:app-cubical}.
+The source code can be browsed online and is linked in the beginning
+of \S\ref{ch:implementation}.
 
 \subsection{The equality type}
 The usual notion of judgmental equality says that given a type $A \tp \MCU$ and
@@ -137,11 +137,13 @@ With this we can now prove the desired equality $f \equiv g$ from section
 %
 \begin{align*}
   p & \tp f \equiv g \\
-  p & \defeq \funExt\ \lambda n \to \refl
+  p & \defeq \funExt\ \phi
 \end{align*}
 %
-Paths have some other important properties, but they are not the focus of
-this thesis. \TODO{Refer the reader somewhere for more info.}
+Here $\phi \tp \prod_{n \tp \bN} \var{zeroLeft}\ n \equiv
+\var{zeroRight} n$. Paths have some other important properties, but
+they are not the focus of this thesis. \TODO{Refer the reader
+  somewhere for more info.}
 %
 \section{Homotopy levels}
 In ITT all equality proofs are identical (in a closed context). This means that,
@@ -273,7 +275,7 @@ $$
 We have the function:
 %
 \begin{equation}
-\pathJ\ D\ d \tp \prod_{b \tp A} \prod_{p \tp a ≡ b} D\ a\ p
+\pathJ\ D\ d \tp \prod_{b \tp A} \prod_{p \tp a ≡ b} D\ b\ p
 \end{equation}
 %
 A simple application of $\pathJ$ is for proving that $\var{sym}$ is an

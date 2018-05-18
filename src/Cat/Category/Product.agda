@@ -1,7 +1,6 @@
 {-# OPTIONS --cubical --caching #-}
 module Cat.Category.Product where
 
-
 open import Cat.Prelude as P hiding (_×_ ; fst ; snd)
 open import Cat.Equivalence
 
