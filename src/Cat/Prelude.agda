@@ -14,7 +14,7 @@ open import Function using (_∘_ ; _∘′_ ; _$_ ; case_of_ ; flip) public
 idFun : ∀ {a} (A : Set a) → A → A
 idFun A a = a
 
-open import Cubical public
+open import Cubical public hiding (funExt)
 -- FIXME rename `gradLemma` to `fromIsomorphism` - perhaps just use wrapper
 -- module.
 open import Cubical.GradLemma
@@ -140,3 +140,8 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb} where
   open TLevel
   grpdSig : isGrpd A → (∀ a → isGrpd (B a)) → isGrpd (Σ A B)
   grpdSig = sigPresNType {n = S (S (S ⟨-2⟩))}
+
+module _ {ℓa ℓb} {A : Set ℓa} {B : A → Set ℓb} where
+  abstract
+    funExt : {f g : (x : A) → B x} → ((x : A) → f x ≡ g x) → f ≡ g
+    funExt p i x = p x i
