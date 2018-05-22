@@ -1,4 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
 -- | Custom prelude for this module
 module Cat.Prelude where
 
@@ -34,7 +33,7 @@ open import Cubical.NType.Properties
 propIsContr : {ℓ : Level} → {A : Set ℓ} → isProp (isContr A)
 propIsContr = propHasLevel ⟨-2⟩
 
-open import Cubical.Sigma using (setSig ; sigPresSet ; sigPresNType) public
+open import Cubical.Sigma using (setSig ; sigPresSet ; sigPresNType ; grpdSig) public
 
 module _ (ℓ : Level) where
   -- FIXME Ask if we can push upstream.
@@ -131,3 +130,8 @@ module _ {ℓ : Level} {A : Set ℓ} where
   setGrpd = ntypeCumulative
     {suc (suc zero)} {suc (suc (suc zero))}
     (≤′-step ≤′-refl)
+
+  propGrpd : isProp A → isGrpd A
+  propGrpd = ntypeCumulative
+    {suc zero} {suc (suc (suc zero))}
+    (≤′-step (≤′-step ≤′-refl))
