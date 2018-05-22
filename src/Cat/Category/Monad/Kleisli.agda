@@ -1,7 +1,7 @@
 {---
 The Kleisli formulation of monads
  ---}
-{-# OPTIONS --cubical #-}
+{-# OPTIONS --cubical --allow-unsolved-metas #-}
 open import Agda.Primitive
 
 open import Cat.Prelude
@@ -265,3 +265,34 @@ module _ {m n : Monad} (eq : Monad.raw m ≡ Monad.raw n) where
   Monad≡ : m ≡ n
   Monad.raw     (Monad≡ i) = eq i
   Monad.isMonad (Monad≡ i) = eqIsMonad i
+
+module _ where
+  private
+    module _ (x y : RawMonad) (p q : x ≡ y) (a b : p ≡ q) where
+      eq0-helper : isGrpd (Object → Object)
+      eq0-helper = grpdPi (λ a → ℂ.groupoidObject)
+
+      eq0 : cong (cong RawMonad.omap) a ≡ cong (cong RawMonad.omap) b
+      eq0 = eq0-helper
+        (RawMonad.omap x)             (RawMonad.omap y)
+        (cong RawMonad.omap p)        (cong RawMonad.omap q)
+        (cong (cong RawMonad.omap) a) (cong (cong RawMonad.omap) b)
+
+      eq1-helper : (omap : Object → Object) → isGrpd ({X : Object}   → ℂ [ X , omap X ])
+      eq1-helper f = grpdPiImpl (setGrpd ℂ.arrowsAreSets)
+
+      postulate
+        eq1 : PathP (λ i → PathP
+          (λ j →
+          PathP (λ k → {X : Object} → ℂ [ X , eq0 i j k X ])
+          (RawMonad.pure x) (RawMonad.pure y))
+          (λ i → RawMonad.pure (p i)) (λ i → RawMonad.pure (q i)))
+          (cong-d (cong-d RawMonad.pure) a) (cong-d (cong-d RawMonad.pure) b)
+
+    grpdRaw : isGrpd RawMonad
+    RawMonad.omap (grpdRaw x y p q a b x₁ x₂ x₃) = eq0 x y p q a b x₁ x₂ x₃
+    RawMonad.pure (grpdRaw x y p q a b x₁ x₂ x₃) = {!eq1 x y p q a b x₁ x₂ x₃!}
+    RawMonad.bind (grpdRaw x y p q a b x₁ x₂ x₃) = {!!}
+
+  -- grpdKleisli : isGrpd Monad
+  -- grpdKleisli = {!!}

@@ -107,13 +107,13 @@ module _ {ℓ : Level} {A : Set ℓ} where
   ntypeCumulative {m}         ≤′-refl      lvl = lvl
   ntypeCumulative {n} {suc m} (≤′-step le) lvl = HasLevel+1 ⟨ m ⟩₋₂ (ntypeCumulative le lvl)
 
-  grpdPi : {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb}
+  grpdPi : {ℓb : Level} {B : A → Set ℓb}
     → ((a : A) → isGrpd (B a)) → isGrpd ((a : A) → (B a))
   grpdPi = piPresNType (S (S (S ⟨-2⟩)))
 
-  grpdPiImpl : {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb}
+  grpdPiImpl : {ℓb : Level} {B : A → Set ℓb}
     → ({a : A} → isGrpd (B a)) → isGrpd ({a : A} → (B a))
-  grpdPiImpl {A = A} {B} g = equivPreservesNType {A = Expl} {B = Impl} {n = one} e (grpdPi (λ a → g))
+  grpdPiImpl {B = B} g = equivPreservesNType {A = Expl} {B = Impl} {n = one} e (grpdPi (λ a → g))
     where
     one = (S (S (S ⟨-2⟩)))
     t : ({a : A} → HasLevel one (B a))
