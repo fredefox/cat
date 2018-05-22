@@ -33,7 +33,7 @@ open import Cubical.NType.Properties
 propIsContr : {ℓ : Level} → {A : Set ℓ} → isProp (isContr A)
 propIsContr = propHasLevel ⟨-2⟩
 
-open import Cubical.Sigma using (setSig ; sigPresSet ; sigPresNType ; grpdSig) public
+open import Cubical.Sigma using (setSig ; sigPresSet ; sigPresNType) public
 
 module _ (ℓ : Level) where
   -- FIXME Ask if we can push upstream.
@@ -135,3 +135,8 @@ module _ {ℓ : Level} {A : Set ℓ} where
   propGrpd = ntypeCumulative
     {suc zero} {suc (suc (suc zero))}
     (≤′-step (≤′-step ≤′-refl))
+
+module _ {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb} where
+  open TLevel
+  grpdSig : isGrpd A → (∀ a → isGrpd (B a)) → isGrpd (Σ A B)
+  grpdSig = sigPresNType {n = S (S (S ⟨-2⟩))}
