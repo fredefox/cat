@@ -231,3 +231,10 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
 
   Monoidal≡Kleisli : Monoidal.Monad ≡ Kleisli.Monad
   Monoidal≡Kleisli = isoToPath Monoidal≊Kleisli
+
+  grpdKleisli : isGrpd Kleisli.Monad
+  grpdKleisli = Kleisli.grpdMonad
+
+  grpdMonoidal : isGrpd Monoidal.Monad
+  grpdMonoidal = subst {P = isGrpd}
+    (sym Monoidal≡Kleisli) grpdKleisli
