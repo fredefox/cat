@@ -9,8 +9,9 @@
 %% Alternatively:
 %% \newcommand{\defeq}{≔}
 \newcommand{\bN}{\mathbb{N}}
-\newcommand{\bC}{\mathbb{C}}
-\newcommand{\bX}{\mathbb{X}}
+\newcommand{\bC}{ℂ}
+\newcommand{\bD}{𝔻}
+\newcommand{\bX}{𝕏}
 % \newcommand{\to}{\rightarrow}
 %% \newcommand{\mto}{\mapsto}
 \newcommand{\mto}{\rightarrow}
@@ -99,6 +100,10 @@
 \newcommand\Endo[1]{\varindex{Endo}\ #1}
 \newcommand\EndoR{\functor{\mathcal{R}}}
 \newcommand\omapR{\mathcal{R}}
+\newcommand\omapF{\mathcal{F}}
+\newcommand\omapG{\mathcal{G}}
+\newcommand\FunF{\functor{\omapF}}
+\newcommand\FunG{\functor{\omapG}}
 \newcommand\funExt{\varindex{funExt}}
 \newcommand{\suc}[1]{\varindex{suc}\ #1}
 \newcommand{\trans}{\varindex{trans}}
@@ -117,3 +122,5 @@
   }
 \newcommand{\gitlink}{\hrefsymb{\docbasepath}{\texttt{\docbasepath}}}
 \newcommand{\doclink}{\hrefsymb{\sourcebasepath}{\texttt{\sourcebasepath}}}
+\newcommand{\clll}{\mathrel{\bC.\mathord{\lll}}}
+\newcommand{\dlll}{\mathrel{\bD.\mathord{\lll}}}

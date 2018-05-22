@@ -63,7 +63,8 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         f ∎
       Kleisli.IsMonad.isDistributive toKleisliIsMonad f g = begin
         bind g >>> bind f ≡⟨⟩
-        (join <<< fmap g) >>> (join <<< fmap f) ≡⟨ isDistributive f g ⟩
+        (join <<< fmap f) <<< (join <<< fmap g) ≡⟨ isDistributive f g ⟩
+        join <<< fmap (join <<< fmap f <<< g) ≡⟨⟩
         bind (g >=> f) ∎
       -- Kleisli.IsMonad.isDistributive toKleisliIsMonad = isDistributive
 

@@ -1261,6 +1261,55 @@ That in any category:
 \prod_{A\ B \tp \Object} \isProp\ (\var{Product}\ \bC\ A\ B)
 \end{align}
 %
+\section{Functors and natural transformations}
+For the sake of completeness I will mention the definition of functors
+and natural transformations. Please refer to the implementation for
+the full details.
+%
+\subsection{Functors}
+Given two categories $\bC$ and $\bD$ a functor consists of the
+following data:
+%
+\begin{align*}
+      \omapF & \tp ℂ.\Object → 𝔻.\Object \\
+      \fmap  & \tp ℂ.\Arrow\ A\ B → 𝔻.\Arrow\ (\omapF\ A)\ (\omapF\ B)
+\end{align*}
+%
+And the following laws:
+\begin{align*}
+\fmap\ ℂ.\identity & ≡ 𝔻.identity \\
+\fmap\ (g \clll f) & ≡ \fmap\ g \dlll \fmap\ f
+\end{align*}
+%
+The implementation can be found here:
+%
+\begin{center}
+\sourcelink{Cat.Category.Functor}
+\end{center}
+\subsection{Natural Transformation}
+Given two functors between categories $\bC$ and $\bD$. Name them
+$\FunF$ and $\FunG$. A natural transformation is a family of arrows:
+%
+\begin{align*}
+\prod_{C \tp ℂ.\Object} \bD.\Arrow\ (\omapF\ C)\ (\omapG\ C)
+\end{align*}
+%
+This family of arrows can be seen as the data. If $\theta$ is a
+natural transformation $\theta\ C$ will be called the component (of
+$\theta$) at $C$. The laws of this family of morphism is the
+naturality condition:
+%
+\begin{align*}
+\prod_{f \tp ℂ.\Arrow\ A\ B}
+       (θ\ B) \dlll (\FunF.\fmap\ f) ≡ (\FunG.\fmap\ f) \dlll (θ\ A)
+\end{align*}
+%
+The implementation can be found here:
+%
+\begin{center}
+\sourcelink{Cat.Category.NaturalTransformation}
+\end{center}
+
 \section{Monads}
 \label{sec:monads}
 In this section I present two formulations of monads. The two representations
@@ -1269,8 +1318,14 @@ simply monoidal monads and Kleisli monads for short. We then show that the two
 formulations are equivalent, which due to univalence gives us a path between the
 two types.
 
-Let a category $\bC$ be given. In the remainder of this sections all objects and
-arrows will implicitly refer to objects and arrows in this category.
+Let a category $\bC$ be given. In the remainder of this sections all
+objects and arrows will implicitly refer to objects and arrows in this
+category. I will also use the notation $\EndoR$ to refer to an
+endofunctor on this category. Its map on objects will be denoted
+$\omapR$ and its map on arrows will be denoted $\fmap$. Likewise I
+will use the notation $\pureNT$ to refer to a natural transformation
+and its component at a given (implicit) object will be denoted
+$\pure$.
 %
 \subsection{Monoidal formulation}
 The monoidal formulation of monads consists of the following data:
@@ -1278,7 +1333,7 @@ The monoidal formulation of monads consists of the following data:
 \begin{align}
 \label{eq:monad-monoidal-data}
 \begin{split}
-    \EndoR      & \tp \Endo ℂ \\
+    \EndoR      & \tp \Functor\ ℂ\ \bC \\
     \pureNT  & \tp \NT{\EndoR^0}{\EndoR} \\
     \joinNT  & \tp \NT{\EndoR^2}{\EndoR}
 \end{split}
@@ -1321,8 +1376,15 @@ The Kleisli-formulation consists of the following data:
 \end{split}
 \end{align}
 %
-The objects $X$ and $Y$ are implicitly universally quantified.
-
+The objects $X$ and $Y$ are implicitly universally quantified. With this data we can construct the \nomenindex{Kleisli arrow}:
+%
+\begin{align*}
+\fish     & \tp \Arrow\ A\ (\omapR\ B)
+            \to \Arrow\ B\ (\omapR\ C)
+            \to \Arrow\ A\ (\omapR\ C) \\
+f \fish g & \defeq f \rrr (\bind\ g)
+\end{align*}
+%
 It is interesting to note here that this formulation does not talk about natural
 transformations or other such constructs from category theory. All we have here
 is a regular maps on objects and a pair of arrows.
@@ -1339,11 +1401,10 @@ This data must satisfy:
 \end{align}
 \newcommand\kleislilaws{\ref{eq:monad-kleisli-laws-0}, \ref{eq:monad-kleisli-laws-1} and \ref{eq:monad-kleisli-laws-2}}%
 %
-Here likewise the arrows $f \tp \Arrow\ X\ (\EndoR\ Y)$ and $g \tp
-\Arrow\ Y\ (\EndoR\ Z)$ are universally quantified (as well as the objects they
-range over). $\fish$ is the Kleisli-arrow which is defined as $f \fish g \defeq
-f \rrr (\bind\ g)$ . (\TODO{Better way to typeset $\fish$?})
-
+Here likewise the arrows $f \tp \Arrow\ X\ (\omapR\ Y)$ and $g \tp
+\Arrow\ Y\ (\omapR\ Z)$ are universally quantified as well as the
+objects they range over.
+%
 \subsection{Equivalence of formulations}
 %
 The notation I have chosen here in the report
@@ -1376,27 +1437,27 @@ show that $(\omapR, \pure, \bind)$ is indeed a monad in the Kleisli
 form. In the second part we will show the other direction.
 
 \subsubsection{Monoidal to Kleisli}
-Let $(\EndoR, \pure, \join)$ be given as in \ref{eq:monad-monoidal-data}
+Let $(\EndoR, \pureNT, \joinNT)$ be given as in \ref{eq:monad-monoidal-data}
 satisfying the laws \monoidallaws. For the data of the Kleisli
 formulation we pick:
 %
 \begin{align}
 \begin{split}
-    \EndoR   & \defeq \EndoRX \\
-    \pure    & \defeq \pureX \\
-    \bind\ f & \tp \joinX \lll \fmapX\ f
+    \omapR   & \defeq \omapR \\
+    \pure    & \defeq \pure  \\
+    \bind\ f & \defeq \join \lll \fmap\ f
 \end{split}
 \end{align}
 %
-$\EndoRX$ is the object map of the endo-functor $\EndoR$, $\pureX$ and
-$\joinX$ are the arrows from the natural transformations $\pure$ and
-$\join$ respectively. The term $\fmapX$ is the arrow map of the
-endo-functor $\EndoR$. It now just remains to verify the laws
+Again $\omapR$ is the object map of the endo-functor $\EndoR$, $\pure$
+and $\join$ are the arrows from the natural transformations $\pureNT$
+and $\joinNT$ respectively and $\fmap$ is the map on arrows of the
+endofunctor $\EndoR$. It now just remains to verify the laws
 \kleislilaws. For \ref{eq:monad-kleisli-laws-0}:
 %
 \begin{align*}
-\bind\ \pure & ≡
-\join \lll (\fmap\ \pure) && \text{By definition} \\
+\bind\ \pure & =
+\join \lll (\fmap\ \pure) \\
 & ≡ \identity && \text{By \ref{eq:monad-monoidal-laws-2}}
 \end{align*}
 %
@@ -1404,57 +1465,89 @@ For \ref{eq:monad-kleisli-laws-1}:
 %
 \begin{align*}
 \pure \fish f
-& \equiv %%%
-\pure \ggg \bind\ f && \text{By definition} \\ & ≡
-\bind\ f \lll \pure && \text{By definition} \\ & ≡
-\joinX \lll \fmapX\ f \lll \pureX   && \text{By definition} \\ & ≡
-\joinX \lll \pureX \lll f          && \text{$\pure$ is a natural transformation} \\ & ≡
+& = %%%
+\pure \ggg \bind\ f              \\ & =
+\bind\ f \lll \pure              \\ & =
+\join \lll \fmap\ f \lll \pure   \\ & ≡
+\join \lll \pure \lll f          && \text{$\pure$ is a natural transformation} \\ & ≡
 \identity \lll f                 && \text{By \ref{eq:monad-monoidal-laws-1}} \\ & ≡
 f                                && \text{Left identity}
 \end{align*}
 %
 For \ref{eq:monad-kleisli-laws-2}:
 \begin{align*}
-\bind\ g \rrr \bind\ f & ≡
+\bind\ g \rrr \bind\ f & =
 \bind\ f \lll \bind\ g
- \\ & ≡
+ \\ & =
 %% %%%%
-\joinX \lll \fmapX\ g \lll \joinX \lll \fmapX\ f
-&& \text{\dots} \\ & ≡
-\joinX \lll \joinX \lll \fmapX^2\ g \lll \fmapX\ f
+\join \lll \fmap\ g \lll \join \lll \fmap\ f
+\\ & ≡
+\join \lll \join \lll (\fmap \comp \fmap)\ f \lll \fmap\ g
 && \text{$\join$ is a natural transformation} \\ & ≡
-\joinX\  \lll \fmapX\ \joinX \lll \fmapX^2\ g \lll \fmapX\ f
+\join  \lll \fmap\ \join \lll (\fmap \comp \fmap)\ f \lll \fmap\ g
 && \text{By \ref{eq:monad-monoidal-laws-0}} \\ & ≡
-\joinX\  \lll \fmapX\  \joinX\  \lll \fmapX\  (\fmapX\  g) \lll \fmapX\  f
+\join  \lll \fmap\  \join \lll \fmap\ (\fmap\ f) \lll \fmap\ g
 && \text{} \\ & ≡
-\joinX \lll \fmapX\  (\joinX \lll \fmapX\  g \lll f)
-&& \text{Distributive law for functors} \\ & \equiv
+\join \lll \fmap\  (\join \lll \fmap\ f \lll g)
+&& \text{Distributive law for functors} \\ & =
+\join \lll \fmap\ (\join \lll \fmap\ f \lll g) \\ & =
 %%%%
+\bind\ (\bind\ f \lll g) \\ & =
+\bind\ (g \rrr \bind\ f) \\ & =
 \bind\ (g \fish f)
 \end{align*}
+%
+The construction can be found in the module:
+\begin{center}
+  \sourcelink{Cat.Category.Monad.Monoidal}
+\end{center}
+%
 \subsubsection{Kleisli to Monoidal}
-For the other direction we are given $(\EndoR, \pure, \bind)$ as in
+For the other direction we are given $(\omapR, \pure, \bind)$ as in
 \ref{eq:monad-kleisli-data} satisfying the laws \kleislilaws. For the data of
 the monoidal formulation we pick:
 %
 \begin{align}
 \begin{split}
-    \EndoR & \defeq \EndoRX \\
-    \pure  & \defeq \pureX \\
-    \join  & \defeq \bind\ \identity
+    \EndoR & \defeq (\omapR, \bind\ (\pure \lll f)) \\
+    \pure   & \defeq \pure \\
+    \join   & \defeq \bind\ \identity
 \end{split}
 \end{align}
 %
-Where $\EndoRX \defeq (\bind\ (\pure \lll f), \EndoR)$ and $\pureX \defeq
-\bind\ \identity$. We must now show the laws \monoidallaws, but we must also
-verify that our choice of $\EndoRX$ actually is a functor. I will ommit this
-here. In stead we shall see how these two mappings are indeed inverses.
-
+We must now not only show the monad laws given for the monoidal
+formulation (\monoidallaws), we must also verify that $\EndoR$ is a
+functor and that $\pure$ and $\join$ are natural transformations. I
+will ommit this here. In stead we shall see how these two mappings are
+indeed inverses. The full construction can be found in the module:
+\begin{center}
+\mbox{\sourcelink{Cat.Category.Monad.Kleisli}}
+\end{center}
+%
 \subsubsection{Equivalence}
-To prove that the two formulations are equivalent we must demonstrate that the
-two mappings sketched above are indeed inverses of each other. If we name the
-first mapping $\toKleisli$ and it's proposed inverse $\toMonoidal$
-then we must show:
+To prove that the two formulations are equivalent we must demonstrate
+that the two mappings sketched above are indeed inverses of each
+other. To recap, these maps are:
+%
+\begin{align*}
+  \toKleisli & \tp \var{Kleisli} \to \var{Monoidal} \\
+  \toKleisli & \defeq \lambda\ (\omapR, \pure, \bind)
+    \to (\EndoR, \pure, \bind\ \identity)
+\end{align*}
+%
+Where $\EndoR \defeq (\omapR, \bind\ (\pure \lll f))$. The proof that
+this is indeed a functor is left implicit as well as the monad laws.
+Likewise the proof that $\pure$ and $\bind\ \identity$ are natural
+transformations are left implicit. The inverse map will be:
+%
+\begin{align*}
+  \toMonoidal & \tp \var{Monoidal} \to \var{Kleisli} \\
+  \toMonoidal & \defeq \lambda\ (\EndoR, \pureNT, \joinNT)
+    \to (\omapR, \pure, \bind)
+\end{align*}
+%
+Where $\bind\ f \defeq \join \lll \fmap\ f$. Again the monad laws are
+left implicit. Now we must show:
 %
 \begin{align}
   \label{eq:monad-forwards}
@@ -1463,30 +1556,37 @@ then we must show:
   \toMonoidal \comp \toKleisli & ≡ \identity
 \end{align}
 %
-For \ref{eq:monad-forwards} let $(\EndoR, \pure, \join)$ be a monad in the
-monoidal form. In my formulation the proof that being-a-monad is a proposition
-can be found. With this result in place we get an equality principle for
-kleisli-monads that say that to equate two such monads it suffices to equate
-their data-part. So it suffices to equate the data-parts of the
-\ref{eq:monad-forwards}. Such a proof is a triple equation the three projections
-of \ref{eq:monad-kleisli-data}. The first two hold definitionally -- essentially
-one just wraps and unwraps the morphism in a functor. For the last equation a
-little more work is required:
+For \ref{eq:monad-forwards} let $(\omapR, \pure, \bind)$ be a monad in
+the Kleisli form. Since being-a-monad is a proposition\footnote{The
+  proof can be found in the implementation.} we get an
+equality-principle for kleisli-monads that say that to equate two such
+monads it suffices to equate their data-part. So it suffices to equate
+the data-parts of the \ref{eq:monad-forwards}. Such a proof is a
+triple equating the three projections of \ref{eq:monad-kleisli-data}.
+The first two hold definitionally -- essentially one just wraps and
+unwraps the morphism in a functor. For the last equation a little more
+work is required:
 %
 \begin{align*}
-\join \lll \fmap\ f & ≡
-\fmap\ f \rrr \join \\ & ≡
+\join \lll \fmap\ f & =
+\fmap\ f \rrr \join \\ & =
 \bind\ (f \rrr \pure) \rrr \bind\ \identity
   && \text{By definition of $\fmap$ and $\join$} \\ & ≡
 \bind\ (f \rrr \pure \fish \identity)
   && \text{By \ref{eq:monad-kleisli-laws-2}} \\ & ≡
 \bind\ (f \rrr \identity)
-  && \text{By \ref{eq:monad-kleisli-laws-1}} \\ & ≡
+  && \text{By \ref{eq:monad-kleisli-laws-1}} \\ & =
 \bind\ f
 \end{align*}
 %
-For the other direction we can likewise verify that the maps $\EndoR$, $\bind$,
-$\join$, and $\fmap$ are equal. The equality principle for functors gives us
-that this is enough to show that the the functor $\EndoR$ we construct is
-identical. Similarly for the natural transformations we have that the naturality
-condition is a proposition so the paths between the maps are sufficient.
+For the other direction (\ref{eq:monad-backwards}) we are given a
+monad in the monoidal form; $(\EndoR, \pureNT, \joinNT)$. The various
+equality-principles again give us that it is sufficient to equate the
+data-part of the above. That is, we only need to verify that the
+following pieces of data: $\omapR$, $\fmap$, $\pure$ and $\join$ get
+mapped correctly. To see the full details check the implementation in
+the module:
+%
+\begin{center}
+\sourcelink{Cat.Category.Monad}
+\end{center}
