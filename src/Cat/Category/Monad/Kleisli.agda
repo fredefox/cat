@@ -5,6 +5,7 @@ The Kleisli formulation of monads
 open import Agda.Primitive
 
 open import Cat.Prelude
+open import Cat.Equivalence
 
 open import Cat.Category
 open import Cat.Category.Functor as F
@@ -328,13 +329,15 @@ module _ where
       module M = Monad m
 
     e : Monad' ≃ Monad
-    e = toMonad , gradLemma toMonad fromMonad
+    e = fromIsomorphism _ _ (toMonad , fromMonad , (funExt λ _ → refl) , funExt eta-refl)
+      where
       -- Monads don't have eta-equality
-      (λ x → λ
-        { i .Monad.raw → Monad.raw x
-        ; i .Monad.isMonad → Monad.isMonad x}
-      )
-      λ _ → refl
+      eta-refl : (x : Monad) → toMonad (fromMonad x) ≡ x
+      eta-refl =
+        (λ x → λ
+          { i .Monad.raw → Monad.raw x
+          ; i .Monad.isMonad  → Monad.isMonad x}
+        )
 
   grpdMonad : isGrpd Monad
   grpdMonad = equivPreservesNType

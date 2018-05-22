@@ -1,11 +1,11 @@
 {-
 This module provides construction 2.3 in [voe]
 -}
-{-# OPTIONS --cubical --caching #-}
+{-# OPTIONS --cubical --allow-unsolved-metas #-}
 module Cat.Category.Monad.Voevodsky where
 
-
 open import Cat.Prelude
+open import Cat.Equivalence
 
 open import Cat.Category
 open import Cat.Category.Functor as F
@@ -203,8 +203,8 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         K.Monad.raw (lemma m i) = K.Monad.raw m
         K.Monad.isMonad (lemma m i) = K.Monad.isMonad m
 
-      voe-isEquiv : isEquiv (§2-3.§1 omap pure) (§2-3.§2 omap pure) forth
-      voe-isEquiv = gradLemma forth back forthEq backEq
-
     equiv-2-3 : §2-3.§1 omap pure ≃ §2-3.§2 omap pure
-    equiv-2-3 = forth , voe-isEquiv
+    equiv-2-3 = fromIsomorphism _ _
+      ( forth , back
+      , funExt backEq , funExt forthEq
+      )
