@@ -1,55 +1,99 @@
 \chapter{Perspectives}
 \section{Discussion}
-In the previous chapter the practical aspects of proving things in Cubical Agda
-were highlighted. I also demonstrated the usefulness of separating ``laws'' from
-``data''. One of the reasons for this is that dependencies within types can lead
-to very complicated goals. One technique for alleviating this was to prove that
-certain types are mere propositions.
+In the previous chapter the practical aspects of proving things in
+Cubical Agda were highlighted. I also demonstrated the usefulness of
+separating ``laws'' from ``data''. One of the reasons for this is that
+dependencies within types can lead to very complicated goals. One
+technique for alleviating this was to prove that certain types are
+mere propositions.
 
 \subsection{Computational properties}
-Another aspect (\TODO{That I actually did not highlight very well in the
-  previous chapter}) is the computational nature of paths. Say we have
-formalized this common result about monads:
+The new contribution of cubical Agda is that it has a constructive
+proof of functional extensionality\index{functional extensionality}
+and univalence\index{univalence}. This means that in particular that
+the type checker can reduce terms defined with these theorems. So one
+interesting result of this development is how much this influenced the
+development. In particular having a functional extensionality that
+``computes'' should simplify some proofs.
 
-\TODO{Some equation\ldots}
+I have tested this theory by using a feature of Agda where one can
+mark certain bindings as being \emph{abstract}. This means that the
+type-checker will not try to reduce that term further when
+type-checking is performed. I tried making univalence and functional
+extensionality abstract. It turns out that the conversion behaviour of
+univalence is not used anywhere. For functional extensionality there
+are two places in the whole solution where the reduction behaviour is
+used to simplify some proofs. This is in showing that the maps between
+the two formulations of monads are inverses. See the notes in this
+module:
+%
+\begin{center}
+\sourcelink{Cat.Category.Monad.Voevodsky}
+\end{center}
+%
+I've also put this in a source listing in \ref{app:abstract-funext}. I
+will not reproduce it in full here as the type is quite involved. The
+method used to find in what places the computational behaviour of
+these proofs are needed has the caveat of only working for places that
+directly or transitively uses these two proofs. Fortunately though the
+code is structured in such a way that this should be the case.
+Nonetheless it is quite surprising that this computational behaviours
+is not used more widely in the formalization.
 
-By transporting this to the Kleisli formulation we get a result that we can use
-to compute with. This is particularly useful because the Kleisli formulation
-will be more familiar to programmers e.g.\ those coming from a background in
-Haskell. Whereas the theory usually talks about monoidal monads.
-
-\TODO{Mention that with postulates we cannot do this}
+Barring this, however, the computational behaviour of paths can still
+be useful. E.g. if a programmer want's to reuse functions that operate
+on a monoidal monads to work with a monad in the Kleisli form that
+this programmer has specified. To make this idea concrete, say we are
+given some function $f \tp \Kleisli \to T$ having a path between $p
+\tp \Monoidal \equiv \Kleisli$ induces a map $\coe\ p \tp \Monoidal
+\to \Kleisli$. We can compose $f$ with this map to get $f \comp
+\coe\ p \tp \Monoidal \to T$. Of course, since that map was
+constructed with an isomorphism these maps already exist and could be
+used directly. So this is arguably only interesting when one wants to
+prove properties of such functions.
 
 \subsection{Reusability of proofs}
-The previous example also illustrate how univalence unifies two otherwise
-disparate areas: The category-theoretic study of monads; and monads as in
-functional programming. Univalence thus allows one to reuse proofs. You could
-say that univalence gives the developer two proofs for the price of one.
+The previous example illustrate how univalence unifies two otherwise
+disparate areas: The category-theoretic study of monads; and monads as
+in functional programming. Univalence thus allows one to reuse proofs.
+You could say that univalence gives the developer two proofs for the
+price of one. As an illustration of this I proved that monads are
+groupoids. I initially proved this for the Kleisli
+formulation\footnote{Actually doing this directly turned out to be
+  tricky as well, so I defined an equivalent formulation which was not
+  formulated with a record, but purely with $\sum$-types.}. Since the
+two formulations are equal under univalence, substitution directly
+gives us that this also holds for the monoidal formulation. This of
+course generalizes to any family $P \tp 𝒰 → 𝒰$ where $P$ is inhabited
+at either formulation (i.e.\ either $P\ \Monoidal$ or $P\ \Kleisli$
+holds).
 
 The introduction (section \S\ref{sec:context}) mentioned an often
 employed-technique for enabling extensional equalities is to use the
-setoid-interpretation. Nowhere in this formalization has this been necessary,
-$\Path$ has been used globally in the project as propositional equality. One
-interesting place where this becomes apparent is in interfacing with the Agda
-standard library. Multiple definitions in the Agda standard library have been
-designed with the setoid-interpretation in mind. E.g. the notion of ``unique
+setoid-interpretation. Nowhere in this formalization has this been
+necessary, $\Path$ has been used globally in the project as
+propositional equality. One interesting place where this becomes
+apparent is in interfacing with the Agda standard library. Multiple
+definitions in the Agda standard library have been designed with the
+setoid-interpretation in mind. E.g. the notion of ``unique
 existential'' is indexed by a relation that should play the role of
-propositional equality. Likewise for equivalence relations, they are indexed,
-not only by the actual equivalence relation, but also by another relation that
-serve as propositional equality.
-%% Unfortunately we cannot use the definition of equivalences found in the
-%% standard library to do equational reasoning directly. The reason for this is
-%% that the equivalence relation defined there must be a homogenous relation,
-%% but paths are heterogeneous relations.
+propositional equality. Likewise for equivalence relations, they are
+indexed, not only by the actual equivalence relation, but also by
+another relation that serve as propositional equality.
+%% Unfortunately we cannot use the definition of equivalences found in
+%% the standard library to do equational reasoning directly. The
+%% reason for this is that the equivalence relation defined there must
+%% be a homogenous relation, but paths are heterogeneous relations.
 
-In the formalization at present a significant amount of energy has been put
-towards proving things that would not have been needed in classical Agda. The
-proofs that some given type is a proposition were provided as a strategy to
-simplify some otherwise very complicated proofs (e.g.
-\ref{eq:proof-prop-IsPreCategory} and \label{eq:productPath}). Often these
-proofs would not be this complicated. If the J-rule holds definitionally the
-proof-assistant can help simplify these goals considerably. The lack of the
-J-rule has a significant impact on the complexity of these kinds of proofs.
+In the formalization at present a significant amount of energy has
+been put towards proving things that would not have been needed in
+classical Agda. The proofs that some given type is a proposition were
+provided as a strategy to simplify some otherwise very complicated
+proofs (e.g. \ref{eq:proof-prop-IsPreCategory}
+and \label{eq:productPath}). Often these proofs would not be this
+complicated. If the J-rule holds definitionally the proof-assistant
+can help simplify these goals considerably. The lack of the J-rule has
+a significant impact on the complexity of these kinds of proofs.
 
 \TODO{Universe levels.}
 
@@ -60,15 +104,16 @@ Jesper Cockx' work extending the universe-level-laws for Agda and the
 
 \subsection{Compiling Cubical Agda}
 \label{sec:compiling-cubical-agda}
-Compilation of program written in Cubical Agda is currently not supported. One
-issue here is that the backends does not provide an implementation for the
-cubical primitives (such as the path-type). This means that even though the
-path-type gives us a computational interpretation of functional extensionality,
-univalence, transport, etc., we do not have a way of actually using this to
-compile our programs that use these primitives. It would be interesting to see
-practical applications of this. The path between monads that this library
-exposes could provide one particularly interesting case-study.
+Compilation of program written in Cubical Agda is currently not
+supported. One issue here is that the backends does not provide an
+implementation for the cubical primitives (such as the path-type).
+This means that even though the path-type gives us a computational
+interpretation of functional extensionality, univalence, transport,
+etc., we do not have a way of actually using this to compile our
+programs that use these primitives. It would be interesting to see
+practical applications of this. The path between monads that this
+library exposes could provide one particularly interesting case-study.
 
 \subsection{Higher inductive types}
-This library has not explored the usefulness of higher inductive types in the
-context of Category Theory.
+This library has not explored the usefulness of higher inductive types
+in the context of Category Theory.

@@ -1,0 +1,9 @@
+App. 2 in HoTT gives typing rule for pathJ including a computational
+rule for it.
+
+If you have this computational rule definitionally, then you wouldn't
+need to use `pathJprop`.
+
+In discussion-section I mention HITs. I should remove this or come up
+with a more elaborate example of something you could do, e.g.
+something with pushouts in the category of sets.

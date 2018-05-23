@@ -1,42 +1,64 @@
 \chapter{Introduction}
-This thesis is a case-study in the application of Cubical Agda in the
+This thesis is a case-study in the application of cubical Agda in the
 context of category theory. At the center of this is the notion of
 \nomenindex{equality}. In type-theory there are two pervasive notions
 of equality: \nomenindex{judgmental equality} and
 \nomenindex{propositional equality}. Judgmental equality is a property
-of the type system, it is a property that is automatically checked by
-a type checker. As such there are some properties judgmental
-equalities must crucially have. It must be \nomenindex{decidable},
-\nomenindex{sound}, enjoy \nomenindex{canonicity} and be a
-\nomen{congruence relation}. Being decidable simply means that that an
-algorithm exists to decide whether two terms are equal. For any
-practical implementation the decidability must also be effectively
-computable. Soundness means that things judged to be equal actually
-\emph{are} considered equal. It must be a congruence relation because
-otherwise the relation certainly does not adhere to our notion of
-equality. One would be able to conclude things like: $x \nequiv y
-\rightarrow f\ x \equiv f\ y$. Canonicity will be explained later in
-this introduction after we've seen an example of judgmental- and
-propositional equality at play for a simple example.\TODO{How to
-  motivate canonicity for equality}.
+of the type system. Judgmental equality on the other hand is usually
+defined \emph{within} the system. When introducing definitions this
+report will use the notation $\defeq$. Judgmental equalities written
+$=$. For propositional equalities the notation $\equiv$ is used.
+
+For judgmental equality there are some properties that it must
+satisfy. \nomenindex{sound}, enjoy \nomenindex{canonicity} and be a
+\nomen{congruence relation}. Soundness means that things judged to be
+equal are equal with respects to the model of the theory (the meta
+theory). It must be a congruence relation because otherwise the
+relation certainly does not adhere to our notion of equality. One
+would be able to conclude things like: $x \equiv y \rightarrow f\ x
+\nequiv f\ y$. Canonicity means that any well typed term evaluates to
+a \emph{canonical} form. For example for a closed term $e \tp \bN$ it
+will be the case that $e$ reduces to $n$ applications of
+$\mathit{suc}$ to $0$ for some $n$; $e = \mathit{suc}^n\ 0$. Without
+canonicity terms in the language can get ``stuck'' -- meaning that
+they do not reduce to a canonical form.
+
+To work as a programming languages it is necessary for judgmental
+equality to be \nomenindex{decidable}. Being decidable simply means
+that that an algorithm exists to decide whether two terms are equal.
+For any practical implementation the decidability must also be
+effectively computable.
 
 For propositional equality the decidability requirement is relaxed. It
 is not in general possible to decide the correctness of logical
 propositions (cf.\ Hilbert's \emph{entscheidigungsproblem}).
-Propositional equality are provided by the developer. When introducing
-definitions this report will use the notation $\defeq$. Judgmental
-equalities written $=$. For propositional equalities the notation
-$\equiv$ is used.
+
+There are two flavors of type-theory. \emph{Intensional-} and
+\emph{extensional-} type theory. Identity types in extensional type
+theory are required to be \nomen{propositions}{proposition}. That is,
+a type with at most one inhabitant. In extensional type thoery the
+principle of reflection
+%
+$$a ≡ b → a = b$$
+%
+is enough to make type checking undecidable. This report focuses on
+Agda which at a glance can be thought of a version of intensional type
+theory. Pattern-matching in regular Agda let's one prove
+\nomenindex{axiom K}. Axiom K states that any two identity proofs are
+propositionally identical.
 
 The usual notion of propositional equality in \nomenindex{Intensional
   Type Theory} (ITT) is quite restrictive. In the next section a few
 motivating examples will highlight this. There exist techniques to
 circumvent these problems, as we shall see. This thesis will explore
 an extension to Agda that redefines the notion of propositional
-equality and as such is an alternative to these other techniques. What
-makes this extension particularly interesting is that it gives a
-\emph{constructive} interpretation of univalence. What this means will
-be elaborated in the following sections.
+equality and as such is an alternative to these other techniques. The
+extension is called cubical Agda. Cubical Agda drops Axiom K as this
+does not permit \nomenindex{functional extensionality} and
+\nomenindex{univalence}. What makes this extension particularly
+interesting is that it gives a \emph{constructive} interpretation of
+univalence. What all this means will be elaborated in the following
+sections.
 %
 \section{Motivating examples}
 %
@@ -192,22 +214,16 @@ There are alternative approaches to working in a cubical setting where
 one can still have univalence and functional extensionality. One
 option is to postulate these as axioms. This approach, however, has
 other shortcomings, e.g. you lose \nomenindex{canonicity}
-(\TODO{Pageno!} \cite{huber-2016}). Canonicity means that any well
-typed term evaluates to a \emph{canonical} form. For example for a
-closed term $e \tp \bN$ it will be the case that $e$ reduces to $n$
-applications of $\mathit{suc}$ to $0$ for some $n$; $e =
-\mathit{suc}^n\ 0$. Without canonicity terms in the language can get
-``stuck'' -- meaning that they do not reduce to a canonical form.
+(\TODO{Pageno!} \cite{huber-2016}).
 
 Another approach is to use the \emph{setoid interpretation} of type
 theory (\cite{hofmann-1995,huber-2016}). With this approach one works
-with
-\nomenindex{extensional sets} $(X, \sim)$, that is a type $X \tp \MCU$
-and an equivalence relation $\sim\ \tp X \to X \to \MCU$ on that type.
-Under the setoid interpretation the equivalence relation serve as a
-sort of ``local'' propositional equality. Since the developer gets to
-pick this relation it is not guaranteed to be a congruence relation
-a priori. So this must be verified manually by the developer.
+with \nomenindex{extensional sets} $(X, \sim)$, that is a type $X \tp
+\MCU$ and an equivalence relation $\sim\ \tp X \to X \to \MCU$ on that
+type. Under the setoid interpretation the equivalence relation serve
+as a sort of ``local'' propositional equality. Since the developer
+gets to pick this relation it is not guaranteed to be a congruence
+relation a priori. So this must be verified manually by the developer.
 Furthermore, functions between different setoids must be shown to be
 setoid homomorphism, that is; they preserve the relation.
 

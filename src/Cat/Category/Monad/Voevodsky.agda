@@ -1,7 +1,7 @@
 {-
 This module provides construction 2.3 in [voe]
 -}
-{-# OPTIONS --cubical --allow-unsolved-metas #-}
+{-# OPTIONS --cubical #-}
 module Cat.Category.Monad.Voevodsky where
 
 open import Cat.Prelude
@@ -152,7 +152,26 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
        §2-fromMonad
          ((Monoidal→Kleisli ∘ Kleisli→Monoidal)
           (§2-3.§2.toMonad m))
-         ≡⟨ (cong-d (\ φ → §2-fromMonad (φ (§2-3.§2.toMonad m))) re-ve) ⟩
+         -- Below is the fully normalized goal and context with
+         -- `funExt` made abstract.
+         --
+         -- Goal: PathP (λ _ → §2-3.§2 omap (λ {z} → pure))
+         --       (§2-fromMonad
+         --        (.Cat.Category.Monad.toKleisli ℂ
+         --         (.Cat.Category.Monad.toMonoidal ℂ (§2-3.§2.toMonad m))))
+         --       (§2-fromMonad (§2-3.§2.toMonad m))
+         -- Have: PathP
+         --       (λ i →
+         --          §2-3.§2 K.IsMonad.omap
+         --          (K.RawMonad.pure
+         --           (K.Monad.raw
+         --            (funExt (λ m₁ → K.Monad≡ (.Cat.Category.Monad.toKleisliRawEq ℂ m₁))
+         --             i (§2-3.§2.toMonad m)))))
+         --       (§2-fromMonad
+         --        (.Cat.Category.Monad.toKleisli ℂ
+         --         (.Cat.Category.Monad.toMonoidal ℂ (§2-3.§2.toMonad m))))
+         --       (§2-fromMonad (§2-3.§2.toMonad m))
+         ≡⟨ ( cong-d {x = Monoidal→Kleisli ∘ Kleisli→Monoidal} {y = idFun K.Monad} (\ φ → §2-fromMonad (φ (§2-3.§2.toMonad m))) re-ve) ⟩
        (§2-fromMonad ∘ §2-3.§2.toMonad) m
          ≡⟨ lemma ⟩
        m ∎
@@ -174,24 +193,41 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         §1-fromMonad
         ((Kleisli→Monoidal ∘ Monoidal→Kleisli)
         (§2-3.§1.toMonad m))
+          -- Below is the fully normalized `agda2-goal-and-context`
+          -- with `funExt` made abstract.
+          --
+          -- Goal: PathP (λ _ → §2-3.§1 omap (λ {X} → pure))
+          --       (§1-fromMonad
+          --        (.Cat.Category.Monad.toMonoidal ℂ
+          --         (.Cat.Category.Monad.toKleisli ℂ (§2-3.§1.toMonad m))))
+          --       (§1-fromMonad (§2-3.§1.toMonad m))
+          -- Have: PathP
+          --       (λ i →
+          --          §2-3.§1
+          --          (RawFunctor.omap
+          --           (Functor.raw
+          --            (M.RawMonad.R
+          --             (M.Monad.raw
+          --              (funExt
+          --               (λ m₁ → M.Monad≡ (.Cat.Category.Monad.toMonoidalRawEq ℂ m₁)) i
+          --               (§2-3.§1.toMonad m))))))
+          --          (λ {X} →
+          --             fst
+          --             (M.RawMonad.pureNT
+          --              (M.Monad.raw
+          --               (funExt
+          --                (λ m₁ → M.Monad≡ (.Cat.Category.Monad.toMonoidalRawEq ℂ m₁)) i
+          --                (§2-3.§1.toMonad m))))
+          --             X))
+          --       (§1-fromMonad
+          --        (.Cat.Category.Monad.toMonoidal ℂ
+          --         (.Cat.Category.Monad.toKleisli ℂ (§2-3.§1.toMonad m))))
+          --       (§1-fromMonad (§2-3.§1.toMonad m))
           ≡⟨ (cong-d (\ φ → §1-fromMonad (φ (§2-3.§1.toMonad m))) ve-re) ⟩
         §1-fromMonad (§2-3.§1.toMonad m)
           ≡⟨ lemmaz ⟩
         m ∎
        where
-        -- having eta equality on causes roughly the same work as checking this proof of foo,
-        -- which is quite expensive because it ends up reducing complex terms.
-
-        -- rhs = §1-fromMonad (Kleisli→Monoidal ((Monoidal→Kleisli (§2-3.§1.toMonad m))))
-        -- foo : §1-fromMonad (Kleisli→Monoidal (§2-3.§2.toMonad (§2-fromMonad (Monoidal→Kleisli (§2-3.§1.toMonad m)))))
-        --     ≡ §1-fromMonad (Kleisli→Monoidal ((Monoidal→Kleisli (§2-3.§1.toMonad m))))
-        -- §2-3.§1.fmap (foo i) = §2-3.§1.fmap rhs
-        -- §2-3.§1.join (foo i) = §2-3.§1.join rhs
-        -- §2-3.§1.RisFunctor (foo i) = §2-3.§1.RisFunctor rhs
-        -- §2-3.§1.pureN (foo i) = §2-3.§1.pureN rhs
-        -- §2-3.§1.joinN (foo i) = §2-3.§1.joinN  rhs
-        -- §2-3.§1.isMonad (foo i) = §2-3.§1.isMonad rhs
-
         lemmaz : §1-fromMonad (§2-3.§1.toMonad m) ≡ m
         §2-3.§1.fmap (lemmaz i) = §2-3.§1.fmap m
         §2-3.§1.join (lemmaz i) = §2-3.§1.join m

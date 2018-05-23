@@ -198,7 +198,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       Req = Functor≡ rawEq
 
       pureTEq : Monoidal.RawMonad.pureT (toMonoidalRaw (toKleisli m)) ≡ pureT
-      pureTEq = funExt (λ X → refl)
+      pureTEq = refl
 
       pureNTEq : (λ i → NaturalTransformation Functors.identity (Req i))
         [ Monoidal.RawMonad.pureNT (toMonoidalRaw (toKleisli m)) ≡ pureNT ]
