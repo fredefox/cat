@@ -97,10 +97,25 @@ a significant impact on the complexity of these kinds of proofs.
 
 \TODO{Universe levels.}
 
+\subsection{Motifs}
+An oft-used technique in this development is using based path
+induction to prove certain properties. One particular challenge that
+arises when doing so is that Agda is not able to automatically infer
+the family that one wants to do induction over. For instance in the
+proof $\var{sym}\ (\var{sym}\ p) ≡ p$ from \ref{eq:sym-invol} the
+family that we chose to do induction over was $D\ b'\ p' \defeq
+\var{sym}\ (\var{sym}\ p') ≡ p'$. However, if one interactively tries
+to give this hole, all the information that Agda can provide is that
+one must provide an element of $𝒰$. Agda could be more helpful in this
+context, perhaps even infer this family in some situations. In this
+very simple example this is of course not a big problem, but there are
+examples in the source code where this gets more involved.
+
 \section{Future work}
 \subsection{Agda \texttt{Prop}}
 Jesper Cockx' work extending the universe-level-laws for Agda and the
 \texttt{Prop}-type.
+\TODO{Do I want to include this?}
 
 \subsection{Compiling Cubical Agda}
 \label{sec:compiling-cubical-agda}
@@ -117,3 +132,8 @@ library exposes could provide one particularly interesting case-study.
 \subsection{Higher inductive types}
 This library has not explored the usefulness of higher inductive types
 in the context of Category Theory.
+
+\subsection{Initiality conjecture}
+A fellow student here at Chalmers, Andreas Källberg, is currently
+working on proving the initiality conjecture\TODO{Citation}. He will
+be using this library to do so.

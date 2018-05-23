@@ -277,16 +277,19 @@ $i$ becomes the triple:
 \end{aligned}
 \end{equation}
 %
-I have found this to be a general pattern when proving things in homotopy type
-theory, namely that you have to wrap and unwrap equalities at different levels.
-It is worth noting that proving this theorem with the regular inductive equality
-type would already not be possible, since we at least need extensionality (the
-projections are all $\prod$-types). Assuming we had functional extensionality
-available to us as an axiom, we would use functional extensionality \TODO{in
-reverse?} to retrieve the equalities in $a$ and $b$, pattern-match on them to
-see that they are both $\refl$ and then close the proof with $\refl$.
-Of course this theorem is not so interesting in the setting of ITT since we know
-a priori that equality proofs are unique.
+I have found this to be a general pattern when proving things in
+homotopy type theory, namely that you have to wrap and unwrap
+equalities at different levels. It is worth noting that proving this
+theorem with the regular inductive equality type would already not be
+possible, since we at least need functional
+extensionality\index{functional extensionality} (the projections are
+all $\prod$-types). Assuming we had functional extensionality
+available to us as an axiom, we would use functional extensionality
+\TODO{in reverse?} to retrieve the equalities in $a$ and $b$,
+pattern-match on them to see that they are both $\refl$ and then close
+the proof with $\refl$. Of course this theorem is not so interesting
+in the setting of ITT since we know a priori that equality proofs are
+unique.
 
 The situation is a bit more complicated when we have a dependent type.
 For instance, when we want to show that $\IsCategory$ is a mere
@@ -326,8 +329,8 @@ $$
 And this finishes the proof that being-a-category is a mere proposition
 (\ref{eq:propIsPreCategory}).
 
-When we have a proper category we can make precise the notion of ``identifying
-isomorphic types'' \TODO{cite Awodey here}. That is, we can construct the
+When we have a proper category we can make precise the notion of
+``identifying isomorphic types''. That is, we can construct the
 function:
 %
 $$
@@ -345,7 +348,11 @@ terminal objects are propositional:
 It follows from the usual observation that any two terminal objects are
 isomorphic - and since categories are univalent, so are they equal. The proof is
 omitted here, but the curious reader can check the implementation for the
-details. \TODO{The proof is a bit fun, should I include it?}
+details. It is in the module:
+%
+\begin{center}
+\sourcelink{Cat.Category}
+\end{center}
 
 \section{Equivalences}
 \label{sec:equiv}
@@ -733,7 +740,7 @@ $x \equiv y$ and $\fst\ x \equiv \fst\ y$:
 \end{aligned}
 \end{equation*}
 %
-\TODO{Is it confusing that I use point-free style here?} Here $\var{lemSig}$ is
+\TODO{Is it confusing that I use point-free style here?}Here $\var{lemSig}$ is
 a lemma that says that if the second component of a pair is a proposition, it
 suffices to give a path between its first components to construct an equality of
 the two pairs:
@@ -744,15 +751,18 @@ the two pairs:
   \left( \fst\ u \equiv \fst\ v \right) \to u \equiv v
 \end{align*}
 %
-The proof that these are indeed inverses has been omitted. \TODO{Do I really
-  want to omit it?}\QED
+The proof that these are indeed inverses has been omitted. The details
+can be found in the module:
+\begin{center}
+\sourcelink{Cat.Categories.Sets}
+\end{center}
 
-Now to prove \ref{eq:equivSig}: Let $e \tp \prod_{a \tp A} \left( P\ a \simeq
-Q\ a \right)$ be given. To prove the equivalence, it suffices to give an
-isomorphism between $\sum_{a \tp A} P\ a$ and $\sum_{a \tp A} Q\ a$, but since
-they have identical first components it suffices to give an isomorphism between
-$P\ a$ and $Q\ a$ for all $a \tp A$. This is exactly what we can get from
-the equivalence $e$.\QED
+Now to prove \ref{eq:equivSig}: Let $e \tp \prod_{a \tp A} \left( P\ a
+\simeq Q\ a \right)$ be given. To prove the equivalence, it suffices
+to give an isomorphism between $\sum_{a \tp A} P\ a$ and $\sum_{a \tp
+  A} Q\ a$, but since they have identical first components it suffices
+to give an isomorphism between $P\ a$ and $Q\ a$ for all $a \tp A$.
+This is exactly what we can get from the equivalence $e$.\QED
 
 Lastly we prove \ref{eq:equivIso}. Let $f \tp A \to B$ be given. For the maps we
 choose:
@@ -1050,7 +1060,10 @@ $b_0, b_1$ corresponds to a pair of paths between $a_0,b_0$ and $a_1,b_1$ (check
 the implementation for the details).
 
 \emph{Proposition} \ref{eq:univ-1} is isomorphic to \ref{eq:univ-2}:
-\TODO{Super complicated}
+This proof of this has been omitted but can be found in the module:
+\begin{center}
+\sourcelink{Cat.Categories.Span}
+\end{center}
 
 \emph{Proposition} \ref{eq:univ-2} is isomorphic to \ref{eq:univ-3}: For this I
 will show two corollaries of \ref{eq:coeCod}: For an isomorphism $(\iota,
@@ -1067,7 +1080,10 @@ f & \equiv g \lll \iota \\
 g & \equiv f \lll \inv{\iota}
 \end{align}
 %
-Proof: \TODO{\ldots}
+The proof is omitted but can be found in the module:
+\begin{center}
+\sourcelink{Cat.Category}
+\end{center}
 
 Now we can prove the equivalence in the following way: Given $(f, \inv{f},
 \var{inv}_f) \tp X \cong Y$ and two heterogeneous paths

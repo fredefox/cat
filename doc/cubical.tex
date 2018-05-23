@@ -54,17 +54,18 @@ Judgmental equality in Cubical Agda is encapsulated with the type:
 \Path \tp (P \tp I → \MCU) → P\ 0 → P\ 1 → \MCU
 \end{equation}
 %
-$I$ is a special data type (\TODO{that also has special computational properties
-  AFAIK}) called the index set. $I$ can be thought of simply as the interval on
-the real numbers from $0$ to $1$. $P$ is a family of types over the index set
-$I$. I will sometimes refer to $P$ as the \nomenindex{path space} of some path $p \tp
-\Path\ P\ a\ b$. By this token $P\ 0$ then corresponds to the type at the
-left-endpoint and $P\ 1$ as the type at the right-endpoint. The type is called
-$\Path$ because it is connected with paths in homotopy theory. The intuition
-behind this is that $\Path$ describes paths in $\MCU$ -- i.e.\ between types. For
-a path $p$ for the point $p\ i$ the index $i$ describes how far along the path
-one has moved. An inhabitant of $\Path\ P\ a_0\ a_1$ is a (dependent-) function,
-$p$, from the index-space to the path space:
+$I$ is a special data type called the index set. $I$ can be thought of
+simply as the interval on the real numbers from $0$ to $1$. $P$ is a
+family of types over the index set $I$. I will sometimes refer to $P$
+as the \nomenindex{path space} of some path $p \tp \Path\ P\ a\ b$. By
+this token $P\ 0$ then corresponds to the type at the left-endpoint
+and $P\ 1$ as the type at the right-endpoint. The type is called
+$\Path$ because it is connected with paths in homotopy theory. The
+intuition behind this is that $\Path$ describes paths in $\MCU$ --
+i.e.\ between types. For a path $p$ for the point $p\ i$ the index $i$
+describes how far along the path one has moved. An inhabitant of
+$\Path\ P\ a_0\ a_1$ is a (dependent-) function, $p$, from the
+index-space to the path space:
 %
 $$
 p \tp \prod_{i \tp I} P\ i
@@ -194,7 +195,7 @@ indeed both $\top$ and $\bot$ are propositions:
 The term $\varnothing$ is used here to denote an impossible pattern. It is a
 theorem that if a mere proposition $A$ is inhabited, then so is it contractible.
 If it is not inhabited it is equivalent to the empty-type (or false
-proposition).\TODO{Cite!!}
+proposition).\TODO{Cite}
 
 I will refer to a type $A \tp \MCU$ as a \emph{mere} proposition if I want to
 stress that we have $\isProp\ A$.
@@ -242,11 +243,16 @@ Let $\left\Vert A \right\Vert = n$ denote that the level of $A$ is $n$.
 Proposition: For any homotopic level $n$ this is a mere proposition.
 %
 \section{A few lemmas}
-Rather than getting into the nitty-gritty details of Agda I venture to take a
-more ``combinator-based'' approach. That is, I will use theorems about paths
-already that have already been formalized. Specifically the results come from
-the Agda library \texttt{cubical} (\TODO{Cite}). I have used a handful of
-results from this library as well as contributed a few lemmas myself.\footnote{The module \texttt{Cat.Prelude} lists the upstream dependencies. As well my contribution to \texttt{cubical} can be found in the git logs \TODO{Cite}.}
+Rather than getting into the nitty-gritty details of Agda I venture to
+take a more ``combinator-based'' approach. That is, I will use
+theorems about paths already that have already been formalized.
+Specifically the results come from the Agda library \texttt{cubical}
+(\cite{cubical-demo}). I have used a handful of results from this
+library as well as contributed a few lemmas myself.\footnote{The
+  module \texttt{Cat.Prelude} lists the upstream dependencies. As well
+  my contribution to \texttt{cubical} can be found in the git logs
+  which are available at
+  \hrefsymb{https://github.com/Saizan/cubical-demo}{\texttt{https://github.com/Saizan/cubical-demo}}.}
 
 These theorems are all purely related to homotopy theory and cubical Agda and as
 such not specific to the formalization of Category Theory. I will present a few

@@ -1,22 +1,24 @@
 \chapter{Conclusion}
-This thesis highlighted some issues with the standard inductive definition of
-propositional equality used in Agda. Functional extensionality and univalence
-are examples of two propositions not admissible in Intensional Type Theory
-(ITT). This has a big impact on what is provable and the reusability of proofs.
-This issue is overcome with an extension to Agda's type system called Cubical
-Agda. With Cubical Agda both functional extensionality and univalence are
-admissible. Cubical Agda is more expressive, but there are certain issues that
-arise that are not present in standard Agda. For one thing ITT and standard Agda
-enjoys Uniqueness of Identity Proofs (UIP). This is not the case in Cubical
-Agda. In stead there exists a hierarchy of types with increasing
-\nomen{homotopical structure}{homotopy levels}. It turns out to be useful to built the
-formalization with this hierarchy in mind as it can simplify proofs
-considerably. Another issue one must overcome in Cubical Agda is when a type has
-a field whose type depends on a previous field. In this case paths between such
-types will be heterogeneous paths. This problem is related to Cubical Agda not
-having the K-rule \TODO{Not mentioned anywhere in the report}. In practice it
-turns out to be considerably more difficult to work heterogeneous paths than
-with homogeneous paths. The thesis demonstrated some techniques to overcome
+This thesis highlighted some issues with the standard inductive
+definition of propositional equality used in Agda. Functional
+extensionality and univalence are examples of two propositions not
+admissible in Intensional Type Theory (ITT). This has a big impact on
+what is provable and the reusability of proofs. This issue is overcome
+with an extension to Agda's type system called Cubical Agda. With
+Cubical Agda both functional extensionality and univalence are
+admissible. Cubical Agda is more expressive, but there are certain
+issues that arise that are not present in standard Agda. For one thing
+ITT and standard Agda enjoys Uniqueness of Identity Proofs (UIP). This
+is not the case in Cubical Agda. In stead there exists a hierarchy of
+types with increasing \nomen{homotopical structure}{homotopy levels}.
+It turns out to be useful to built the formalization with this
+hierarchy in mind as it can simplify proofs considerably. Another
+issue one must overcome in Cubical Agda is when a type has a field
+whose type depends on a previous field. In this case paths between
+such types will be heterogeneous paths. This problem is related to
+Cubical Agda not having the K-rule. In practice it turns out to be
+considerably more difficult to work heterogeneous paths than with
+homogeneous paths. The thesis demonstrated some techniques to overcome
 these difficulties, such as based path-induction.
 
 This thesis formalized some of the core concepts from category theory including;
