@@ -109,7 +109,7 @@ definitions: If we let $p$ be a witness to the identity law, which formally is:
   \label{eq:identity}
   \var{IsIdentity} \defeq
   \prod_{A\ B \tp \Object} \prod_{f \tp \Arrow\ A\ B}
-    \id \lll f \equiv f \x f \lll \id \equiv f
+    \left(\id \lll f \equiv f\right) \x \left(f \lll \id \equiv f\right)
 \end{equation}
 %
 Then we can construct the identity isomorphism $\idIso \tp \identity,
@@ -160,8 +160,13 @@ And laws:
 %% \tag{associativity}
 h \lll (g \lll f) ≡ (h \lll g) \lll f \\
 %% \tag{identity}
-\identity \lll f ≡ f \x
+\left(
+\identity \lll f ≡ f
+\right)
+\x
+\left(
 f \lll \identity ≡ f
+\right)
 \\
 \label{eq:arrows-are-sets}
 %% \tag{arrows are sets}
@@ -201,7 +206,7 @@ So the proof goes like this: We `eliminate' the 3 function abstractions by
 applying $\propPi$ three times. So our proof obligation becomes:
 %
 $$
-\isProp\ \left( \id \comp f \equiv f \x f \comp \id \equiv f \right)
+\isProp\ \left( \left( \id \comp f \equiv f \right) \x \left( f \comp \id \equiv f \right) \right)
 $$
 %
 Then we eliminate the (non-dependent) sigma-type by applying $\propSig$ giving
@@ -360,7 +365,7 @@ The usual notion of a function $f \tp A \to B$ having an inverses is:
 %
 \begin{equation}
 \label{eq:isomorphism}
-\sum_{g \tp B \to A} f \comp g \equiv \identity \x g \comp f \equiv \identity
+\sum_{g \tp B \to A} \left( f \comp g \equiv \identity \right) \x \left( g \comp f \equiv \identity \right)
 \end{equation}
 %
 This is defined in \cite[p. 129]{hott-2013} where it is referred to as the a
@@ -608,7 +613,7 @@ An inhabitant of $A \approxeq B$ is simply an arrow $f \tp \Arrow\ A\ B$
 and its inverse $g \tp \Arrow\ B\ A$. In the opposite category $g$ will
 play the role of the isomorphism and $f$ will be the inverse. Similarly we can
 go in the opposite direction. I name these maps $\shufflef \tp (A \approxeq
-B) \to (A \wideoverbar{\approxeq} B)$ and $\shuffle^{-1} \tp (A
+B) \to (A \wideoverbar{\approxeq} B)$ and $\shufflef^{-1} \tp (A
 \wideoverbar{\approxeq} B) \to (A \approxeq B)$ respectively.
 
 As the inverse of $\wideoverbar{\idToIso}$ I will pick $\wideoverbar{\isoToId}
@@ -648,8 +653,8 @@ $$
 $$
 %
 As we have seen the laws in $\left(\bC^{\var{Op}}\right)^{\var{Op}}$ get quite
-involved.\footnote{We have not even seen the full story because we have used
-  this `interface' for equivalences.} Luckily since being-a-category is a mere
+involved\footnote{We have not even seen the full story because we have used
+  this `interface' for equivalences.}. Luckily since being-a-category is a mere
 proposition, we need not concern ourselves with this bit when proving the above.
 We can use the equality principle for categories that let us prove an equality
 just by giving an equality on the data-part. So, given a category $\bC$ all we
@@ -798,13 +803,13 @@ inverse to $f$. The path $p$ is inhabited by:
 %
 \begin{align*}
   x
-  & \equiv x \comp \identity \\
+  & = x \comp \identity \\
   & \equiv x \comp (f \comp y)
   && \text{$y$ is an inverse to $f$} \\
   & \equiv (x \comp f) \comp y \\
   & \equiv \identity \comp y
   && \text{$x$ is an inverse to $f$} \\
-  & \equiv y
+  & = y
 \end{align*}
 %
 For the other (dependent) path we can prove that being-an-inverse-of is a
@@ -1061,10 +1066,11 @@ the implementation for the details).
 
 \emph{Proposition} \ref{eq:univ-1} is isomorphic to \ref{eq:univ-2}:
 This proof of this has been omitted but can be found in the module:
-\begin{center}
+%
+\begin{center}%
 \sourcelink{Cat.Categories.Span}
 \end{center}
-
+%
 \emph{Proposition} \ref{eq:univ-2} is isomorphic to \ref{eq:univ-3}: For this I
 will show two corollaries of \ref{eq:coeCod}: For an isomorphism $(\iota,
 \inv{\iota}, \var{inv}) \tp A \cong B$, arrows $f \tp \Arrow\ A\ X$, $g \tp
@@ -1108,7 +1114,7 @@ To show that this choice fits the bill I must now verify that it satisfies
 \ref{eq:pairArrowLaw}, which in this case becomes:
 %
 \begin{align}
-y_{\mathcal{A}} \lll f ≡ x_{\mathcal{A}} × y_{\mathcal{B}} \lll f ≡ x_{\mathcal{B}}
+(y_{\mathcal{A}} \lll f ≡ x_{\mathcal{A}}) × (y_{\mathcal{B}} \lll f ≡ x_{\mathcal{B}})
 \end{align}
 %
 Which, since $f$ is an isomorphism and $p_{\mathcal{A}}$ (resp.\ $p_{\mathcal{B}}$)
@@ -1217,10 +1223,11 @@ indeed a product. That is, for an object $Y$ and two arrows $y_𝒜 \tp
 %
 \begin{align}
 \label{eq:pairCondRev}
-\begin{split}
-  x_𝒜 \lll f & ≡ y_𝒜 \\
-  x_ℬ \lll f & ≡ y_ℬ
-\end{split}
+%% \begin{split}
+  ( x_𝒜 \lll f ≡ y_𝒜 )
+  \x
+  ( x_ℬ \lll f ≡ y_ℬ )
+%% \end{split}
 \end{align}
 %
 Since $X, x_𝒜, x_ℬ$ is a terminal object there is a \emph{unique} arrow from
@@ -1250,8 +1257,9 @@ of proofs:
 Here $\Phi$ is given as:
 $$
 \prod_{f \tp \Arrow\ Y\ X}
-  x_𝒜 \lll f ≡ y_𝒜
-× x_ℬ \lll f ≡ y_ℬ
+  ( x_𝒜 \lll f ≡ y_𝒜 )
+  ×
+  ( x_ℬ \lll f ≡ y_ℬ )
 $$
 %
 $p$ follows from the universal property of $y_𝒜 \x y_ℬ$. For the latter we will
@@ -1260,8 +1268,9 @@ more general result:
 %
 $$
 \prod_{f \tp \Arrow\ Y\ X} \isProp\ (
-  x_𝒜 \lll f ≡ y_𝒜
-× x_ℬ \lll f ≡ y_ℬ
+( x_𝒜 \lll f ≡ y_𝒜 )
+×
+( x_ℬ \lll f ≡ y_ℬ )
 )
 $$
 %
