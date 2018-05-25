@@ -1,5 +1,5 @@
 build: src/**.agda
-	agda src/Cat.agda
+	agda --library-file ./libraries src/Cat.agda
 
 clean:
 	find src -name "*.agdai" -type f -delete
