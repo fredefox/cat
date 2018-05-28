@@ -1,4 +1,5 @@
 \documentclass[a4paper,handout]{beamer}
+\usetheme{metropolis}
 \beamertemplatenavigationsymbolsempty
 %% \usecolortheme[named=seagull]{structure}
 
@@ -21,28 +22,28 @@
   \framesubtitle{Functional extensionality}
   Consider the functions
   \begin{align*}
-    \var{zeroLeft}  & \defeq \lambda (n \tp \bN) \mto (0 + n \tp \bN) \\
-    \var{zeroRight} & \defeq \lambda (n \tp \bN) \mto (n + 0 \tp \bN)
+    \var{zeroLeft}  & ≜ \lambda (n \tp \bN) \mto (0 + n \tp \bN) \\
+    \var{zeroRight} & ≜ \lambda (n \tp \bN) \mto (n + 0 \tp \bN)
   \end{align*}
   \pause
   We have
   %
   $$
-  \prod_{n \tp \bN} \var{zeroLeft}\ n \equiv \var{zeroRight}\ n
+  ∏_{n \tp \bN} \var{zeroLeft}\ n ≡ \var{zeroRight}\ n
   $$
   %
   \pause
   But not
   %
   $$
-  \var{zeroLeft} \equiv \var{zeroRight}
+  \var{zeroLeft} ≡ \var{zeroRight}
   $$
   %
   \pause
   We need
   %
   $$
-  \funExt \tp \prod_{a \tp A} f\ a \equiv g\ a \to f \equiv g
+  \funExt \tp ∏_{a \tp A} f\ a ≡ g\ a → f ≡ g
   $$
 \end{frame}
 \begin{frame}
@@ -52,20 +53,20 @@
   $\{x \mid \phi\ x \land \psi\ x\}$
   \pause
 
-  If we show $\forall x . \psi\ x \equiv \top$
+  If we show $∀ x . \psi\ x ≡ \top$
   then we want to conclude
-  $\{x \mid \phi\ x \land \psi\ x\} \equiv \{x \mid \phi\ x\}$
+  $\{x \mid \phi\ x \land \psi\ x\} ≡ \{x \mid \phi\ x\}$
   \pause
 
   We need univalence:
-  $$(A \simeq B) \simeq (A \equiv B)$$
+  $$(A ≃ B) ≃ (A ≡ B)$$
   \pause
   %
-  We will return to $\simeq$, but for now think of it as an
+  We will return to $≃$, but for now think of it as an
   isomorphism, so it induces maps:
   \begin{align*}
-    \var{toPath}  & \tp (A \simeq B) \to (A \equiv B) \\
-    \var{toEquiv} & \tp (A \equiv B) \to (A \simeq B)
+    \var{toPath}  & \tp (A ≃ B) → (A ≡ B) \\
+    \var{toEquiv} & \tp (A ≡ B) → (A ≃ B)
   \end{align*}
 \end{frame}
 \begin{frame}
@@ -76,11 +77,11 @@
     \Path \tp (P \tp I → \MCU) → P\ 0 → P\ 1 → \MCU
   \end{equation*}
   \pause
-  For $P \tp I \to \MCU$, $A \tp \MCU$ and $a_0, a_1 \tp A$
+  For $P \tp I → \MCU$, $A \tp \MCU$ and $a_0, a_1 \tp A$
   inhabitants of $\Path\ P\ a_0\ a_1$ are like functions
   %
   $$
-  p \tp \prod_{i \tp I} P\ i
+  p \tp ∏_{i \tp I} P\ i
   $$
   %
   Which satisfy $p\ 0 & = a_0$ and $p\ 1 & = a_1$
@@ -88,46 +89,46 @@
 
   Homogenous paths
   $$
-  a_0 \equiv a_1 \defeq \Path\ (\var{const}\ A)\ a_0\ a_1
+  a_0 ≡ a_1 ≜ \Path\ (\var{const}\ A)\ a_0\ a_1
   $$
 \end{frame}
 \begin{frame}
   \frametitle{Paths}
   \framesubtitle{Functional extenstionality}
   $$
-  \funExt & \tp \prod_{a \tp A} f\ a \equiv g\ a \to f \equiv g
+  \funExt & \tp ∏_{a \tp A} f\ a ≡ g\ a → f ≡ g
   $$
   \pause
   $$
-  \funExt\ p \defeq λ i\ a → p\ a\ i
+  \funExt\ p ≜ λ i\ a → p\ a\ i
   $$
   \pause
   $$
   \funExt\ (\var{const}\ \refl)
   \tp
-  \var{zeroLeft} \equiv \var{zeroRight}
+  \var{zeroLeft} ≡ \var{zeroRight}
   $$
 \end{frame}
 \begin{frame}
   \frametitle{Paths}
   \framesubtitle{Homotopy levels}
   \begin{align*}
-    & \isContr    && \tp    \MCU \to \MCU \\
-    & \isContr\ A && \defeq \sum_{c \tp A} \prod_{a \tp A} a \equiv c
+    & \isContr    && \tp    \MCU → \MCU \\
+    & \isContr\ A && ≜ ∑_{c \tp A} ∏_{a \tp A} a ≡ c
   \end{align*}
   \pause
   \begin{align*}
-    & \isProp    && \tp \MCU \to \MCU \\
-    & \isProp\ A && \defeq \prod_{a_0, a_1 \tp A} a_0 \equiv a_1
+    & \isProp    && \tp \MCU → \MCU \\
+    & \isProp\ A && ≜ ∏_{a_0, a_1 \tp A} a_0 ≡ a_1
   \end{align*}
   \pause
   \begin{align*}
-    & \isSet    && \tp \MCU \to \MCU \\
-    & \isSet\ A && \defeq \prod_{a_0, a_1 \tp A} \isProp\ (a_0 \equiv a_1)
+    & \isSet    && \tp \MCU → \MCU \\
+    & \isSet\ A && ≜ ∏_{a_0, a_1 \tp A} \isProp\ (a_0 ≡ a_1)
   \end{align*}
   \begin{align*}
-    & \isGroupoid    && \tp \MCU \to \MCU \\
-    & \isGroupoid\ A && \defeq \prod_{a_0, a_1 \tp A} \isSet\ (a_0 \equiv a_1)
+    & \isGroupoid    && \tp \MCU → \MCU \\
+    & \isGroupoid\ A && ≜ ∏_{a_0, a_1 \tp A} \isSet\ (a_0 ≡ a_1)
   \end{align*}
 \end{frame}
 \begin{frame}
@@ -135,7 +136,7 @@
   \framesubtitle{A few lemmas}
   Let $D$ be a type-family:
   $$
-  D \tp \prod_{b \tp A} \prod_{p \tp a ≡ b} \MCU
+  D \tp ∏_{b \tp A} ∏_{p \tp a ≡ b} \MCU
   $$
   %
   \pause
@@ -149,7 +150,7 @@
   We then have the function:
   %
   $$
-    \pathJ\ D\ d \tp \prod_{b \tp A} \prod_{p \tp a ≡ b} D\ b\ p
+    \pathJ\ D\ d \tp ∏_{b \tp A} ∏_{p \tp a ≡ b} D\ b\ p
   $$
 \end{frame}
 \begin{frame}
@@ -158,9 +159,9 @@
   Given
   \begin{align*}
     A           & \tp \MCU \\
-    P           & \tp A \to \MCU \\
-    \var{propP} & \tp \prod_{x \tp A} \isProp\ (P\ x) \\
-    p           & \tp a_0 \equiv a_1 \\
+    P           & \tp A → \MCU \\
+    \var{propP} & \tp ∏_{x \tp A} \isProp\ (P\ x) \\
+    p           & \tp a_0 ≡ a_1 \\
     p_0         & \tp P\ a_0 \\
     p_1         & \tp P\ a_1
   \end{align*}
@@ -176,17 +177,17 @@
 \begin{frame}
   \frametitle{Paths}
   \framesubtitle{A few lemmas}
-  $\prod$ preserves $\isProp$:
+  $∏$ preserves $\isProp$:
   $$
   \mathit{propPi}
   \tp
-  \left(\prod_{a \tp A} \isProp\ (P\ a)\right)
-  \to \isProp\ \left(\prod_{a \tp A} P\ a\right)
+  \left(∏_{a \tp A} \isProp\ (P\ a)\right)
+  → \isProp\ \left(∏_{a \tp A} P\ a\right)
   $$
   \pause
-  $\sum$ preserves $\isProp$:
+  $∑$ preserves $\isProp$:
   $$
-  \mathit{propSig} \tp \isProp\ A \to \left(\prod_{a \tp A} \isProp\ (P\ a)\right) \to \isProp\ \left(\sum_{a \tp A} P\ a\right)
+  \mathit{propSig} \tp \isProp\ A → \left(∏_{a \tp A} \isProp\ (P\ a)\right) → \isProp\ \left(∑_{a \tp A} P\ a\right)
   $$
 \end{frame}
 \begin{frame}
@@ -195,9 +196,9 @@
   Data:
   \begin{align*}
     \Object   & \tp \Type \\
-    \Arrow    & \tp \Object \to \Object \to \Type \\
+    \Arrow    & \tp \Object → \Object → \Type \\
     \identity & \tp \Arrow\ A\ A \\
-    \lll      & \tp \Arrow\ B\ C \to \Arrow\ A\ B \to \Arrow\ A\ C
+    \lll      & \tp \Arrow\ B\ C → \Arrow\ A\ B → \Arrow\ A\ C
   \end{align*}
   %
   \pause
@@ -208,7 +209,7 @@
   $$
   $$
   (\identity \lll f ≡ f)
-  \x
+  ×
   (f \lll \identity ≡ f)
   $$
   \pause
@@ -221,7 +222,7 @@
   \frametitle{Pre categories}
   \framesubtitle{Propositionality}
   $$
-  \isProp\ \left( (\identity \comp f \equiv f) \x (f \comp \identity \equiv f) \right)
+  \isProp\ \left( (\identity \comp f ≡ f) × (f \comp \identity ≡ f) \right)
   $$
   \pause
   \begin{align*}
@@ -247,14 +248,17 @@
   \frametitle{Categories}
   \framesubtitle{Univalence}
   \begin{align*}
-    \var{IsIdentity} & \defeq
-    \prod_{A\ B \tp \Object} \prod_{f \tp \Arrow\ A\ B} \phi\ f
+    \var{IsIdentity} & ≜
+    ∏_{A\ B \tp \Object} ∏_{f \tp \Arrow\ A\ B} \phi\ f
     %% \\
-    %%   & \mathrel{\ } \identity \lll f \equiv f \x f \lll \identity \equiv f
+    %%   & \mathrel{\ } \identity \lll f ≡ f × f \lll \identity ≡ f
   \end{align*}
   where
   $$
-  \phi\ f \defeq \identity \lll f \equiv f \x f \lll \identity \equiv f
+  \phi\ f ≜ \identity
+  ( \lll f ≡ f )
+  ×
+  ( f \lll \identity ≡ f)
   $$
   \pause
   Let $\approxeq$ denote ismorphism of objects. We can then construct
@@ -271,29 +275,29 @@
   For a category to be univalent we require this to be an equivalence:
   %
   $$
-  \isEquiv\ (A \equiv B)\ (A \approxeq B)\ \idToIso
+  \isEquiv\ (A ≡ B)\ (A \approxeq B)\ \idToIso
   $$
   %
 \end{frame}
 \begin{frame}
   \frametitle{Categories}
   \framesubtitle{Univalence, cont'd}
-  $$\isEquiv\ (A \equiv B)\ (A \approxeq B)\ \idToIso$$
+  $$\isEquiv\ (A ≡ B)\ (A \approxeq B)\ \idToIso$$
   \pause%
-  $$(A \equiv B) \simeq (A \approxeq B)$$
+  $$(A ≡ B) ≃ (A \approxeq B)$$
   \pause%
-  $$(A \equiv B) \cong (A \approxeq B)$$
+  $$(A ≡ B) ≅ (A \approxeq B)$$
   \pause%
   Name the above maps:
   $$\idToIso \tp A ≡ B → A ≊ B$$
   %
-  $$\isoToId \tp (A \approxeq B) \to (A \equiv B)$$
+  $$\isoToId \tp (A \approxeq B) → (A ≡ B)$$
 \end{frame}
 \begin{frame}
   \frametitle{Categories}
   \framesubtitle{Propositionality}
   $$
-  \isProp\ \IsCategory = \prod_{a, b \tp \IsCategory} a \equiv b
+  \isProp\ \IsCategory = ∏_{a, b \tp \IsCategory} a ≡ b
   $$
   \pause
   So, for
@@ -303,8 +307,8 @@
   the proof obligation is the pair:
   %
   \begin{align*}
-    p & \tp a.\isPreCategory \equiv b.\isPreCategory \\
-    & \mathrel{\ } \Path\ (\lambda\; i \to (p\ i).Univalent)\ a.\isPreCategory\ b.\isPreCategory
+    p & \tp a.\isPreCategory ≡ b.\isPreCategory \\
+    & \mathrel{\ } \Path\ (\lambda\; i → (p\ i).Univalent)\ a.\isPreCategory\ b.\isPreCategory
   \end{align*}
 \end{frame}
 \begin{frame}
@@ -313,17 +317,17 @@
   First path given by:
   $$
   p
-  \defeq
+  ≜
   \var{propIsPreCategory}\ a\ b
   \tp
-  a.\isPreCategory \equiv b.\isPreCategory
+  a.\isPreCategory ≡ b.\isPreCategory
   $$
   \pause
   Use $\lemPropF$ for the latter.
   \pause
   %
-  Univalence is indexed by an identity proof. So $A \defeq
-  IsIdentity\ identity$ and $B \defeq \var{Univalent}$.
+  Univalence is indexed by an identity proof. So $A ≜
+  IsIdentity\ identity$ and $B ≜ \var{Univalent}$.
   \pause
   %
   $$
@@ -342,16 +346,16 @@
   The isomorphism induces the path
   %
   $$
-  p \defeq \idToIso\ (\iota, \inv{\iota}) \tp A \equiv B
+  p ≜ \idToIso\ (\iota, \inv{\iota}) \tp A ≡ B
   $$
   %
   \pause
   and consequently an arrow:
   %
   $$
-  p_{\var{dom}} \defeq \congruence\ (λ x → \Arrow\ x\ X)\ p
+  p_{\var{dom}} ≜ \congruence\ (λ x → \Arrow\ x\ X)\ p
   \tp
-  \Arrow\ A\ X \equiv \Arrow\ B\ X
+  \Arrow\ A\ X ≡ \Arrow\ B\ X
   $$
   %
   \pause
@@ -360,8 +364,8 @@
   \begin{align}
     \label{eq:coeDom}
     \tag{$\var{coeDom}$}
-    \prod_{f \tp A \to X}
-    \var{coe}\ p_{\var{dom}}\ f \equiv f \lll \inv{\iota}
+    ∏_{f \tp A → X}
+    \var{coe}\ p_{\var{dom}}\ f ≡ f \lll \inv{\iota}
   \end{align}
 \end{frame}
 \begin{frame}
@@ -369,23 +373,23 @@
   \framesubtitle{A theorem, proof}
   \begin{align*}
     \var{coe}\ p_{\var{dom}}\ f
-    & \equiv f \lll \inv{(\idToIso\ p)} && \text{By path-induction} \\
-    & \equiv f \lll \inv{\iota}
+    & ≡ f \lll \inv{(\idToIso\ p)} && \text{By path-induction} \\
+    & ≡ f \lll \inv{\iota}
     && \text{$\idToIso$ and $\isoToId$ are inverses}\\
   \end{align*}
   \pause
   %
   Induction will be based at $A$. Let $\widetilde{B}$ and $\widetilde{p}
-  \tp A \equiv \widetilde{B}$ be given.
+  \tp A ≡ \widetilde{B}$ be given.
   %
   \pause
   %
   Define the family:
   %
   $$
-  D\ \widetilde{B}\ \widetilde{p} \defeq
+  D\ \widetilde{B}\ \widetilde{p} ≜
   \var{coe}\ \widetilde{p}_{\var{dom}}\ f
-  \equiv
+  ≡
   f \lll \inv{(\idToIso\ \widetilde{p})}
   $$
   \pause
@@ -393,7 +397,7 @@
   The base-case becomes:
   $$
   d \tp D\ A\ \refl =
-  \var{coe}\ \refl_{\var{dom}}\ f \equiv f \lll \inv{(\idToIso\ \refl)}
+  \var{coe}\ \refl_{\var{dom}}\ f ≡ f \lll \inv{(\idToIso\ \refl)}
   $$
 \end{frame}
 \begin{frame}
@@ -401,17 +405,17 @@
   \framesubtitle{A theorem, proof, cont'd}
   $$
   d \tp
-  \var{coe}\ \refl_{\var{dom}}\ f \equiv f \lll \inv{(\idToIso\ \refl)}
+  \var{coe}\ \refl_{\var{dom}}\ f ≡ f \lll \inv{(\idToIso\ \refl)}
   $$
   \pause
   \begin{align*}
     \var{coe}\ \refl^*\ f
-    & \equiv f
+    & ≡ f
     && \text{$\refl$ is a neutral element for $\var{coe}$}\\
-    & \equiv f \lll \identity \\
-    & \equiv f \lll \var{subst}\ \refl\ \identity
+    & ≡ f \lll \identity \\
+    & ≡ f \lll \var{subst}\ \refl\ \identity
     && \text{$\refl$ is a neutral element for $\var{subst}$}\\
-    & \equiv f \lll \inv{(\idToIso\ \refl)}
+    & ≡ f \lll \inv{(\idToIso\ \refl)}
     && \text{By definition of $\idToIso$}\\
   \end{align*}
   \pause
@@ -429,7 +433,7 @@
   \pause
   Objects:
   $$
-  \sum_{X \tp Object} \Arrow\ X\ \pairA × \Arrow\ X\ \pairB
+  ∑_{X \tp Object} \Arrow\ X\ \pairA × \Arrow\ X\ \pairB
   $$
   \pause
   %
@@ -437,9 +441,9 @@
   $B ,\ b_{\pairA} ,\ b_{\pairB}$:
   %
   $$
-  \sum_{f \tp \Arrow\ A\ B}
-  b_{\pairA} \lll f \equiv a_{\pairA} \x
-  b_{\pairB} \lll f \equiv a_{\pairB}
+  ∑_{f \tp \Arrow\ A\ B}
+  b_{\pairA} \lll f ≡ a_{\pairA} ×
+  b_{\pairB} \lll f ≡ a_{\pairB}
   $$
 \end{frame}
 \begin{frame}
@@ -447,25 +451,25 @@
   \framesubtitle{Univalence}
   \begin{align*}
     \label{eq:univ-0}
-    (X , x_{\mathcal{A}} , x_{\mathcal{B}}) ≡ (Y , y_{\mathcal{A}} , y_{\mathcal{B}})
+    (X , x_{𝒜} , x_{ℬ}) ≡ (Y , y_{𝒜} , y_{ℬ})
   \end{align*}
   \begin{align*}
     \label{eq:univ-1}
     \begin{split}
-      p \tp & X \equiv Y \\
-      & \Path\ (λ i → \Arrow\ (p\ i)\ \mathcal{A})\ x_{\mathcal{A}}\ y_{\mathcal{A}} \\
-      & \Path\ (λ i → \Arrow\ (p\ i)\ \mathcal{B})\ x_{\mathcal{B}}\ y_{\mathcal{B}}
+      p \tp & X ≡ Y \\
+      & \Path\ (λ i → \Arrow\ (p\ i)\ 𝒜)\ x_{𝒜}\ y_{𝒜} \\
+      & \Path\ (λ i → \Arrow\ (p\ i)\ ℬ)\ x_{ℬ}\ y_{ℬ}
     \end{split}
   \end{align*}
   \begin{align*}
     \begin{split}
       \var{iso} \tp & X \approxeq Y \\
-      & \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ \mathcal{A})\ x_{\mathcal{A}}\ y_{\mathcal{A}} \\
-      & \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ \mathcal{B})\ x_{\mathcal{B}}\ y_{\mathcal{B}}
+      & \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ 𝒜)\ x_{𝒜}\ y_{𝒜} \\
+      & \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ ℬ)\ x_{ℬ}\ y_{ℬ}
     \end{split}
   \end{align*}
   \begin{align*}
-    (X , x_{\mathcal{A}} , x_{\mathcal{B}}) ≊ (Y , y_{\mathcal{A}} , y_{\mathcal{B}})
+    (X , x_{𝒜} , x_{ℬ}) ≊ (Y , y_{𝒜} , y_{ℬ})
   \end{align*}
 \end{frame}
 \begin{frame}
@@ -475,12 +479,12 @@
   \begin{align*}
     %% (f, \inv{f}, \var{inv}_f, \var{inv}_{\inv{f}})
     %% \tp
-    (X, x_{\mathcal{A}}, x_{\mathcal{B}}) \approxeq (Y, y_{\mathcal{A}}, y_{\mathcal{B}})
+    (X, x_{𝒜}, x_{ℬ}) \approxeq (Y, y_{𝒜}, y_{ℬ})
     \to
     \begin{split}
       \var{iso} \tp & X \approxeq Y \\
-      & \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ \mathcal{A})\ x_{\mathcal{A}}\ y_{\mathcal{A}} \\
-      & \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ \mathcal{B})\ x_{\mathcal{B}}\ y_{\mathcal{B}}
+      & \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ 𝒜)\ x_{𝒜}\ y_{𝒜} \\
+      & \Path\ (λ i → \Arrow\ (\widetilde{p}\ i)\ ℬ)\ x_{ℬ}\ y_{ℬ}
     \end{split}
   \end{align*}
   \pause
@@ -503,8 +507,8 @@
   %
   \begin{align*}
     \begin{split}
-      \widetilde{p} & \tp X \equiv Y \\
-      \widetilde{p}_{\mathcal{A}} & \tp \Arrow\ X\ \mathcal{A} \equiv \Arrow\ Y\ \mathcal{A} \\
+      \widetilde{p} & \tp X ≡ Y \\
+      \widetilde{p}_{𝒜} & \tp \Arrow\ X\ 𝒜 ≡ \Arrow\ Y\ 𝒜 \\
     \end{split}
   \end{align*}
   %
@@ -517,7 +521,7 @@
   \begin{align*}
     \begin{split}
       \label{eq:product-paths}
-      & \Path\ (λ i → \widetilde{p}_{\mathcal{A}}\ i)\ x_{\mathcal{A}}\ y_{\mathcal{A}}
+      & \Path\ (λ i → \widetilde{p}_{𝒜}\ i)\ x_{𝒜}\ y_{𝒜}
     \end{split}
   \end{align*}
   \pause
@@ -525,9 +529,9 @@
   This is achieved with the following lemma:
   %
   \begin{align*}
-    \prod_{q \tp A \equiv B} \var{coe}\ q\ x_{\mathcal{A}} ≡ y_{\mathcal{A}}
+    ∏_{q \tp A ≡ B} \var{coe}\ q\ x_{𝒜} ≡ y_{𝒜}
     →
-    \Path\ (λ i → q\ i)\ x_{\mathcal{A}}\ y_{\mathcal{A}}
+    \Path\ (λ i → q\ i)\ x_{𝒜}\ y_{𝒜}
   \end{align*}
   %
   Which is used without proof.\pause
@@ -535,15 +539,15 @@
   So the construction reduces to:
   %
   \begin{align*}
-    \var{coe}\ \widetilde{p}_{\mathcal{A}}\ x_{\mathcal{A}} ≡ y_{\mathcal{A}}
+    \var{coe}\ \widetilde{p}_{𝒜}\ x_{𝒜} ≡ y_{𝒜}
   \end{align*}%
   \pause%
   This is proven with:
   %
   \begin{align*}
-    \var{coe}\ \widetilde{p}_{\mathcal{A}}\ x_{\mathcal{A}}
-    & ≡ x_{\mathcal{A}} \lll \fst\ \inv{f} && \text{\ref{eq:coeDom}} \\
-    & ≡ y_{\mathcal{A}} && \text{Property of span category}
+    \var{coe}\ \widetilde{p}_{𝒜}\ x_{𝒜}
+    & ≡ x_{𝒜} \lll \fst\ \inv{f} && \text{\ref{eq:coeDom}} \\
+    & ≡ y_{𝒜} && \text{Property of span category}
   \end{align*}
 \end{frame}
 \begin{frame}
@@ -556,13 +560,13 @@
   %
   We can show:
   \begin{align*}
-    \var{Terminal} ≃ \var{Product}\ ℂ\ \mathcal{A}\ \mathcal{B}
+    \var{Terminal} ≃ \var{Product}\ ℂ\ 𝒜\ ℬ
   \end{align*}
   \pause
   And since equivalences preserve homotopy levels we get:
   %
   $$
-  \isProp\ \left(\var{Product}\ \bC\ \mathcal{A}\ \mathcal{B}\right)
+  \isProp\ \left(\var{Product}\ \bC\ 𝒜\ ℬ\right)
   $$
 \end{frame}
 \begin{frame}
@@ -595,7 +599,7 @@
   %
   \begin{align*}
     \omapR & \tp \Object → \Object \\
-    \pure  & \tp % \prod_{X \tp Object}
+    \pure  & \tp % ∏_{X \tp Object}
     \Arrow\ X\ (\omapR\ X) \\
     \bind  & \tp
     \Arrow\ X\ (\omapR\ Y)
@@ -610,7 +614,7 @@
     \Arrow\ B\ (\omapR\ C)
     →
     \Arrow\ A\ (\omapR\ C) \\
-    f \fish g & \defeq f \rrr (\bind\ g)
+    f \fish g & ≜ f \rrr (\bind\ g)
   \end{align*}
   \pause
   %
@@ -629,20 +633,20 @@
   In the monoidal formulation we can define $\bind$:
   %
   $$
-  \bind\ f \defeq \join \lll \fmap\ f
+  \bind\ f ≜ \join \lll \fmap\ f
   $$
   \pause
   %
   And likewise in the Kleisli formulation we can define $\join$:
   %
   $$
-  \join \defeq \bind\ \identity
+  \join ≜ \bind\ \identity
   $$
   \pause
   The laws are logically equivalent. So we get:
   %
   $$
-  \var{Monoidal} \simeq \var{Kleisli}
+  \var{Monoidal} ≃ \var{Kleisli}
   $$
   %
 \end{frame}

@@ -90,7 +90,7 @@ been put towards proving things that would not have been needed in
 classical Agda. The proofs that some given type is a proposition were
 provided as a strategy to simplify some otherwise very complicated
 proofs (e.g. \ref{eq:proof-prop-IsPreCategory}
-and \label{eq:productPath}). Often these proofs would not be this
+and \ref{eq:productPath}). Often these proofs would not be this
 complicated. If the J-rule holds definitionally the proof-assistant
 can help simplify these goals considerably. The lack of the J-rule has
 a significant impact on the complexity of these kinds of proofs.
@@ -112,11 +112,6 @@ very simple example this is of course not a big problem, but there are
 examples in the source code where this gets more involved.
 
 \section{Future work}
-\subsection{Agda \texttt{Prop}}
-Jesper Cockx' work extending the universe-level-laws for Agda and the
-\texttt{Prop}-type.
-\TODO{Do I want to include this?}
-
 \subsection{Compiling Cubical Agda}
 \label{sec:compiling-cubical-agda}
 Compilation of program written in Cubical Agda is currently not
@@ -137,3 +132,9 @@ in the context of Category Theory.
 A fellow student here at Chalmers, Andreas Källberg, is currently
 working on proving the initiality conjecture\TODO{Citation}. He will
 be using this library to do so.
+
+\subsection{Proving laws of programs}
+Another interesting thing would be to use the Kleisli formulation of
+monads to prove properties of functional programs. The existence of
+univalence will make it possible to re-use proofs stated in terms of
+the monoidal formulation in this setting.

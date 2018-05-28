@@ -1,29 +1,31 @@
 \chapter{Cubical Agda}
 \section{Propositional equality}
-Judgmental equality in Agda is a feature of the type system. Its something that
-can be checked automatically by the type checker: In the example from the
-introduction $n + 0$ can be judged to be equal to $n$ simply by expanding the
-definition of $+$.
+Judgmental equality in Agda is a feature of the type system. It is
+something that can be checked automatically by the type checker: In
+the example from the introduction $n + 0$ can be judged to be equal to
+$n$ simply by expanding the definition of $+$.
 
-On the other hand, propositional equality is something defined within the
-language itself. Propositional equality cannot be derived automatically. The
-normal definition of judgmental equality is an inductive data type. Cubical Agda
-discards this type in favor of a new primitives that has certain computational
-properties exclusive to it.
+On the other hand, propositional equality is something defined within
+the language itself. Propositional equality cannot be derived
+automatically. The normal definition of judgmental equality is an
+inductive data type. Cubical Agda discards this type in favor of some
+new primitives.
 
-The source code can be browsed online and is linked in the beginning
-of \S\ref{ch:implementation}.
+Most of the source code related with this section is implemented in
+\cite{cubical-demo} it can be browsed in hyperlinked and syntax
+highlighted HTML online. The links can be found in the beginning of
+section \S\ref{ch:implementation}.
 
 \subsection{The equality type}
-The usual notion of judgmental equality says that given a type $A \tp \MCU$ and
-two points of $A$; $a_0, a_1 \tp A$ we can form the type:
+The usual notion of judgmental equality says that given a type $A \tp
+\MCU$ and two points hereof $a_0, a_1 \tp A$ we can form the type:
 %
 \begin{align}
   a_0 \equiv a_1 \tp \MCU
 \end{align}
 %
-In Agda this is defined as an inductive data type with the single constructor
-for any $a \tp A$:
+In Agda this is defined as an inductive data type with the single
+constructor $\refl$ that for any $a \tp A$ gives:
 %
 \begin{align}
   \refl \tp a \equiv a
@@ -37,8 +39,8 @@ for equating points of different types. In this case given two types $A, B \tp
   a \cong b \tp \MCU
 \end{align}
 %
-This is likewise defined as an inductive data type with a single constructors
-for any $a \tp A$:
+This likewise has the single constructor $\refl$ that for any $a \tp
+A$ gives:
 %
 \begin{align}
   \refl \tp a \cong a
@@ -51,28 +53,28 @@ heterogeneous paths respectively.
 Judgmental equality in Cubical Agda is encapsulated with the type:
 %
 \begin{equation}
-\Path \tp (P \tp I → \MCU) → P\ 0 → P\ 1 → \MCU
+\Path \tp (P \tp \I → \MCU) → P\ 0 → P\ 1 → \MCU
 \end{equation}
 %
-$I$ is a special data type called the index set. $I$ can be thought of
-simply as the interval on the real numbers from $0$ to $1$. $P$ is a
-family of types over the index set $I$. I will sometimes refer to $P$
-as the \nomenindex{path space} of some path $p \tp \Path\ P\ a\ b$. By
-this token $P\ 0$ then corresponds to the type at the left-endpoint
-and $P\ 1$ as the type at the right-endpoint. The type is called
-$\Path$ because it is connected with paths in homotopy theory. The
-intuition behind this is that $\Path$ describes paths in $\MCU$ --
-i.e.\ between types. For a path $p$ for the point $p\ i$ the index $i$
-describes how far along the path one has moved. An inhabitant of
-$\Path\ P\ a_0\ a_1$ is a (dependent-) function, $p$, from the
-index-space to the path space:
+The special type $\I$ is called the index set. The index set can be
+thought of simply as the interval on the real numbers from $0$ to $1$
+(both inclusive). The family $P$ over $\I$ will be referred to as the
+\nomenindex{path space} given some path $p \tp \Path\ P\ a\ b$. By
+that token $P\ 0$ corresponds to the type at the left endpoint of $p$.
+Likewise $P\ 1$ is the type at the right endpoint. The type is called
+$\Path$ because the idea has roots in homotopy theory. The intuition
+is that $\Path$ describes\linebreak[1] paths in $\MCU$. I.e.\ paths
+between types. For a path $p$ the expression $p\ i$ can be thought of
+as a \emph{point} on this path. The index $i$ describes how far along
+the path one has moved. An inhabitant of $\Path\ P\ a_0\ a_1$ is a
+(dependent) function from the index set to the path space:
 %
 $$
-p \tp \prod_{i \tp I} P\ i
+p \tp \prod_{i \tp \I} P\ i
 $$
 %
-Which must satisfy being judgmentally equal to $a_0$ (respectively $a_1$) at the
-endpoints. I.e.:
+Which must satisfy being judgmentally equal to $a_0$ at the
+left endpoint and equal to $a_1$ at the other end. I.e.:
 %
 \begin{align*}
   p\ 0 & = a_0 \\
@@ -80,80 +82,77 @@ endpoints. I.e.:
 \end{align*}
 %
 The notion of \nomenindex{homogeneous equalities} is recovered when $P$ does not
-depend on its argument. That is for $A \tp \MCU$, $a_0, a_1 \tp A$ the
+depend on its argument. That is for $A \tp \MCU$ and $a_0, a_1 \tp A$ the
 homogenous equality between $a_0$ and $a_1$ is the type:
 %
 $$
-a_0 \equiv a_1 \defeq \Path\ (\lambda i \to A)\ a_0\ a_1
+a_0 \equiv a_1 \defeq \Path\ (\lambda\;i \to A)\ a_0\ a_1
 $$
 %
-I will generally prefer to use the notation
-$a \equiv b$ when talking about non-dependent paths and use the notation
-$\Path\ (\lambda i \to P\ i)\ a\ b$ when the path space is of particular
-interest.
+I will generally prefer to use the notation $a \equiv b$ when talking
+about non-dependent paths and use the notation $\Path\ (\lambda\; i
+\to P\ i)\ a\ b$ when the path space is of particular interest.
 
 With this definition we can also recover reflexivity. That is, for any $A \tp
 \MCU$ and $a \tp A$:
 %
 \begin{equation}
 \begin{aligned}
-\refl & \tp \Path (\lambda i \to A)\ a\ a \\
-\refl & \defeq \lambda i \to a
+\refl & \tp a \equiv a \\
+\refl & \defeq \lambda\; i \to a
 \end{aligned}
 \end{equation}
 %
-Here the path space is $P \defeq \lambda i \to A$ and it satsifies $P\ i = A$
-definitionally. So to inhabit it, is to give a path $I \to A$ which is
-judgmentally $a$ at either endpoint. This is satisfied by the constant path;
-i.e.\ the path that stays at $a$ at any index $i$.
+Here the path space is $P \defeq \lambda\; i \to A$ and it satsifies
+$P\ i = A$ definitionally. So to inhabit it, is to give a path $\I \to
+A$ which is judgmentally $a$ at either endpoint. This is satisfied by
+the constant path; i.e.\ the path that is constantly $a$ at any index
+$i \tp \I$.
 
-It is also surpisingly easy to show functional extensionality with which we can
-construct a path between $f$ and $g$ -- the functions defined in the
-introduction (section \S\ref{sec:functional-extensionality}). Functional
-extensionality is the proposition, given a type $A \tp \MCU$, a family of types
-$B \tp A \to \MCU$ and functions $f, g \tp \prod_{a \tp A} B\ a$:
+It is also surprisingly easy to show functional extensionality.
+Functional extensionality is the proposition that given a type $A \tp
+\MCU$, a family of types $B \tp A \to \MCU$ and functions $f, g \tp
+\prod_{a \tp A} B\ a$ gives:
 %
 \begin{equation}
 \label{eq:funExt}
-\funExt \tp \prod_{a \tp A} f\ a \equiv g\ a \to f \equiv g
+\funExt \tp \left(\prod_{a \tp A} f\ a \equiv g\ a \right) \to f \equiv g
 \end{equation}
 %
-%% p = λ i a → p a i
-So given $p \tp \prod_{a \tp A} f\ a \equiv g\ a$ we must give a path $f \equiv
-g$. That is a function $I \to \prod_{a \tp A} B\ a$. So let $i \tp I$ be given.
+%% p = λ\; i a → p a i
+So given $η \tp \prod_{a \tp A} f\ a \equiv g\ a$ we must give a path $f \equiv
+g$. That is a function $\I \to \prod_{a \tp A} B\ a$. So let $i \tp \I$ be given.
 We must now give an expression $\phi \tp \prod_{a \tp A} B\ a$ satisfying
 $\phi\ 0 \equiv f\ a$ and $\phi\ 1 \equiv g\ a$. This neccesitates that the
 expression must be a lambda-abstraction, so let $a \tp A$ be given. Now we can
-apply $a$ to $p$ and get the path $p\ a \tp f\ a \equiv g\ a$. And this exactly
-satisfied the conditions for $\phi$. In conclustion \ref{eq:funExt} is inhabited
+apply $a$ to $η$ and get the path $η\ a \tp f\ a \equiv g\ a$. And this exactly
+satisfies the conditions for $\phi$. In conclustion \ref{eq:funExt} is inhabited
 by the term:
 %
-\begin{equation}
-\label{eq:funExt}
-\funExt\ p \defeq λ i\ a → p\ a\ i
-\end{equation}
+\begin{equation*}
+\funExt\ η \defeq λ\; i\ a → η\ a\ i
+\end{equation*}
 %
-With this we can now prove the desired equality $f \equiv g$ from section
-\S\ref{sec:functional-extensionality}:
+With $\funExt$ in place we can now construct a path between
+$\var{zeroLeft}$ and $\var{zeroRight}$ -- the functions defined in the
+introduction \S\ref{sec:functional-extensionality}:
 %
 \begin{align*}
-  p & \tp f \equiv g \\
-  p & \defeq \funExt\ \phi
+  p & \tp \var{zeroLeft} \equiv \var{zeroRight} \\
+  p & \defeq \funExt\ \var{zrn}
 \end{align*}
 %
-Here $\phi \tp \prod_{n \tp \bN} \var{zeroLeft}\ n \equiv
-\var{zeroRight} n$. Paths have some other important properties, but
-they are not the focus of this thesis. \TODO{Refer the reader
-  somewhere for more info.}
+Here $\var{zrn}$ is the proof from \ref{eq:zrn}.
 %
 \section{Homotopy levels}
-In ITT all equality proofs are identical (in a closed context). This means that,
-in some sense, any two inhabitants of $a \equiv b$ are ``equally good'' -- they
-do not have any interesting structure. This is referred to as Uniqueness of
-Identity Proofs (UIP). Unfortunately it is not possible to have a type theory
-with both univalence and UIP. In stead we have a hierarchy of types with an
-increasing amount of homotopic structure. At the bottom of this hierarchy we
-have the set of contractible types:
+In ITT all equality proofs are identical (in a closed context). This
+means that, in some sense, any two inhabitants of $a \equiv b$ are
+``equally good''. They do not have any interesting structure. This is
+referred to as Uniqueness of Identity Proofs (UIP). Unfortunately it
+is not possible to have a type theory with both univalence and UIP. In
+stead in cubical Agda we have a hierarchy of types with an increasing
+amount of homotopic structure. At the bottom of this hierarchy is the
+set of contractible types:
 %
 \begin{equation}
 \begin{aligned}
@@ -168,8 +167,9 @@ The first component of $\isContr\ A$ is called ``the center of contraction''.
 Under the propositions-as-types interpretation of type theory $\isContr\ A$ can
 be thought of as ``the true proposition $A$''. And indeed $\top$ is
 contractible:
+%
 \begin{equation*}
-\var{tt} , \lambda x \to \refl \tp \isContr\ \top
+(\var{tt} , \lambda\; x \to \refl) \tp \isContr\ \top
 \end{equation*}
 %
 It is a theorem that if a type is contractible, then it is isomorphic to the
@@ -188,19 +188,19 @@ One can think of $\isProp\ A$ as the set of true and false propositions. And
 indeed both $\top$ and $\bot$ are propositions:
 %
 \begin{align*}
-λ \var{tt}\ \var{tt} → refl & \tp \isProp\ ⊤ \\
-λ\varnothing\ \varnothing   & \tp \isProp\ ⊥
+(λ\; \var{tt}, \var{tt} → refl) & \tp \isProp\ ⊤ \\
+λ\;\varnothing\ \varnothing   & \tp \isProp\ ⊥
 \end{align*}
 %
 The term $\varnothing$ is used here to denote an impossible pattern. It is a
 theorem that if a mere proposition $A$ is inhabited, then so is it contractible.
 If it is not inhabited it is equivalent to the empty-type (or false
-proposition).\TODO{Cite}
+proposition).
 
-I will refer to a type $A \tp \MCU$ as a \emph{mere} proposition if I want to
+I will refer to a type $A \tp \MCU$ as a \emph{mere proposition} if I want to
 stress that we have $\isProp\ A$.
 
-Then comes the set of homotopical sets:
+The next step in the hierarchy is the set of homotopical sets:
 %
 \begin{equation}
 \begin{aligned}
@@ -209,13 +209,14 @@ Then comes the set of homotopical sets:
 \end{aligned}
 \end{equation}
 %
-I will not give an example of a set at this point. It turns out that proving
-e.g.\ $\isProp\ \bN$ is not so straight-forward (see \cite[\S3.1.4]{hott-2013}).
-There will be examples of sets later in this report. At this point it should be
-noted that the term ``set'' is somewhat conflated; there is the notion of sets
-from set-theory, in Agda types are denoted \texttt{Set}. I will use it
-consistently to refer to a type $A$ as a set exactly if $\isSet\ A$ is a
-proposition.
+I will not give an example of a set at this point. It turns out that
+proving e.g.\ $\isProp\ \bN$ directly is not so straightforward (see
+\cite[\S3.1.4]{hott-2013}). Hedberg's theorem states that any type
+with decidable equality is a set. There will be examples of sets later
+in this report. At this point it should be noted that the term ``set''
+is somewhat conflated; there is the notion of sets from set-theory, in
+Agda types are denoted \texttt{Set}. I will use it consistently to
+refer to a type $A$ as a set exactly if $\isSet\ A$ is a proposition.
 
 As the reader may have guessed the next step in the hierarchy is the type:
 %
@@ -239,34 +240,40 @@ exposition:
 Proposition: Homotopy levels are cumulative. That is, if $A \tp \MCU$ has
 homotopy level $n$ then so does it have $n + 1$.
 
-Let $\left\Vert A \right\Vert = n$ denote that the level of $A$ is $n$.
-Proposition: For any homotopic level $n$ this is a mere proposition.
+For any level $n$ it is the case that to be of level $n$ is a mere proposition.
 %
 \section{A few lemmas}
 Rather than getting into the nitty-gritty details of Agda I venture to
-take a more ``combinator-based'' approach. That is, I will use
-theorems about paths already that have already been formalized.
+take a more ``combinator-based'' approach. That is I will use
+theorems about paths that have already been formalized.
 Specifically the results come from the Agda library \texttt{cubical}
 (\cite{cubical-demo}). I have used a handful of results from this
-library as well as contributed a few lemmas myself.\footnote{The
-  module \texttt{Cat.Prelude} lists the upstream dependencies. As well
-  my contribution to \texttt{cubical} can be found in the git logs
-  which are available at
-  \hrefsymb{https://github.com/Saizan/cubical-demo}{\texttt{https://github.com/Saizan/cubical-demo}}.}
+library as well as contributed a few lemmas myself%
+\footnote{The module \texttt{Cat.Prelude} lists the upstream
+  dependencies. As well my contribution to \texttt{cubical} can be
+  found in the git logs which are available at
+  \hrefsymb{https://github.com/Saizan/cubical-demo}{\texttt{https://github.com/Saizan/cubical-demo}}.
+}.
 
-These theorems are all purely related to homotopy theory and cubical Agda and as
-such not specific to the formalization of Category Theory. I will present a few
-of these theorems here, as they will be used later in chapter
-\ref{ch:implementation} throughout.
+These theorems are all purely related to homotopy type theory and as
+such not specific to the formalization of Category Theory. I will
+present a few of these theorems here as they will be used throughout
+chapter \ref{ch:implementation}. They should also give the reader some
+intuition about the path type.
 
 \subsection{Path induction}
 \label{sec:pathJ}
-The induction principle for paths intuitively gives us a way to reason about a
-type family indexed by a path by only considering if said path is $\refl$ (the
-\nomen{base case}{path induction}). For \emph{based path induction}, that equality is \emph{based}
-at some element $a \tp A$.
+The induction principle for paths intuitively gives us a way to reason
+about a type family indexed by a path by only considering if said path
+is $\refl$ (the \nomen{base case}{path induction}). For \emph{based
+  path induction}, that equality is \emph{based} at some element $a
+\tp A$.
 
-Let a type $A \tp \MCU$ and an element of the type $a \tp A$ be given. $a$ is said to be the base of the induction. Given a family of types:
+\pagebreak[3]
+\begin{samepage}
+Let a type $A \tp \MCU$ and an element of the type $a \tp A$ be
+given. $a$ is said to be the base of the induction.\linebreak[3] Given
+a family of types:
 %
 $$
 D \tp \prod_{b \tp A} \prod_{p \tp a ≡ b} \MCU
@@ -283,7 +290,8 @@ We have the function:
 \begin{equation}
 \pathJ\ D\ d \tp \prod_{b \tp A} \prod_{p \tp a ≡ b} D\ b\ p
 \end{equation}
-%
+\end{samepage}%
+
 A simple application of $\pathJ$ is for proving that $\var{sym}$ is an
 involution. Namely for any set $A \tp \MCU$, points $a, b \tp A$ and a path
 between them $p \tp a \equiv b$:
@@ -293,8 +301,8 @@ between them $p \tp a \equiv b$:
 \var{sym}\ (\var{sym}\ p) ≡ p
 \end{equation}
 %
-The proof will be by induction on $p$ and will be based at $a$. That is, $D$
-will be the family:
+The proof will be by induction on $p$ and will be based at $a$. That
+is $D$ will be the family:
 %
 \begin{align*}
 D         & \tp \prod_{b' \tp A} \prod_{p \tp a ≡ b'} \MCU \\
@@ -319,7 +327,7 @@ definitionally. In summary \ref{eq:sym-invol} is inhabited by the term:
 %
 Another application of $\pathJ$ is for proving associativity of $\trans$. That
 is, given a type $A \tp \MCU$, elements of $A$, $a, b, c, d \tp A$ and paths
-between them, $p \tp a \equiv b$, $q \tp b \equiv c$ and $r \tp c \equiv d$ we
+between them $p \tp a \equiv b$, $q \tp b \equiv c$ and $r \tp c \equiv d$ we
 have the following:
 %
 \begin{equation}
@@ -351,49 +359,52 @@ conclusion \ref{eq:cum-trans} is inhabited by the term:
 \pathJ\ T\ t\ d\ r
 \end{align*}
 %
-We shall see another application on path induction in \ref{eq:pathJ-example}.
+We shall see another application of path induction in \ref{eq:pathJ-example}.
 
 \subsection{Paths over propositions}
 \label{sec:lemPropF}
-Another very useful combinator is $\lemPropF$:
-
-To `promote' this to a dependent path we can use another useful combinator;
-$\lemPropF$. Given a type $A \tp \MCU$ and a type family on $A$; $P \tp A \to
-\MCU$. Let $\var{propP} \tp \prod_{x \tp A} \isProp\ (P\ x)$ be the proof that
-$P$ is a mere proposition for all elements of $A$. Furthermore say we have a
-path between some two elements in $A$; $p \tp a_0 \equiv a_1$ then we can built
-a heterogeneous path between any two elements of $p_0 \tp P\ a_0$ and $p_1 \tp
-P\ a_1$:
+Another very useful combinator is $\lemPropF$: Given a type $A \tp
+\MCU$ and a type family on $A$; $D \tp A \to \MCU$. Let $\var{propD}
+\tp \prod_{x \tp A} \isProp\ (D\ x)$ be the proof that $D$ is a mere
+proposition for all elements of $A$. Furthermore say we have a path
+between some two elements in $A$; $p \tp a_0 \equiv a_1$ then we can
+built a heterogeneous path between any two elements of $d_0 \tp
+D\ a_0$ and $d_1 \tp D\ a_1$.
 %
 $$
-\lemPropF\ \var{propP}\ p \tp \Path\ (\lambda\; i \mto P\ (p\ i))\ p_0\ p_1
+\lemPropF\ \var{propD}\ p \tp \Path\ (\lambda\; i \mto D\ (p\ i))\ d_0\ d_1
 $$
 %
-This is quite a mouthful. So let me try to show how this is a very general and
-useful result.
+Note that $d_0$ and $d_1$, though points of the same family, have
+different types. This is quite a mouthful. So let me try to show how
+this is a very general and useful result.
 
 Often when proving equalities between elements of some dependent types
-$\lemPropF$ can be used to boil this complexity down to showing that the
-dependent parts of the type are mere propositions. For instance, saw we have a type:
+$\lemPropF$ can be used to boil this complexity down to showing that
+the dependent parts of the type are mere propositions. For instance
+say we have a type:
 %
 $$
-T \defeq \sum_{a \tp A} P\ a
+T \defeq \sum_{a \tp A} D\ a
 $$
 %
-For some proposition $P \tp A \to \MCU$. If we want to prove $t_0 \equiv t_1$
-for two elements $t_0, t_1 \tp T$ then this will be a pair of paths:
+For some proposition $D \tp A \to \MCU$. That is we have $\var{propD}
+\tp \prod_{a \tp A} \isProp\ (D\ a)$. If we want to prove $t_0 \equiv
+t_1$ for two elements $t_0, t_1 \tp T$ then this will be a pair of
+paths:
 %
 %
 \begin{align*}
   p \tp & \fst\ t_0 \equiv \fst\ t_1 \\
-        & \Path\ (\lambda i \to P\ (p\ i))\ \snd\ t_0 \equiv \snd\ t_1
+        & \Path\ (\lambda\; i \to D\ (p\ i))\ (\snd\ t_0)\ (\snd\ t_1)
 \end{align*}
 %
-Here $\lemPropF$ directly allow us to prove the latter of these:
+Here $\lemPropF$ directly allow us to prove the latter of these given
+that we have already provided $p$.
 %
 $$
-\lemPropF\ \var{propP}\ p
-  \tp \Path\ (\lambda i \to P\ (p\ i))\ \snd\ t_0 \equiv \snd\ t_1
+\lemPropF\ \var{propD}\ p
+  \tp \Path\ (\lambda\; i \to D\ (p\ i))\ (\snd\ t_0)\ (\snd\ t_1)
 $$
 %
 \subsection{Functions over propositions}
@@ -407,9 +418,9 @@ $$
 \subsection{Pairs over propositions}
 \label{sec:propSig}
 %
-$\sum$-types preserve propositionality whenever its first component is a
-proposition, and its second component is a proposition for all points of in the
-left type.
+$\sum$-types preserve propositionality whenever its first component is
+a proposition, and its second component is a proposition for all
+points of the left type.
 %
 $$
 \mathit{propSig} \tp \isProp\ A \to \left(\prod_{a \tp A} \isProp\ (P\ a)\right) \to \isProp\ \left(\sum_{a \tp A} P\ a\right)
