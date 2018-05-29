@@ -1,113 +1,113 @@
 \chapter{Perspectives}
 \section{Discussion}
 In the previous chapter the practical aspects of proving things in
-Cubical Agda were highlighted. I also demonstrated the usefulness of
-separating ``laws'' from ``data''. One of the reasons for this is that
-dependencies within types can lead to very complicated goals. One
+Cubical Agda were highlighted.  I also demonstrated the usefulness of
+separating ``laws'' from ``data''.  One of the reasons for this is that
+dependencies within types can lead to very complicated goals.  One
 technique for alleviating this was to prove that certain types are
 mere propositions.
 
 \subsection{Computational properties}
 The new contribution of cubical Agda is that it has a constructive
 proof of functional extensionality\index{functional extensionality}
-and univalence\index{univalence}. This means that in particular that
-the type checker can reduce terms defined with these theorems. So one
+and univalence\index{univalence}.  This means that in particular that
+the type checker can reduce terms defined with these theorems.  So one
 interesting result of this development is how much this influenced the
-development. In particular having a functional extensionality that
+development.  In particular having a functional extensionality that
 ``computes'' should simplify some proofs.
 
-I have tested this theory by using a feature of Agda where one can
-mark certain bindings as being \emph{abstract}. This means that the
-type-checker will not try to reduce that term further when
-type-checking is performed. I tried making univalence and functional
-extensionality abstract. It turns out that the conversion behaviour of
-univalence is not used anywhere. For functional extensionality there
-are two places in the whole solution where the reduction behaviour is
-used to simplify some proofs. This is in showing that the maps between
-the two formulations of monads are inverses. See the notes in this
+I have tested this by using a feature of Agda where one can mark
+certain bindings as being \emph{abstract}.  This means that the
+type-checker will not try to reduce that term further during type
+checking.  I tried making univalence and functional extensionality
+abstract.  It turns out that the conversion behaviour of univalence is
+not used anywhere.  For functional extensionality there are two places
+in the whole solution where the reduction behaviour is used to
+simplify some proofs.  This is in showing that the maps between the
+two formulations of monads are inverses.  See the notes in this
 module:
 %
 \begin{center}
 \sourcelink{Cat.Category.Monad.Voevodsky}
 \end{center}
 %
-I've also put this in a source listing in \ref{app:abstract-funext}. I
-will not reproduce it in full here as the type is quite involved. The
-method used to find in what places the computational behaviour of
-these proofs are needed has the caveat of only working for places that
-directly or transitively uses these two proofs. Fortunately though the
-code is structured in such a way that this should be the case.
-Nonetheless it is quite surprising that this computational behaviours
-is not used more widely in the formalization.
 
-Barring this, however, the computational behaviour of paths can still
-be useful. E.g. if a programmer want's to reuse functions that operate
-on a monoidal monads to work with a monad in the Kleisli form that
-this programmer has specified. To make this idea concrete, say we are
+I will not reproduce it in full here as the type is quite involved. In
+stead I have put this in a source listing in \ref{app:abstract-funext}.
+The method used to find in what places the computational behaviour of
+these proofs are needed has the caveat of only working for places that
+directly or transitively uses these two proofs.  Fortunately though
+the code is structured in such a way that this is the case. So in
+conclusion the way I have structured these proofs means that the
+computational behaviour of functional extensionality and univalence
+has not been so relevant.
+
+Barring this the computational behaviour of paths can still be useful.
+E.g.\ if a programmer wants to reuse functions that operate on a
+monoidal monads to work with a monad in the Kleisli form that the
+programmer has specified.  To make this idea concrete, say we are
 given some function $f \tp \Kleisli \to T$ having a path between $p
 \tp \Monoidal \equiv \Kleisli$ induces a map $\coe\ p \tp \Monoidal
-\to \Kleisli$. We can compose $f$ with this map to get $f \comp
-\coe\ p \tp \Monoidal \to T$. Of course, since that map was
+\to \Kleisli$.  We can compose $f$ with this map to get $f \comp
+\coe\ p \tp \Monoidal \to T$.  Of course, since that map was
 constructed with an isomorphism these maps already exist and could be
-used directly. So this is arguably only interesting when one wants to
-prove properties of such functions.
+used directly.  So this is arguably only interesting when one also
+wants to prove properties of applying such functions.
 
 \subsection{Reusability of proofs}
 The previous example illustrate how univalence unifies two otherwise
 disparate areas: The category-theoretic study of monads; and monads as
-in functional programming. Univalence thus allows one to reuse proofs.
+in functional programming.  Univalence thus allows one to reuse proofs.
 You could say that univalence gives the developer two proofs for the
-price of one. As an illustration of this I proved that monads are
-groupoids. I initially proved this for the Kleisli
+price of one.  As an illustration of this I proved that monads are
+groupoids.  I initially proved this for the Kleisli
 formulation\footnote{Actually doing this directly turned out to be
   tricky as well, so I defined an equivalent formulation which was not
-  formulated with a record, but purely with $\sum$-types.}. Since the
+  formulated with a record, but purely with $\sum$-types.}.  Since the
 two formulations are equal under univalence, substitution directly
-gives us that this also holds for the monoidal formulation. This of
+gives us that this also holds for the monoidal formulation.  This of
 course generalizes to any family $P \tp 𝒰 → 𝒰$ where $P$ is inhabited
 at either formulation (i.e.\ either $P\ \Monoidal$ or $P\ \Kleisli$
 holds).
 
-The introduction (section \S\ref{sec:context}) mentioned an often
-employed-technique for enabling extensional equalities is to use the
-setoid-interpretation. Nowhere in this formalization has this been
-necessary, $\Path$ has been used globally in the project as
-propositional equality. One interesting place where this becomes
-apparent is in interfacing with the Agda standard library. Multiple
-definitions in the Agda standard library have been designed with the
-setoid-interpretation in mind. E.g. the notion of ``unique
-existential'' is indexed by a relation that should play the role of
-propositional equality. Likewise for equivalence relations, they are
-indexed, not only by the actual equivalence relation, but also by
-another relation that serve as propositional equality.
+The introduction (section \S\ref{sec:context}) mentioned that a
+typical way of getting access to functional extensionality is to work
+with setoids.  Nowhere in this formalization has this been necessary,
+$\Path$ has been used globally in the project for propositional
+equality.  One interesting place where this becomes apparent is in
+interfacing with the Agda standard library.  Multiple definitions in
+the Agda standard library have been designed with the
+setoid-interpretation in mind.  E.g.\ the notion of \emph{unique
+  existential} is indexed by a relation that should play the role of
+propositional equality.  Equivalence relations are likewise indexed,
+not only by the actual equivalence relation but also by another
+relation that serve as propositional equality.
 %% Unfortunately we cannot use the definition of equivalences found in
-%% the standard library to do equational reasoning directly. The
+%% the standard library to do equational reasoning directly.  The
 %% reason for this is that the equivalence relation defined there must
 %% be a homogenous relation, but paths are heterogeneous relations.
 
 In the formalization at present a significant amount of energy has
 been put towards proving things that would not have been needed in
-classical Agda. The proofs that some given type is a proposition were
+classical Agda.  The proofs that some given type is a proposition were
 provided as a strategy to simplify some otherwise very complicated
-proofs (e.g. \ref{eq:proof-prop-IsPreCategory}
-and \ref{eq:productPath}). Often these proofs would not be this
-complicated. If the J-rule holds definitionally the proof-assistant
-can help simplify these goals considerably. The lack of the J-rule has
+proofs (e.g.\ \ref{eq:proof-prop-IsPreCategory}
+and \ref{eq:productPath}).  Often these proofs would not be this
+complicated.  If the J-rule holds definitionally the proof-assistant
+can help simplify these goals considerably.  The lack of the J-rule has
 a significant impact on the complexity of these kinds of proofs.
-
-\TODO{Universe levels.}
 
 \subsection{Motifs}
 An oft-used technique in this development is using based path
-induction to prove certain properties. One particular challenge that
+induction to prove certain properties.  One particular challenge that
 arises when doing so is that Agda is not able to automatically infer
-the family that one wants to do induction over. For instance in the
+the family that one wants to do induction over.  For instance in the
 proof $\var{sym}\ (\var{sym}\ p) ≡ p$ from \ref{eq:sym-invol} the
 family that we chose to do induction over was $D\ b'\ p' \defeq
-\var{sym}\ (\var{sym}\ p') ≡ p'$. However, if one interactively tries
+\var{sym}\ (\var{sym}\ p') ≡ p'$.  However, if one interactively tries
 to give this hole, all the information that Agda can provide is that
-one must provide an element of $𝒰$. Agda could be more helpful in this
-context, perhaps even infer this family in some situations. In this
+one must provide an element of $𝒰$.  Agda could be more helpful in this
+context, perhaps even infer this family in some situations.  In this
 very simple example this is of course not a big problem, but there are
 examples in the source code where this gets more involved.
 
@@ -115,26 +115,25 @@ examples in the source code where this gets more involved.
 \subsection{Compiling Cubical Agda}
 \label{sec:compiling-cubical-agda}
 Compilation of program written in Cubical Agda is currently not
-supported. One issue here is that the backends does not provide an
+supported.  One issue here is that the backends does not provide an
 implementation for the cubical primitives (such as the path-type).
 This means that even though the path-type gives us a computational
 interpretation of functional extensionality, univalence, transport,
 etc., we do not have a way of actually using this to compile our
-programs that use these primitives. It would be interesting to see
-practical applications of this. The path between monads that this
-library exposes could provide one particularly interesting case-study.
-
-\subsection{Higher inductive types}
-This library has not explored the usefulness of higher inductive types
-in the context of Category Theory.
-
-\subsection{Initiality conjecture}
-A fellow student here at Chalmers, Andreas Källberg, is currently
-working on proving the initiality conjecture\TODO{Citation}. He will
-be using this library to do so.
+programs that use these primitives.  It would be interesting to see
+practical applications of this.
 
 \subsection{Proving laws of programs}
 Another interesting thing would be to use the Kleisli formulation of
-monads to prove properties of functional programs. The existence of
+monads to prove properties of functional programs.  The existence of
 univalence will make it possible to re-use proofs stated in terms of
 the monoidal formulation in this setting.
+
+%% \subsection{Higher inductive types}
+%% This library has not explored the usefulness of higher inductive types
+%% in the context of Category Theory.
+
+\subsection{Initiality conjecture}
+A fellow student at Chalmers, Andreas Källberg, is currently working
+on proving the initiality conjecture.  He will be using this library
+to do so.
