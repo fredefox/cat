@@ -9,15 +9,15 @@
 %% Alternatively:
 %% \newcommand{\defeq}{≔}
 \newcommand{\bN}{\mathbb{N}}
-\newcommand{\bC}{\mathbb{C}}
-\newcommand{\bX}{\mathbb{X}}
+\newcommand{\bC}{ℂ}
+\newcommand{\bD}{𝔻}
+\newcommand{\bX}{𝕏}
 % \newcommand{\to}{\rightarrow}
 %% \newcommand{\mto}{\mapsto}
 \newcommand{\mto}{\rightarrow}
 \newcommand{\UU}{\ensuremath{\mathcal{U}}\xspace}
 \let\type\UU
 \newcommand{\MCU}{\UU}
-\newcommand{\nomen}[1]{\emph{#1}}
 \newcommand{\todo}[1]{\textit{#1}}
 \newcommand{\comp}{\circ}
 \newcommand{\x}{\times}
@@ -33,7 +33,9 @@
 }
 \makeatother
 \newcommand{\var}[1]{\ensuremath{\mathit{#1}}}
-\newcommand{\varindex}[1]{\ensuremath{\mathit{#1}}\index{#1}}
+\newcommand{\varindex}[1]{\ensuremath{\var{#1}}\index{$\var{#1}$}}
+\newcommand{\nomen}[2]{\emph{#1}\index{#2}}
+\newcommand{\nomenindex}[1]{\nomen{#1}{#1}}
 
 \newcommand{\Hom}{\varindex{Hom}}
 \newcommand{\fmap}{\varindex{fmap}}
@@ -71,13 +73,17 @@
 \newcommand\isequiv{\varindex{isequiv}}
 \newcommand\qinv{\varindex{qinv}}
 \newcommand\fiber{\varindex{fiber}}
-\newcommand\shuffle{\varindex{shuffle}}
+\newcommand\shufflef{\varindex{shuffle}}
 \newcommand\Univalent{\varindex{Univalent}}
 \newcommand\refl{\varindex{refl}}
 \newcommand\isoToId{\varindex{isoToId}}
 \newcommand\Isomorphism{\varindex{Isomorphism}}
 \newcommand\rrr{\ggg}
-\newcommand\fish{\mathrel{\wideoverbar{\rrr}}}
+%% \newcommand\fish{\mathbin{↣}}
+%% \newcommand\fish{\mathbin{⤅}}
+\newcommand\fish{\mathbin{⤇}}
+%% \newcommand\fish{\mathbin{⤜}}
+%% \newcommand\fish{\mathrel{\wideoverbar{\rrr}}}
 \newcommand\fst{\varindex{fst}}
 \newcommand\snd{\varindex{snd}}
 \newcommand\Path{\varindex{Path}}
@@ -86,9 +92,39 @@
 \newcommand*{\QED}{\hfill\ensuremath{\square}}%
 \newcommand\uexists{\exists!}
 \newcommand\Arrow{\varindex{Arrow}}
+\newcommand\embellish[1]{\widehat{#1}}
+\newcommand\nattrans[1]{\embellish{#1}}
+\newcommand\functor[1]{\embellish{#1}}
 \newcommand\NTsym{\varindex{NT}}
 \newcommand\NT[2]{\NTsym\ #1\ #2}
 \newcommand\Endo[1]{\varindex{Endo}\ #1}
-\newcommand\EndoR{\mathcal{R}}
+\newcommand\EndoR{\functor{\mathcal{R}}}
+\newcommand\omapR{\mathcal{R}}
+\newcommand\omapF{\mathcal{F}}
+\newcommand\omapG{\mathcal{G}}
+\newcommand\FunF{\functor{\omapF}}
+\newcommand\FunG{\functor{\omapG}}
 \newcommand\funExt{\varindex{funExt}}
-\newcommand{\suc}[1]{\mathit{suc}\ #1}
+\newcommand{\suc}[1]{\varindex{suc}\ #1}
+\newcommand{\trans}{\varindex{trans}}
+\newcommand{\toKleisli}{\varindex{toKleisli}}
+\newcommand{\toMonoidal}{\varindex{toMonoidal}}
+\newcommand\pairA{\mathcal{A}}
+\newcommand\pairB{\mathcal{B}}
+\newcommand{\joinNT}{\functor{\varindex{join}}}
+\newcommand{\pureNT}{\functor{\varindex{pure}}}
+\newcommand{\hrefsymb}[2]{\href{#1}{#2 \ExternalLink}}
+\newcommand{\sourcebasepath}{http://web.student.chalmers.se/\textasciitilde hanghj/cat/doc/html/}
+\newcommand{\docbasepath}{https://github.com/fredefox/cat/}
+\newcommand{\sourcelink}[1]{\hrefsymb
+    {\sourcebasepath#1.html}
+    {\texttt{#1}}
+  }
+\newcommand{\gitlink}{\hrefsymb{\docbasepath}{\texttt{\docbasepath}}}
+\newcommand{\doclink}{\hrefsymb{\sourcebasepath}{\texttt{\sourcebasepath}}}
+\newcommand{\clll}{\mathrel{\bC.\mathord{\lll}}}
+\newcommand{\dlll}{\mathrel{\bD.\mathord{\lll}}}
+\newcommand\coe{\varindex{coe}}
+\newcommand\Monoidal{\varindex{Monoidal}}
+\newcommand\Kleisli{\varindex{Kleisli}}
+\newcommand\I{\mathds{I}}

@@ -1,0 +1,95 @@
+%% FRONTMATTER
+\frontmatter
+%% \newgeometry{top=3cm, bottom=3cm,left=2.25 cm, right=2.25cm}
+\begingroup
+\thispagestyle{empty}
+{\Huge\thetitle}\\[.5cm]
+{\Large A formalization of category theory in Cubical Agda}\\[6cm]
+\begin{center}
+\includegraphics[width=\linewidth,keepaspectratio]{isomorphism.png}
+\end{center}
+% Cover text
+\vfill
+%% \renewcommand{\familydefault}{\sfdefault} \normalfont % Set cover page font
+{\Large\theauthor}\\[.5cm]
+Master's thesis in Computer Science
+\endgroup
+%% \end{titlepage}
+
+
+% BACK OF COVER PAGE (BLANK PAGE)
+\newpage
+%% \newgeometry{a4paper}	% Temporarily change margins
+%% \restoregeometry
+\thispagestyle{empty}
+\null
+
+%% \begin{titlepage}
+
+% TITLE PAGE
+\newpage
+\thispagestyle{empty}
+\begin{center}
+	\textsc{\LARGE Master's thesis \the\year}\\[4cm]		% Report number is currently not in use
+	\textbf{\LARGE \thetitle} \\[1cm]
+	{\large \subtitle}\\[1cm]
+	{\large \theauthor}
+	
+	\vfill	
+	\centering
+	\includegraphics[width=0.2\pdfpagewidth]{logo_eng.pdf}
+  \vspace{5mm}
+	
+	\textsc{Department of Computer Science and Engineering}\\
+	\textsc{{\researchgroup}}\\
+	%Name of research group (if applicable)\\
+	\textsc{\institution} \\
+	\textsc{Gothenburg, Sweden \the\year}\\
+\end{center}
+
+
+% IMPRINT PAGE (BACK OF TITLE PAGE)
+\newpage
+\thispagestyle{plain}
+\textit{\thetitle}\\
+\subtitle\\
+\copyright\ \the\year ~ \textsc{\theauthor}
+\vspace{4.5cm}
+
+\setlength{\parskip}{0.5cm}
+\textbf{Author:}\\
+\theauthor\\
+\href{mailto:\authoremail>}{\texttt{<\authoremail>}}
+
+\textbf{Supervisor:}\\
+\supervisor\\
+\href{mailto:\supervisoremail>}{\texttt{<\supervisoremail>}}\\
+\supervisordepartment
+
+\textbf{Co-supervisor:}\\
+\cosupervisor\\
+\href{mailto:\cosupervisoremail>}{\texttt{<\cosupervisoremail>}}\\
+\cosupervisordepartment
+
+\textbf{Examiner:}\\
+\examiner\\
+\href{mailto:\examineremail>}{\texttt{<\examineremail>}}\\
+\examinerdepartment
+
+\vfill
+Master's Thesis \the\year\\	% Report number currently not in use
+\department\\
+%Division of Division name\\
+%Name of research group (if applicable)\\
+\institution\\
+SE-412 96 Gothenburg\\
+Telephone +46 31 772 1000 \setlength{\parskip}{0.5cm}\\
+% Caption for cover page figure if used, possibly with reference to further information in the report
+%% Cover: Wind visualization constructed in Matlab showing a surface of constant wind speed along with streamlines of the flow. \setlength{\parskip}{0.5cm}
+%Printed by [Name of printing company]\\
+Gothenburg, Sweden \the\year
+
+%% \restoregeometry
+%% \end{titlepage}
+
+\tableofcontents

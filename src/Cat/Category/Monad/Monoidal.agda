@@ -18,7 +18,7 @@ private
 
 open Category ℂ using (Object ; Arrow ; identity ; _<<<_)
 open import Cat.Category.NaturalTransformation ℂ ℂ
-  using (NaturalTransformation ; Transformation ; Natural)
+  using (NaturalTransformation ; Transformation ; Natural ; NaturalTransformation≡)
 
 record RawMonad : Set ℓ where
   field
@@ -78,15 +78,39 @@ record IsMonad (raw : RawMonad) : Set ℓ where
 
   isNatural : IsNatural
   isNatural {X} {Y} f = begin
-    joinT Y <<< R.fmap f <<< pureT X     ≡⟨ sym ℂ.isAssociative ⟩
-    joinT Y <<< (R.fmap f <<< pureT X)   ≡⟨ cong (λ φ → joinT Y <<< φ) (sym (pureN f)) ⟩
-    joinT Y <<< (pureT (R.omap Y) <<< f) ≡⟨ ℂ.isAssociative ⟩
-    joinT Y <<< pureT (R.omap Y) <<< f   ≡⟨ cong (λ φ → φ <<< f) (fst isInverse) ⟩
-    identity <<< f                       ≡⟨ ℂ.leftIdentity ⟩
-    f                                    ∎
+    join <<< fmap f <<< pure     ≡⟨ sym ℂ.isAssociative ⟩
+    join <<< (fmap f <<< pure)   ≡⟨ cong (λ φ → join <<< φ) (sym (pureN f)) ⟩
+    join <<< (pure <<< f)        ≡⟨ ℂ.isAssociative ⟩
+    join <<< pure <<< f          ≡⟨ cong (λ φ → φ <<< f) (fst isInverse) ⟩
+    identity <<< f               ≡⟨ ℂ.leftIdentity ⟩
+    f                            ∎
 
   isDistributive : IsDistributive
-  isDistributive {X} {Y} {Z} g f = sym aux
+  isDistributive {X} {Y} {Z} g f = begin
+       join <<< fmap g <<< (join <<< fmap f)
+       ≡⟨ Category.isAssociative ℂ ⟩
+       join <<< fmap g <<< join <<< fmap f
+       ≡⟨ cong (_<<< fmap f) (sym ℂ.isAssociative) ⟩
+       (join <<< (fmap g <<< join)) <<< fmap f
+       ≡⟨ cong (λ φ → φ <<< fmap f) (cong (_<<<_ join) (sym (joinN g))) ⟩
+       (join <<< (join <<< R².fmap g)) <<< fmap f
+       ≡⟨ cong (_<<< fmap f) ℂ.isAssociative ⟩
+       ((join <<< join) <<< R².fmap g) <<< fmap f
+       ≡⟨⟩
+       join <<< join <<< R².fmap g <<< fmap f
+       ≡⟨ sym ℂ.isAssociative ⟩
+       (join <<< join) <<< (R².fmap g <<< fmap f)
+       ≡⟨ cong (λ φ → φ <<< (R².fmap g <<< fmap f)) (sym isAssociative) ⟩
+       (join <<< fmap join) <<< (R².fmap g <<< fmap f)
+       ≡⟨ sym ℂ.isAssociative ⟩
+       join <<< (fmap join <<< (R².fmap g <<< fmap f))
+       ≡⟨ cong (_<<<_ join) ℂ.isAssociative ⟩
+       join <<< (fmap join <<< R².fmap g <<< fmap f)
+       ≡⟨⟩
+       join <<< (fmap join <<< fmap (fmap g) <<< fmap f)
+       ≡⟨ cong (λ φ → join <<< φ) (sym distrib3) ⟩
+       join <<< fmap (join <<< fmap g <<< f)
+       ∎
     where
     module R² = Functor F[ R ∘ R ]
     distrib3 : ∀ {A B C D} {a : Arrow C D} {b : Arrow B C} {c : Arrow A B}
@@ -96,33 +120,9 @@ record IsMonad (raw : RawMonad) : Set ℓ where
       R.fmap (a <<< b <<< c)              ≡⟨ R.isDistributive ⟩
       R.fmap (a <<< b) <<< R.fmap c       ≡⟨ cong (_<<< _) R.isDistributive ⟩
       R.fmap a <<< R.fmap b <<< R.fmap c  ∎
-    aux = begin
-      joinT Z <<< R.fmap (joinT Z <<< R.fmap g <<< f)
-        ≡⟨ cong (λ φ → joinT Z <<< φ) distrib3 ⟩
-      joinT Z <<< (R.fmap (joinT Z) <<< R.fmap (R.fmap g) <<< R.fmap f)
-        ≡⟨⟩
-      joinT Z <<< (R.fmap (joinT Z) <<< R².fmap g <<< R.fmap f)
-        ≡⟨ cong (_<<<_ (joinT Z)) (sym ℂ.isAssociative) ⟩
-      joinT Z <<< (R.fmap (joinT Z) <<< (R².fmap g <<< R.fmap f))
-        ≡⟨ ℂ.isAssociative ⟩
-      (joinT Z <<< R.fmap (joinT Z)) <<< (R².fmap g <<< R.fmap f)
-        ≡⟨ cong (λ φ → φ <<< (R².fmap g <<< R.fmap f)) isAssociative ⟩
-      (joinT Z <<< joinT (R.omap Z)) <<< (R².fmap g <<< R.fmap f)
-        ≡⟨ ℂ.isAssociative ⟩
-      joinT Z <<< joinT (R.omap Z) <<< R².fmap g <<< R.fmap f
-        ≡⟨⟩
-      ((joinT Z <<< joinT (R.omap Z)) <<< R².fmap g) <<< R.fmap f
-        ≡⟨ cong (_<<< R.fmap f) (sym ℂ.isAssociative) ⟩
-      (joinT Z <<< (joinT (R.omap Z) <<< R².fmap g)) <<< R.fmap f
-        ≡⟨ cong (λ φ → φ <<< R.fmap f) (cong (_<<<_ (joinT Z)) (joinN g)) ⟩
-      (joinT Z <<< (R.fmap g <<< joinT Y)) <<< R.fmap f
-        ≡⟨ cong (_<<< R.fmap f) ℂ.isAssociative ⟩
-      joinT Z <<< R.fmap g <<< joinT Y <<< R.fmap f
-        ≡⟨ sym (Category.isAssociative ℂ) ⟩
-      joinT Z <<< R.fmap g <<< (joinT Y <<< R.fmap f)
-        ∎
 
 record Monad : Set ℓ where
+  no-eta-equality
   field
     raw     : RawMonad
     isMonad : IsMonad raw

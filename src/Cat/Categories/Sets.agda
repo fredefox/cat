@@ -3,11 +3,11 @@
 module Cat.Categories.Sets where
 
 open import Cat.Prelude as P
-
+open import Cat.Equivalence
 open import Cat.Category
 open import Cat.Category.Functor
 open import Cat.Category.Product
-open import Cat.Equivalence
+open import Cat.Categories.Opposite
 
 _⊙_ : {ℓa ℓb ℓc : Level} {A : Set ℓa} {B : Set ℓb} {C : Set ℓc} → (A ≃ B) → (B ≃ C) → A ≃ C
 eqA ⊙ eqB = Equivalence.compose eqA eqB

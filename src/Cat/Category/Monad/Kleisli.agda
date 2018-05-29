@@ -5,6 +5,7 @@ The Kleisli formulation of monads
 open import Agda.Primitive
 
 open import Cat.Prelude
+open import Cat.Equivalence
 
 open import Cat.Category
 open import Cat.Category.Functor as F
@@ -230,6 +231,7 @@ record IsMonad (raw : RawMonad) : Set ℓ where
     m ∎
 
 record Monad : Set ℓ where
+  no-eta-equality
   field
     raw : RawMonad
     isMonad : IsMonad raw
@@ -264,3 +266,82 @@ module _ {m n : Monad} (eq : Monad.raw m ≡ Monad.raw n) where
   Monad≡ : m ≡ n
   Monad.raw     (Monad≡ i) = eq i
   Monad.isMonad (Monad≡ i) = eqIsMonad i
+
+module _ where
+  private
+    module _ (x y : RawMonad) (p q : x ≡ y) (a b : p ≡ q) where
+      eq0-helper : isGrpd (Object → Object)
+      eq0-helper = grpdPi (λ a → ℂ.groupoidObject)
+
+      eq0 : cong (cong RawMonad.omap) a ≡ cong (cong RawMonad.omap) b
+      eq0 = eq0-helper
+        (RawMonad.omap x)             (RawMonad.omap y)
+        (cong RawMonad.omap p)        (cong RawMonad.omap q)
+        (cong (cong RawMonad.omap) a) (cong (cong RawMonad.omap) b)
+
+      eq1-helper : (omap : Object → Object) → isGrpd ({X : Object}   → ℂ [ X , omap X ])
+      eq1-helper f = grpdPiImpl (setGrpd ℂ.arrowsAreSets)
+
+      postulate
+        eq1 : PathP (λ i → PathP
+          (λ j →
+          PathP (λ k → {X : Object} → ℂ [ X , eq0 i j k X ])
+          (RawMonad.pure x) (RawMonad.pure y))
+          (λ i → RawMonad.pure (p i)) (λ i → RawMonad.pure (q i)))
+          (cong-d (cong-d RawMonad.pure) a) (cong-d (cong-d RawMonad.pure) b)
+
+
+    RawMonad' : Set _
+    RawMonad' = Σ (Object → Object) (λ omap
+      → ({X : Object} → ℂ [ X , omap X ])
+      × ({X Y : Object} → ℂ [ X , omap Y ] → ℂ [ omap X , omap Y ])
+      )
+    grpdRawMonad' : isGrpd RawMonad'
+    grpdRawMonad' = grpdSig (grpdPi (λ _ → ℂ.groupoidObject)) λ _ → grpdSig (grpdPiImpl (setGrpd ℂ.arrowsAreSets)) (λ _ → grpdPiImpl (grpdPiImpl (grpdPi (λ _ → setGrpd ℂ.arrowsAreSets))))
+    toRawMonad : RawMonad' → RawMonad
+    RawMonad.omap (toRawMonad (a , b , c)) = a
+    RawMonad.pure (toRawMonad (a , b , c)) = b
+    RawMonad.bind (toRawMonad (a , b , c)) = c
+
+    IsMonad' : RawMonad' → Set _
+    IsMonad' raw = M.IsIdentity × M.IsNatural × M.IsDistributive
+      where
+      module M = RawMonad (toRawMonad raw)
+
+    grpdIsMonad' : (m : RawMonad') → isGrpd (IsMonad' m)
+    grpdIsMonad' m = grpdSig (propGrpd (propIsIdentity (toRawMonad m)))
+      λ _ → grpdSig (propGrpd (propIsNatural (toRawMonad m)))
+      λ _ → propGrpd (propIsDistributive (toRawMonad m))
+
+    Monad' = Σ RawMonad' IsMonad'
+    grpdMonad' = grpdSig grpdRawMonad' grpdIsMonad'
+
+    toMonad : Monad' → Monad
+    Monad.raw (toMonad x) = toRawMonad (fst x)
+    isIdentity (Monad.isMonad (toMonad x)) = fst (snd x)
+    isNatural (Monad.isMonad (toMonad x)) = fst (snd (snd x))
+    isDistributive (Monad.isMonad (toMonad x)) = snd (snd (snd x))
+
+    fromMonad : Monad → Monad'
+    fromMonad m = (M.omap , M.pure , M.bind)
+      , M.isIdentity , M.isNatural , M.isDistributive
+      where
+      module M = Monad m
+
+    e : Monad' ≃ Monad
+    e = fromIsomorphism _ _ (toMonad , fromMonad , (funExt λ _ → refl) , funExt eta-refl)
+      where
+      -- Monads don't have eta-equality
+      eta-refl : (x : Monad) → toMonad (fromMonad x) ≡ x
+      eta-refl =
+        (λ x → λ
+          { i .Monad.raw → Monad.raw x
+          ; i .Monad.isMonad  → Monad.isMonad x}
+        )
+
+  grpdMonad : isGrpd Monad
+  grpdMonad = equivPreservesNType
+    {n = (S (S (S ⟨-2⟩)))}
+    e grpdMonad'
+    where
+    open import Cubical.NType

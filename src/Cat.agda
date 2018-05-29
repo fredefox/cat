@@ -10,10 +10,11 @@ open import Cat.Category.NaturalTransformation
 open import Cat.Category.Yoneda
 open import Cat.Category.Monoid
 open import Cat.Category.Monad
-open        Cat.Category.Monad.Monoidal
-open        Cat.Category.Monad.Kleisli
+open import Cat.Category.Monad.Monoidal
+open import Cat.Category.Monad.Kleisli
 open import Cat.Category.Monad.Voevodsky
 
+open import Cat.Categories.Opposite
 open import Cat.Categories.Sets
 open import Cat.Categories.Cat
 open import Cat.Categories.Rel

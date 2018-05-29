@@ -2,6 +2,7 @@
 module Cat.Categories.Rel where
 
 open import Cat.Prelude hiding (Rel)
+open import Cat.Equivalence
 
 open import Cat.Category
 
@@ -61,15 +62,9 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
           lem0 = (λ a'' a≡a'' → ∀ a''b∈S → (forwards ∘ backwards) (a'' , a≡a'' , a''b∈S) ≡ (a'' , a≡a'' , a''b∈S))
           lem1 = (λ z₁ → cong (\ z → a , refl , z) (pathJprop (\ y _ → y) z₁))
 
-      isequiv : isEquiv
-        (Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
-        ((a , b) ∈ S)
-        backwards
-      isequiv y = gradLemma backwards forwards fwd-bwd bwd-fwd y
-
       equi : (Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
         ≃ (a , b) ∈ S
-      equi = backwards , isequiv
+      equi = fromIsomorphism _ _ (backwards , forwards , funExt bwd-fwd , funExt fwd-bwd)
 
     ident-r : (Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
       ≡ (a , b) ∈ S
@@ -95,15 +90,9 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
           lem0 = (λ b'' b≡b'' → (ab''∈S : (a , b'') ∈ S) → (forwards ∘ backwards) (b'' , ab''∈S , sym b≡b'') ≡ (b'' , ab''∈S , sym b≡b''))
           lem1 = (λ ab''∈S → cong (λ φ → b , φ , refl) (pathJprop (λ y _ → y) ab''∈S))
 
-      isequiv : isEquiv
-        (Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
-        ((a , b) ∈ S)
-        backwards
-      isequiv ab∈S = gradLemma backwards forwards bwd-fwd fwd-bwd ab∈S
-
       equi : (Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
         ≃ ab ∈ S
-      equi = backwards , isequiv
+      equi = fromIsomorphism _ _ (backwards , (forwards , funExt fwd-bwd , funExt bwd-fwd))
 
     ident-l : (Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
       ≡ ab ∈ S
@@ -133,15 +122,9 @@ module _ {A B C D : Set} {S : Subset (A × B)} {R : Subset (B × C)} {Q : Subset
     bwd-fwd : (x : Q⊕⟨R⊕S⟩) → (bwd ∘ fwd) x ≡ x
     bwd-fwd x = refl
 
-    isequiv : isEquiv
-      (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
-      (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
-      fwd
-    isequiv = gradLemma fwd bwd fwd-bwd bwd-fwd
-
     equi : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
       ≃ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
-    equi = fwd , isequiv
+    equi = fromIsomorphism _ _ (fwd , bwd , funExt bwd-fwd , funExt fwd-bwd)
 
     -- isAssociativec : Q + (R + S) ≡ (Q + R) + S
   is-isAssociative : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)

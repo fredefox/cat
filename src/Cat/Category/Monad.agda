@@ -28,186 +28,213 @@ import Cat.Category.Monad.Monoidal
 import Cat.Category.Monad.Kleisli
 open import Cat.Categories.Fun
 
-module Monoidal = Cat.Category.Monad.Monoidal
-module Kleisli  = Cat.Category.Monad.Kleisli
-
 -- | The monoidal- and kleisli presentation of monads are equivalent.
 module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   open Cat.Category.NaturalTransformation ℂ ℂ using (NaturalTransformation ; propIsNatural)
   private
     module ℂ = Category ℂ
     open ℂ using (Object ; Arrow ; identity ; _<<<_ ; _>>>_)
-    module M = Monoidal ℂ
-    module K = Kleisli  ℂ
 
-    module _ (m : M.RawMonad) where
-      open M.RawMonad m
+    module Monoidal = Cat.Category.Monad.Monoidal ℂ
+    module Kleisli  = Cat.Category.Monad.Kleisli ℂ
 
-      forthRaw : K.RawMonad
-      K.RawMonad.omap forthRaw = Romap
-      K.RawMonad.pure forthRaw = pureT _
-      K.RawMonad.bind forthRaw = bind
+    module _ (m : Monoidal.RawMonad) where
+      open Monoidal.RawMonad m
 
-    module _ {raw : M.RawMonad} (m : M.IsMonad raw) where
-      private
-        module MI = M.IsMonad m
-      forthIsMonad : K.IsMonad (forthRaw raw)
-      K.IsMonad.isIdentity     forthIsMonad = snd MI.isInverse
-      K.IsMonad.isNatural      forthIsMonad = MI.isNatural
-      K.IsMonad.isDistributive forthIsMonad = MI.isDistributive
+      toKleisliRaw : Kleisli.RawMonad
+      Kleisli.RawMonad.omap toKleisliRaw = Romap
+      Kleisli.RawMonad.pure toKleisliRaw = pure
+      Kleisli.RawMonad.bind toKleisliRaw = bind
 
-    forth : M.Monad → K.Monad
-    Kleisli.Monad.raw     (forth m) = forthRaw     (M.Monad.raw     m)
-    Kleisli.Monad.isMonad (forth m) = forthIsMonad (M.Monad.isMonad m)
+    module _ {raw : Monoidal.RawMonad} (m : Monoidal.IsMonad raw) where
+      open Monoidal.IsMonad m
 
-    module _ (m : K.Monad) where
-      open K.Monad m
+      open Kleisli.RawMonad (toKleisliRaw raw) using (_>=>_)
+      toKleisliIsMonad : Kleisli.IsMonad (toKleisliRaw raw)
+      Kleisli.IsMonad.isIdentity     toKleisliIsMonad = begin
+        bind pure ≡⟨⟩
+        join <<< (fmap pure) ≡⟨ snd isInverse ⟩
+        identity ∎
+      Kleisli.IsMonad.isNatural      toKleisliIsMonad f = begin
+        pure >=> f ≡⟨⟩
+        pure >>> bind f ≡⟨⟩
+        bind f <<< pure ≡⟨⟩
+        (join <<< fmap f) <<< pure ≡⟨ isNatural f ⟩
+        f ∎
+      Kleisli.IsMonad.isDistributive toKleisliIsMonad f g = begin
+        bind g >>> bind f ≡⟨⟩
+        (join <<< fmap f) <<< (join <<< fmap g) ≡⟨ isDistributive f g ⟩
+        join <<< fmap (join <<< fmap f <<< g) ≡⟨⟩
+        bind (g >=> f) ∎
+      -- Kleisli.IsMonad.isDistributive toKleisliIsMonad = isDistributive
 
-      backRaw : M.RawMonad
-      M.RawMonad.R      backRaw = R
-      M.RawMonad.pureNT backRaw = pureNT
-      M.RawMonad.joinNT backRaw = joinNT
+    toKleisli : Monoidal.Monad → Kleisli.Monad
+    Kleisli.Monad.raw     (toKleisli m) = toKleisliRaw     (Monoidal.Monad.raw     m)
+    Kleisli.Monad.isMonad (toKleisli m) = toKleisliIsMonad (Monoidal.Monad.isMonad m)
 
-      private
-        open M.RawMonad backRaw renaming
-          ( join to join*
-          ; pure to pure*
-          ; bind to bind*
-          ; fmap to fmap*
-          )
-        module R = Functor (M.RawMonad.R backRaw)
+    module _ (m : Kleisli.Monad) where
+      open Kleisli.Monad m
 
-      backIsMonad : M.IsMonad backRaw
-      M.IsMonad.isAssociative backIsMonad = begin
-        join* <<< R.fmap join* ≡⟨⟩
+      toMonoidalRaw : Monoidal.RawMonad
+      Monoidal.RawMonad.R      toMonoidalRaw = R
+      Monoidal.RawMonad.pureNT toMonoidalRaw = pureNT
+      Monoidal.RawMonad.joinNT toMonoidalRaw = joinNT
+
+      open Monoidal.RawMonad toMonoidalRaw renaming
+        ( join to join*
+        ; pure to pure*
+        ; bind to bind*
+        ; fmap to fmap*
+        ) using ()
+
+      toMonoidalIsMonad : Monoidal.IsMonad toMonoidalRaw
+      Monoidal.IsMonad.isAssociative toMonoidalIsMonad = begin
+        join* <<< fmap join* ≡⟨⟩
         join  <<< fmap join    ≡⟨ isNaturalForeign ⟩
         join  <<< join         ∎
-      M.IsMonad.isInverse backIsMonad {X} = inv-l , inv-r
+      Monoidal.IsMonad.isInverse toMonoidalIsMonad {X} = inv-l , inv-r
         where
         inv-l = begin
           join <<< pure                ≡⟨ fst isInverse ⟩
           identity                     ∎
         inv-r = begin
-          joinT X <<< R.fmap (pureT X) ≡⟨⟩
+          join* <<< fmap* pure*        ≡⟨⟩
           join <<< fmap pure           ≡⟨ snd isInverse ⟩
           identity                     ∎
 
-    back : K.Monad → M.Monad
-    Monoidal.Monad.raw     (back m) = backRaw     m
-    Monoidal.Monad.isMonad (back m) = backIsMonad m
+    toMonoidal : Kleisli.Monad → Monoidal.Monad
+    Monoidal.Monad.raw     (toMonoidal m) = toMonoidalRaw     m
+    Monoidal.Monad.isMonad (toMonoidal m) = toMonoidalIsMonad m
 
-    module _ (m : K.Monad) where
+    module _ (m : Kleisli.Monad) where
       private
-        open K.Monad m
+        open Kleisli.Monad m
         bindEq : ∀ {X Y}
-          → K.RawMonad.bind (forthRaw (backRaw m)) {X} {Y}
-          ≡ K.RawMonad.bind (K.Monad.raw m)
-        bindEq {X} {Y} = begin
-          K.RawMonad.bind (forthRaw (backRaw m))        ≡⟨⟩
-          (λ f → join <<< fmap f)                       ≡⟨⟩
-          (λ f → bind (f >>> pure) >>> bind identity)   ≡⟨ funExt lem ⟩
-          (λ f → bind f)                                ≡⟨⟩
-          bind                                          ∎
+          → Kleisli.RawMonad.bind (toKleisliRaw (toMonoidalRaw m)) {X} {Y}
+          ≡ bind
+        bindEq {X} {Y} = funExt lem
           where
           lem : (f : Arrow X (omap Y))
             → bind (f >>> pure) >>> bind identity
             ≡ bind f
           lem f = begin
+            join <<< fmap f
+              ≡⟨⟩
             bind (f >>> pure) >>> bind identity
               ≡⟨ isDistributive _ _ ⟩
+            bind ((f >>> pure) >=> identity)
+              ≡⟨⟩
             bind ((f >>> pure) >>> bind identity)
               ≡⟨ cong bind ℂ.isAssociative ⟩
             bind (f >>> (pure >>> bind identity))
+              ≡⟨⟩
+            bind (f >>> (pure >=> identity))
               ≡⟨ cong (λ φ → bind (f >>> φ)) (isNatural _) ⟩
             bind (f >>> identity)
               ≡⟨ cong bind ℂ.leftIdentity ⟩
             bind f ∎
 
-      forthRawEq : forthRaw (backRaw m) ≡ K.Monad.raw m
-      K.RawMonad.omap  (forthRawEq _) = omap
-      K.RawMonad.pure  (forthRawEq _) = pure
-      K.RawMonad.bind  (forthRawEq i) = bindEq i
+      toKleisliRawEq : toKleisliRaw (toMonoidalRaw m) ≡ Kleisli.Monad.raw m
+      Kleisli.RawMonad.omap  (toKleisliRawEq i) = (begin
+          Kleisli.RawMonad.omap (toKleisliRaw (toMonoidalRaw m)) ≡⟨⟩
+          Monoidal.RawMonad.Romap (toMonoidalRaw m) ≡⟨⟩
+          omap ∎
+        ) i
+      Kleisli.RawMonad.pure  (toKleisliRawEq i) = (begin
+          Kleisli.RawMonad.pure  (toKleisliRaw (toMonoidalRaw m)) ≡⟨⟩
+          Monoidal.RawMonad.pure (toMonoidalRaw m)               ≡⟨⟩
+          pure ∎
+        ) i
+      Kleisli.RawMonad.bind  (toKleisliRawEq i) = bindEq i
 
-    fortheq : (m : K.Monad) → forth (back m) ≡ m
-    fortheq m = K.Monad≡ (forthRawEq m)
+    toKleislieq : (m : Kleisli.Monad) → toKleisli (toMonoidal m) ≡ m
+    toKleislieq m = Kleisli.Monad≡ (toKleisliRawEq m)
 
-    module _ (m : M.Monad) where
+    module _ (m : Monoidal.Monad) where
       private
-        open M.Monad m
-        module KM = K.Monad (forth m)
+        open Monoidal.Monad m
+        -- module KM = Kleisli.Monad (toKleisli m)
+        open Kleisli.Monad (toKleisli m) renaming
+          ( bind to bind* ; omap to omap* ; join to join*
+          ; fmap to fmap* ; pure to pure* ; R to R*)
+          using ()
         module R = Functor R
-        omapEq : KM.omap ≡ Romap
+        omapEq : omap* ≡ Romap
         omapEq = refl
 
-        bindEq : ∀ {X Y} {f : Arrow X (Romap Y)} → KM.bind f ≡ bind f
+        bindEq : ∀ {X Y} {f : Arrow X (Romap Y)} → bind* f ≡ bind f
         bindEq {X} {Y} {f} = begin
-          KM.bind f           ≡⟨⟩
-          joinT Y <<< fmap f ≡⟨⟩
-          bind f              ∎
+          bind* f         ≡⟨⟩
+          join <<< fmap f ≡⟨⟩
+          bind f          ∎
 
-        joinEq : ∀ {X} → KM.join ≡ joinT X
+        joinEq : ∀ {X} → join* ≡ joinT X
         joinEq {X} = begin
-          KM.join                    ≡⟨⟩
-          KM.bind identity           ≡⟨⟩
-          bind identity              ≡⟨⟩
-          joinT X <<< fmap identity ≡⟨ cong (λ φ → _ <<< φ) R.isIdentity ⟩
-          joinT X <<< identity       ≡⟨ ℂ.rightIdentity ⟩
-          joinT X                    ∎
+          join*                  ≡⟨⟩
+          bind* identity         ≡⟨⟩
+          bind identity          ≡⟨⟩
+          join <<< fmap identity ≡⟨ cong (λ φ → _ <<< φ) R.isIdentity ⟩
+          join <<< identity      ≡⟨ ℂ.rightIdentity ⟩
+          join                   ∎
 
-        fmapEq : ∀ {A B} → KM.fmap {A} {B} ≡ fmap
+        fmapEq : ∀ {A B} → fmap* {A} {B} ≡ fmap
         fmapEq {A} {B} = funExt (λ f → begin
-          KM.fmap f                                ≡⟨⟩
-          KM.bind (f >>> KM.pure)                  ≡⟨⟩
-             bind (f >>> pureT _)                  ≡⟨⟩
-             fmap (f >>> pureT B) >>> joinT B     ≡⟨⟩
-          fmap (f >>> pureT B) >>> joinT B        ≡⟨ cong (λ φ → φ >>> joinT B) R.isDistributive ⟩
-          fmap f >>> fmap (pureT B) >>> joinT B  ≡⟨ ℂ.isAssociative ⟩
-          joinT B <<< fmap (pureT B) <<< fmap f  ≡⟨ cong (λ φ → φ <<< fmap f) (snd isInverse) ⟩
-          identity <<< fmap f                     ≡⟨ ℂ.leftIdentity ⟩
-          fmap f                                  ∎
+          fmap* f                          ≡⟨⟩
+          bind* (f >>> pure*)              ≡⟨⟩
+          bind (f >>> pure)                ≡⟨⟩
+          fmap (f >>> pure) >>> join       ≡⟨⟩
+          fmap (f >>> pure) >>> join       ≡⟨ cong (λ φ → φ >>> joinT B) R.isDistributive ⟩
+          fmap f >>> fmap pure >>> join    ≡⟨ ℂ.isAssociative ⟩
+          join <<< fmap pure <<< fmap f    ≡⟨ cong (λ φ → φ <<< fmap f) (snd isInverse) ⟩
+          identity <<< fmap f              ≡⟨ ℂ.leftIdentity ⟩
+          fmap f                           ∎
           )
 
-        rawEq : Functor.raw KM.R ≡ Functor.raw R
+        rawEq : Functor.raw R* ≡ Functor.raw R
         RawFunctor.omap (rawEq i) = omapEq i
         RawFunctor.fmap (rawEq i) = fmapEq i
 
-      Req : M.RawMonad.R (backRaw (forth m)) ≡ R
+      Req : Monoidal.RawMonad.R (toMonoidalRaw (toKleisli m)) ≡ R
       Req = Functor≡ rawEq
 
-      pureTEq : M.RawMonad.pureT (backRaw (forth m)) ≡ pureT
-      pureTEq = funExt (λ X → refl)
+      pureTEq : Monoidal.RawMonad.pureT (toMonoidalRaw (toKleisli m)) ≡ pureT
+      pureTEq = refl
 
       pureNTEq : (λ i → NaturalTransformation Functors.identity (Req i))
-        [ M.RawMonad.pureNT (backRaw (forth m)) ≡ pureNT ]
+        [ Monoidal.RawMonad.pureNT (toMonoidalRaw (toKleisli m)) ≡ pureNT ]
       pureNTEq = lemSigP (λ i → propIsNatural Functors.identity (Req i)) _ _ pureTEq
 
-      joinTEq : M.RawMonad.joinT (backRaw (forth m)) ≡ joinT
+      joinTEq : Monoidal.RawMonad.joinT (toMonoidalRaw (toKleisli m)) ≡ joinT
       joinTEq = funExt (λ X → begin
-        M.RawMonad.joinT (backRaw (forth m)) X ≡⟨⟩
-        KM.join ≡⟨⟩
-        joinT X <<< fmap identity ≡⟨ cong (λ φ → joinT X <<< φ) R.isIdentity ⟩
-        joinT X <<< identity ≡⟨ ℂ.rightIdentity ⟩
-        joinT X ∎)
+        Monoidal.RawMonad.joinT (toMonoidalRaw (toKleisli m)) X ≡⟨⟩
+        join* ≡⟨⟩
+        join <<< fmap identity ≡⟨ cong (λ φ → join <<< φ) R.isIdentity ⟩
+        join <<< identity ≡⟨ ℂ.rightIdentity ⟩
+        join ∎)
 
       joinNTEq : (λ i → NaturalTransformation F[ Req i ∘ Req i ] (Req i))
-        [ M.RawMonad.joinNT (backRaw (forth m)) ≡ joinNT ]
+        [ Monoidal.RawMonad.joinNT (toMonoidalRaw (toKleisli m)) ≡ joinNT ]
       joinNTEq = lemSigP (λ i → propIsNatural F[ Req i ∘ Req i ] (Req i)) _ _ joinTEq
 
-      backRawEq : backRaw (forth m) ≡ M.Monad.raw m
-      M.RawMonad.R      (backRawEq i) = Req i
-      M.RawMonad.pureNT (backRawEq i) = pureNTEq i
-      M.RawMonad.joinNT (backRawEq i) = joinNTEq i
+      toMonoidalRawEq : toMonoidalRaw (toKleisli m) ≡ Monoidal.Monad.raw m
+      Monoidal.RawMonad.R      (toMonoidalRawEq i) = Req i
+      Monoidal.RawMonad.pureNT (toMonoidalRawEq i) = pureNTEq i
+      Monoidal.RawMonad.joinNT (toMonoidalRawEq i) = joinNTEq i
 
-    backeq : (m : M.Monad) → back (forth m) ≡ m
-    backeq m = M.Monad≡ (backRawEq m)
-
-    eqv : isEquiv M.Monad K.Monad forth
-    eqv = gradLemma forth back fortheq backeq
+    toMonoidaleq : (m : Monoidal.Monad) → toMonoidal (toKleisli m) ≡ m
+    toMonoidaleq m = Monoidal.Monad≡ (toMonoidalRawEq m)
 
   open import Cat.Equivalence
 
-  Monoidal≊Kleisli : M.Monad ≅ K.Monad
-  Monoidal≊Kleisli = forth , back , funExt backeq , funExt fortheq
+  Monoidal≊Kleisli : Monoidal.Monad ≅ Kleisli.Monad
+  Monoidal≊Kleisli = toKleisli , toMonoidal , funExt toMonoidaleq , funExt toKleislieq
 
-  Monoidal≡Kleisli : M.Monad ≡ K.Monad
+  Monoidal≡Kleisli : Monoidal.Monad ≡ Kleisli.Monad
   Monoidal≡Kleisli = isoToPath Monoidal≊Kleisli
+
+  grpdKleisli : isGrpd Kleisli.Monad
+  grpdKleisli = Kleisli.grpdMonad
+
+  grpdMonoidal : isGrpd Monoidal.Monad
+  grpdMonoidal = subst {P = isGrpd}
+    (sym Monoidal≡Kleisli) grpdKleisli

@@ -105,3 +105,38 @@ module _ {ℓ : Level} {A : Set ℓ} where
   ntypeCumulative : ∀ {n m} → n ≤′ m → HasLevel ⟨ n ⟩₋₂ A → HasLevel ⟨ m ⟩₋₂ A
   ntypeCumulative {m}         ≤′-refl      lvl = lvl
   ntypeCumulative {n} {suc m} (≤′-step le) lvl = HasLevel+1 ⟨ m ⟩₋₂ (ntypeCumulative le lvl)
+
+  grpdPi : {ℓb : Level} {B : A → Set ℓb}
+    → ((a : A) → isGrpd (B a)) → isGrpd ((a : A) → (B a))
+  grpdPi = piPresNType (S (S (S ⟨-2⟩)))
+
+  grpdPiImpl : {ℓb : Level} {B : A → Set ℓb}
+    → ({a : A} → isGrpd (B a)) → isGrpd ({a : A} → (B a))
+  grpdPiImpl {B = B} g = equivPreservesNType {A = Expl} {B = Impl} {n = one} e (grpdPi (λ a → g))
+    where
+    one = (S (S (S ⟨-2⟩)))
+    t : ({a : A} → HasLevel one (B a))
+    t = g
+    Impl = {a : A} → B a
+    Expl = (a : A) → B a
+    expl : Impl → Expl
+    expl f a = f {a}
+    impl : Expl → Impl
+    impl f {a} = f a
+    e : Expl ≃ Impl
+    e = impl , (gradLemma impl expl (λ f → refl) (λ f → refl))
+
+  setGrpd : isSet A → isGrpd A
+  setGrpd = ntypeCumulative
+    {suc (suc zero)} {suc (suc (suc zero))}
+    (≤′-step ≤′-refl)
+
+  propGrpd : isProp A → isGrpd A
+  propGrpd = ntypeCumulative
+    {suc zero} {suc (suc (suc zero))}
+    (≤′-step (≤′-step ≤′-refl))
+
+module _ {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb} where
+  open TLevel
+  grpdSig : isGrpd A → (∀ a → isGrpd (B a)) → isGrpd (Σ A B)
+  grpdSig = sigPresNType {n = S (S (S ⟨-2⟩))}

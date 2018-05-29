@@ -1,0 +1,74 @@
+\chapter{Non-reducing functional extensionality}
+\label{app:abstract-funext}
+In two places in my formalization was the computational behaviours of
+functional extensionality used. The reduction behaviour can be
+disabled by marking functional extensionality as abstract. Below the
+fully normalized goal and context with functional extensionality
+marked abstract has been shown. The excerpts are from the module
+%
+\begin{center}
+\sourcelink{Cat.Category.Monad.Voevodsky}
+\end{center}
+%
+where this is also written as a comment next to the proofs. When
+functional extensionality is not abstract the goal and current value
+are the same. It is of course necessary to show the fully normalized
+goal and context otherwise the reduction behaviours is not forced.
+
+\subsubsection*{First goal}
+Goal:
+\begin{verbatim}
+PathP (λ _ → §2-3.§2 omap (λ {z} → pure))
+(§2-fromMonad
+ (.Cat.Category.Monad.toKleisli ℂ
+  (.Cat.Category.Monad.toMonoidal ℂ (§2-3.§2.toMonad m))))
+(§2-fromMonad (§2-3.§2.toMonad m))
+\end{verbatim}
+Have:
+\begin{verbatim}
+PathP
+(λ i →
+   §2-3.§2 K.IsMonad.omap
+   (K.RawMonad.pure
+    (K.Monad.raw
+     (funExt (λ m₁ → K.Monad≡ (.Cat.Category.Monad.toKleisliRawEq ℂ m₁))
+      i (§2-3.§2.toMonad m)))))
+(§2-fromMonad
+ (.Cat.Category.Monad.toKleisli ℂ
+  (.Cat.Category.Monad.toMonoidal ℂ (§2-3.§2.toMonad m))))
+(§2-fromMonad (§2-3.§2.toMonad m))
+\end{verbatim}
+\subsubsection*{Second goal}
+Goal:
+\begin{verbatim}
+PathP (λ _ → §2-3.§1 omap (λ {X} → pure))
+(§1-fromMonad
+ (.Cat.Category.Monad.toMonoidal ℂ
+  (.Cat.Category.Monad.toKleisli ℂ (§2-3.§1.toMonad m))))
+(§1-fromMonad (§2-3.§1.toMonad m))
+\end{verbatim}
+Have:
+\begin{verbatim}
+PathP
+(λ i →
+   §2-3.§1
+   (RawFunctor.omap
+    (Functor.raw
+     (M.RawMonad.R
+      (M.Monad.raw
+       (funExt
+        (λ m₁ → M.Monad≡ (.Cat.Category.Monad.toMonoidalRawEq ℂ m₁)) i
+        (§2-3.§1.toMonad m))))))
+   (λ {X} →
+      fst
+      (M.RawMonad.pureNT
+       (M.Monad.raw
+        (funExt
+         (λ m₁ → M.Monad≡ (.Cat.Category.Monad.toMonoidalRawEq ℂ m₁)) i
+         (§2-3.§1.toMonad m))))
+      X))
+(§1-fromMonad
+ (.Cat.Category.Monad.toMonoidal ℂ
+  (.Cat.Category.Monad.toKleisli ℂ (§2-3.§1.toMonad m))))
+(§1-fromMonad (§2-3.§1.toMonad m))
+\end{verbatim}
