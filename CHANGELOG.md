@@ -1,6 +1,13 @@
 Change log
 =========
 
+Version 1.6.0
+-------------
+
+This version mainly contains changes to the report.
+
+This is the version I submit for my MSc..
+
 Version 1.5.0
 -------------
 Prove postulates in `Cat.Wishlist`:
