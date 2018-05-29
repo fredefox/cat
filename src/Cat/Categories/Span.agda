@@ -71,9 +71,20 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb)
         open Σ 𝕐 renaming (fst to Y ; snd to y)
         open Σ y renaming (fst to ya ; snd to yb)
         open import Cat.Equivalence using (composeIso) renaming (_≅_ to _≅_)
-        step0
-          : ((X , xa , xb) ≡ (Y , ya , yb))
-          ≅ (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) 𝒜) xa ya) × (PathP (λ i → ℂ.Arrow (p i) ℬ) xb yb))
+
+        -- The proof will be a sequence of isomorphisms between the
+        -- following 4 types:
+        T0 = ((X , xa , xb) ≡ (Y , ya , yb))
+        T1 = (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) 𝒜) xa ya) × (PathP (λ i → ℂ.Arrow (p i) ℬ) xb yb))
+        T2 = Σ (X ℂ.≊ Y) (λ iso
+            → let p = ℂ.isoToId iso
+            in
+            ( PathP (λ i → ℂ.Arrow (p i) 𝒜) xa ya)
+            × PathP (λ i → ℂ.Arrow (p i) ℬ) xb yb
+            )
+        T3 = ((X , xa , xb) ≊ (Y , ya , yb))
+
+        step0 : T0 ≅ T1
         step0
           = (λ p → cong fst p , cong-d (fst ∘ snd) p , cong-d (snd ∘ snd) p)
           -- , (λ x  → λ i → fst x i , (fst (snd x) i) , (snd (snd x) i))
@@ -81,14 +92,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb)
           , funExt (λ{ p → refl})
           , funExt (λ{ (p , q , r) → refl})
 
-        step1
-          : (Σ[ p ∈ (X ≡ Y) ] (PathP (λ i → ℂ.Arrow (p i) 𝒜) xa ya) × (PathP (λ i → ℂ.Arrow (p i) ℬ) xb yb))
-          ≅ Σ (X ℂ.≊ Y) (λ iso
-            → let p = ℂ.isoToId iso
-            in
-            ( PathP (λ i → ℂ.Arrow (p i) 𝒜) xa ya)
-            × PathP (λ i → ℂ.Arrow (p i) ℬ) xb yb
-            )
+        step1 : T1 ≅ T2
         step1
           = symIso
               (isoSigFst
@@ -100,14 +104,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb)
                 (symIso (_ , ℂ.asTypeIso {X} {Y}) .snd)
               )
 
-        step2
-          : Σ (X ℂ.≊ Y) (λ iso
-            → let p = ℂ.isoToId iso
-            in
-            ( PathP (λ i → ℂ.Arrow (p i) 𝒜) xa ya)
-            × PathP (λ i → ℂ.Arrow (p i) ℬ) xb yb
-            )
-          ≅ ((X , xa , xb) ≊ (Y , ya , yb))
+        step2 : T2 ≅ T3
         step2
           = ( λ{ (iso@(f , f~ , inv-f) , p , q)
               → ( f  , sym (ℂ.domain-twist-sym  iso p) , sym (ℂ.domain-twist-sym iso q))
