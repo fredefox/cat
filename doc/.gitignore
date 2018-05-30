@@ -4,6 +4,7 @@
 *.log
 *.out
 *.pdf
+!assets/**
 *.bbl
 *.blg
 *.toc

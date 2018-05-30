@@ -4,8 +4,12 @@
 %% \usecolortheme[named=seagull]{structure}
 
 \input{packages.tex}
+
 \input{macros.tex}
-\title[Univalent Categories]{Univalent Categories\\ \footnotesize A formalization of category theory in Cubical Agda}
+
+\title{Univalent Categories}
+\subtitle{A formalization of category theory in Cubical Agda}
+
 \newcommand{\myname}{Frederik Hangh{\o}j Iversen}
 \author[\myname]{
   \myname\\
@@ -74,14 +78,14 @@
   \framesubtitle{Definition}
   Heterogeneous paths
   \begin{equation*}
-    \Path \tp (P \tp I → \MCU) → P\ 0 → P\ 1 → \MCU
+    \Path \tp (P \tp \I → \MCU) → P\ 0 → P\ 1 → \MCU
   \end{equation*}
   \pause
-  For $P \tp I → \MCU$, $A \tp \MCU$ and $a_0, a_1 \tp A$
+  For $P \tp \I → \MCU$, $A \tp \MCU$ and $a_0, a_1 \tp A$
   inhabitants of $\Path\ P\ a_0\ a_1$ are like functions
   %
   $$
-  p \tp ∏_{i \tp I} P\ i
+  p \tp ∏_{i \tp \I} P\ i
   $$
   %
   Which satisfy $p\ 0 & = a_0$ and $p\ 1 & = a_1$
@@ -255,13 +259,13 @@
   \end{align*}
   where
   $$
-  \phi\ f ≜ \identity
-  ( \lll f ≡ f )
+  \phi\ f ≜
+  ( \identity \lll f ≡ f )
   ×
   ( f \lll \identity ≡ f)
   $$
   \pause
-  Let $\approxeq$ denote ismorphism of objects. We can then construct
+  Let $\approxeq$ denote isomorphism of objects.  We can then construct
   the identity isomorphism in any category:
   $$
   \identity , \identity , \var{isIdentity} \tp A \approxeq A
@@ -326,7 +330,7 @@
   Use $\lemPropF$ for the latter.
   \pause
   %
-  Univalence is indexed by an identity proof. So $A ≜
+  Univalence is indexed by an identity proof.  So $A ≜
   IsIdentity\ identity$ and $B ≜ \var{Univalent}$.
   \pause
   %
@@ -379,7 +383,7 @@
   \end{align*}
   \pause
   %
-  Induction will be based at $A$. Let $\widetilde{B}$ and $\widetilde{p}
+  Induction will be based at $A$.  Let $\widetilde{B}$ and $\widetilde{p}
   \tp A ≡ \widetilde{B}$ be given.
   %
   \pause
@@ -582,7 +586,7 @@
   \end{align*}
   \pause
   %
-  Let $\fmap$ be the map on arrows of $\EndoR$. Likewise
+  Let $\fmap$ be the map on arrows of $\EndoR$.  Likewise
   $\pure$ and $\join$ are the maps of the natural transformations
   $\pureNT$ and $\joinNT$ respectively.
   %
@@ -643,7 +647,7 @@
   \join ≜ \bind\ \identity
   $$
   \pause
-  The laws are logically equivalent. So we get:
+  The laws are logically equivalent.  So we get:
   %
   $$
   \var{Monoidal} ≃ \var{Kleisli}
