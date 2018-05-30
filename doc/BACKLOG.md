@@ -1,3 +1,13 @@
+Presentation
+====
+Find one clear goal.
+
+Remember crowd-control.
+
+Leave out:
+  lemPropF
+
+
 Talk about structure of library:
 ===
 
