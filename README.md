@@ -11,39 +11,42 @@ If you want more information about this project, then you're in luck. This is my
 masters thesis. Go ahead and read it:
 
     cd doc/
-    make read
-
-Installation
-============
+    make
 
 Dependencies
-------------
-To succesfully compile the following is needed:
+============
+To successfully compile the following is needed:
 
-* The Agda release candidate 2.5.4[^1]
+* The Agda release candidate 2.5.4 or higher[^1]
 * [Agda Standard Library](https://github.com/agda/agda-stdlib)
 * [Cubical](https://github.com/Saizan/cubical-demo/)
+
+Also tested with:
+
+  * Agda version 2.6.0-d3efe64
 
 [^1]: At least version >=
   [`707ce6042`](https://github.com/agda/agda/commit/707ce6042b6a3bdb26521f3fe8dfe5d8a8470a43)
 
-The version of the libraries that this depends on can be shown by
-executing the following command in the root directory of the project:
+Building
+========
+You can build the library with
 
-    git submodule foreach git rev-parse HEAD
+    git submodule update --init
+	make
 
-Unfortunately Agda's module system does not allow us to automatically
-add these dependencies. So you'll have to make sure you're using
-versions of these libraries that are compatible with this
-project. Since this information is only provided as documentation it
-may also noot be up-to-date so beware.
+The Makefile takes care of using the right dependencies.
+Unfortunately I have not found a way to automatically inform
+`agda-mode` that it should use these dependencies. So what you can do
+in stead is to copy these libraries to a global location and then add
+them system wide:
 
-You can let Agda know about these libraries by appending them to your global
-libraries file like so: (NB!: There is a good reason this is not in a
-makefile. So please verify that you know what you are doing, you probably
-already have standard-library in you libraries)
+    mkdir -p ~/.agda/libs
+	cd ~/.agda/libs
+	git clone $CAT/libs/std-lib
+	git clone $CAT/libs/cubical
+	echo << EOF | tee -a ~/.agda/libraries
+	$HOME/.agda/libs/agda-stdlib/standard-library.agda-lib
+	$HOME/.agda/libs/cubical/cubical.agda-lib
+	EOF
 
-    AGDA_LIB=~/.agda
-    readlink -f libs/*/*.agda-lib | tee -a $AGDA_LIB/libraries
-
-Anyways, assuming you have this set up you should be good to go.

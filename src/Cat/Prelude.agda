@@ -44,8 +44,8 @@ module _ (ℓ : Level) where
   hSet : Set (lsuc ℓ)
   hSet = ⟨0⟩ -type
 
-  Prop : Set (lsuc ℓ)
-  Prop = ⟨-1⟩ -type
+  hProp : Set (lsuc ℓ)
+  hProp = ⟨-1⟩ -type
 
 -----------------
 -- * Utilities --

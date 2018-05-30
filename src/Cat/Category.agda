@@ -559,7 +559,6 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
       -- projections of `IsCategory` - Here I arbitrarily chose to use this
       -- result from `x : IsCategory C`. I don't know which (if any) possibly
       -- adverse effects this may have.
-      module Prop = X.Propositionality
 
       isIdentity= : (λ _ → IsIdentity identity) [ X.isIdentity ≡ Y.isIdentity ]
       isIdentity= = X.propIsIdentity X.isIdentity Y.isIdentity
