@@ -7,8 +7,10 @@ This project aims to formalize some parts of category theory using cubical agda
 This project draws a lot of inspiration from [the
 HoTT-book](https://homotopytypetheory.org/book/).
 
-If you want more information about this project, then you're in luck.  This is my
-masters thesis.  Go ahead and [read it](http://web.student.chalmers.se/~hanghj/papers/univalent-categories.pdf):
+If you want more information about this project, then you're in luck.
+This is my masters thesis.  Go ahead and read it
+[here](http://web.student.chalmers.se/~hanghj/papers/univalent-categories.pdf)
+or alternative like so:
 
     cd doc/
     make
