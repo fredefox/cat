@@ -33,7 +33,7 @@ Building
 You can build the library with
 
     git submodule update --init
-	make
+    make
 
 The Makefile takes care of using the right dependencies.
 Unfortunately I have not found a way to automatically inform
@@ -42,11 +42,12 @@ in stead is to copy these libraries to a global location and then add
 them system wide:
 
     mkdir -p ~/.agda/libs
-	cd ~/.agda/libs
-	git clone $CAT/libs/std-lib
-	git clone $CAT/libs/cubical
-	echo << EOF | tee -a ~/.agda/libraries
-	$HOME/.agda/libs/agda-stdlib/standard-library.agda-lib
-	$HOME/.agda/libs/cubical/cubical.agda-lib
-	EOF
+    cd ~/.agda/libs
+    git clone $CAT/libs/std-lib
+    git clone $CAT/libs/cubical
+    echo << EOF | tee -a ~/.agda/libraries
+    $HOME/.agda/libs/agda-stdlib/standard-library.agda-lib
+    $HOME/.agda/libs/cubical/cubical.agda-lib
+    EOF
 
+Or you could symlink them as well if you want.
