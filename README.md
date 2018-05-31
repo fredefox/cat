@@ -8,7 +8,7 @@ This project draws a lot of inspiration from [the
 HoTT-book](https://homotopytypetheory.org/book/).
 
 If you want more information about this project, then you're in luck.  This is my
-masters thesis.  Go ahead and read it:
+masters thesis.  Go ahead and [read it](http://web.student.chalmers.se/~hanghj/papers/univalent-categories.pdf):
 
     cd doc/
     make
