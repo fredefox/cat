@@ -7,6 +7,15 @@ Remember crowd-control.
 Leave out:
   lemPropF
 
+Outline
+-------
+
+Introduction
+
+A formalization of Category Theory in cubical Agda.
+
+Cubical Agda: A constructive interpretation of functional
+extensionality and univalence
 
 Talk about structure of library:
 ===

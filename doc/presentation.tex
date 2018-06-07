@@ -1,6 +1,4 @@
-\documentclass[a4paper,handout]{beamer}
-\usetheme{metropolis}
-\beamertemplatenavigationsymbolsempty
+\documentclass[a4paper]{beamer}
 %% \usecolortheme[named=seagull]{structure}
 
 \input{packages.tex}
@@ -19,60 +17,39 @@
 \institute{Chalmers University of Technology}
 
 \begin{document}
+
 \frame{\titlepage}
 
 \begin{frame}
-  \frametitle{Motivating example}
-  \framesubtitle{Functional extensionality}
-  Consider the functions
-  \begin{align*}
-    \var{zeroLeft}  & ≜ \lambda (n \tp \bN) \mto (0 + n \tp \bN) \\
-    \var{zeroRight} & ≜ \lambda (n \tp \bN) \mto (n + 0 \tp \bN)
-  \end{align*}
-  \pause
-  We have
-  %
-  $$
-  ∏_{n \tp \bN} \var{zeroLeft}\ n ≡ \var{zeroRight}\ n
-  $$
-  %
-  \pause
-  But not
-  %
-  $$
-  \var{zeroLeft} ≡ \var{zeroRight}
-  $$
-  %
-  \pause
-  We need
-  %
-  $$
-  \funExt \tp ∏_{a \tp A} f\ a ≡ g\ a → f ≡ g
-  $$
+\frametitle{Introduction}
+Category Theory: The study of abstract functions. Slogan: ``It's the
+arrows that matter''\pause
+
+Objects are equal ``up to isomorphism''.  Univalence makes this notion
+precise.\pause
+
+Agda does not permit proofs of univalence.  Cubical Agda admits
+this.\pause
+
+Goal: Construct a category whose terminal objects are (equivalent to)
+products. Use this to conclude that products are propositions, not a
+structure on a category.
 \end{frame}
+
 \begin{frame}
-  \frametitle{Motivating example}
-  \framesubtitle{Univalence}
-  Consider the set
-  $\{x \mid \phi\ x \land \psi\ x\}$
-  \pause
+\frametitle{Outline}
+The path type
 
-  If we show $∀ x . \psi\ x ≡ \top$
-  then we want to conclude
-  $\{x \mid \phi\ x \land \psi\ x\} ≡ \{x \mid \phi\ x\}$
-  \pause
+Definition of a (pre-) category
 
-  We need univalence:
-  $$(A ≃ B) ≃ (A ≡ B)$$
-  \pause
-  %
-  We will return to $≃$, but for now think of it as an
-  isomorphism, so it induces maps:
-  \begin{align*}
-    \var{toPath}  & \tp (A ≃ B) → (A ≡ B) \\
-    \var{toEquiv} & \tp (A ≡ B) → (A ≃ B)
-  \end{align*}
+1-categories
+
+Univalent (proper) categories
+
+The category of spans
 \end{frame}
+
+\section{Paths}
 \begin{frame}
   \frametitle{Paths}
   \framesubtitle{Definition}
@@ -81,7 +58,7 @@
     \Path \tp (P \tp \I → \MCU) → P\ 0 → P\ 1 → \MCU
   \end{equation*}
   \pause
-  For $P \tp \I → \MCU$, $A \tp \MCU$ and $a_0, a_1 \tp A$
+  For $P \tp \I → \MCU$ and $a_0 \tp P\ 0$, $a_1 \tp P\ 1$
   inhabitants of $\Path\ P\ a_0\ a_1$ are like functions
   %
   $$
@@ -96,104 +73,7 @@
   a_0 ≡ a_1 ≜ \Path\ (\var{const}\ A)\ a_0\ a_1
   $$
 \end{frame}
-\begin{frame}
-  \frametitle{Paths}
-  \framesubtitle{Functional extenstionality}
-  $$
-  \funExt & \tp ∏_{a \tp A} f\ a ≡ g\ a → f ≡ g
-  $$
-  \pause
-  $$
-  \funExt\ p ≜ λ i\ a → p\ a\ i
-  $$
-  \pause
-  $$
-  \funExt\ (\var{const}\ \refl)
-  \tp
-  \var{zeroLeft} ≡ \var{zeroRight}
-  $$
-\end{frame}
-\begin{frame}
-  \frametitle{Paths}
-  \framesubtitle{Homotopy levels}
-  \begin{align*}
-    & \isContr    && \tp    \MCU → \MCU \\
-    & \isContr\ A && ≜ ∑_{c \tp A} ∏_{a \tp A} a ≡ c
-  \end{align*}
-  \pause
-  \begin{align*}
-    & \isProp    && \tp \MCU → \MCU \\
-    & \isProp\ A && ≜ ∏_{a_0, a_1 \tp A} a_0 ≡ a_1
-  \end{align*}
-  \pause
-  \begin{align*}
-    & \isSet    && \tp \MCU → \MCU \\
-    & \isSet\ A && ≜ ∏_{a_0, a_1 \tp A} \isProp\ (a_0 ≡ a_1)
-  \end{align*}
-  \begin{align*}
-    & \isGroupoid    && \tp \MCU → \MCU \\
-    & \isGroupoid\ A && ≜ ∏_{a_0, a_1 \tp A} \isSet\ (a_0 ≡ a_1)
-  \end{align*}
-\end{frame}
-\begin{frame}
-  \frametitle{Paths}
-  \framesubtitle{A few lemmas}
-  Let $D$ be a type-family:
-  $$
-  D \tp ∏_{b \tp A} ∏_{p \tp a ≡ b} \MCU
-  $$
-  %
-  \pause
-  And $d$ and in inhabitant of $D$ at $\refl$:
-  %
-  $$
-  d \tp D\ a\ \refl
-  $$
-  %
-  \pause
-  We then have the function:
-  %
-  $$
-    \pathJ\ D\ d \tp ∏_{b \tp A} ∏_{p \tp a ≡ b} D\ b\ p
-  $$
-\end{frame}
-\begin{frame}
-  \frametitle{Paths}
-  \framesubtitle{A few lemmas}
-  Given
-  \begin{align*}
-    A           & \tp \MCU \\
-    P           & \tp A → \MCU \\
-    \var{propP} & \tp ∏_{x \tp A} \isProp\ (P\ x) \\
-    p           & \tp a_0 ≡ a_1 \\
-    p_0         & \tp P\ a_0 \\
-    p_1         & \tp P\ a_1
-  \end{align*}
-  %
-  We have
-  $$
-  \lemPropF\ \var{propP}\ p
-  \tp
-  \Path\ (\lambda\; i \mto P\ (p\ i))\ p_0\ p_1
-  $$
-  %
-\end{frame}
-\begin{frame}
-  \frametitle{Paths}
-  \framesubtitle{A few lemmas}
-  $∏$ preserves $\isProp$:
-  $$
-  \mathit{propPi}
-  \tp
-  \left(∏_{a \tp A} \isProp\ (P\ a)\right)
-  → \isProp\ \left(∏_{a \tp A} P\ a\right)
-  $$
-  \pause
-  $∑$ preserves $\isProp$:
-  $$
-  \mathit{propSig} \tp \isProp\ A → \left(∏_{a \tp A} \isProp\ (P\ a)\right) → \isProp\ \left(∑_{a \tp A} P\ a\right)
-  $$
-\end{frame}
+
 \begin{frame}
   \frametitle{Pre categories}
   \framesubtitle{Definition}
@@ -216,59 +96,46 @@
   ×
   (f \lll \identity ≡ f)
   $$
-  \pause
+\end{frame}
+\begin{frame}
+  \frametitle{Pre categories}
+  \framesubtitle{1-categories}
+Cubical Agda does not admit \emph{Uniqueness of Identity Proofs}
+(UIP).  Rather there is a hierarchy of \emph{Homotopy Types}:
+Contractible types, mere propositions, sets, groupoids, \dots
+
+\pause
   1-categories:
   $$
   \isSet\ (\Arrow\ A\ B)
   $$
+\pause
+  \begin{align*}
+    \isSet    & \tp \MCU → \MCU \\
+    \isSet\ A & ≜ ∏_{a_0, a_1 \tp A} \isProp\ (a_0 ≡ a_1)
+  \end{align*}
 \end{frame}
+
 \begin{frame}
-  \frametitle{Pre categories}
-  \framesubtitle{Propositionality}
-  $$
-  \isProp\ \left( (\identity \comp f ≡ f) × (f \comp \identity ≡ f) \right)
-  $$
-  \pause
-  \begin{align*}
-    \isProp\ \IsPreCategory
-  \end{align*}
-  \pause
-  \begin{align*}
-    \var{isAssociative} & \tp \var{IsAssociative}\\
-    \isIdentity    & \tp \var{IsIdentity}\\
-    \var{arrowsAreSets} & \tp \var{ArrowsAreSets}
-  \end{align*}
-  \pause
-  \begin{align*}
-    & \var{propIsAssociative} && a.\var{isAssociative}\
-    && b.\var{isAssociative} && i  \\
-    & \propIsIdentity    && a.\isIdentity\
-    && b.\isIdentity    && i  \\
-    & \var{propArrowsAreSets} && a.\var{arrowsAreSets}\
-    && b.\var{arrowsAreSets} && i
-  \end{align*}
+\frametitle{Outline}
+The path type \ensuremath{\checkmark}
+
+Definition of a (pre-) category \ensuremath{\checkmark}
+
+1-categories \ensuremath{\checkmark}
+
+Univalent (proper) categories
+
+The category of spans
 \end{frame}
+
 \begin{frame}
   \frametitle{Categories}
   \framesubtitle{Univalence}
-  \begin{align*}
-    \var{IsIdentity} & ≜
-    ∏_{A\ B \tp \Object} ∏_{f \tp \Arrow\ A\ B} \phi\ f
-    %% \\
-    %%   & \mathrel{\ } \identity \lll f ≡ f × f \lll \identity ≡ f
-  \end{align*}
-  where
-  $$
-  \phi\ f ≜
-  ( \identity \lll f ≡ f )
-  ×
-  ( f \lll \identity ≡ f)
-  $$
-  \pause
   Let $\approxeq$ denote isomorphism of objects.  We can then construct
   the identity isomorphism in any category:
   $$
-  \identity , \identity , \var{isIdentity} \tp A \approxeq A
+  (\identity , \identity , \var{isIdentity}) \tp A \approxeq A
   $$
   \pause
   Likewise since paths are substitutive we can promote a path to an isomorphism:
@@ -292,50 +159,22 @@
   \pause%
   $$(A ≡ B) ≅ (A \approxeq B)$$
   \pause%
-  Name the above maps:
-  $$\idToIso \tp A ≡ B → A ≊ B$$
-  %
+  Name the inverse of $\idToIso$:
   $$\isoToId \tp (A \approxeq B) → (A ≡ B)$$
 \end{frame}
 \begin{frame}
-  \frametitle{Categories}
-  \framesubtitle{Propositionality}
-  $$
-  \isProp\ \IsCategory = ∏_{a, b \tp \IsCategory} a ≡ b
-  $$
-  \pause
-  So, for
-  $$
-  a\ b \tp \IsCategory
-  $$
-  the proof obligation is the pair:
-  %
+  \frametitle{Propositionality of products}
+  Construct a category for which it is the case that the terminal
+  objects are equivalent to products:
   \begin{align*}
-    p & \tp a.\isPreCategory ≡ b.\isPreCategory \\
-    & \mathrel{\ } \Path\ (\lambda\; i → (p\ i).Univalent)\ a.\isPreCategory\ b.\isPreCategory
+    \var{Terminal} ≃ \var{Product}\ ℂ\ 𝒜\ ℬ
   \end{align*}
-\end{frame}
-\begin{frame}
-  \frametitle{Categories}
-  \framesubtitle{Propositionality, cont'd}
-  First path given by:
-  $$
-  p
-  ≜
-  \var{propIsPreCategory}\ a\ b
-  \tp
-  a.\isPreCategory ≡ b.\isPreCategory
-  $$
+
   \pause
-  Use $\lemPropF$ for the latter.
-  \pause
-  %
-  Univalence is indexed by an identity proof.  So $A ≜
-  IsIdentity\ identity$ and $B ≜ \var{Univalent}$.
-  \pause
+  And since equivalences preserve homotopy levels we get:
   %
   $$
-  \lemPropF\ \var{propUnivalent}\ p
+  \isProp\ \left(\var{Product}\ \bC\ 𝒜\ ℬ\right)
   $$
 \end{frame}
 
@@ -343,18 +182,18 @@
   \frametitle{Categories}
   \framesubtitle{A theorem}
   %
-  Let the isomorphism $(ι, \inv{ι}) \tp A \approxeq B$.
+  Let the isomorphism $(ι, \inv{ι}, \var{inv}) \tp A \approxeq B$.
   %
   \pause
   %
   The isomorphism induces the path
   %
   $$
-  p ≜ \idToIso\ (\iota, \inv{\iota}) \tp A ≡ B
+  p ≜ \isoToId\ (\iota, \inv{\iota}, \var{inv}) \tp A ≡ B
   $$
   %
   \pause
-  and consequently an arrow:
+  and consequently a path on arrows:
   %
   $$
   p_{\var{dom}} ≜ \congruence\ (λ x → \Arrow\ x\ X)\ p
@@ -377,7 +216,7 @@
   \framesubtitle{A theorem, proof}
   \begin{align*}
     \var{coe}\ p_{\var{dom}}\ f
-    & ≡ f \lll \inv{(\idToIso\ p)} && \text{By path-induction} \\
+    & ≡ f \lll (\idToIso\ p)_1 && \text{By path-induction} \\
     & ≡ f \lll \inv{\iota}
     && \text{$\idToIso$ and $\isoToId$ are inverses}\\
   \end{align*}
@@ -401,7 +240,7 @@
   The base-case becomes:
   $$
   d \tp D\ A\ \refl =
-  \var{coe}\ \refl_{\var{dom}}\ f ≡ f \lll \inv{(\idToIso\ \refl)}
+  \left(\var{coe}\ \refl_{\var{dom}}\ f ≡ f \lll \inv{(\idToIso\ \refl)}\right)
   $$
 \end{frame}
 \begin{frame}
@@ -413,20 +252,21 @@
   $$
   \pause
   \begin{align*}
-    \var{coe}\ \refl^*\ f
+    \var{coe}\ \refl_{\var{dom}}\ f
+    & =
+    \var{coe}\ \refl\ f \\
     & ≡ f
-    && \text{$\refl$ is a neutral element for $\var{coe}$}\\
+    && \text{neutral element for $\var{coe}$}\\
     & ≡ f \lll \identity \\
     & ≡ f \lll \var{subst}\ \refl\ \identity
-    && \text{$\refl$ is a neutral element for $\var{subst}$}\\
+    && \text{neutral element for $\var{subst}$}\\
     & ≡ f \lll \inv{(\idToIso\ \refl)}
     && \text{By definition of $\idToIso$}\\
   \end{align*}
   \pause
   In conclusion, the theorem is inhabited by:
   $$
-  \label{eq:pathJ-example}
-  \pathJ\ D\ d\ B\ p
+  \var{pathInd}\ D\ d\ B\ p
   $$
 \end{frame}
 \begin{frame}
@@ -437,28 +277,26 @@
   \pause
   Objects:
   $$
-  ∑_{X \tp Object} \Arrow\ X\ \pairA × \Arrow\ X\ \pairB
+  ∑_{X \tp Object} (\Arrow\ X\ \pairA) × (\Arrow\ X\ \pairB)
   $$
   \pause
   %
-  Arrows between objects $A ,\ a_{\pairA} ,\ a_{\pairB}$ and
-  $B ,\ b_{\pairA} ,\ b_{\pairB}$:
+  Arrows between objects $(A , a_{\pairA} , a_{\pairB})$ and
+  $(B , b_{\pairA} , b_{\pairB})$:
   %
   $$
   ∑_{f \tp \Arrow\ A\ B}
-  b_{\pairA} \lll f ≡ a_{\pairA} ×
-  b_{\pairB} \lll f ≡ a_{\pairB}
+  (b_{\pairA} \lll f ≡ a_{\pairA}) ×
+  (b_{\pairB} \lll f ≡ a_{\pairB})
   $$
 \end{frame}
 \begin{frame}
   \frametitle{Span category}
   \framesubtitle{Univalence}
   \begin{align*}
-    \label{eq:univ-0}
     (X , x_{𝒜} , x_{ℬ}) ≡ (Y , y_{𝒜} , y_{ℬ})
   \end{align*}
   \begin{align*}
-    \label{eq:univ-1}
     \begin{split}
       p \tp & X ≡ Y \\
       & \Path\ (λ i → \Arrow\ (p\ i)\ 𝒜)\ x_{𝒜}\ y_{𝒜} \\
@@ -524,7 +362,6 @@
   %
   \begin{align*}
     \begin{split}
-      \label{eq:product-paths}
       & \Path\ (λ i → \widetilde{p}_{𝒜}\ i)\ x_{𝒜}\ y_{𝒜}
     \end{split}
   \end{align*}
@@ -578,17 +415,15 @@
   \framesubtitle{Monoidal form}
   %
   \begin{align*}
-    \EndoR  & \tp \Endo ℂ \\
+    \EndoR  & \tp \Functor\ ℂ\ ℂ \\
     \pureNT
-    & \tp \NT{\EndoR^0}{\EndoR} \\
+    & \tp \NT{\widehat{\identity}}{\EndoR} \\
     \joinNT
-    & \tp \NT{\EndoR^2}{\EndoR}
+    & \tp \NT{(\EndoR \oplus \EndoR)}{\EndoR}
   \end{align*}
   \pause
   %
-  Let $\fmap$ be the map on arrows of $\EndoR$.  Likewise
-  $\pure$ and $\join$ are the maps of the natural transformations
-  $\pureNT$ and $\joinNT$ respectively.
+  Let $\fmap$ be the map on arrows of $\EndoR$.
   %
   \begin{align*}
     \join \lll \fmap\ \join
@@ -623,11 +458,8 @@
   \pause
   %
   \begin{align*}
-    \label{eq:monad-kleisli-laws-0}
     \bind\ \pure & ≡ \identity_{\omapR\ X} \\
-    \label{eq:monad-kleisli-laws-1}
     \pure \fish f & ≡ f \\
-    \label{eq:monad-kleisli-laws-2}
     (\bind\ f) \rrr (\bind\ g) & ≡ \bind\ (f \fish g)
   \end{align*}
 \end{frame}
@@ -647,7 +479,8 @@
   \join ≜ \bind\ \identity
   $$
   \pause
-  The laws are logically equivalent.  So we get:
+  The laws are logically equivalent. Since logical equivalence is
+  enough for as an equivalence of types for propositions we get:
   %
   $$
   \var{Monoidal} ≃ \var{Kleisli}
