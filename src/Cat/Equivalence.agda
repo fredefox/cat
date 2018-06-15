@@ -184,7 +184,7 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
   private
     module _ {obverse : A → B} (e : isEquiv A B obverse) where
       inverse : B → A
-      inverse b = fst (fst (e b))
+      inverse b = fst (fst (e .equiv-proof b))
 
       reverse : B → A
       reverse = inverse
@@ -198,7 +198,7 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
           b ∎
           where
           μ : (b : B) → b ≡ obverse (inverse b)
-          μ b = snd (fst (e b))
+          μ b = snd (fst (e .equiv-proof b))
         verso-recto : ∀ a → (inverse ∘ obverse) a ≡ a
         verso-recto a = begin
           (inverse ∘ obverse) a ≡⟨ sym h ⟩
@@ -206,7 +206,7 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
           a ∎
           where
           c : isContr (fiber obverse (obverse a))
-          c = e (obverse a)
+          c = e .equiv-proof (obverse a)
           fbr : fiber obverse (obverse a)
           fbr = fst c
           a' : A
