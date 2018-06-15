@@ -152,7 +152,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     univalenceFrom≅ x = univalenceFrom≃ $ fromIsomorphism _ _ x
 
     propUnivalent : isProp Univalent
-    propUnivalent a b i = propPi (λ iso → propIsContr) a b i
+    propUnivalent a b i .equiv-proof = propPi (λ iso → propIsContr) (a .equiv-proof) (b .equiv-proof) i
 
 module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   record IsPreCategory : Set (lsuc (ℓa ⊔ ℓb)) where
