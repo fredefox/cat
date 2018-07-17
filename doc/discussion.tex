@@ -10,8 +10,8 @@ mere propositions.
 \subsection{Computational properties}
 The new contribution of cubical Agda is that it has a constructive
 proof of functional extensionality\index{functional extensionality}
-and univalence\index{univalence}.  This means that in particular that
-the type checker can reduce terms defined with these theorems.  So one
+and univalence\index{univalence}.  This means in particular that the
+type checker can reduce terms defined with these theorems.  One
 interesting result of this development is how much this influenced the
 development.  In particular having a functional extensionality that
 ``computes'' should simplify some proofs.
@@ -33,24 +33,24 @@ module:
 %
 
 I will not reproduce it in full here as the type is quite involved. In
-stead I have put this in a source listing in \ref{app:abstract-funext}.
-The method used to find in what places the computational behaviour of
-these proofs are needed has the caveat of only working for places that
-directly or transitively uses these two proofs.  Fortunately though
-the code is structured in such a way that this is the case. So in
-conclusion the way I have structured these proofs means that the
-computational behaviour of functional extensionality and univalence
-has not been so relevant.
+stead I have put this in a source listing in
+\ref{app:abstract-funext}.  The method used to find in what places the
+computational behaviour of these proofs are needed has the caveat of
+only working for places that directly or transitively uses these two
+proofs.  Fortunately though the code is structured in such a way that
+this is the case. In conclusion the way I have structured these proofs
+means that the computational behaviour of functional extensionality
+and univalence has not been so relevant.
 
 Barring this the computational behaviour of paths can still be useful.
 E.g.\ if a programmer wants to reuse functions that operate on a
 monoidal monads to work with a monad in the Kleisli form that the
 programmer has specified.  To make this idea concrete, say we are
-given some function $f \tp \Kleisli \to T$ having a path between $p
+given some function $f \tp \Kleisli \to T$, having a path between $p
 \tp \Monoidal \equiv \Kleisli$ induces a map $\coe\ p \tp \Monoidal
 \to \Kleisli$.  We can compose $f$ with this map to get $f \comp
 \coe\ p \tp \Monoidal \to T$.  Of course, since that map was
-constructed with an isomorphism these maps already exist and could be
+constructed with an isomorphism, these maps already exist and could be
 used directly.  So this is arguably only interesting when one also
 wants to prove properties of applying such functions.
 

@@ -12,27 +12,27 @@ thing Agda enjoys Uniqueness of Identity Proofs (UIP) though a flag
 exists to turn this off.  This feature is not present in Cubical Agda.
 Rather than having unique identity proofs cubical Agda gives rise to a
 hierarchy of types with increasing \nomen{homotopical
-  structure}{homotopy levels}.  It turns out to be useful to built the
+  structure}{homotopy levels}.  It turns out to be useful to build the
 formalization with this hierarchy in mind as it can simplify proofs
 considerably.  Another issue one must overcome in Cubical Agda is when
 a type has a field whose type depends on a previous field.  In this
 case paths between such types will be heterogeneous paths.  In
 practice it turns out to be considerably more difficult to work with
-heterogeneous paths than with homogeneous paths.  The thesis
+heterogeneous paths than with homogeneous paths.  This thesis
 demonstrated the application of some techniques to overcome these
 difficulties, such as based path induction.
 
 This thesis formalizes some of the core concepts from category theory
-including; categories, functors, products, exponentials, Cartesian
+including: categories, functors, products, exponentials, Cartesian
 closed categories, natural transformations, the yoneda embedding,
 monads and more.  Category theory is an interesting case study for the
-application of cubical Agda for two reasons in particular: Because
-category theory is the study of abstract algebra of functions, meaning
-that functional extensionality is particularly relevant.  Another
-reason is that in category theory it is commonplace to identify
-isomorphic structures.  Univalence allows for making this notion
-precise.  This thesis also demonstrated another technique that is
-common in category theory; namely to define categories to prove
+application of cubical Agda for two reasons in particular. One reason
+is because category theory is the study of abstract algebra of
+functions, meaning that functional extensionality is particularly
+relevant.  Another reason is that in category theory it is commonplace
+to identify isomorphic structures.  Univalence allows for making this
+notion precise.  This thesis also demonstrated another technique that
+is common in category theory; namely to define categories to prove
 properties of other structures.  Specifically a category was defined
 to demonstrate that any two product objects in a category are
 isomorphic.  Furthermore the thesis showed two formulations of monads

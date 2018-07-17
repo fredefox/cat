@@ -7,7 +7,7 @@ $n$ simply by expanding the definition of $+$.
 
 On the other hand, propositional equality is something defined within
 the language itself. Propositional equality cannot be derived
-automatically. The normal definition of judgmental equality is an
+automatically. The normal definition of propositional equality is an
 inductive data type. Cubical Agda discards this type in favor of some
 new primitives.
 
@@ -73,7 +73,7 @@ $$
 p \tp \prod_{i \tp \I} P\ i
 $$
 %
-Which must satisfy being judgmentally equal to $a_0$ at the
+This function must satisfy being judgmentally equal to $a_0$ at the
 left endpoint and equal to $a_1$ at the other end. I.e.:
 %
 \begin{align*}
@@ -93,8 +93,8 @@ I will generally prefer to use the notation $a \equiv b$ when talking
 about non-dependent paths and use the notation $\Path\ (\lambda\; i
 \to P\ i)\ a\ b$ when the path space is of particular interest.
 
-With this definition we can also recover reflexivity. That is, for any $A \tp
-\MCU$ and $a \tp A$:
+With this definition we can recover reflexivity. That is, for any $A
+\tp \MCU$ and $a \tp A$:
 %
 \begin{equation}
 \begin{aligned}
@@ -105,7 +105,7 @@ With this definition we can also recover reflexivity. That is, for any $A \tp
 %
 Here the path space is $P \defeq \lambda\; i \to A$ and it satsifies
 $P\ i = A$ definitionally. So to inhabit it, is to give a path $\I \to
-A$ which is judgmentally $a$ at either endpoint. This is satisfied by
+A$ that is judgmentally $a$ at either endpoint. This is satisfied by
 the constant path; i.e.\ the path that is constantly $a$ at any index
 $i \tp \I$.
 
@@ -120,14 +120,15 @@ Functional extensionality is the proposition that given a type $A \tp
 \end{equation}
 %
 %% p = λ\; i a → p a i
-So given $η \tp \prod_{a \tp A} f\ a \equiv g\ a$ we must give a path $f \equiv
-g$. That is a function $\I \to \prod_{a \tp A} B\ a$. So let $i \tp \I$ be given.
-We must now give an expression $\phi \tp \prod_{a \tp A} B\ a$ satisfying
-$\phi\ 0 \equiv f\ a$ and $\phi\ 1 \equiv g\ a$. This neccesitates that the
-expression must be a lambda-abstraction, so let $a \tp A$ be given. Now we can
-apply $a$ to $η$ and get the path $η\ a \tp f\ a \equiv g\ a$. And this exactly
-satisfies the conditions for $\phi$. In conclustion \ref{eq:funExt} is inhabited
-by the term:
+So given $η \tp \prod_{a \tp A} f\ a \equiv g\ a$ we must give a path
+$f \equiv g$. That is a function $\I \to \prod_{a \tp A} B\ a$. So let
+$i \tp \I$ be given.  We must now give an expression $\phi \tp
+\prod_{a \tp A} B\ a$ satisfying $\phi\ 0 \equiv f\ a$ and $\phi\ 1
+\equiv g\ a$. This neccesitates that the expression must be a lambda
+abstraction, so let $a \tp A$ be given. We can now apply $a$ to $η$
+and get the path $η\ a \tp f\ a \equiv g\ a$. This exactly
+satisfies the conditions for $\phi$. In conclusion \ref{eq:funExt} is
+inhabited by the term:
 %
 \begin{equation*}
 \funExt\ η \defeq λ\; i\ a → η\ a\ i
@@ -149,10 +150,10 @@ In ITT all equality proofs are identical (in a closed context). This
 means that, in some sense, any two inhabitants of $a \equiv b$ are
 ``equally good''. They do not have any interesting structure. This is
 referred to as Uniqueness of Identity Proofs (UIP). Unfortunately it
-is not possible to have a type theory with both univalence and UIP. In
-stead in cubical Agda we have a hierarchy of types with an increasing
-amount of homotopic structure. At the bottom of this hierarchy is the
-set of contractible types:
+is not possible to have a type theory with both univalence and UIP.
+Instead in cubical Agda we have a hierarchy of types with an
+increasing amount of homotopic structure. At the bottom of this
+hierarchy is the set of contractible types:
 %
 \begin{equation}
 \begin{aligned}
@@ -214,8 +215,8 @@ proving e.g.\ $\isProp\ \bN$ directly is not so straightforward (see
 \cite[\S3.1.4]{hott-2013}). Hedberg's theorem states that any type
 with decidable equality is a set. There will be examples of sets later
 in this report. At this point it should be noted that the term ``set''
-is somewhat conflated; there is the notion of sets from set-theory, in
-Agda types are denoted \texttt{Set}. I will use it consistently to
+is somewhat conflated; there is the notion of sets from set theory.
+In Agda types are denoted \texttt{Set}. I will use it consistently to
 refer to a type $A$ as a set exactly if $\isSet\ A$ is a proposition.
 
 As the reader may have guessed the next step in the hierarchy is the type:
@@ -227,11 +228,12 @@ As the reader may have guessed the next step in the hierarchy is the type:
 \end{aligned}
 \end{equation}
 %
-And so it continues. In fact we can generalize this family of types by indexing
-them with a natural number. For historical reasons, though, the bottom of the
-hierarchy, the contractible types, is said to be a \nomen{-2-type}{homotopy
-  levels}, propositions are \nomen{-1-types}{homotopy levels}, (homotopical)
-sets are \nomen{0-types}{homotopy levels} and so on\ldots
+So it continues.  In fact we can generalize this family of types by
+indexing them with a natural number. For historical reasons, though,
+the bottom of the hierarchy, the contractible types, is said to be a
+\nomen{-2-type}{homotopy levels}, propositions are
+\nomen{-1-types}{homotopy levels}, (homotopical) sets are
+\nomen{0-types}{homotopy levels} and so on\ldots
 
 Just as with paths, homotopical sets are not at the center of focus for this
 thesis. But I mention here some properties that will be relevant for this
@@ -250,7 +252,7 @@ Specifically the results come from the Agda library \texttt{cubical}
 (\cite{cubical-demo}). I have used a handful of results from this
 library as well as contributed a few lemmas myself%
 \footnote{The module \texttt{Cat.Prelude} lists the upstream
-  dependencies. As well my contribution to \texttt{cubical} can be
+  dependencies.  My contribution to \texttt{cubical} can as well be
   found in the git logs which are available at
   \hrefsymb{https://github.com/Saizan/cubical-demo}{\texttt{https://github.com/Saizan/cubical-demo}}.
 }.
@@ -279,12 +281,11 @@ $$
 D \tp \prod_{b \tp A} \prod_{p \tp a ≡ b} \MCU
 $$
 %
-And an inhabitant of $D$ at $\refl$:
+and an inhabitant of $D$ at $\refl$:
 %
 $$
 d \tp D\ a\ \refl
 $$
-%
 We have the function:
 %
 \begin{equation}
@@ -343,7 +344,7 @@ over the family:
   T\ d'\ r' & \defeq \trans\ p\ (\trans\ q\ r') ≡ \trans\ (\trans\ p\ q)\ r'
 \end{align*}
 %
-So the base case is proven with $t$ which is defined as:
+The base case is proven with $t$ which is defined as:
 %
 \begin{align*}
   \trans\ p\ (\trans\ q\ \refl) & ≡
@@ -376,7 +377,7 @@ $$
 $$
 %
 Note that $d_0$ and $d_1$, though points of the same family, have
-different types. This is quite a mouthful. So let me try to show how
+different types. This is quite a mouthful, so let me try to show how
 this is a very general and useful result.
 
 Often when proving equalities between elements of some dependent types
@@ -388,7 +389,7 @@ $$
 T \defeq \sum_{a \tp A} D\ a
 $$
 %
-For some proposition $D \tp A \to \MCU$. That is we have $\var{propD}
+for some proposition $D \tp A \to \MCU$. That is we have $\var{propD}
 \tp \prod_{a \tp A} \isProp\ (D\ a)$. If we want to prove $t_0 \equiv
 t_1$ for two elements $t_0, t_1 \tp T$ then this will be a pair of
 paths:
@@ -408,7 +409,7 @@ $$
 $$
 %
 \subsection{Functions over propositions}
-\label{sec:propPi}
+\label{sec:propPi}%
 $\prod$-types preserve propositionality when the co-domain is always a
 proposition.
 %
@@ -419,7 +420,7 @@ $$
 \label{sec:propSig}
 %
 $\sum$-types preserve propositionality whenever its first component is
-a proposition, and its second component is a proposition for all
+a proposition and its second component is a proposition for all
 points of the left type.
 %
 $$

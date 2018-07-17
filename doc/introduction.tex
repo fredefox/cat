@@ -1,17 +1,17 @@
 \chapter{Introduction}
-This thesis is a case-study in the application of cubical Agda in the
-context of category theory. At the center of this is the notion of
-\nomenindex{equality}. In type-theory there are two pervasive notions
-of equality: \nomenindex{judgmental equality} and
+This thesis is a case study in the application of cubical Agda to the
+formalization of category theory. At the center of this is the notion
+of \nomenindex{equality}. There are two pervasive notions of equality
+in type theory: \nomenindex{judgmental equality} and
 \nomenindex{propositional equality}. Judgmental equality is a property
-of the type system. Judgmental equality on the other hand is usually
-defined \emph{within} the system. When introducing definitions this
-report will use the symbol $\defeq$. Judgmental equalities will be
-denoted with $=$ and for propositional equalities the notation
-$\equiv$ is used.
+of the type system.  Propositional equality on the other hand is
+usually defined \emph{within} the system.  When introducing
+definitions this report will use the symbol $\defeq$.  Judgmental
+equalities will be denoted with $=$ and for propositional equalities
+the notation $\equiv$ is used.
 
 The rules of judgmental equality are related with $β$- and
-$η$-reduction which gives a notion of computation in a given type
+$η$-reduction, which gives a notion of computation in a given type
 theory.
 %
 There are some properties that one usually want judgmental equality to
@@ -19,20 +19,21 @@ satisfy. It must be \nomenindex{sound}, enjoy \nomenindex{canonicity}
 and be a \nomenindex{congruence relation}. Soundness means that things
 judged to be equal are equal with respects to the \nomenindex{model}
 of the theory or the \emph{meta theory}. It must be a congruence
-relation because otherwise the relation certainly does not adhere to
-our notion of equality. One would be able to conclude things like: $x
-\equiv y \rightarrow f\ x \nequiv f\ y$. Canonicity means that any
-well typed term evaluates to a \emph{canonical} form. For example for
-a closed term $e \tp \bN$ it will be the case that $e$ reduces to $n$
-applications of $\mathit{suc}$ to $0$ for some $n$; $e =
-\mathit{suc}^n\ 0$. Without canonicity terms in the language can get
-``stuck'' meaning that they do not reduce to a canonical form.
+relation, because otherwise the relation certainly does not adhere to
+our notion of equality. E.g.\ One would be able to conclude things
+like: $x \equiv y \rightarrow f\ x \nequiv f\ y$. Canonicity means
+that any well typed term evaluates to a \emph{canonical} form. For
+example, for a closed term $e \tp \bN$, it will be the case that $e$
+reduces to $n$ applications of $\mathit{suc}$ to $0$ for some $n$;
+i.e.\ $e = \mathit{suc}^n\ 0$.  Without canonicity terms in the
+language can get ``stuck'', meaning that they do not reduce to a
+canonical form.
 
-To work as a programming languages it is necessary for judgmental
-equality to be \nomenindex{decidable}. Being decidable simply means
-that that an algorithm exists to decide whether two terms are equal.
-For any practical implementation the decidability must also be
-effectively computable.
+For a system to work as a programming languages it is necessary for
+judgmental equality to be \nomenindex{decidable}. Being decidable
+simply means that that an algorithm exists to decide whether two terms
+are equal.  For any practical implementation, the decidability must
+also be effectively computable.
 
 For propositional equality the decidability requirement is relaxed. It
 is not in general possible to decide the correctness of logical
@@ -47,28 +48,27 @@ inhabitant. In extensional type theory the principle of reflection
 $$a ≡ b → a = b$$
 %
 is enough to make type checking undecidable. This report focuses on
-Agda which at a glance can be thought of as a version of intensional
+Agda, which at a glance can be thought of as a version of intensional
 type theory. Pattern-matching in regular Agda lets one prove
 \nomenindex{Uniqueness of Identity Proofs} (UIP). UIP states that any
 two identity proofs are propositionally identical.
 
 The usual notion of propositional equality in ITT is quite
-restrictive. In the next section a few motivating examples will
-highlight this. There exist techniques to circumvent these problems,
-as we shall see. This thesis will explore an extension to Agda that
-redefines the notion of propositional equality and as such is an
-alternative to these other techniques. The extension is called cubical
-Agda. Cubical Agda drops UIP as this does not permit
-\nomenindex{functional extensionality} and
-\nomenindex{univalence}. What makes this extension particularly
-interesting is that it gives a \emph{constructive} interpretation of
-univalence. What all this means will be elaborated in the following
-sections.
+restrictive.  In the next section a few motivating examples will be
+presented that highlight.  There exist techniques to circumvent these
+problems, as we shall see.  This thesis will explore an extension to
+Agda that redefines the notion of propositional equality and as such
+is an alternative to these other techniques.  The extension is called
+cubical Agda.  Cubical Agda drops UIP, as it does not permit
+\nomenindex{functional extensionality} nor \nomenindex{univalence}.
+What makes cubical Agda particularly interesting is that it gives a
+\emph{constructive} interpretation of univalence.  What all this means
+will be elaborated in the following sections.
 %
 \section{Motivating examples}
 %
 In the following two sections I present two examples that illustrate
-some limitations inherent in ITT and -- by extension -- Agda.
+some limitations inherent in ITT and, by extension, Agda.
 %
 \subsection{Functional extensionality}
 \label{sec:functional-extensionality}%
@@ -80,9 +80,9 @@ Consider the functions:
 \end{align*}%
 %
 The term $n + 0$ is \nomenindex{definitionally} equal to $n$, which we
-write as $n + 0 = n$. This is also called \nomenindex{judgmental
-  equality}.  We call it definitional equality because the
-\emph{equality} arises from the \emph{definition} of $+$ which is:
+write as $n + 0 = n$.  This is also called \nomenindex{judgmental
+  equality}.   We call it definitional equality because the
+\emph{equality} arises from the \emph{definition} of $+$, which is:
 %
 \begin{align*}
   +             & \tp \bN \to \bN \to \bN      \\
@@ -90,12 +90,12 @@ write as $n + 0 = n$. This is also called \nomenindex{judgmental
   n + (\suc{m}) & \defeq \suc{(n + m)}
 \end{align*}
 %
-Note that $0 + n$ is \emph{not} definitionally equal to $n$. This is
-because $0 + n$ is in normal form. I.e.\ there is no rule for $+$
-whose left hand side matches this expression. We do however have that
+Note that $0 + n$ is \emph{not} definitionally equal to $n$.  This is
+because $0 + n$ is in normal form.  I.e.\ there is no rule for $+$
+whose left hand side matches this expression.  We do, however, have that
 they are \nomen{propositionally}{propositional equality} equal, which
-we write as $n \equiv n + 0$. Propositional equality means that there
-is a proof that exhibits this relation. We can do induction over $n$
+we write as $n \equiv n + 0$.  Propositional equality means that there
+is a proof that exhibits this relation.  We can do induction over $n$
 to prove this:
 %
 \begin{align}
@@ -107,39 +107,38 @@ to prove this:
 \end{split}
 \end{align}
 %
-This show that zero is a right neutral element hence the name $\var{zrn}$.
-Since equality is a transitive relation we have that $\forall n \to
-\var{zeroLeft}\ n \equiv \var{zeroRight}\ n$. Unfortunately we don't
-have $\var{zeroLeft} \equiv \var{zeroRight}$. There is no way to
-construct a proof asserting the obvious equivalence of
-$\var{zeroLeft}$ and $\var{zeroRight}$. Actually showing this is
-outside the scope of this text. Essentially it would involve giving a
+This show that zero is a right neutral element (hence the name
+$\var{zrn}$).  Since equality is a transitive relation we have that
+$\forall n \to \var{zeroLeft}\ n \equiv \var{zeroRight}\ n$.
+Unfortunately we don't have $\var{zeroLeft} \equiv \var{zeroRight}$.
+There is no way to construct a proof asserting the obvious equivalence
+of $\var{zeroLeft}$ and $\var{zeroRight}$.  Actually showing this is
+outside the scope of this text.  It would essentially involve giving a
 model for our type theory that validates all our axioms but where
-$\var{zeroLeft} \equiv \var{zeroRight}$ is not true. We cannot show
+$\var{zeroLeft} \equiv \var{zeroRight}$ is not true.  We cannot show
 that they are equal even though we can prove them equal for all
-points. For functions this is exactly the notion of equality that we
-are interested in: Functions are considered equal when they are equal
-for all inputs. This is called \nomenindex{pointwise equality}, where
-the \emph{points} of a function refer to its arguments.
+points.  This is exactly the notion of equality that we are interested
+in for functions: Functions are considered equal when they are equal
+for all inputs.  This is called \nomenindex{pointwise equality} where
+\emph{points} of a function refer to its arguments.
 %
 \subsection{Equality of isomorphic types}
 %
 Let $\top$ denote the unit type -- a type with a single constructor.
 In the propositions as types interpretation of type theory $\top$ is
-the proposition that is always true. The type $A \x \top$ and $A$ has
-an element for each $a \tp A$. So in a sense they have the same shape
-(Greek;
-\nomenindex{isomorphic}). The second element of the pair does not
-add any ``interesting information''. It can be useful to identify such
-types. In fact, it is quite commonplace in mathematics. Say we look at
-a set $\{x \mid \phi\ x \land \psi\ x\}$ and somehow conclude that
-$\psi\ x \equiv \top$ for all $x$. A mathematician would immediately
-conclude $\{x \mid \phi\ x \land \psi\ x\} \equiv \{x \mid \phi\ x\}$
-without thinking twice. Unfortunately such an identification can not
-be performed in ITT.
+the proposition that is always true.  The type $A \x \top$ and $A$ has
+an element for each $a \tp A$.  So in a sense they have the same shape
+(Greek; \nomenindex{isomorphic}).  The second element of the pair does
+not add any ``interesting information''.  It can be useful to identify
+such types.  In fact it is quite commonplace in mathematics.  Say we
+look at a set $\{x \mid \phi\ x \land \psi\ x\}$ and somehow conclude
+that $\psi\ x \equiv \top$ for all $x$.  A mathematician would
+immediately conclude $\{x \mid \phi\ x \land \psi\ x\} \equiv \{x \mid
+\phi\ x\}$ without thinking twice.  Unfortunately such an
+identification can not be performed in ITT.
 
 More specifically what we are interested in is a way of identifying
-\nomenindex{equivalent} types. I will return to the definition of
+\nomenindex{equivalent} types.  I will return to the definition of
 equivalence later in section \S\ref{sec:equiv}, but for now it is
 sufficient to think of an equivalence as a one-to-one correspondence.
 We write $A \simeq B$ to assert that $A$ and $B$ are equivalent types.
@@ -155,23 +154,23 @@ and vice versa.
 
 \section{Formalizing Category Theory}
 %
-The above examples serve to illustrate a limitation of ITT. One case
+The above examples serve to illustrate a limitation of ITT.  One case
 where these limitations are particularly prohibitive is in the study
-of Category Theory. At a glance category theory can be described as
+of Category Theory.  At a glance category theory can be described as
 ``the mathematical study of (abstract) algebras of functions''
-(\cite{awodey-2006}). By that token functional extensionality is
-particularly useful for formulating Category Theory. In Category
-theory it is also commonplace to identify isomorphic structures and
-univalence gives us a way to make this notion precise. In fact we can
+(\cite{awodey-2006}).  By that token functional extensionality is
+particularly useful for formulating Category Theory.  In Category
+theory it is also commonplace to identify isomorphic structures.
+Univalence gives us a way to make this notion precise.  In fact we can
 formulate this requirement within our formulation of categories by
 requiring the \emph{categories} themselves to be univalent as we shall
-see in \S\ref{sec:univalence}.
+see in section \S\ref{sec:univalence}.
 
 \section{Context}
 \label{sec:context}
 %
-The idea of formalizing Category Theory in proof assistants is not new. There
-are a multitude of these available online. Notably:
+The idea of formalizing Category Theory in proof assistants is not new.  There
+are a multitude of these available online.  Notably:
 %
 \begin{itemize}
 \item
@@ -186,20 +185,21 @@ are a multitude of these available online. Notably:
   \url{https://github.com/HoTT/HoTT/tree/master/theories/Categories}
 \item
   A formalization in \emph{CubicalTT} -- a language designed for
-  cubical type theory. Formalizes many different things, but only a
+  cubical type theory.  Formalizes many different things, but only a
   few concepts from category theory:
   \url{https://github.com/mortberg/cubicaltt}
 \end{itemize}
 %
-The contribution of this thesis is to explore how working in a cubical setting
-will make it possible to prove more things and to reuse proofs and to try and
-compare some aspects of this formalization with the existing ones.
+The contribution of this thesis is to explore how working in a cubical
+setting will make it possible to prove more things, to reuse proofs
+and to compare some aspects of this formalization with the existing
+ones.
 
 There are alternative approaches to working in a cubical setting where
-one can still have univalence and functional extensionality. One
-option is to postulate these as axioms. This approach, however, has
-other shortcomings, e.g. you lose \nomenindex{canonicity}
-(\cite[p. 3]{huber-2016}).
+one can still have univalence and functional extensionality.  One
+option is to postulate these as axioms.  This approach, however, has
+other shortcomings, e.g.\ you lose \nomenindex{canonicity}
+(\cite[p.\ 3]{huber-2016}).
 
 Another approach is to use the \emph{setoid interpretation} of type
 theory (\cite{hofmann-1995,huber-2016}). With this approach one works
@@ -207,13 +207,13 @@ with \nomenindex{extensional sets} $(X, \sim)$. That is a type $X \tp
 \MCU$ and an equivalence relation $\sim\ \tp X \to X \to \MCU$ on that
 type. Under the setoid interpretation the equivalence relation serve
 as a sort of ``local'' propositional equality. Since the developer
-gets to pick this relation it is not a~priori a congruence
-relation. So this must be verified manually by the developer.
-Furthermore, functions between different setoids must be shown to be
-setoid homomorphism, that is; they preserve the relation.
+gets to pick this relation, it is not a~priori a congruence
+relation. It must be manually verified by the developer.  Furthermore,
+functions between different setoids must be shown to be setoid
+homomorphism, that is; they preserve the relation.
 
-This approach has other drawbacks; it does not satisfy all
-propositional equalities of type theory a\~priori. That is, the
+This approach has other drawbacks: It does not satisfy all
+propositional equalities of type theory a~priori. That is, the
 developer must manually show that e.g.\ the relation is a congruence.
 Equational proofs $a \sim_{X} b$ are in some sense `local' to the
 extensional set $(X , \sim)$. To e.g.\ prove that $x ∼ y → f\ x ∼
@@ -223,23 +223,19 @@ makes it very cumbersome to work with in practice (\cite[p.
   4]{huber-2016}).
 
 \section{Conventions}
-In the remainder of this paper I will use the term \nomenindex{Type}
-to describe -- well -- types. Thereby departing from the notation in
-Agda where the keyword \texttt{Set} refers to types.  \nomenindex{Set}
-on the other hand shall refer to the homotopical notion of a set. I
-will also leave all universe levels implicit. This of course does not
-mean that a statement such as $\MCU \tp \MCU$ means that we have
-type-in-type but rather that the arguments to the universes are
-implicit.
+In the remainder of this thesis I will use the term \nomenindex{Type}
+to describe -- well -- types; thereby departing from the notation in
+Agda where the keyword \texttt{Set} refers to types.
+\nomenindex{Set}, on the other hand, shall refer to the homotopical
+notion of a set. I will also leave all universe levels implicit. This
+of course does not mean that a statement such as $\MCU \tp \MCU$ means
+that we have type-in-type but rather that the arguments to the
+universes are implicit.
 
-And I use the term
-\nomenindex{arrow} to refer to morphisms in a category,
-whereas the terms
-\nomenindex{morphism},
-\nomenindex{map} or
-\nomenindex{function}
-shall be reserved for talking about type theoretic functions; i.e.
-functions in Agda.
+I use the term \nomenindex{arrow} to refer to morphisms in a category,
+whereas the terms \nomenindex{morphism}, \nomenindex{map} or
+\nomenindex{function} shall be reserved for talking about type
+theoretic functions; i.e.\ functions in Agda.
 
 As already noted $\defeq$ will be used for introducing definitions $=$
 will be used to for judgmental equality and $\equiv$ will be used for
