@@ -84,11 +84,11 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   _≊_ A B = Σ[ f ∈ Arrow A B ] (Isomorphism f)
 
   module _ {A B : Object} where
-    Epimorphism : {X : Object } → (f : Arrow A B) → Set ℓb
-    Epimorphism {X} f = (g₀ g₁ : Arrow B X) → g₀ <<< f ≡ g₁ <<< f → g₀ ≡ g₁
+    Epimorphism : (f : Arrow A B) → Set _
+    Epimorphism f = ∀ {X} → (g₀ g₁ : Arrow B X) → g₀ <<< f ≡ g₁ <<< f → g₀ ≡ g₁
 
-    Monomorphism : {X : Object} → (f : Arrow A B) → Set ℓb
-    Monomorphism {X} f = (g₀ g₁ : Arrow X A) → f <<< g₀ ≡ f <<< g₁ → g₀ ≡ g₁
+    Monomorphism : (f : Arrow A B) → Set _
+    Monomorphism f = ∀ {X} → (g₀ g₁ : Arrow X A) → f <<< g₀ ≡ f <<< g₁ → g₀ ≡ g₁
 
   IsInitial  : Object → Set (ℓa ⊔ ℓb)
   IsInitial  I = {X : Object} → isContr (Arrow I X)
@@ -175,7 +175,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 
     -- | Relation between iso- epi- and mono- morphisms.
     module _ {A B : Object} {X : Object} (f : Arrow A B) where
-      iso→epi : Isomorphism f → Epimorphism {X = X} f
+      iso→epi : Isomorphism f → Epimorphism f
       iso→epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
         g₀                  ≡⟨ sym rightIdentity ⟩
         g₀ <<< identity     ≡⟨ cong (_<<<_ g₀) (sym right-inv) ⟩
@@ -186,7 +186,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         g₁ <<< identity     ≡⟨ rightIdentity ⟩
         g₁                  ∎
 
-      iso→mono : Isomorphism f → Monomorphism {X = X} f
+      iso→mono : Isomorphism f → Monomorphism f
       iso→mono (f- , left-inv , right-inv) g₀ g₁ eq =
         begin
         g₀                ≡⟨ sym leftIdentity ⟩
@@ -198,7 +198,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         identity <<< g₁   ≡⟨ leftIdentity ⟩
         g₁                ∎
 
-      iso→epi×mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
+      iso→epi×mono : Isomorphism f → Epimorphism f × Monomorphism f
       iso→epi×mono iso = iso→epi iso , iso→mono iso
 
     propIsAssociative : isProp IsAssociative
