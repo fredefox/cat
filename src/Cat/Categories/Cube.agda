@@ -54,9 +54,9 @@ module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
         → case (f i) of λ
           { (inj₁ (fi , _)) → case (f j) of λ
             { (inj₁ (fj , _)) → fi ≡ fj → i ≡ j
-            ; (inj₂ _) → Lift ⊤
+            ; (inj₂ _) → Lift _ ⊤
             }
-          ; (inj₂ _) → Lift ⊤
+          ; (inj₂ _) → Lift _ ⊤
           }
 
       Hom = Σ Hom' rules
