@@ -41,6 +41,9 @@
 %% FRONTMATTER
 \newcommand*{\myfrontmatter}{%
 %% \newgeometry{top=3cm, bottom=3cm,left=2.25 cm, right=2.25cm}
+  \AddToShipoutPicture*{\backgroundpic{-4}{56.7}{assets/frontpage_gu_eng.pdf}}
+  \ClearShipoutPicture
+\addtolength{\voffset}{2cm}
 \begingroup
 \thispagestyle{empty}
 {\Huge\@title}\\[.5cm]
@@ -61,7 +64,7 @@ Master's thesis in Computer Science
 % BACK OF COVER PAGE (BLANK PAGE)
 \newpage
 %% \newgeometry{a4paper}	% Temporarily change margins
-%% \restoregeometry
+\restoregeometry
 \thispagestyle{empty}
 \null
 }
