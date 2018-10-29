@@ -1,4 +1,5 @@
 \documentclass[a4paper]{beamer}
+%% \documentclass[a4paper,handout]{beamer}
 %% \usecolortheme[named=seagull]{structure}
 
 \input{packages.tex}
@@ -82,20 +83,21 @@ The category of spans
     \Object   & \tp \Type \\
     \Arrow    & \tp \Object → \Object → \Type \\
     \identity & \tp \Arrow\ A\ A \\
-    \lll      & \tp \Arrow\ B\ C → \Arrow\ A\ B → \Arrow\ A\ C
+    \llll      & \tp \Arrow\ B\ C → \Arrow\ A\ B → \Arrow\ A\ C
   \end{align*}
   %
   \pause
   Laws:
   %
-  $$
-  h \lll (g \lll f) ≡ (h \lll g) \lll f
-  $$
-  $$
-  (\identity \lll f ≡ f)
+  \begin{align*}
+  \var{isAssociative} & \tp
+  h \llll (g \llll f) ≡ (h \llll g) \llll f \\
+  \var{isIdentity} & \tp
+  (\identity \llll f ≡ f)
   ×
-  (f \lll \identity ≡ f)
-  $$
+  (f \llll \identity ≡ f)
+  \end{align*}
+
 \end{frame}
 \begin{frame}
   \frametitle{Pre categories}
@@ -208,7 +210,7 @@ The category of spans
     \label{eq:coeDom}
     \tag{$\var{coeDom}$}
     ∏_{f \tp A → X}
-    \var{coe}\ p_{\var{dom}}\ f ≡ f \lll \inv{\iota}
+    \var{coe}\ p_{\var{dom}}\ f ≡ f \llll \inv{\iota}
   \end{align}
 \end{frame}
 \begin{frame}
@@ -216,8 +218,8 @@ The category of spans
   \framesubtitle{A theorem, proof}
   \begin{align*}
     \var{coe}\ p_{\var{dom}}\ f
-    & ≡ f \lll (\idToIso\ p)_1 && \text{By path-induction} \\
-    & ≡ f \lll \inv{\iota}
+    & ≡ f \llll (\idToIso\ p)_1 && \text{By path-induction} \\
+    & ≡ f \llll \inv{\iota}
     && \text{$\idToIso$ and $\isoToId$ are inverses}\\
   \end{align*}
   \pause
@@ -233,14 +235,14 @@ The category of spans
   D\ \widetilde{B}\ \widetilde{p} ≜
   \var{coe}\ \widetilde{p}_{\var{dom}}\ f
   ≡
-  f \lll \inv{(\idToIso\ \widetilde{p})}
+  f \llll \inv{(\idToIso\ \widetilde{p})}
   $$
   \pause
   %
   The base-case becomes:
   $$
   d \tp D\ A\ \refl =
-  \left(\var{coe}\ \refl_{\var{dom}}\ f ≡ f \lll \inv{(\idToIso\ \refl)}\right)
+  \left(\var{coe}\ \refl_{\var{dom}}\ f ≡ f \llll \inv{(\idToIso\ \refl)}\right)
   $$
 \end{frame}
 \begin{frame}
@@ -248,7 +250,7 @@ The category of spans
   \framesubtitle{A theorem, proof, cont'd}
   $$
   d \tp
-  \var{coe}\ \refl_{\var{dom}}\ f ≡ f \lll \inv{(\idToIso\ \refl)}
+  \var{coe}\ \refl_{\var{dom}}\ f ≡ f \llll \inv{(\idToIso\ \refl)}
   $$
   \pause
   \begin{align*}
@@ -257,10 +259,10 @@ The category of spans
     \var{coe}\ \refl\ f \\
     & ≡ f
     && \text{neutral element for $\var{coe}$}\\
-    & ≡ f \lll \identity \\
-    & ≡ f \lll \var{subst}\ \refl\ \identity
+    & ≡ f \llll \identity \\
+    & ≡ f \llll \var{subst}\ \refl\ \identity
     && \text{neutral element for $\var{subst}$}\\
-    & ≡ f \lll \inv{(\idToIso\ \refl)}
+    & ≡ f \llll \inv{(\idToIso\ \refl)}
     && \text{By definition of $\idToIso$}\\
   \end{align*}
   \pause
@@ -286,8 +288,8 @@ The category of spans
   %
   $$
   ∑_{f \tp \Arrow\ A\ B}
-  (b_{\pairA} \lll f ≡ a_{\pairA}) ×
-  (b_{\pairB} \lll f ≡ a_{\pairB})
+  (b_{\pairA} \llll f ≡ a_{\pairA}) ×
+  (b_{\pairB} \llll f ≡ a_{\pairB})
   $$
 \end{frame}
 \begin{frame}
@@ -387,7 +389,7 @@ The category of spans
   %
   \begin{align*}
     \var{coe}\ \widetilde{p}_{𝒜}\ x_{𝒜}
-    & ≡ x_{𝒜} \lll \fst\ \inv{f} && \text{\ref{eq:coeDom}} \\
+    & ≡ x_{𝒜} \llll \fst\ \inv{f} && \text{\ref{eq:coeDom}} \\
     & ≡ y_{𝒜} && \text{Property of span category}
   \end{align*}
 \end{frame}
@@ -426,10 +428,10 @@ The category of spans
   Let $\fmap$ be the map on arrows of $\EndoR$.
   %
   \begin{align*}
-    \join \lll \fmap\ \join
-    & ≡ \join \lll \join \\
-    \join \lll \pure\           & ≡ \identity \\
-    \join \lll \fmap\     \pure & ≡ \identity
+    \join \llll \fmap\ \join
+    & ≡ \join \llll \join \\
+    \join \llll \pure\           & ≡ \identity \\
+    \join \llll \fmap\     \pure & ≡ \identity
   \end{align*}
 \end{frame}
 \begin{frame}
@@ -453,14 +455,14 @@ The category of spans
     \Arrow\ B\ (\omapR\ C)
     →
     \Arrow\ A\ (\omapR\ C) \\
-    f \fish g & ≜ f \rrr (\bind\ g)
+    f \fish g & ≜ f \rrrr (\bind\ g)
   \end{align*}
   \pause
   %
   \begin{align*}
     \bind\ \pure & ≡ \identity_{\omapR\ X} \\
     \pure \fish f & ≡ f \\
-    (\bind\ f) \rrr (\bind\ g) & ≡ \bind\ (f \fish g)
+    (\bind\ f) \rrrr (\bind\ g) & ≡ \bind\ (f \fish g)
   \end{align*}
 \end{frame}
 \begin{frame}
@@ -469,7 +471,7 @@ The category of spans
   In the monoidal formulation we can define $\bind$:
   %
   $$
-  \bind\ f ≜ \join \lll \fmap\ f
+  \bind\ f ≜ \join \llll \fmap\ f
   $$
   \pause
   %

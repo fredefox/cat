@@ -128,3 +128,20 @@
 \newcommand\Monoidal{\varindex{Monoidal}}
 \newcommand\Kleisli{\varindex{Kleisli}}
 \newcommand\I{\mathds{I}}
+
+\makeatletter
+\DeclareRobustCommand\bigop[1]{%
+  \mathop{\vphantom{\sum}\mathpalette\bigop@{#1}}\slimits@
+}
+\newcommand{\bigop@}[2]{%
+  \vcenter{%
+    \sbox\z@{$#1\sum$}%
+    \hbox{\resizebox{\ifx#1\displaystyle.7\fi\dimexpr\ht\z@+\dp\z@}{!}{$\m@th#2$}}%
+  }%
+}
+\makeatother
+
+\renewcommand{\llll}{\mathbin{\bigop{\lll}}}
+\renewcommand{\rrrr}{\mathbin{\bigop{\rrr}}}
+%% \newcommand{\llll}{lll}
+%% \newcommand{\rrrr}{rrr}
