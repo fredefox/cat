@@ -112,7 +112,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     --
     -- [HoTT §9.1.4]
     idToIso : (A B : Object) → A ≡ B → A ≊ B
-    idToIso A B eq = subst eq (idIso A)
+    idToIso A B eq = subst {P = λ X → A ≊ X} eq (idIso A)
 
     Univalent : Set (ℓa ⊔ ℓb)
     Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≊ B) (idToIso A B)
