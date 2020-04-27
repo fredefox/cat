@@ -32,8 +32,8 @@ The concepts formalized in this development are:
     Natural transformations & \sourcelink{Cat.Category.NaturalTransformation} \\
     Yoneda embedding & \sourcelink{Cat.Category.Yoneda} \\
     Monads & \sourcelink{Cat.Category.Monad} \\
-    Kleisli Monads & \sourcelink{Cat.Category.Monad.Kleisli} \\
-    Monoidal Monads & \sourcelink{Cat.Category.Monad.Monoidal} \\
+    Kleisli monads & \sourcelink{Cat.Category.Monad.Kleisli} \\
+    Monoidal monads & \sourcelink{Cat.Category.Monad.Monoidal} \\
     Voevodsky's construction & \sourcelink{Cat.Category.Monad.Voevodsky} \\
     Opposite category & \sourcelink{Cat.Categories.Opposite} \\
     Category of sets & \sourcelink{Cat.Categories.Sets} \\
@@ -259,7 +259,7 @@ $$
 To prove the proposition let $a, b \tp \IsPreCategory$ be given.  To
 prove the equality $a ≡ b$ is to give a continuous path from the
 index-type into the path space; i.e.\ a function $\I →
-\IsPreCategory$.  This path must satisfy being being judgmentally the
+\IsPreCategory$.  This path must satisfy being judgmentally the
 same as $a$ at the left endpoint and $b$ at the right endpoint.  We
 know we can form a continuous path between all projections of $a$ and
 $b$.  This follows from the type of all the projections being mere
@@ -448,7 +448,7 @@ equivalence between them:
 Note that the term equivalence here is overloaded referring both to the map $f
 \tp A → B$ and the type $A ≃ B$.  The notion of an isomorphism is
 similarly conflated as isomorphism can refer to the type $A \cong B$ as well as
-the the map $A → B$ that witness this.  I will use these conflated terms when
+the map $A → B$ that witness this.  I will use these conflated terms when
 it is clear from the context what is being referred to.
 
 Both $\cong$ and $≃$ form equivalence relations (no pun intended).
@@ -485,7 +485,7 @@ between equalities and isomorphisms (on arrows).  It is worthwhile to
 dwell on this for a few seconds.  This type looks very similar to
 univalence for types and is therefore perhaps a bit more intuitive to
 grasp the implications of.  Of course univalence for types (which is a
-theorem -- i.e.\ provably holds) does not imply univalence of all
+theorem --- i.e.\ provably holds) does not imply univalence of all
 pre-category since morphisms in a category are not regular functions,
 instead they can be thought of as a generalization hereof.  The
 univalence criterion therefore is simply a way of restricting arrows
@@ -695,7 +695,7 @@ The laws in $\left(\bC^{\var{Op}}\right)^{\var{Op}}$ get quite
 involved.  Luckily since being-a-category is a mere proposition, we
 need not concern ourselves with this bit when proving the above.   We
 can use the equality principle for categories that let us prove an
-equality just by giving an equality on the data-part.  So, given a
+equality just by giving an equality on the data part.  So, given a
 category $\bC$ all we must provide is the following proof:
 %
 $$
@@ -1410,8 +1410,8 @@ The implementation can be found here:
 \section{Monads}
 \label{sec:monads}
 In this section I present two formulations of monads.  The two
-representations are referred to as the monoidal- and Kleisli-
-representation respectively or simply monoidal monads and Kleisli
+formulations are referred to as the monoidal- and Kleisli-
+formulation respectively or simply monoidal monads and Kleisli
 monads.  We then show that the two formulations are equivalent, which
 due to univalence gives us a path between the two types.
 
@@ -1458,7 +1458,7 @@ they range over are universally quantified.
 %
 \subsection{Kleisli formulation}
 %
-The Kleisli-formulation consists of the following data:
+The Kleisli formulation consists of the following data:
 %
 \begin{align}
   \begin{split}
@@ -1626,8 +1626,8 @@ that the two mappings sketched above are indeed inverses of each
 other.  To recap, these maps are:
 %
 \begin{align*}
-  \toKleisli & \tp \var{Kleisli} → \var{Monoidal} \\
-  \toKleisli & ≜ \lambda\ (\omapR, \pure, \bind)
+  \toMonoidal & \tp \var{Kleisli} → \var{Monoidal} \\
+  \toMonoidal & ≜ \lambda\ (\omapR, \pure, \bind)
     → (\EndoR, \pure, \bind\ \identity)
 \end{align*}
 %
@@ -1637,8 +1637,8 @@ Likewise the proof that $\pure$ and $\bind\ \identity$ are natural
 transformations are left implicit.  The inverse map will be:
 %
 \begin{align*}
-  \toMonoidal & \tp \var{Monoidal} → \var{Kleisli} \\
-  \toMonoidal & ≜ \lambda\ (\EndoR, \pureNT, \joinNT)
+  \toKleisli & \tp \var{Monoidal} → \var{Kleisli} \\
+  \toKleisli & ≜ \lambda\ (\EndoR, \pureNT, \joinNT)
     → (\omapR, \pure, \bind)
 \end{align*}
 %
@@ -1655,11 +1655,11 @@ left implicit.  Now we must show:
 For \ref{eq:monad-forwards} let $(\omapR, \pure, \bind)$ be a monad in
 the Kleisli form.  Since being-a-monad is a proposition\footnote{The
   proof was omitted here but can be found in the implementation.} we
-get an equality-principle for kleisli-monads that say that to equate
+get an equality principle for Kleisli monads that says that to equate
 two such monads it suffices to equate their data part.  It thus
 suffices to equate the data parts of \ref{eq:monad-forwards}.  Such a
 proof is a triple equating the three projections of
-\ref{eq:monad-kleisli-data}.  The first two hold definitionally --
+\ref{eq:monad-kleisli-data}.  The first two hold definitionally ---
 essentially one just wraps and unwraps the morphism in a functor.  For
 the last equation a little more work is required:
 %
@@ -1677,8 +1677,8 @@ the last equation a little more work is required:
 %
 For the other direction (\ref{eq:monad-backwards}) we are given a
 monad in the monoidal form; $(\EndoR, \pureNT, \joinNT)$.  The various
-equality-principles again give us that it is sufficient to equate the
-data-part of the above.  That is, we only need to verify that the
+equality principles again give us that it is sufficient to equate the
+data part of the above.  That is, we only need to verify that the
 following pieces of data: $\omapR$, $\fmap$, $\pure$ and $\join$ get
 mapped correctly.  To see the full details check the implementation in
 the module:
