@@ -21,7 +21,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
       open RawProduct raw public
       field
         ump : ∀ {X : Object} (f : ℂ [ X , A ]) (g : ℂ [ X , B ])
-          → ∃![ f×g ] (ℂ [ fst ∘ f×g ] ≡ f P.× ℂ [ snd ∘ f×g ] ≡ g)
+          → ∃![ f×g ] ((ℂ [ fst ∘ f×g ] ≡ f) P.× (ℂ [ snd ∘ f×g ] ≡ g))
 
       -- | Arrow product
       _P[_×_] : ∀ {X} → (π₁ : ℂ [ X , A ]) (π₂ : ℂ [ X , B ])
@@ -69,12 +69,12 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
           module _ {X : Object} (f : ℂ [ X , 𝒜 ]) (g : ℂ [ X , ℬ ]) where
             module _ (f×g : Arrow X y.object) where
               help : isProp (∀{y} → (ℂ [ y.fst ∘ y ] ≡ f) P.× (ℂ [ y.snd ∘ y ] ≡ g) → f×g ≡ y)
-              help = propPiImpl (λ _ → propPi (λ _ → arrowsAreSets _ _))
+              help = propPiImpl (propPi (λ _ → arrowsAreSets _ _))
 
             res = ∃-unique (x.ump f g) (y.ump f g)
 
             prodAux : x.ump f g ≡ y.ump f g
-            prodAux = lemSig ((λ f×g → propSig (propSig (arrowsAreSets _ _) λ _ → arrowsAreSets _ _) (λ _ → help f×g))) _ _ res
+            prodAux = lemSig ((λ f×g → propSig (propSig (arrowsAreSets _ _) λ _ → arrowsAreSets _ _) (λ _ → help f×g))) res
 
           propIsProduct' : x ≡ y
           propIsProduct' i = record { ump = λ f g → prodAux f g i }
@@ -86,7 +86,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
     Product≡ {x} {y} p i = record { raw = p i ; isProduct = q i }
       where
       q : (λ i → IsProduct ℂ 𝒜 ℬ (p i)) [ Product.isProduct x ≡ Product.isProduct y ]
-      q = lemPropF propIsProduct p
+      q = lemPropF propIsProduct _ _ p
 
     open P
     open import Cat.Categories.Span
@@ -111,7 +111,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
           uy = uniq {Y , p0 , p1}
           open Σ uy renaming (fst to Y→X ; snd to contractible)
           open Σ Y→X renaming (fst to p0×p1 ; snd to cond)
-          ump : ∃![ f×g ] (ℂ [ x0 ∘ f×g ] ≡ p0 P.× ℂ [ x1 ∘ f×g ] ≡ p1)
+          ump : ∃![ f×g ] ((ℂ [ x0 ∘ f×g ] ≡ p0) P.× (ℂ [ x1 ∘ f×g ] ≡ p1))
           ump = p0×p1 , cond , λ {f} cond-f → cong fst (contractible (f , cond-f))
         isP : IsProduct ℂ 𝒜 ℬ rawP
         isP = record { ump = ump }
@@ -146,16 +146,16 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
               × (ℂ [ x₁ ∘ a ] ≡ y₁)
               )
             prp f f0 f1 = Σ≡
-              (ℂ.arrowsAreSets _ _ (fst f0) (fst f1))
-              (ℂ.arrowsAreSets _ _ (snd f0) (snd f1))
+              ( ℂ.arrowsAreSets _ _ (fst f0) (fst f1)
+              , ℂ.arrowsAreSets _ _ (snd f0) (snd f1))
             h :
               ( λ i
-                → ℂ [ x₀ ∘ k i ] ≡ y₀
-                × ℂ [ x₁ ∘ k i ] ≡ y₁
+                → (ℂ [ x₀ ∘ k i ] ≡ y₀)
+                × (ℂ [ x₁ ∘ k i ] ≡ y₁)
               ) [ f'-cond ≡ f-cond ]
-            h = lemPropF prp k
+            h = lemPropF prp _ _ k
             res : (f' , f'-cond) ≡ (f , f-cond)
-            res = Σ≡ k h
+            res = Σ≡ (k , h)
         t : IsTerminal 𝒳
         t {𝒴} = 𝒻 , contractible
       ve-re : ∀ x → g (f x) ≡ x
@@ -173,7 +173,7 @@ module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb}
       inv = funExt ve-re , funExt re-ve
 
   propProduct : isProp (Product ℂ 𝒜 ℬ)
-  propProduct = equivPreservesNType {n = ⟨-1⟩} lemma Propositionality.propTerminal
+  propProduct = equivPreservesNType 1 lemma Propositionality.propTerminal
 
 module _ {ℓa ℓb : Level} {ℂ : Category ℓa ℓb} {A B : Category.Object ℂ} where
   open Category ℂ

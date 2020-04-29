@@ -1,142 +1,177 @@
+{-# OPTIONS --cubical #-}
 -- | Custom prelude for this module
 module Cat.Prelude where
 
 open import Agda.Primitive public
--- FIXME Use:
-open import Agda.Builtin.Sigma public
--- Rather than
-open import Data.Product public
-  renaming (∃! to ∃!≈)
-  using (_×_ ; Σ-syntax ; swap)
 
-open import Function using (_∘_ ; _∘′_ ; _$_ ; case_of_ ; flip) public
+open import Cubical.Foundations.Prelude public
+  renaming ( fromPathP to coe-lem
+           ; isGroupoid to isGrpd
+           ; isPropIsContr to propIsContr
+           ; isProp→isSet to propSet
+           ; J to pathJ
+           ; JRefl to pathJprop
+           ; substRefl to subst-neutral
+           ; toPathP to coe-lem-inv
+           ; transport to coe
+           ; transportRefl to coe-neutral
+           ; _∙_ to trans
+           )
+open import Cubical.Foundations.Equiv public
+  renaming ( isPropIsEquiv to propIsEquiv
+           )
+open import Cubical.Foundations.Equiv.Fiberwise public
+open import Cubical.Foundations.Function public
+  renaming ( idfun to idFun
+           )
+open import Cubical.Foundations.HLevels public
+  renaming ( isGroupoidΣ to grpdSig
+           ; isGroupoidΠ to grpdPi
+           ; isOfHLevel to HasLevel
+           ; isOfHLevelRespectEquiv to equivPreservesNType
+           ; isOfHLevelΠ to HasLevelPi
+           ; isPropIsSet to isSetIsProp
+           ; isPropΣ to propSig
+           ; isPropΠ to propPi
+           ; isSet→isGroupoid to setGrpd
+           ; isSetΣ to setSig
+           ; isSetΠ to setPi
+           )
+open import Cubical.Foundations.Isomorphism
+open import Cubical.Foundations.Transport public
+  renaming ( transport⁻-filler to transp-iso'
+           )
+open import Cubical.Foundations.Univalence public
+  using    ( ua
+           ; univalence
+           )
 
-idFun : ∀ {a} (A : Set a) → A → A
-idFun A a = a
+open import Cubical.Data.Nat
+  renaming ( ℕ to TLevel
+           ; suc to S
+           )
+open import Cubical.Data.Sigma public
+  renaming ( congΣEquiv to equivSig
+           ; ΣPathP to Σ≡
+           ; ΣProp≡ to lemSig
+           ; Σ≡ to Σ≡-equiv
+           )
 
-open import Cubical public
--- FIXME rename `gradLemma` to `fromIsomorphism` - perhaps just use wrapper
--- module.
-open import Cubical.GradLemma
-  using (gradLemma)
-  public
-open import Cubical.NType
-  using (⟨-2⟩ ; ⟨-1⟩ ; ⟨0⟩ ; TLevel ; HasLevel ; isGrpd)
-  public
-open import Cubical.NType.Properties
-  using
-    ( lemPropF ; lemSig ;  lemSigP ; isSetIsProp
-    ; propPi ; propPiImpl ; propHasLevel ; setPi ; propSet
-    ; propSig ; equivPreservesNType)
-  public
-
-propIsContr : {ℓ : Level} → {A : Set ℓ} → isProp (isContr A)
-propIsContr = propHasLevel ⟨-2⟩
-
-open import Cubical.Sigma using (setSig ; sigPresSet ; sigPresNType) public
-
-module _ (ℓ : Level) where
-  -- FIXME Ask if we can push upstream.
-  -- A redefinition of `Cubical.Universe` with an explicit parameter
-  _-type : TLevel → Set (lsuc ℓ)
-  n -type = Σ (Set ℓ) (HasLevel n)
-
-  hSet : Set (lsuc ℓ)
-  hSet = ⟨0⟩ -type
-
-  hProp : Set (lsuc ℓ)
-  hProp = ⟨-1⟩ -type
+open import Relation.Binary public
+  using    ( IsEquivalence
+           ; Preorder
+           ; Rel
+           ; Setoid
+           ; Transitive
+           )
 
 -----------------
 -- * Utilities --
 -----------------
 
--- | Unique existentials.
-∃! : ∀ {a b} {A : Set a}
-  → (A → Set b) → Set (a ⊔ b)
-∃! = ∃!≈ _≡_
+∃-syntax : ∀ {a b} {A : Type a} → (A → Type b) → Type (a ⊔ b)
+∃-syntax = Σ _
 
-∃!-syntax : ∀ {a b} {A : Set a} → (A → Set b) → Set (a ⊔ b)
+syntax ∃-syntax (λ x → B) = ∃[ x ] B
+
+-- | Unique existentials.
+∃! : ∀ {a b} {A : Type a}
+  → (A → Type b) → Type (a ⊔ b)
+∃! B = ∃[ x ] (B x × (∀ {y} → B y → x ≡ y))
+
+∃!-syntax : ∀ {a b} {A : Type a} → (A → Type b) → Type (a ⊔ b)
 ∃!-syntax = ∃!
 
 syntax ∃!-syntax (λ x → B) = ∃![ x ] B
 
-module _ {ℓa ℓb} {A : Set ℓa} {P : A → Set ℓb} (f g : ∃! P) where
+module _ {ℓa ℓb} {A : Type ℓa} {P : A → Type ℓb} (f g : ∃! P) where
   ∃-unique : fst f ≡ fst g
   ∃-unique = (snd (snd f)) (fst (snd g))
 
-module _ {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb} {a b : Σ A B}
-  (fst≡ : (λ _ → A)            [ fst a ≡ fst b ])
-  (snd≡ : (λ i → B (fst≡ i)) [ snd a ≡ snd b ]) where
-
-  Σ≡ : a ≡ b
-  fst (Σ≡ i) = fst≡ i
-  snd (Σ≡ i) = snd≡ i
-
-import Relation.Binary
-open Relation.Binary public using
-  ( Preorder ; Transitive ; IsEquivalence ; Rel
-  ; Setoid )
-
-equalityIsEquivalence : {ℓ : Level} {A : Set ℓ} → IsEquivalence {A = A} _≡_
+equalityIsEquivalence : {ℓ : Level} {A : Type ℓ} → IsEquivalence {A = A} _≡_
 IsEquivalence.refl  equalityIsEquivalence = refl
 IsEquivalence.sym   equalityIsEquivalence = sym
 IsEquivalence.trans equalityIsEquivalence = trans
 
 IsPreorder
-  : {a ℓ : Level} {A : Set a}
+  : {a ℓ : Level} {A : Type a}
   → (_∼_ : Rel A ℓ) -- The relation.
-  → Set _
+  → Type _
 IsPreorder _~_ = Relation.Binary.IsPreorder _≡_ _~_
 
-module _ {ℓ : Level} {A : Set ℓ} {a : A} where
-  -- FIXME rename to `coe-neutral`
-  id-coe : coe refl a ≡ a
-  id-coe = begin
-    coe refl a                 ≡⟨⟩
-    pathJ (λ y x → A) _ A refl ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
-    _ ≡⟨ pathJprop {x = a} (λ y x → A) _ ⟩
-    a ∎
+-- | Prelude
+infix  1 begin_
+begin_ : {ℓ : Level} {A : Type ℓ} {x y : A} → x ≡ y → x ≡ y
+begin x≡y = x≡y
 
-module _ {ℓ : Level} {A : Set ℓ} where
-  open import Cubical.NType
-  open import Data.Nat using (_≤′_ ;  ≤′-refl ;  ≤′-step ; zero ; suc)
-  open import Cubical.NType.Properties
-  ntypeCumulative : ∀ {n m} → n ≤′ m → HasLevel ⟨ n ⟩₋₂ A → HasLevel ⟨ m ⟩₋₂ A
-  ntypeCumulative {m}         ≤′-refl      lvl = lvl
-  ntypeCumulative {n} {suc m} (≤′-step le) lvl = HasLevel+1 ⟨ m ⟩₋₂ (ntypeCumulative le lvl)
+infixr 2 _≡⟨⟩_
+_≡⟨⟩_ : {ℓ : Level} {A : Type ℓ} {y : A} → (x : A) → x ≡ y → x ≡ y
+_ ≡⟨⟩ y≡z = y≡z
 
-  grpdPi : {ℓb : Level} {B : A → Set ℓb}
-    → ((a : A) → isGrpd (B a)) → isGrpd ((a : A) → (B a))
-  grpdPi = piPresNType (S (S (S ⟨-2⟩)))
+-- | Function
+_∘′_ : {a b c : Level} {A : Type a} {B : Type b} {C : Type c}
+    → (B → C) → (A → B) → (A → C)
+f ∘′ g = f ∘ g
 
-  grpdPiImpl : {ℓb : Level} {B : A → Set ℓb}
-    → ({a : A} → isGrpd (B a)) → isGrpd ({a : A} → (B a))
-  grpdPiImpl {B = B} g = equivPreservesNType {A = Expl} {B = Impl} {n = one} e (grpdPi (λ a → g))
-    where
-    one = (S (S (S ⟨-2⟩)))
-    t : ({a : A} → HasLevel one (B a))
-    t = g
-    Impl = {a : A} → B a
-    Expl = (a : A) → B a
-    expl : Impl → Expl
-    expl f a = f {a}
-    impl : Expl → Impl
-    impl f {a} = f a
-    e : Expl ≃ Impl
-    e = impl , (gradLemma impl expl (λ f → refl) (λ f → refl))
+_$_ : {a b : Level} {A : Type a} {B : A → Type b}
+    → ((x : A) → B x) → ((x : A) → B x)
+f $ x = f x
 
-  setGrpd : isSet A → isGrpd A
-  setGrpd = ntypeCumulative
-    {suc (suc zero)} {suc (suc (suc zero))}
-    (≤′-step ≤′-refl)
+flip : {a b c : Level} {A : Type a} {B : Type b} {C : A → B → Type c}
+     → ((x : A) (y : B) → C x y) → ((y : B) (x : A) → C x y)
+flip f = λ y x → f x y
+
+swap : {a b : Level} {A : Type a} {B : Type b} → A × B → B × A
+swap = swapΣEquiv _ _ .fst
+
+-- | Isomorphism
+-- FIXME rename `gradLemma` to `fromIsomorphism` - perhaps just use wrapper
+-- module.
+gradLemma : {ℓ ℓ' : Level} {A : Type ℓ} {B : Type ℓ'}
+  → ∀ (f : A → B) (inv : B → A) (rightInv : section f inv) (leftInv : retract f inv) → isEquiv f
+gradLemma f inv rightInv leftInv = isoToIsEquiv (iso f inv rightInv leftInv)
+
+-- | HLevels
+module _ (ℓ : Level) where
+  -- FIXME Ask if we can push upstream.
+  -- A redefinition of `Cubical.Universe` with an explicit parameter
+  _-type : TLevel → Type (lsuc ℓ)
+  n -type = Σ (Type ℓ) (HasLevel n)
+
+module _ {ℓa : Level} {A : Type ℓa} where
+  module _ {ℓb : Level} {B : A → Type ℓb} where
+    piImpl : (n : TLevel)
+      → ({a : A} → HasLevel n (B a)) → HasLevel n ({a : A} → (B a))
+    piImpl n g = equivPreservesNType {A = Expl} {B = Impl} n e (HasLevelPi n (λ a → g))
+      where
+      Impl = {a : A} → B a
+      Expl = (a : A) → B a
+      expl : Impl → Expl
+      expl f a = f {a}
+      impl : Expl → Impl
+      impl f {a} = f a
+      e : Expl ≃ Impl
+      e = impl , gradLemma impl expl (λ f → refl) (λ f → refl)
+
+    propPiImpl : ({a : A} → isProp (B a)) → isProp ({a : A} → (B a))
+    propPiImpl = piImpl 1
+
+    grpdPiImpl : ({a : A} → isGrpd (B a)) → isGrpd ({a : A} → (B a))
+    grpdPiImpl = piImpl 3
+
+    lemPropF : (h : ∀ (x : A) → isProp (B x)) → ∀ {x y : A} (b : B x) (b' : B y) (p : x ≡ y) → PathP (λ i → B (p i)) b b'
+    lemPropF = isOfHLevel→isOfHLevelDep 1
 
   propGrpd : isProp A → isGrpd A
-  propGrpd = ntypeCumulative
-    {suc zero} {suc (suc (suc zero))}
-    (≤′-step (≤′-step ≤′-refl))
+  propGrpd = isProp→isOfHLevelSuc 2
 
-module _ {ℓa ℓb : Level} {A : Set ℓa} {B : A → Set ℓb} where
-  open TLevel
-  grpdSig : isGrpd A → (∀ a → isGrpd (B a)) → isGrpd (Σ A B)
-  grpdSig = sigPresNType {n = S (S (S ⟨-2⟩))}
+-- | Sigma
+lemSigP : {ℓ ℓ' : Level} {A : Type ℓ} {B : (i : I) → A → Type ℓ'}
+  → (h : ∀ i → (x : A) → isProp (B i x))
+  → ∀ (u : Σ A (B i0)) (v : Σ A (B i1)) (p : fst u ≡ fst v) → PathP (λ i → Σ A (B i)) u v
+lemSigP h u v p i = p i , isProp→PathP (λ i → h i (p i)) (snd u) (snd v) i
+
+equivSigProp : {ℓ ℓ' : Level} {A : Type ℓ} {B : A → Type ℓ'}
+  → (h : ∀ (x : A) → isProp (B x))
+  → ∀ {u v : Σ A B} → (u ≡ v) ≃ (fst u ≡ fst v)
+equivSigProp h = invEquiv (_ , ΣProp≡-equiv h)

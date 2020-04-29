@@ -1,3 +1,4 @@
+{-# OPTIONS --cubical #-}
 module Cat.Categories.CwF where
 
 open import Cat.Prelude
@@ -25,10 +26,10 @@ module _ {ℓa ℓb : Level} where
       [] : ℂ.Terminal
     private
       module T = Functor T
-    Type : (Γ : ℂ.Object) → Set ℓa
-    Type Γ = fst (fst (T.omap Γ))
+    Ty : (Γ : ℂ.Object) → Set ℓa
+    Ty Γ = fst (fst (T.omap Γ))
 
-    module _ {Γ : ℂ.Object} {A : Type Γ} where
+    module _ {Γ : ℂ.Object} {A : Ty Γ} where
 
       -- module _ {A B : Object ℂ} {γ : ℂ [ A , B ]} where
       --   k : Σ (fst (omap T B) → fst (omap T A))

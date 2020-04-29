@@ -148,7 +148,7 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
          (Monoidal→Kleisli
           (§2-3.§1.toMonad
            (§1-fromMonad (Kleisli→Monoidal (§2-3.§2.toMonad m)))))
-         ≡⟨ cong-d (§2-fromMonad ∘ Monoidal→Kleisli) (lemmaz (Kleisli→Monoidal (§2-3.§2.toMonad m))) ⟩
+         ≡⟨ cong (§2-fromMonad ∘ Monoidal→Kleisli) (lemmaz (Kleisli→Monoidal (§2-3.§2.toMonad m))) ⟩
        §2-fromMonad
          ((Monoidal→Kleisli ∘ Kleisli→Monoidal)
           (§2-3.§2.toMonad m))
@@ -171,7 +171,7 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
          --        (.Cat.Category.Monad.toKleisli ℂ
          --         (.Cat.Category.Monad.toMonoidal ℂ (§2-3.§2.toMonad m))))
          --       (§2-fromMonad (§2-3.§2.toMonad m))
-         ≡⟨ ( cong-d {x = Monoidal→Kleisli ∘ Kleisli→Monoidal} {y = idFun K.Monad} (\ φ → §2-fromMonad (φ (§2-3.§2.toMonad m))) re-ve) ⟩
+         ≡⟨ ( cong {x = Monoidal→Kleisli ∘ Kleisli→Monoidal} {y = idFun K.Monad} (\ φ → §2-fromMonad (φ (§2-3.§2.toMonad m))) re-ve) ⟩
        (§2-fromMonad ∘ §2-3.§2.toMonad) m
          ≡⟨ lemma ⟩
        m ∎
@@ -189,7 +189,7 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
         (Kleisli→Monoidal
         (§2-3.§2.toMonad
         (§2-fromMonad (Monoidal→Kleisli (§2-3.§1.toMonad m)))))
-          ≡⟨ cong-d (§1-fromMonad ∘ Kleisli→Monoidal) (lemma (Monoidal→Kleisli (§2-3.§1.toMonad m))) ⟩
+          ≡⟨ cong (§1-fromMonad ∘ Kleisli→Monoidal) (lemma (Monoidal→Kleisli (§2-3.§1.toMonad m))) ⟩
         §1-fromMonad
         ((Kleisli→Monoidal ∘ Monoidal→Kleisli)
         (§2-3.§1.toMonad m))
@@ -223,7 +223,7 @@ module voe {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
           --        (.Cat.Category.Monad.toMonoidal ℂ
           --         (.Cat.Category.Monad.toKleisli ℂ (§2-3.§1.toMonad m))))
           --       (§1-fromMonad (§2-3.§1.toMonad m))
-          ≡⟨ (cong-d (\ φ → §1-fromMonad (φ (§2-3.§1.toMonad m))) ve-re) ⟩
+          ≡⟨ (cong (\ φ → §1-fromMonad (φ (§2-3.§1.toMonad m))) ve-re) ⟩
         §1-fromMonad (§2-3.§1.toMonad m)
           ≡⟨ lemmaz ⟩
         m ∎

@@ -19,13 +19,15 @@ Dependencies
 ============
 To successfully compile the following is needed:
 
-* The master branch of Agda.
+* [Agda](https://github.com/agda/agda)
 * [Agda Standard Library](https://github.com/agda/agda-stdlib)
-* [Cubical](https://github.com/Saizan/cubical-demo/)
+* [Agda Cubical Library](https://github.com/agda/cubical)
 
 Has been tested with:
 
-  * Agda version 2.6.0-d3efe64
+  * Agda versions 2.6.1 and 2.6.2-02cb18a
+  * Agda Standard Library version v1.3-9f454e23
+  * Agda Cubical Library version v0.1-acabbd9
 
 Building
 ========

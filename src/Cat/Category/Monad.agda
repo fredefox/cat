@@ -236,5 +236,5 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
   grpdKleisli = Kleisli.grpdMonad
 
   grpdMonoidal : isGrpd Monoidal.Monad
-  grpdMonoidal = subst {P = isGrpd}
+  grpdMonoidal = subst isGrpd
     (sym Monoidal≡Kleisli) grpdKleisli

@@ -66,14 +66,14 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
     open RawCategory rawProduct
 
     arrowsAreSets : ArrowsAreSets
-    arrowsAreSets = setSig {sA = ℂ.arrowsAreSets} {sB = λ x → 𝔻.arrowsAreSets}
+    arrowsAreSets = setSig ℂ.arrowsAreSets λ x → 𝔻.arrowsAreSets
     isIdentity : IsIdentity identity
     isIdentity
-      = Σ≡ (fst ℂ.isIdentity) (fst 𝔻.isIdentity)
-      , Σ≡ (snd ℂ.isIdentity) (snd 𝔻.isIdentity)
+      = Σ≡ (fst ℂ.isIdentity , fst 𝔻.isIdentity)
+      , Σ≡ (snd ℂ.isIdentity , snd 𝔻.isIdentity)
 
     isPreCategory : IsPreCategory rawProduct
-    IsPreCategory.isAssociative isPreCategory = Σ≡ ℂ.isAssociative 𝔻.isAssociative
+    IsPreCategory.isAssociative isPreCategory = Σ≡ (ℂ.isAssociative , 𝔻.isAssociative)
     IsPreCategory.isIdentity    isPreCategory = isIdentity
     IsPreCategory.arrowsAreSets isPreCategory = arrowsAreSets
 
@@ -112,8 +112,8 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
           ; fmap = λ x → x₁.fmap x , x₂.fmap x
           }
         ; isFunctor = record
-          { isIdentity     = Σ≡ x₁.isIdentity x₂.isIdentity
-          ; isDistributive = Σ≡ x₁.isDistributive x₂.isDistributive
+          { isIdentity     = Σ≡ (x₁.isIdentity , x₂.isIdentity)
+          ; isDistributive = Σ≡ (x₁.isDistributive , x₂.isDistributive)
           }
         }
         where
@@ -126,13 +126,13 @@ module CatProduct {ℓ ℓ' : Level} (ℂ 𝔻 : Category ℓ ℓ') where
       isUniqR : F[ sndF ∘ x ] ≡ x₂
       isUniqR = Functor≡ refl
 
-      isUniq : F[ fstF ∘ x ] ≡ x₁ × F[ sndF ∘ x ] ≡ x₂
+      isUniq : (F[ fstF ∘ x ] ≡ x₁) × (F[ sndF ∘ x ] ≡ x₂)
       isUniq = isUniqL , isUniqR
 
-    isProduct : ∃![ x ] (F[ fstF ∘ x ] ≡ x₁ × F[ sndF ∘ x ] ≡ x₂)
+    isProduct : ∃![ x ] ((F[ fstF ∘ x ] ≡ x₁) × (F[ sndF ∘ x ] ≡ x₂))
     isProduct = x , isUniq , uq
       where
-      module _ {y : Functor X object} (eq : F[ fstF ∘ y ] ≡ x₁ × F[ sndF ∘ y ] ≡ x₂) where
+      module _ {y : Functor X object} (eq : (F[ fstF ∘ y ] ≡ x₁) × (F[ sndF ∘ y ] ≡ x₂)) where
         omapEq : Functor.omap x ≡ Functor.omap y
         omapEq = {!!}
         -- fmapEq : (λ i → {!{A B : ?} → Arrow A B → 𝔻 [ ? A , ? B ]!}) [ Functor.fmap x ≡ Functor.fmap y ]
@@ -300,6 +300,8 @@ module _ (ℓ : Level) (unprovable : IsCategory (RawCat ℓ ℓ)) where
   private
     Catℓ : Category (lsuc (ℓ ⊔ ℓ)) (ℓ ⊔ ℓ)
     Catℓ = Cat ℓ ℓ unprovable
+
+    instance _ = hasProducts unprovable
 
     module _ (ℂ 𝔻 : Category ℓ ℓ) where
       module CatExp = CatExponential ℂ 𝔻

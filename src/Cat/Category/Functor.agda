@@ -2,9 +2,6 @@
 module Cat.Category.Functor where
 
 open import Cat.Prelude
-
-open import Cubical
-
 open import Cat.Category
 
 module _ {ℓc ℓc' ℓd ℓd'}
@@ -51,7 +48,7 @@ module _ {ℓc ℓc' ℓd ℓd'}
         where
       private
         p : P (omap y) eq
-        p = pathJ P kk (omap y) eq
+        p = pathJ P kk eq
         eq→ : (λ i → Fmap (eq i)) [ fmap x ≡ fmap y ]
         eq→ = p (fmap y)
       RawFunctor≡ : x ≡ y
@@ -104,7 +101,7 @@ module _
 
   IsFunctorIsProp' : IsProp' λ i → IsFunctor _ _ (F i)
   IsFunctorIsProp' isF0 isF1 = lemPropF {B = IsFunctor ℂ 𝔻}
-    (\ F → propIsFunctor F) (\ i → F i)
+    (\ F → propIsFunctor F) _ _ (\ i → F i)
 
 module _ {ℓc ℓc' ℓd ℓd' : Level} {ℂ : Category ℓc ℓc'} {𝔻 : Category ℓd ℓd'} where
   open Functor
@@ -196,5 +193,5 @@ module Functors where
     rightIdentity : F[ F ∘ identity ] ≡ F
     rightIdentity = Functor≡ refl
 
-    isIdentity : F[ identity ∘ F ] ≡ F × F[ F ∘ identity ] ≡ F
+    isIdentity : (F[ identity ∘ F ] ≡ F) × (F[ F ∘ identity ] ≡ F)
     isIdentity = leftIdentity , rightIdentity

@@ -50,7 +50,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
     open RawFunctor rawYoneda hiding (fmap)
 
     isIdentity : IsIdentity
-    isIdentity {c} = lemSig prp _ _ eq
+    isIdentity {c} = lemSig prp eq
       where
       eq : (λ C x → ℂ [ ℂ.identity ∘ x ]) ≡ identityTrans (presheaf c)
       eq = funExt λ A → funExt λ B → ℂ.leftIdentity
@@ -58,7 +58,7 @@ module _ {ℓ : Level} {ℂ : Category ℓ ℓ} where
 
     isDistributive : IsDistributive
     isDistributive {A} {B} {C} {f = f} {g}
-      = lemSig (propIsNatural (presheaf A) (presheaf C)) _ _ eq
+      = lemSig (propIsNatural (presheaf A) (presheaf C)) eq
       where
       T[_∘_]' = T[_∘_] {F = presheaf A} {presheaf B} {presheaf C}
       eqq : (X : ℂ.Object) → (x : ℂ [ X , A ])
