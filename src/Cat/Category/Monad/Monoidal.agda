@@ -57,9 +57,9 @@ record RawMonad : Set ℓ where
   IsInverse : Set _
   IsInverse = {X : Object}
     -- Talks about R's action on objects
-    → join <<< pure      ≡ identity {Romap X}
+    → (join <<< pure      ≡ identity {Romap X})
     -- Talks about R's action on arrows
-    × join <<< fmap pure ≡ identity {Romap X}
+    × (join <<< fmap pure ≡ identity {Romap X})
   IsNatural = ∀ {X Y} (f : Arrow X (Romap Y))
     → join <<< fmap f <<< pure ≡ f
   IsDistributive = ∀ {X Y Z} (g : Arrow Y (Romap Z)) (f : Arrow X (Romap Y))
@@ -154,7 +154,7 @@ private
 module _ {m n : Monad} (eq : Monad.raw m ≡ Monad.raw n) where
   private
     eqIsMonad : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
-    eqIsMonad = lemPropF propIsMonad eq
+    eqIsMonad = lemPropF propIsMonad _ _ eq
 
   Monad≡ : m ≡ n
   Monad.raw     (Monad≡ i) = eq i

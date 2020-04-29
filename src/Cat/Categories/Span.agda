@@ -17,8 +17,8 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb)
         { Object = Σ[ X ∈ ℂ.Object ] ℂ.Arrow X 𝒜 × ℂ.Arrow X ℬ
         ; Arrow = λ{ (A , a0 , a1) (B , b0 , b1)
           → Σ[ f ∈ ℂ.Arrow A B ]
-              ℂ [ b0 ∘ f ] ≡ a0
-            × ℂ [ b1 ∘ f ] ≡ a1
+              (ℂ [ b0 ∘ f ] ≡ a0)
+            × (ℂ [ b1 ∘ f ] ≡ a1)
             }
         ; identity = λ{ {X , f , g} → ℂ.identity {X} , ℂ.rightIdentity , ℂ.rightIdentity}
         ; _<<<_ = λ { {_ , a0 , a1} {_ , b0 , b1} {_ , c0 , c1} (f , f0 , f1) (g , g0 , g1)
@@ -42,11 +42,11 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb)
         open RawCategory raw
 
         propEqs : ∀ {X' : Object}{Y' : Object} (let X , xa , xb = X') (let Y , ya , yb = Y')
-                    → (xy : ℂ.Arrow X Y) → isProp (ℂ [ ya ∘ xy ] ≡ xa × ℂ [ yb ∘ xy ] ≡ xb)
+                    → (xy : ℂ.Arrow X Y) → isProp ((ℂ [ ya ∘ xy ] ≡ xa) × (ℂ [ yb ∘ xy ] ≡ xb))
         propEqs xs = propSig (ℂ.arrowsAreSets _ _) (\ _ → ℂ.arrowsAreSets _ _)
 
         arrowEq : {X Y : Object} {f g : Arrow X Y} → fst f ≡ fst g → f ≡ g
-        arrowEq {X} {Y} {f} {g} p = λ i → p i , lemPropF propEqs p {snd f} {snd g} i
+        arrowEq {X} {Y} {f} {g} p = λ i → p i , lemPropF propEqs (snd f) (snd g) p i
 
         isAssociative : IsAssociative
         isAssociative {f = f , f0 , f1} {g , g0 , g1} {h , h0 , h1} = arrowEq ℂ.isAssociative
@@ -56,7 +56,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb)
 
         arrowsAreSets : ArrowsAreSets
         arrowsAreSets {X , x0 , x1} {Y , y0 , y1}
-          = sigPresSet ℂ.arrowsAreSets λ a → propSet (propEqs _)
+          = setSig ℂ.arrowsAreSets λ a → propSet (propEqs _)
 
         isPreCat : IsPreCategory raw
         IsPreCategory.isAssociative isPreCat = isAssociative
@@ -86,9 +86,9 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb)
 
         step0 : T0 ≅ T1
         step0
-          = (λ p → cong fst p , cong-d (fst ∘ snd) p , cong-d (snd ∘ snd) p)
+          = (λ p → cong fst p , cong (fst ∘ snd) p , cong (snd ∘ snd) p)
           -- , (λ x  → λ i → fst x i , (fst (snd x) i) , (snd (snd x) i))
-          , (λ{ (p , q , r) → Σ≡ p λ i → q i , r i})
+          , (λ{ (p , q , r) → Σ≡ (p , λ i → q i , r i)})
           , funExt (λ{ p → refl})
           , funExt (λ{ (p , q , r) → refl})
 
@@ -134,14 +134,13 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb)
             in iso , coe-lem-inv k1 , coe-lem-inv k0})
           , funExt (λ x → lemSig
               (λ x → propSig prop0 (λ _ → prop1))
-              _ _
-              (Σ≡ refl (ℂ.propIsomorphism _ _ _)))
-          , funExt (λ{ (f , _) → lemSig propIsomorphism _ _ (Σ≡ refl (propEqs _ _ _))})
+              (Σ≡ (refl , ℂ.propIsomorphism _ _ _)))
+          , funExt (λ{ (f , _) → lemSig propIsomorphism (Σ≡ (refl , propEqs _ _ _))})
             where
             prop0 : ∀ {x} → isProp (PathP (λ i → ℂ.Arrow (ℂ.isoToId x i) 𝒜) xa ya)
-            prop0 {x} = pathJ (λ y p → ∀ x → isProp (PathP (λ i → ℂ.Arrow (p i) 𝒜) xa x)) (λ x → ℂ.arrowsAreSets _ _) Y (ℂ.isoToId x) ya
+            prop0 {x} = pathJ (λ y p → ∀ x → isProp (PathP (λ i → ℂ.Arrow (p i) 𝒜) xa x)) (λ x → ℂ.arrowsAreSets _ _) (ℂ.isoToId x) ya
             prop1 : ∀ {x} → isProp (PathP (λ i → ℂ.Arrow (ℂ.isoToId x i) ℬ) xb yb)
-            prop1 {x} = pathJ (λ y p → ∀ x → isProp (PathP (λ i → ℂ.Arrow (p i) ℬ) xb x)) (λ x → ℂ.arrowsAreSets _ _) Y (ℂ.isoToId x) yb
+            prop1 {x} = pathJ (λ y p → ∀ x → isProp (PathP (λ i → ℂ.Arrow (p i) ℬ) xb x)) (λ x → ℂ.arrowsAreSets _ _) (ℂ.isoToId x) yb
         -- One thing to watch out for here is that the isomorphisms going forwards
         -- must compose to give idToIso
         iso

@@ -1,3 +1,4 @@
+{-# OPTIONS --cubical #-}
 module Cat where
 
 open import Cat.Category

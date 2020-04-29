@@ -67,7 +67,7 @@ module _ {ℓa ℓb : Level} (ℂ : Category ℓa ℓb) where
     IsPreCategory.arrowsAreSets isPreCategory = arrowsAreSets
 
     module _ {A B : ℂ.Object} where
-      eqv : isEquiv (A ≡ B) (A ≊ B) (Univalence.idToIso isIdentity A B)
+      eqv : isEquiv (Univalence.idToIso isIdentity A B)
       eqv = {!!}
 
     univalent : Univalent

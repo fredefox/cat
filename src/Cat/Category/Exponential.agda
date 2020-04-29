@@ -1,3 +1,4 @@
+{-# OPTIONS --cubical #-}
 module Cat.Category.Exponential where
 
 open import Cat.Prelude hiding (_×_)
@@ -27,7 +28,7 @@ module _ {ℓ ℓ'} (ℂ : Category ℓ ℓ') {{hasProducts : HasProducts ℂ}} 
         -- obj ≡ Cᴮ
         obj : Object
         eval : ℂ [ obj × B , C ]
-        {{isExponential}} : IsExponential obj eval
+        isExponential : IsExponential obj eval
 
       transpose : (A : Object) → ℂ [ A × B , C ] → ℂ [ A , obj ]
       transpose A f = fst (isExponential A f)

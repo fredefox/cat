@@ -1,4 +1,5 @@
 {-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --cubical              #-}
 module Cat.Categories.Fam where
 
 open import Cat.Prelude
@@ -27,10 +28,10 @@ module _ (ℓa ℓb : Level) where
     open RawCategory RawFam hiding (Object ; identity)
 
     isAssociative : IsAssociative
-    isAssociative = Σ≡ refl refl
+    isAssociative = Σ≡ (refl , refl)
 
     isIdentity : IsIdentity λ { {A} → identity {A} }
-    isIdentity = (Σ≡ refl refl) , Σ≡ refl refl
+    isIdentity = (Σ≡ (refl , refl)) , Σ≡ (refl , refl)
 
     isPreCategory : IsPreCategory RawFam
     IsPreCategory.isAssociative isPreCategory
@@ -40,8 +41,8 @@ module _ (ℓa ℓb : Level) where
     IsPreCategory.arrowsAreSets isPreCategory
       {(A , hA) , famA} {(B , hB) , famB}
       = setSig
-        {sA = setPi λ _ → hB}
-        {sB = λ f →
+        (setPi λ _ → hB)
+        (λ f →
           let
             helpr : isSet ((a : A) → fst (famA a) → fst (famB (f a)))
             helpr = setPi λ a → setPi λ _ → snd (famB (f a))
@@ -50,7 +51,7 @@ module _ (ℓa ℓb : Level) where
             res : isSet ({a : A} → fst (famA a) → fst (famB (f a)))
             res = {!!}
           in res
-        }
+        )
 
     isCategory : IsCategory RawFam
     IsCategory.isPreCategory isCategory = isPreCategory

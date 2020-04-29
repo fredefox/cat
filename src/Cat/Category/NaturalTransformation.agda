@@ -59,7 +59,7 @@ module _ (F G : Functor ℂ 𝔻) where
   NaturalTransformation≡ : {α β : NaturalTransformation}
     → (eq₁ : α .fst ≡ β .fst)
     → α ≡ β
-  NaturalTransformation≡ eq = lemSig propIsNatural _ _ eq
+  NaturalTransformation≡ eq = lemSig propIsNatural eq
 
 identityTrans : (F : Functor ℂ 𝔻) → Transformation F F
 identityTrans F C = 𝔻.identity
@@ -110,13 +110,10 @@ module Properties where
       lem = λ i f → 𝔻.arrowsAreSets _ _ (θNat f) (θNat' f) i
 
     naturalIsSet : (θ : Transformation F G) → isSet (Natural F G θ)
-    naturalIsSet θ =
-      ntypeCumulative {n = 1}
-      (Data.Nat.≤′-step Data.Nat.≤′-refl)
-      (naturalIsProp θ)
+    naturalIsSet θ = propSet (naturalIsProp θ)
 
     naturalTransformationIsSet : isSet (NaturalTransformation F G)
-    naturalTransformationIsSet = sigPresSet transformationIsSet naturalIsSet
+    naturalTransformationIsSet = setSig transformationIsSet naturalIsSet
 
   module _
     {F G H I : Functor ℂ 𝔻}
@@ -128,7 +125,7 @@ module Properties where
       : NT[_∘_] {F} {H} {I} ζ (NT[_∘_] {F} {G} {H} η θ)
       ≡ NT[_∘_] {F} {G} {I} (NT[_∘_] {G} {H} {I} ζ η) θ
     isAssociative
-      = lemSig (naturalIsProp {F = F} {I}) _ _
+      = lemSig (naturalIsProp {F = F} {I})
         (funExt (λ _ → 𝔻.isAssociative))
 
   module _ {F G : Functor ℂ 𝔻} {θNT : NaturalTransformation F G} where
@@ -136,12 +133,12 @@ module Properties where
       propNat = naturalIsProp {F = F} {G}
 
     rightIdentity : (NT[_∘_] {F} {F} {G} θNT (identity F)) ≡ θNT
-    rightIdentity = lemSig propNat _ _ (funExt (λ _ → 𝔻.rightIdentity))
+    rightIdentity = lemSig propNat (funExt (λ _ → 𝔻.rightIdentity))
 
     leftIdentity : (NT[_∘_] {F} {G} {G} (identity G) θNT) ≡ θNT
-    leftIdentity = lemSig propNat _ _ (funExt (λ _ → 𝔻.leftIdentity))
+    leftIdentity = lemSig propNat (funExt (λ _ → 𝔻.leftIdentity))
 
     isIdentity
-      : (NT[_∘_] {F} {G} {G} (identity G) θNT) ≡ θNT
-      × (NT[_∘_] {F} {F} {G} θNT (identity F)) ≡ θNT
+      : ((NT[_∘_] {F} {G} {G} (identity G) θNT) ≡ θNT)
+      × ((NT[_∘_] {F} {F} {G} θNT (identity F)) ≡ θNT)
     isIdentity = leftIdentity , rightIdentity

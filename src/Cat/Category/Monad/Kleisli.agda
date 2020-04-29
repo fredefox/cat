@@ -77,7 +77,7 @@ record RawMonad : Set ℓ where
   IsNaturalForeign = {X : Object} → join {X} <<< fmap join ≡ join <<< join
 
   IsInverse : Set _
-  IsInverse = {X : Object} → join {X} <<< pure ≡ identity × join {X} <<< fmap pure ≡ identity
+  IsInverse = {X : Object} → (join {X} <<< pure ≡ identity) × (join {X} <<< fmap pure ≡ identity)
 
 record IsMonad (raw : RawMonad) : Set ℓ where
   open RawMonad raw public
@@ -261,7 +261,7 @@ private
 module _ {m n : Monad} (eq : Monad.raw m ≡ Monad.raw n) where
   private
     eqIsMonad : (λ i → IsMonad (eq i)) [ Monad.isMonad m ≡ Monad.isMonad n ]
-    eqIsMonad = lemPropF propIsMonad eq
+    eqIsMonad = lemPropF propIsMonad _ _ eq
 
   Monad≡ : m ≡ n
   Monad.raw     (Monad≡ i) = eq i
@@ -288,7 +288,7 @@ module _ where
           PathP (λ k → {X : Object} → ℂ [ X , eq0 i j k X ])
           (RawMonad.pure x) (RawMonad.pure y))
           (λ i → RawMonad.pure (p i)) (λ i → RawMonad.pure (q i)))
-          (cong-d (cong-d RawMonad.pure) a) (cong-d (cong-d RawMonad.pure) b)
+          (cong (cong RawMonad.pure) a) (cong (cong RawMonad.pure) b)
 
 
     RawMonad' : Set _
@@ -341,7 +341,5 @@ module _ where
 
   grpdMonad : isGrpd Monad
   grpdMonad = equivPreservesNType
-    {n = (S (S (S ⟨-2⟩)))}
+    3
     e grpdMonad'
-    where
-    open import Cubical.NType
