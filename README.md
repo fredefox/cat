@@ -45,6 +45,6 @@ Unfortunately I have not found a way to automatically inform
 instead is to add them system-wide:
 
     cat >>~/.agda/libraries <<EOF
-    `pwd`/libs/agda-stdlib/standard-library.agda-lib
-    `pwd`/libs/cubical/cubical.agda-lib
+    `pwd`/libs/standard-library.agda-lib
+    `pwd`/libs/cubical.agda-lib
     EOF

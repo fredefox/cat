@@ -3,8 +3,8 @@ name: cat
 -- description:
 --   A formalization of category theory in Agda using cubical type theory.
 depend:
-  standard-library
-  cubical
+  standard-library-9f454e23
+  cubical-acabbd9
 include:
   src
 -- libraries:
