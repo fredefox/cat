@@ -25,9 +25,11 @@ To successfully compile the following is needed:
 
 Has been tested with:
 
-  * Agda versions 2.6.1 and 2.6.2-02cb18a
+  * Agda versions 2.6.1 and 2.6.2[^1]
   * Agda Standard Library version v1.3-9f454e23
   * Agda Cubical Library version v0.1-acabbd9
+
+[^1]: Revisions `02cb18a` and `61ea3a3`.
 
 Building
 ========
