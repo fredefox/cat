@@ -1,3 +1,4 @@
+{-# OPTIONS --cubical #-}
 module Cat.Category.CartesianClosed where
 
 open import Agda.Primitive

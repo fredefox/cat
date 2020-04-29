@@ -49,7 +49,7 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
 
       backwards : (Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
         → (a , b) ∈ S
-      backwards (a' , (a=a' , a'b∈S)) = subst (sym a=a') a'b∈S
+      backwards (a' , (a=a' , a'b∈S)) = subst _ (sym a=a') a'b∈S
 
       fwd-bwd : (x : (a , b) ∈ S) → (backwards ∘ forwards) x ≡ x
       fwd-bwd x = pathJprop (λ y _ → y) x
@@ -57,7 +57,7 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
       bwd-fwd : (x : Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
           → (forwards ∘ backwards) x ≡ x
       -- bwd-fwd (y , a≡y , z) = ?
-      bwd-fwd (a' , a≡y , z) = pathJ lem0 lem1 a' a≡y z
+      bwd-fwd (a' , a≡y , z) = pathJ lem0 lem1 a≡y z
         where
           lem0 = (λ a'' a≡a'' → ∀ a''b∈S → (forwards ∘ backwards) (a'' , a≡a'' , a''b∈S) ≡ (a'' , a≡a'' , a''b∈S))
           lem1 = (λ z₁ → cong (\ z → a , refl , z) (pathJprop (\ y _ → y) z₁))
@@ -68,7 +68,7 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
 
     ident-r : (Σ[ a' ∈ A ] (a , a') ∈ Diag A × (a' , b) ∈ S)
       ≡ (a , b) ∈ S
-    ident-r = equivToPath equi
+    ident-r = ua equi
 
   module _ where
     private
@@ -78,14 +78,14 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
 
       backwards : (Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
         → (a , b) ∈ S
-      backwards (b' , (ab'∈S , b'=b)) = subst b'=b ab'∈S
+      backwards (b' , (ab'∈S , b'=b)) = subst _ b'=b ab'∈S
 
       bwd-fwd : (x : (a , b) ∈ S) → (backwards ∘ forwards) x ≡ x
       bwd-fwd x = pathJprop (λ y _ → y) x
 
       fwd-bwd : (x : Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
         → (forwards ∘ backwards) x ≡ x
-      fwd-bwd (b' , (ab'∈S , b'≡b)) = pathJ lem0 lem1 b' (sym b'≡b) ab'∈S
+      fwd-bwd (b' , (ab'∈S , b'≡b)) = pathJ lem0 lem1 (sym b'≡b) ab'∈S
         where
           lem0 = (λ b'' b≡b'' → (ab''∈S : (a , b'') ∈ S) → (forwards ∘ backwards) (b'' , ab''∈S , sym b≡b'') ≡ (b'' , ab''∈S , sym b≡b''))
           lem1 = (λ ab''∈S → cong (λ φ → b , φ , refl) (pathJprop (λ y _ → y) ab''∈S))
@@ -96,7 +96,7 @@ module _ {A B : Set} {S : Subset (A × B)} (ab : A × B) where
 
     ident-l : (Σ[ b' ∈ B ] (a , b') ∈ S × (b' , b) ∈ Diag B)
       ≡ ab ∈ S
-    ident-l = equivToPath equi
+    ident-l = ua equi
 
 module _ {A B C D : Set} {S : Subset (A × B)} {R : Subset (B × C)} {Q : Subset (C × D)} (ad : A × D) where
   private
@@ -129,7 +129,7 @@ module _ {A B C D : Set} {S : Subset (A × B)} {R : Subset (B × C)} {Q : Subset
     -- isAssociativec : Q + (R + S) ≡ (Q + R) + S
   is-isAssociative : (Σ[ c ∈ C ] (Σ[ b ∈ B ] (a , b) ∈ S × (b , c) ∈ R) × (c , d) ∈ Q)
          ≡ (Σ[ b ∈ B ] (a , b) ∈ S × (Σ[ c ∈ C ] (b , c) ∈ R × (c , d) ∈ Q))
-  is-isAssociative = equivToPath equi
+  is-isAssociative = ua equi
 
 RawRel : RawCategory (lsuc lzero) (lsuc lzero)
 RawRel = record

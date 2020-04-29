@@ -1,3 +1,4 @@
+{-# OPTIONS --cubical #-}
 module Cat where
 
 open import Cat.Category
@@ -20,5 +21,5 @@ open import Cat.Categories.Cat
 open import Cat.Categories.Rel
 open import Cat.Categories.Free
 open import Cat.Categories.Fun
-open import Cat.Categories.Cube
+-- open import Cat.Categories.Cube
 open import Cat.Categories.CwF

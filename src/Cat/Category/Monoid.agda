@@ -1,4 +1,5 @@
 {-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --cubical              #-}
 module Cat.Category.Monoid where
 
 open import Agda.Primitive

@@ -29,10 +29,9 @@
 module Cat.Category where
 
 open import Cat.Prelude
-import Cat.Equivalence
-open Cat.Equivalence public using () renaming (Isomorphism to TypeIsomorphism)
-open Cat.Equivalence
-  hiding (preorder≅ ; Isomorphism)
+open import Cat.Equivalence hiding (Isomorphism)
+
+TypeIsomorphism = Cat.Equivalence.Isomorphism
 
 ------------------
 -- * Categories --
@@ -69,13 +68,13 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
 
   IsIdentity : ({A : Object} → Arrow A A) → Set (ℓa ⊔ ℓb)
   IsIdentity id = {A B : Object} {f : Arrow A B}
-    → id <<< f ≡ f × f <<< id ≡ f
+    → (id <<< f ≡ f) × (f <<< id ≡ f)
 
   ArrowsAreSets : Set (ℓa ⊔ ℓb)
   ArrowsAreSets = ∀ {A B : Object} → isSet (Arrow A B)
 
   IsInverseOf : ∀ {A B} → (Arrow A B) → (Arrow B A) → Set ℓb
-  IsInverseOf = λ f g → g <<< f ≡ identity × f <<< g ≡ identity
+  IsInverseOf = λ f g → (g <<< f ≡ identity) × (f <<< g ≡ identity)
 
   Isomorphism : ∀ {A B} → (f : Arrow A B) → Set ℓb
   Isomorphism {A} {B} f = Σ[ g ∈ Arrow B A ] IsInverseOf f g
@@ -84,11 +83,11 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
   _≊_ A B = Σ[ f ∈ Arrow A B ] (Isomorphism f)
 
   module _ {A B : Object} where
-    Epimorphism : {X : Object } → (f : Arrow A B) → Set ℓb
-    Epimorphism {X} f = (g₀ g₁ : Arrow B X) → g₀ <<< f ≡ g₁ <<< f → g₀ ≡ g₁
+    Epimorphism : (f : Arrow A B) → Set _
+    Epimorphism f = ∀ {X} → (g₀ g₁ : Arrow B X) → g₀ <<< f ≡ g₁ <<< f → g₀ ≡ g₁
 
-    Monomorphism : {X : Object} → (f : Arrow A B) → Set ℓb
-    Monomorphism {X} f = (g₀ g₁ : Arrow X A) → f <<< g₀ ≡ f <<< g₁ → g₀ ≡ g₁
+    Monomorphism : (f : Arrow A B) → Set _
+    Monomorphism f = ∀ {X} → (g₀ g₁ : Arrow X A) → f <<< g₀ ≡ f <<< g₁ → g₀ ≡ g₁
 
   IsInitial  : Object → Set (ℓa ⊔ ℓb)
   IsInitial  I = {X : Object} → isContr (Arrow I X)
@@ -112,13 +111,13 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
     --
     -- [HoTT §9.1.4]
     idToIso : (A B : Object) → A ≡ B → A ≊ B
-    idToIso A B eq = subst eq (idIso A)
+    idToIso A B eq = subst (λ X → A ≊ X) eq (idIso A)
 
     Univalent : Set (ℓa ⊔ ℓb)
-    Univalent = {A B : Object} → isEquiv (A ≡ B) (A ≊ B) (idToIso A B)
+    Univalent = {A B : Object} → isEquiv (idToIso A B)
 
     univalenceFromIsomorphism : {A B : Object}
-      → TypeIsomorphism (idToIso A B) → isEquiv (A ≡ B) (A ≊ B) (idToIso A B)
+      → TypeIsomorphism (idToIso A B) → isEquiv (idToIso A B)
     univalenceFromIsomorphism = fromIso _ _
 
     -- A perhaps more readable version of univalence:
@@ -131,9 +130,7 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
       Univalent[Contr] = ∀ A → isContr (Σ[ X ∈ Object ] A ≊ X)
 
       from[Contr] : Univalent[Contr] → Univalent
-      from[Contr] = ContrToUniv.lemma _ _
-        where
-        open import Cubical.Fiberwise
+      from[Contr] = isContrToUniv _ _
 
     univalenceFrom≃ : Univalent≃ → Univalent
     univalenceFrom≃ = from[Contr] ∘ step
@@ -146,13 +143,13 @@ record RawCategory (ℓa ℓb : Level) : Set (lsuc (ℓa ⊔ ℓb)) where
         aux = (A , refl) , (λ y → contrSingl (snd y))
 
         step : isContr (Σ Object (A ≊_))
-        step = equivPreservesNType {n = ⟨-2⟩} lem aux
+        step = equivPreservesNType 0 lem aux
 
     univalenceFrom≅ : Univalent≅ → Univalent
     univalenceFrom≅ x = univalenceFrom≃ $ fromIsomorphism _ _ x
 
     propUnivalent : isProp Univalent
-    propUnivalent a b i = propPi (λ iso → propIsContr) a b i
+    propUnivalent = propPiImpl (propPiImpl (propIsEquiv _))
 
 module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
   record IsPreCategory : Set (lsuc (ℓa ⊔ ℓb)) where
@@ -175,7 +172,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 
     -- | Relation between iso- epi- and mono- morphisms.
     module _ {A B : Object} {X : Object} (f : Arrow A B) where
-      iso→epi : Isomorphism f → Epimorphism {X = X} f
+      iso→epi : Isomorphism f → Epimorphism f
       iso→epi (f- , left-inv , right-inv) g₀ g₁ eq = begin
         g₀                  ≡⟨ sym rightIdentity ⟩
         g₀ <<< identity     ≡⟨ cong (_<<<_ g₀) (sym right-inv) ⟩
@@ -186,7 +183,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         g₁ <<< identity     ≡⟨ rightIdentity ⟩
         g₁                  ∎
 
-      iso→mono : Isomorphism f → Monomorphism {X = X} f
+      iso→mono : Isomorphism f → Monomorphism f
       iso→mono (f- , left-inv , right-inv) g₀ g₁ eq =
         begin
         g₀                ≡⟨ sym leftIdentity ⟩
@@ -198,18 +195,18 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         identity <<< g₁   ≡⟨ leftIdentity ⟩
         g₁                ∎
 
-      iso→epi×mono : Isomorphism f → Epimorphism {X = X} f × Monomorphism {X = X} f
+      iso→epi×mono : Isomorphism f → Epimorphism f × Monomorphism f
       iso→epi×mono iso = iso→epi iso , iso→mono iso
 
     propIsAssociative : isProp IsAssociative
-    propIsAssociative = propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl (λ _ → propPiImpl λ _ → arrowsAreSets _ _))))))
+    propIsAssociative = propPiImpl (propPiImpl (propPiImpl (propPiImpl (propPiImpl (propPiImpl (propPiImpl (arrowsAreSets _ _)))))))
 
     propIsIdentity : ∀ {f : ∀ {A} → Arrow A A} → isProp (IsIdentity f)
-    propIsIdentity {id} = propPiImpl (λ _ → propPiImpl λ _ → propPiImpl (λ f →
-      propSig (arrowsAreSets (id <<< f) f) λ _ → arrowsAreSets (f <<< id) f))
+    propIsIdentity {id} = propPiImpl (propPiImpl (propPiImpl (λ {f} →
+      propSig (arrowsAreSets (id <<< f) f) λ _ → arrowsAreSets (f <<< id) f)))
 
     propArrowIsSet : isProp (∀ {A B} → isSet (Arrow A B))
-    propArrowIsSet = propPiImpl λ _ → propPiImpl (λ _ → isSetIsProp)
+    propArrowIsSet = propPiImpl (propPiImpl isSetIsProp)
 
     propIsInverseOf : ∀ {A B f g} → isProp (IsInverseOf {A} {B} f g)
     propIsInverseOf = propSig (arrowsAreSets _ _) (λ _ → arrowsAreSets _ _)
@@ -217,7 +214,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
     module _ {A B : Object} where
       propIsomorphism : (f : Arrow A B) → isProp (Isomorphism f)
       propIsomorphism f a@(g , η , ε) a'@(g' , η' , ε') =
-        lemSig (λ g → propIsInverseOf) a a' geq
+        lemSig (λ g → propIsInverseOf) geq
           where
             geq : g ≡ g'
             geq = begin
@@ -229,7 +226,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
               g'                ∎
 
       isoEq : {a b : A ≊ B} → fst a ≡ fst b → a ≡ b
-      isoEq = lemSig propIsomorphism _ _
+      isoEq = lemSig propIsomorphism
 
     propIsInitial : ∀ I → isProp (IsInitial I)
     propIsInitial I x y i {X} = res X i
@@ -242,7 +239,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         prop : (x : Arrow I X) → isProp (∀ f → x ≡ f)
         prop x = propPi (λ y → arrowsAreSets x y)
         cp : (λ i → ∀ f → fp i ≡ f) [ cx ≡ cy ]
-        cp = lemPropF prop fp
+        cp = lemPropF prop _ _ fp
         res : (fx , cx) ≡ (fy , cy)
         res i = fp i , cp i
 
@@ -257,7 +254,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         prop : (x : Arrow X T) → isProp (∀ f → x ≡ f)
         prop x = propPi (λ y → arrowsAreSets x y)
         cp : (λ i → ∀ f → fp i ≡ f) [ cx ≡ cy ]
-        cp = lemPropF prop fp
+        cp = lemPropF prop _ _ fp
         res : (fx , cx) ≡ (fy , cy)
         res i = fp i , cp i
 
@@ -340,10 +337,10 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 
         9-1-9-left  : coe (cong (λ x → Arrow x b) p) f ≡ f <<< p~
         9-1-9-left  = pathJ D (begin
-          coe refl f ≡⟨ id-coe ⟩
+          coe refl f ≡⟨ coe-neutral _ ⟩
           f ≡⟨ sym rightIdentity ⟩
-          f <<< identity ≡⟨ cong (f <<<_) (sym subst-neutral) ⟩
-          f <<< _ ≡⟨⟩ _ ∎) a' p
+          f <<< identity ≡⟨ cong (f <<<_) (sym (coe-neutral _)) ⟩
+          f <<< _ ≡⟨⟩ _ ∎) p
 
       module _ {b' : Object} (p : b ≡ b') where
         private
@@ -355,10 +352,10 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
 
         9-1-9-right : coe (cong (λ x → Arrow a x) p) f ≡ p* <<< f
         9-1-9-right = pathJ D (begin
-          coe refl f ≡⟨ id-coe ⟩
+          coe refl f ≡⟨ coe-neutral _ ⟩
           f ≡⟨ sym leftIdentity ⟩
-          identity <<< f ≡⟨ cong (_<<< f) (sym subst-neutral) ⟩
-          _ <<< f ∎) b' p
+          identity <<< f ≡⟨ cong (_<<< f) (sym (coe-neutral _)) ⟩
+          _ <<< f ∎) p
 
     -- lemma 9.1.9 in hott
     module _ {a a' b b' : Object}
@@ -380,7 +377,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         U b'' q' = coe (λ i → Arrow a (q' i)) f ≡ fst (idToIso _ _ q') <<< f <<< (fst (snd (idToIso _ _ refl)))
         u : coe (λ i → Arrow a b) f ≡ fst (idToIso _ _ refl) <<< f <<< (fst (snd (idToIso _ _ refl)))
         u = begin
-          coe refl f     ≡⟨ id-coe ⟩
+          coe refl f     ≡⟨ coe-neutral _ ⟩
           f              ≡⟨ sym leftIdentity ⟩
           identity <<< f ≡⟨ sym rightIdentity ⟩
           identity <<< f <<< identity ≡⟨ cong (λ φ → identity <<< f <<< φ) lem ⟩
@@ -388,16 +385,16 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
           fst (idToIso _ _ refl) <<< f <<< (fst (snd (idToIso _ _ refl))) ∎
           where
           lem : ∀ {x} → PathP (λ _ → Arrow x x) identity (fst (idToIso x x refl))
-          lem = sym subst-neutral
+          lem = sym (coe-neutral _)
 
         D : ∀ a'' → a ≡ a'' → Set _
         D a'' p' = coe (λ i → Arrow (p' i) (q i)) f ≡ fst (idToIso b b' q) <<< f <<< (fst (snd (idToIso _ _ p')))
 
         d : coe (λ i → Arrow a (q i)) f ≡ fst (idToIso b b' q) <<< f <<< (fst (snd (idToIso _ _ refl)))
-        d = pathJ U u b' q
+        d = pathJ U u q
 
       9-1-9 : coe pq f ≡ q* <<< f <<< p~
-      9-1-9 = pathJ D d a' p
+      9-1-9 = pathJ D d p
 
       9-1-9' : coe pq f <<< p* ≡ q* <<< f
       9-1-9' = begin
@@ -487,7 +484,7 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         p0 : X ≡ Y
         p0 = isoToId iso
         p1 : (λ i → IsTerminal (p0 i)) [ Xit ≡ Yit ]
-        p1 = lemPropF propIsTerminal p0
+        p1 = lemPropF propIsTerminal _ _ p0
         res : Xt ≡ Yt
         res i = p0 i , p1 i
 
@@ -515,20 +512,20 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         iso : X ≊ Y
         iso = Y→X , X→Y , right , left
         res : Xi ≡ Yi
-        res = lemSig propIsInitial _ _ (isoToId iso)
+        res = lemSig propIsInitial (isoToId iso)
 
     groupoidObject : isGrpd Object
     groupoidObject A B = res
       where
       open import Data.Nat using (_≤_ ; ≤′-refl ; ≤′-step)
       setIso : ∀ x → isSet (Isomorphism x)
-      setIso x = ntypeCumulative {n = 1} (≤′-step ≤′-refl) (propIsomorphism x)
+      setIso x = propSet (propIsomorphism x)
       step : isSet (A ≊ B)
-      step = setSig {sA = arrowsAreSets} {sB = setIso}
+      step = setSig arrowsAreSets setIso
       res : isSet (A ≡ B)
       res = equivPreservesNType
-        {A = A ≊ B} {B = A ≡ B} {n = ⟨0⟩}
-        (Equivalence.symmetry (univalent≃ {A = A} {B}))
+        {A = A ≊ B} {B = A ≡ B} 2
+        (invEquiv (univalent≃ {A = A} {B}))
         step
 
 module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
@@ -575,8 +572,10 @@ module _ {ℓa ℓb : Level} (ℂ : RawCategory ℓa ℓb) where
         {A = IsIdentity identity}
         {B = Univalent}
         propUnivalent
-        {a0 = X.isIdentity}
-        {a1 = Y.isIdentity}
+        {x = X.isIdentity}
+        {y = Y.isIdentity}
+        _
+        _
         p
 
       done : x ≡ y
@@ -609,7 +608,7 @@ module _ {ℓa ℓb : Level} {ℂ 𝔻 : Category ℓa ℓb} where
   module _ (rawEq : ℂ.raw ≡ 𝔻.raw) where
     private
       isCategoryEq : (λ i → IsCategory (rawEq i)) [ ℂ.isCategory ≡ 𝔻.isCategory ]
-      isCategoryEq = lemPropF {A = RawCategory _ _} {B = IsCategory} propIsCategory rawEq
+      isCategoryEq = lemPropF {A = RawCategory _ _} {B = IsCategory} propIsCategory _ _ rawEq
 
     Category≡ : ℂ ≡ 𝔻
     Category.raw (Category≡ i) = rawEq i

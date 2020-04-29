@@ -1,8 +1,8 @@
 {-# OPTIONS --allow-unsolved-metas #-}
+{-# OPTIONS --cubical              #-}
 module Cat.Categories.Cube where
 
 open import Cat.Prelude
-open import Level
 open import Data.Bool hiding (T)
 open import Data.Sum hiding ([_,_])
 open import Data.Unit
@@ -24,7 +24,7 @@ open Functor
 module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
   private
     -- Ns is the "namespace"
-    ℓo = (suc zero ⊔ ℓ)
+    ℓo = (ℓ-suc ℓ-zero ⊔ ℓ)
 
     FiniteDecidableSubset : Set ℓ
     FiniteDecidableSubset = Ns → Dec ⊤
@@ -54,9 +54,9 @@ module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
         → case (f i) of λ
           { (inj₁ (fi , _)) → case (f j) of λ
             { (inj₁ (fj , _)) → fi ≡ fj → i ≡ j
-            ; (inj₂ _) → Lift ⊤
+            ; (inj₂ _) → Lift _ ⊤
             }
-          ; (inj₂ _) → Lift ⊤
+          ; (inj₂ _) → Lift _ ⊤
           }
 
       Hom = Σ Hom' rules
@@ -66,7 +66,7 @@ module _ {ℓ ℓ' : Level} (Ns : Set ℓ) where
     Rawℂ : RawCategory ℓ ℓ -- ℓo (lsuc lzero ⊔ ℓo)
     Raw.Object Rawℂ = FiniteDecidableSubset
     Raw.Arrow Rawℂ = Hom
-    Raw.identity Rawℂ {o} = inj₁ , λ { (i , ii) (j , jj) eq → Σ≡ eq {!refl!} }
+    Raw.identity Rawℂ {o} = inj₁ , λ { (i , ii) (j , jj) eq → Σ≡ (eq , {!refl!}) }
     Raw._<<<_ Rawℂ = {!!}
 
     postulate IsCategoryℂ : IsCategory Rawℂ

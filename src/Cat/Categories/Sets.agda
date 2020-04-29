@@ -10,10 +10,10 @@ open import Cat.Category.Product
 open import Cat.Categories.Opposite
 
 _⊙_ : {ℓa ℓb ℓc : Level} {A : Set ℓa} {B : Set ℓb} {C : Set ℓc} → (A ≃ B) → (B ≃ C) → A ≃ C
-eqA ⊙ eqB = Equivalence.compose eqA eqB
+eqA ⊙ eqB = compEquiv eqA eqB
 
 sym≃ : ∀ {ℓa ℓb} {A : Set ℓa} {B : Set ℓb} → A ≃ B → B ≃ A
-sym≃ = Equivalence.symmetry
+sym≃ = invEquiv
 
 infixl 10 _⊙_
 
@@ -50,7 +50,7 @@ module _ (ℓ : Level) where
       univ≃
         = equivSigProp (λ A → isSetIsProp)
         ⊙ univalence
-        ⊙ equivSig {P = isEquiv A B} {Q = TypeIsomorphism} (equiv≃iso sA sB)
+        ⊙ equivSig {B = isEquiv} {B' = TypeIsomorphism} (equiv≃iso sA sB)
 
     univalent : Univalent
     univalent = univalenceFrom≃ univ≃
@@ -75,7 +75,7 @@ module _ {ℓ : Level} where
 
       private
         productObject : Object
-        productObject = (A × B) , sigPresSet sA λ _ → sB
+        productObject = (A × B) , setSig sA λ _ → sB
 
         module _ {X A B : Set ℓ} (f : X → A) (g : X → B) where
           _&&&_ : (X → A × B)
@@ -84,7 +84,7 @@ module _ {ℓ : Level} where
         module _ (hX : Object) where
           open Σ hX renaming (fst to X)
           module _ (f : X → A ) (g : X → B) where
-            ump : fst ∘′ (f &&& g) ≡ f × snd ∘′ (f &&& g) ≡ g
+            ump : (fst ∘ (f &&& g) ≡ f) × (snd ∘ (f &&& g) ≡ g)
             fst ump = refl
             snd ump = refl
 
@@ -98,7 +98,7 @@ module _ {ℓ : Level} where
           = f &&& g , ump hX f g , λ eq → funExt (umpUniq eq)
           where
           open Σ hX renaming (fst to X) using ()
-          module _ {y : X → A × B} (eq : fst ∘′ y ≡ f × snd ∘′ y ≡ g) (x : X) where
+          module _ {y : X → A × B} (eq : (fst ∘ y ≡ f) × (snd ∘ y ≡ g)) (x : X) where
             p1 : fst ((f &&& g) x) ≡ fst (y x)
             p1 = begin
               fst ((f &&& g) x) ≡⟨⟩

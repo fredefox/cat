@@ -1,23 +1,7 @@
 {-# OPTIONS --cubical #-}
 module Cat.Equivalence where
 
-open import Cubical.Primitives
-open import Cubical.FromStdLib renaming (ℓ-max to _⊔_)
-open import Cubical.PathPrelude hiding (inverse)
-open import Cubical.PathPrelude using (isEquiv ; isContr ; fiber) public
-open import Cubical.GradLemma hiding (isoToPath)
-
-open import Cat.Prelude using
-  ( lemPropF ; setPi ; lemSig ; propSet
-  ; Preorder ; equalityIsEquivalence ; propSig ; id-coe
-  ; Setoid ; _$_ ; propPi )
-
-import Cubical.Univalence as U
-
-module _ {ℓ : Level} {A B : Set ℓ} where
-  open Cubical.PathPrelude
-  ua : A ≃ B → A ≡ B
-  ua (f , isEqv) = U.ua (U.con f isEqv)
+open import Cat.Prelude
 
 module _ {ℓa ℓb : Level} where
   private
@@ -27,7 +11,7 @@ module _ {ℓa ℓb : Level} where
     -- Quasi-inverse in [HoTT] §2.4.6
     -- FIXME Maybe rename?
     AreInverses : (f : A → B) (g : B → A) → Set ℓ
-    AreInverses f g = g ∘ f ≡ idFun A × f ∘ g ≡ idFun B
+    AreInverses f g = (g ∘ f ≡ idFun A) × (f ∘ g ≡ idFun B)
 
     module AreInverses {f : A → B} {g : B → A}
       (inv : AreInverses f g) where
@@ -52,11 +36,11 @@ module _ {ℓa ℓb ℓc} {A : Set ℓa} {B : Set ℓb} (sB : isSet B) {Q : B �
 
   isoSigFst : Isomorphism f → Σ A (Q ∘ f) ≅ Σ B Q
   isoSigFst (g , g-f , f-g) = Σ-fst-map
-    , (\ { (b , q) → g b , transp (\ i → Q (f-g (~ i) b)) q })
-    , funExt (\ { (a , q) → Cat.Prelude.Σ≡ (\ i → g-f i a)
-             let r = (transp-iso' ((λ i → Q (f-g (i) (f a)))) q) in
-                 transp (\ i → PathP (\ j → Q (sB _ _ (λ j₁ → f-g j₁ (f a)) (λ j₁ → f (g-f j₁ a)) i j)) (transp (λ i₁ → Q (f-g (~ i₁) (f a))) q) q) r })
-    , funExt (\ { (b , q) → Cat.Prelude.Σ≡ (\ i → f-g i b) (transp-iso' (λ i → Q (f-g i b)) q)})
+    , (\ { (b , q) → g b , coe (\ i → Q (f-g (~ i) b)) q })
+    , funExt (\ { (a , q) → Σ≡ ((\ i → g-f i a)
+        , let r = symP (transp-iso' ((λ i → Q (f-g (i) (f a)))) q) in
+          coe (\ i → PathP (\ j → Q (sB _ _ (λ j₁ → f-g j₁ (f a)) (λ j₁ → f (g-f j₁ a)) i j)) (coe (λ i₁ → Q (f-g (~ i₁) (f a))) q) q) r )})
+    , funExt (\ { (b , q) → Σ≡ ((\ i → f-g i b) , symP (transp-iso' (λ i → Q (f-g i b)) q))})
 
 
 module _ {ℓ : Level} {A B : Set ℓ} {f : A → B}
@@ -107,7 +91,7 @@ module _ {ℓ : Level} {A B : Set ℓ} (f : A → B)
             idFun _ ∘ y.inverse         ≡⟨⟩
             y.inverse                   ∎
           2eq : (λ i → AreInverses f (1eq i)) [ x.areInverses ≡ y.areInverses ]
-          2eq = lemPropF p 1eq
+          2eq = lemPropF p _ _ 1eq
           res : x ≡ y
           res i = 1eq i , 2eq i
 
@@ -117,7 +101,7 @@ module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
     field
       fromIso      : {f : A → B} → Isomorphism f → iseqv f
       toIso        : {f : A → B} → iseqv f → Isomorphism f
-      propIsEquiv  : (f : A → B) → isProp (iseqv f)
+      propIseqv    : (f : A → B) → isProp (iseqv f)
 
     -- You're alerady assuming here that we don't need eta-equality on the
     -- equivalence!
@@ -127,7 +111,7 @@ module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
     inverse-from-to-iso : ∀ {f} (x : _) → (fromIso {f} ∘ toIso {f}) x ≡ x
     inverse-from-to-iso x = begin
       (fromIso ∘ toIso) x ≡⟨⟩
-      fromIso (toIso x)   ≡⟨ propIsEquiv _ (fromIso (toIso x)) x ⟩
+      fromIso (toIso x)   ≡⟨ propIseqv _ (fromIso (toIso x)) x ⟩
       x ∎
 
     -- | The other inverse law does not hold in general, it does hold, however,
@@ -160,7 +144,7 @@ module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
               hh b = sB _ _ (λ i → snd t i b) (λ i → snd u i b) i
 
           inx≡iny : (λ i → AreInverses f (fx≡fy i)) [ inv-x ≡ inv-y ]
-          inx≡iny = lemPropF propInv fx≡fy
+          inx≡iny = lemPropF propInv _ _ fx≡fy
 
           propIso : iso-x ≡ iso-y
           propIso i = fx≡fy i , inx≡iny i
@@ -179,12 +163,11 @@ module _ {ℓa ℓb ℓ : Level} (A : Set ℓa) (B : Set ℓb) where
     toIsomorphism (f , eqv) = f , toIso eqv
 
 module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
-  -- A wrapper around PathPrelude.≃
-  open Cubical.PathPrelude using (_≃_)
+  -- A wrapper around Prelude.≃
   private
-    module _ {obverse : A → B} (e : isEquiv A B obverse) where
+    module _ {obverse : A → B} (e : isEquiv obverse) where
       inverse : B → A
-      inverse b = fst (fst (e b))
+      inverse b = fst (fst (e .equiv-proof b))
 
       reverse : B → A
       reverse = inverse
@@ -194,11 +177,11 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
         where
         recto-verso : ∀ b → (obverse ∘ inverse) b ≡ b
         recto-verso b = begin
-          (obverse ∘ inverse) b ≡⟨ sym (μ b) ⟩
+          (obverse ∘ inverse) b ≡⟨ μ b ⟩
           b ∎
           where
-          μ : (b : B) → b ≡ obverse (inverse b)
-          μ b = snd (fst (e b))
+          μ : (b : B) → obverse (inverse b) ≡ b
+          μ b = snd (fst (e .equiv-proof b))
         verso-recto : ∀ a → (inverse ∘ obverse) a ≡ a
         verso-recto a = begin
           (inverse ∘ obverse) a ≡⟨ sym h ⟩
@@ -206,7 +189,7 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
           a ∎
           where
           c : isContr (fiber obverse (obverse a))
-          c = e (obverse a)
+          c = e .equiv-proof (obverse a)
           fbr : fiber obverse (obverse a)
           fbr = fst c
           a' : A
@@ -214,7 +197,7 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
           allC : (y : fiber obverse (obverse a)) → fbr ≡ y
           allC = snd c
           k : fbr ≡ (inverse (obverse a), _)
-          k = allC (inverse (obverse a) , sym (recto-verso (obverse a)))
+          k = allC (inverse (obverse a) , recto-verso (obverse a))
           h : a' ≡ inverse (obverse a)
           h i = fst (k i)
           u : fbr ≡ (a , refl)
@@ -225,10 +208,10 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
       iso : Isomorphism obverse
       iso = reverse , areInverses
 
-    toIsomorphism : {f : A → B} → isEquiv A B f → Isomorphism f
+    toIsomorphism : {f : A → B} → isEquiv f → Isomorphism f
     toIsomorphism = iso
 
-    ≃isEquiv : Equiv A B (isEquiv A B)
+    ≃isEquiv : Equiv A B isEquiv
     Equiv.fromIso     ≃isEquiv {f} (f~ , iso) = gradLemma f f~ rv vr
       where
       rv : (b : B) → _ ≡ b
@@ -236,15 +219,11 @@ module _ {ℓa ℓb : Level} (A : Set ℓa) (B : Set ℓb) where
       vr : (a : A) → _ ≡ a
       vr a i = fst iso i a
     Equiv.toIso        ≃isEquiv = toIsomorphism
-    Equiv.propIsEquiv  ≃isEquiv = P.propIsEquiv
-      where
-      import Cubical.NType.Properties as P
+    Equiv.propIseqv    ≃isEquiv = propIsEquiv
 
   open Equiv ≃isEquiv public
 
 module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
-  open Cubical.PathPrelude using (_≃_)
-
   module _ {ℓc : Level} {C : Set ℓc} {f : A → B} {g : B → C} where
 
     composeIsomorphism : Isomorphism f → Isomorphism g → Isomorphism (g ∘ f)
@@ -267,12 +246,6 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
           idFun C             ∎
         }
 
-    composeIsEquiv : isEquiv A B f → isEquiv B C g → isEquiv A C (g ∘ f)
-    composeIsEquiv a b = fromIso A C (composeIsomorphism a' b')
-      where
-      a' = toIso A B a
-      b' = toIso B C b
-
   composeIso : {ℓc : Level} {C : Set ℓc} → (A ≅ B) → (B ≅ C) → A ≅ C
   composeIso {C = C} (f , iso-f) (g , iso-g) = g ∘ f , composeIsomorphism iso-f iso-g
 
@@ -282,14 +255,6 @@ module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
     , inverse
     , recto-verso
     , verso-recto
-
-  -- Gives the quasi inverse from an equivalence.
-  module Equivalence (e : A ≃ B) where
-    compose : {ℓc : Level} {C : Set ℓc} → (B ≃ C) → A ≃ C
-    compose e' = fromIsomorphism _ _ (composeIso (toIsomorphism _ _ e) (toIsomorphism _ _ e'))
-
-    symmetry : B ≃ A
-    symmetry = fromIsomorphism _ _ (symmetryIso (toIsomorphism _ _ e))
 
 preorder≅ : (ℓ : Level) → Preorder _ _ _
 preorder≅ ℓ = record
@@ -314,17 +279,17 @@ preorder≅ ℓ = record
         d : D A refl
         d = begin
           coe (sym refl) (coe refl a) ≡⟨⟩
-          coe refl (coe refl a)       ≡⟨ id-coe ⟩
-          coe refl a                  ≡⟨ id-coe ⟩
+          coe refl (coe refl a)       ≡⟨ coe-neutral _ ⟩
+          coe refl a                  ≡⟨ coe-neutral _ ⟩
           a ∎
-      in pathJ D d B p
+      in pathJ D d p
     inv-coe' : (p : B ≡ A) → coe p (coe (sym p) a) ≡ a
     inv-coe' p =
       let
         D : (y : Set ℓ) → _ ≡ y → Set _
         D _ q = coe (sym q) (coe q a) ≡ a
         k : coe p (coe (sym p) a) ≡ a
-        k = pathJ D (trans id-coe id-coe) B (sym p)
+        k = pathJ D (trans (coe-neutral _) (coe-neutral _)) (sym p)
       in k
 
 setoid≅ : (ℓ : Level) → Setoid _ _
@@ -343,202 +308,49 @@ setoid≃ ℓ = record
   { Carrier = Set ℓ
   ; _≈_ = _≃_
   ; isEquivalence = record
-    { refl = idEquiv
-    ; sym = Equivalence.symmetry
-    ; trans = λ x x₁ → Equivalence.compose x x₁
+    { refl = idEquiv _
+    ; sym = invEquiv
+    ; trans = compEquiv
     }
   }
-
--- If the second component of a pair is propositional, then equality of such
--- pairs is equivalent to equality of their first components.
-module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
-  equivSigProp : ((x : A) → isProp (P x)) → {p q : Σ A P}
-    → (p ≡ q) ≃ (fst p ≡ fst q)
-  equivSigProp pA {p} {q} = fromIsomorphism _ _ iso
-    where
-    f : ∀ {p q} → p ≡ q → fst p ≡ fst q
-    f = cong fst
-    g : ∀ {p q} → fst p ≡ fst q → p ≡ q
-    g = lemSig pA _ _
-    ve-re : (e : p ≡ q) → (g ∘ f) e ≡ e
-    ve-re = pathJ (\ q (e : p ≡ q) → (g ∘ f) e ≡ e)
-              (\ i j → p .fst , propSet (pA (p .fst)) (p .snd) (p .snd) (λ i → (g {p} {p} ∘ f) (λ i₁ → p) i .snd) (λ i → p .snd) i j ) q
-    re-ve : (e : fst p ≡ fst q) → (f {p} {q} ∘ g {p} {q}) e ≡ e
-    re-ve e = refl
-    inv : AreInverses (f {p} {q}) (g {p} {q})
-    inv = funExt ve-re , funExt re-ve
-    iso : (p ≡ q) ≅ (fst p ≡ fst q)
-    iso = f , g , inv
 
 module _ {ℓ : Level} {A B : Set ℓ} where
   isoToPath : (A ≅ B) → (A ≡ B)
   isoToPath = ua ∘ fromIsomorphism _ _
 
-  univalence : (A ≡ B) ≃ (A ≃ B)
-  univalence = Equivalence.compose u' aux
-    where
-    module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
-      deEta : A ≃ B → A U.≃ B
-      deEta (a , b) = U.con a b
-      doEta : A U.≃ B → A ≃ B
-      doEta (U.con eqv isEqv) = eqv , isEqv
-    u : (A ≡ B) U.≃ (A U.≃ B)
-    u = U.univalence
-    u' : (A ≡ B) ≃ (A U.≃ B)
-    u' = doEta u
-    aux : (A U.≃ B) ≃ (A ≃ B)
-    aux = fromIsomorphism _ _ (doEta , deEta , funExt (λ{ (U.con _ _) → refl}) , refl)
-
   -- Equivalence is equivalent to isomorphism when the equivalence (resp.
   -- isomorphism) acts on sets.
   module _ (sA : isSet A) (sB : isSet B) where
-    equiv≃iso : (f : A → B) → isEquiv A B f ≃ Isomorphism f
+    equiv≃iso : (f : A → B) → isEquiv f ≃ Isomorphism f
     equiv≃iso f =
       let
-        obv : isEquiv A B f → Isomorphism f
+        obv : isEquiv f → Isomorphism f
         obv = toIso A B
-        inv : Isomorphism f → isEquiv A B f
+        inv : Isomorphism f → isEquiv f
         inv = fromIso A B
-        re-ve : (x : isEquiv A B f) → (inv ∘ obv) x ≡ x
+        re-ve : (x : isEquiv f) → (inv ∘ obv) x ≡ x
         re-ve = inverse-from-to-iso A B
         ve-re : (x : Isomorphism f) → (obv ∘ inv) x ≡ x
         ve-re = inverse-to-from-iso A B sA sB
-        iso : isEquiv A B f ≅ Isomorphism f
+        iso : isEquiv f ≅ Isomorphism f
         iso = obv , inv , funExt re-ve , funExt ve-re
       in fromIsomorphism _ _ iso
-
--- A few results that I have not generalized to work with both the eta and no-eta variable of ≃
-module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
-  -- Equality on sigma's whose second component is a proposition is equivalent
-  -- to equality on their first components.
-  equivPropSig : ((x : A) → isProp (P x)) → (p q : Σ A P)
-    → (p ≡ q) ≃ (fst p ≡ fst q)
-  equivPropSig pA p q = fromIsomorphism _ _ iso
-    where
-    f : ∀ {p q} → p ≡ q → fst p ≡ fst q
-    f = cong fst
-    g : ∀ {p q} → fst p ≡ fst q → p ≡ q
-    g {p} {q} = lemSig pA p q
-    ve-re : (e : p ≡ q) → (g ∘ f) e ≡ e
-    ve-re = pathJ (\ q (e : p ≡ q) → (g ∘ f) e ≡ e)
-              (\ i j → p .fst , propSet (pA (p .fst)) (p .snd) (p .snd) (λ i → (g {p} {p} ∘ f) (λ i₁ → p) i .snd) (λ i → p .snd) i j ) q
-    re-ve : (e : fst p ≡ fst q) → (f {p} {q} ∘ g {p} {q}) e ≡ e
-    re-ve e = refl
-    inv : AreInverses (f {p} {q}) (g {p} {q})
-    inv = funExt ve-re , funExt re-ve
-    iso : (p ≡ q) ≅ (fst p ≡ fst q)
-    iso = f , g , inv
-
-  -- Sigma that are equivalent on all points in the second projection are
-  -- equivalent.
-  equivSigSnd : ∀ {ℓc} {Q : A → Set (ℓc ⊔ ℓb)}
-    → ((a : A) → P a ≃ Q a) → Σ A P ≃ Σ A Q
-  equivSigSnd {Q = Q} eA = res
-    where
-    f : Σ A P → Σ A Q
-    f (a , pA) = a , fst (eA a) pA
-    g : Σ A Q → Σ A P
-    g (a , qA) = a , g' qA
-      where
-      k : Isomorphism _
-      k = toIso _ _ (snd (eA a))
-      open Σ k renaming (fst to g')
-    ve-re : (x : Σ A P) → (g ∘ f) x ≡ x
-    ve-re x i = fst x , eq i
-      where
-      eq : snd ((g ∘ f) x) ≡ snd x
-      eq = begin
-        snd ((g ∘ f) x) ≡⟨⟩
-        snd (g (f (a , pA))) ≡⟨⟩
-        g' (fst (eA a) pA) ≡⟨ lem ⟩
-        pA ∎
-        where
-        open Σ x renaming (fst to a ; snd to pA)
-        k : Isomorphism _
-        k = toIso _ _ (snd (eA a))
-        open Σ k renaming (fst to g' ; snd to inv)
-        lem : (g' ∘ (fst (eA a))) pA ≡ pA
-        lem i = fst inv i pA
-    re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
-    re-ve x i = fst x , eq i
-      where
-      open Σ x renaming (fst to a ; snd to qA)
-      eq = begin
-        snd ((f ∘ g) x)                 ≡⟨⟩
-        fst (eA a) (g' qA)              ≡⟨ (λ i → snd inv i qA) ⟩
-        qA                              ∎
-        where
-        k : Isomorphism _
-        k = toIso _ _ (snd (eA a))
-        open Σ k renaming (fst to g' ; snd to inv)
-    inv : AreInverses f g
-    inv = funExt ve-re , funExt re-ve
-    iso : Σ A P ≅ Σ A Q
-    iso = f , g , inv
-    res : Σ A P ≃ Σ A Q
-    res = fromIsomorphism _ _ iso
 
 module _ {ℓa ℓb : Level} {A : Set ℓa} {B : Set ℓb} where
   -- Equivalence is equivalent to isomorphism when the domain and codomain of
   -- the equivalence is a set.
   equivSetIso : isSet A → isSet B → (f : A → B)
-    → isEquiv A B f ≃ Isomorphism f
+    → isEquiv f ≃ Isomorphism f
   equivSetIso sA sB f =
     let
-      obv : isEquiv A B f → Isomorphism f
+      obv : isEquiv f → Isomorphism f
       obv = toIso A B
-      inv : Isomorphism f → isEquiv A B f
+      inv : Isomorphism f → isEquiv f
       inv = fromIso A B
-      re-ve : (x : isEquiv A B f) → (inv ∘ obv) x ≡ x
+      re-ve : (x : isEquiv f) → (inv ∘ obv) x ≡ x
       re-ve = inverse-from-to-iso A B
       ve-re : (x : Isomorphism f)       → (obv ∘ inv) x ≡ x
       ve-re = inverse-to-from-iso A B sA sB
-      iso : isEquiv A B f ≅ Isomorphism f
+      iso : isEquiv f ≅ Isomorphism f
       iso = obv , inv , funExt re-ve , funExt ve-re
     in fromIsomorphism _ _ iso
-
-module _ {ℓa ℓb : Level} {A : Set ℓa} {P : A → Set ℓb} where
-  -- Equivalence of pairs whose first components are identitical can be obtained
-  -- from an equivalence of their seecond components.
-  equivSig : {ℓc : Level} {Q : A → Set ℓc}
-    → ((a : A) → P a ≃ Q a) → Σ A P ≃ Σ A Q
-  equivSig {Q = Q} eA = res
-    where
-    P≅Q : ∀ {a} → P a ≅ Q a
-    P≅Q {a} = toIsomorphism _ _ (eA a)
-    f : Σ A P → Σ A Q
-    f (a , pA) = a , fst P≅Q pA
-    g : Σ A Q → Σ A P
-    g (a , qA) = a , fst (snd P≅Q) qA
-    ve-re : (x : Σ A P) → (g ∘ f) x ≡ x
-    ve-re (a , pA) i = a , eq i
-      where
-      eq : snd ((g ∘ f) (a , pA)) ≡ pA
-      eq = begin
-        snd ((g ∘ f) (a , pA)) ≡⟨⟩
-        snd (g (f (a , pA))) ≡⟨⟩
-        g' (fst (eA a) pA) ≡⟨ lem ⟩
-        pA ∎
-        where
-        open Σ (snd P≅Q) renaming (fst to g' ; snd to inv)
-        -- anti-funExt
-        lem : (g' ∘ (fst (eA a))) pA ≡ pA
-        lem = cong (_$ pA) (fst (snd (snd P≅Q)))
-    re-ve : (x : Σ A Q) → (f ∘ g) x ≡ x
-    re-ve x i = fst x , eq i
-      where
-      open Σ x renaming (fst to a ; snd to qA)
-      eq = begin
-        snd ((f ∘ g) x)                 ≡⟨⟩
-        fst (eA a) (g' qA)            ≡⟨ (λ i → snd inv i qA) ⟩
-        qA                                ∎
-        where
-        k : Isomorphism _
-        k = toIso _ _ (snd (eA a))
-        open Σ k renaming (fst to g' ; snd to inv)
-    inv : AreInverses f g
-    inv = funExt ve-re , funExt re-ve
-    iso : Σ A P ≅ Σ A Q
-    iso = f , g , inv
-    res : Σ A P ≃ Σ A Q
-    res = fromIsomorphism _ _ iso
