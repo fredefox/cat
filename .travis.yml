@@ -6,6 +6,9 @@ branches:
 
 dist: xenial
 
+git:
+  submodules: false
+
 matrix:
   include:
     - env:
@@ -30,6 +33,11 @@ matrix:
 
       install:
         - cabal update
+
+        - sed -i 's%git@\(.*\):\(.*\)%https://\1/\2%' .gitmodules
+
+        - git submodule update --init
+
         - sed -i 's/^jobs:/-- jobs:/' $HOME/.cabal/config
 
         # installing dependencies
@@ -98,11 +106,6 @@ matrix:
 
         # generating Everything.agda
         - cd cat
-
-        # setting up travis-specific scripts and files
-        - cp travis/* .
-
-        - sed -i 's%git@\(.*\):\(.*\)%https://\1/\2%' .gitmodules
       before_script:
         - export AGDA_OPTIONS="-Werror"
         - export RTS_OPTIONS="+RTS -M3.5G -H3.5G -A128M -RTS"
