@@ -38,13 +38,6 @@ You can build the library with
     git submodule update --init
     make
 
-The Makefile takes care of using the right dependencies by passing
-the `--library-file=./libraries` command line option.
-Unfortunately I have not found a way to automatically inform
-`agda-mode` that it should use these dependencies.  So what you can do
-instead is to add them system-wide:
-
-    cat >>~/.agda/libraries <<EOF
-    `pwd`/libs/standard-library.agda-lib
-    `pwd`/libs/cubical.agda-lib
-    EOF
+The library file `.agda-lib` takes care of using the right
+dependencies, which are cloned as "submodules" into the `libs`
+directory by the first command line.
