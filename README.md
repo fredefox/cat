@@ -38,19 +38,6 @@ You can build the library with
     git submodule update --init
     make
 
-The Makefile takes care of using the right dependencies.
-Unfortunately I have not found a way to automatically inform
-`agda-mode` that it should use these dependencies.  So what you can do
-in stead is to copy these libraries to a global location and then add
-them system wide:
-
-    mkdir -p ~/.agda/libs
-    cd ~/.agda/libs
-    git clone $CAT/libs/std-lib
-    git clone $CAT/libs/cubical
-    echo << EOF | tee -a ~/.agda/libraries
-    $HOME/.agda/libs/agda-stdlib/standard-library.agda-lib
-    $HOME/.agda/libs/cubical/cubical.agda-lib
-    EOF
-
-Or you could symlink them as well if you want.
+The library file `.agda-lib` takes care of using the right
+dependencies, which are cloned as "submodules" into the `libs`
+directory by the first command line.
