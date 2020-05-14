@@ -11,7 +11,7 @@ jobs:
         submodules: recursive
     - name: Run Agda
       id: typecheck
-      uses: ayberkt/agda-github-action@v1.2
+      uses: ayberkt/agda-github-action@v1.3
       with:
         main-file: src/Cat.agda
         source-dir: .
