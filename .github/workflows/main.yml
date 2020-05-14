@@ -11,8 +11,8 @@ jobs:
       id: typecheck
       uses: ayberkt/agda-github-action@v1.2
       with:
-        main-file: Cat.agda
-        source-dir: src
+        main-file: src/Cat.agda
+        source-dir: .
     - name: Upload HTML
       id: html-upload
       uses: actions/upload-artifact@v1
