@@ -1,16 +1,16 @@
 Description
 ===========
-This project aims to formalize some parts of category theory using cubical agda
-&mdash; an extension to agda permitting univalence.  To learn more about this
-[read the docs](https://agda.readthedocs.io/en/latest/language/cubical.html).
+This project aims to formalize some parts of category theory using
+Cubical Agda &mdash; an extension to agda permitting univalence.  To
+learn more about Cubical Agda [read the
+docs](https://agda.readthedocs.io/en/latest/language/cubical.html).
 
 This project draws a lot of inspiration from [the
 HoTT-book](https://homotopytypetheory.org/book/).
 
 If you want more information about this project, then you're in luck.
-This is my masters thesis.  Go ahead and read it
-[here](http://web.student.chalmers.se/~hanghj/papers/univalent-categories.pdf)
-or alternative like so:
+This is my masters thesis.  It can be accessed here
+[here](https://hdl.handle.net/20.500.12380/256404) or build like so:
 
     cd doc/
     make
