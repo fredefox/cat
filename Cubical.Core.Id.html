@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Cubical.Core.Id</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Comment">{- This file exports the primitives of cubical Id types -}</a>
+<a id="60" class="Symbol">{-#</a> <a id="64" class="Keyword">OPTIONS</a> <a id="72" class="Pragma">--cubical</a> <a id="82" class="Pragma">--safe</a> <a id="89" class="Symbol">#-}</a>
+<a id="93" class="Keyword">module</a> <a id="100" href="Cubical.Core.Id.html" class="Module">Cubical.Core.Id</a> <a id="116" class="Keyword">where</a>
+
+<a id="123" class="Keyword">open</a> <a id="128" class="Keyword">import</a> <a id="135" href="Cubical.Core.Primitives.html" class="Module">Cubical.Core.Primitives</a> <a id="159" class="Keyword">hiding</a> <a id="166" class="Symbol">(</a> <a id="168" href="Agda.Builtin.Cubical.Path.html#381" class="Function Operator">_≡_</a> <a id="172" class="Symbol">)</a>
+
+<a id="175" class="Keyword">open</a> <a id="180" class="Keyword">import</a> <a id="187" href="Agda.Builtin.Cubical.Id.html" class="Module">Agda.Builtin.Cubical.Id</a> <a id="211" class="Keyword">public</a>
+  <a id="220" class="Keyword">renaming</a> <a id="229" class="Symbol">(</a> <a id="231" href="Agda.Builtin.Cubical.Id.html#418" class="Postulate">conid</a> <a id="237" class="Symbol">to</a> <a id="Id.conid"></a><a id="240" href="Cubical.Core.Id.html#240" class="Postulate">⟨_,_⟩</a>
+           <a id="257" class="Comment">-- TODO: should the user really be able to access these two?</a>
+           <a id="329" class="Symbol">;</a> <a id="331" href="Agda.Builtin.Cubical.Id.html#468" class="Primitive">primIdFace</a> <a id="342" class="Symbol">to</a> <a id="Id.primIdFace"></a><a id="345" href="Cubical.Core.Id.html#345" class="Primitive">faceId</a>  <a id="353" class="Comment">-- ∀ {ℓ} {A : Type ℓ} {x y : A} → Id x y → I</a>
+           <a id="409" class="Symbol">;</a> <a id="411" href="Agda.Builtin.Cubical.Id.html#526" class="Primitive">primIdPath</a> <a id="422" class="Symbol">to</a> <a id="Id.primIdPath"></a><a id="425" href="Cubical.Core.Id.html#425" class="Primitive">pathId</a>  <a id="433" class="Comment">-- ∀ {ℓ} {A : Type ℓ} {x y : A} → Id x y → Path A x y</a>
+
+           <a id="499" class="Symbol">;</a> <a id="501" href="Agda.Builtin.Cubical.Id.html#758" class="Primitive">primIdElim</a> <a id="512" class="Symbol">to</a> <a id="Id.primIdElim"></a><a id="515" href="Cubical.Core.Id.html#515" class="Primitive">elimId</a>  <a id="523" class="Comment">-- ∀ {ℓ ℓ&#39;} {A : Type ℓ} {x : A}</a>
+                                   <a id="591" class="Comment">-- (P : ∀ (y : A) → x ≡ y → Type ℓ&#39;)</a>
+                                   <a id="663" class="Comment">-- (h : ∀ (φ : I) (y : A [ φ ↦ (λ _ → x) ])</a>
+                                   <a id="742" class="Comment">--        (w : (Path _ x (outS y)) [ φ ↦ (λ { (φ = i1) → λ _ → x}) ] ) →</a>
+                                   <a id="850" class="Comment">--        P (outS y) ⟨ φ , outS w ⟩) →</a>
+                                   <a id="924" class="Comment">-- {y : A} (w&#39; : x ≡ y) → P y w&#39;</a>
+           <a id="968" class="Symbol">)</a>
+  <a id="972" class="Keyword">hiding</a> <a id="979" class="Symbol">(</a> <a id="981" href="Agda.Builtin.Cubical.Id.html#601" class="Primitive">primIdJ</a> <a id="989" class="Symbol">)</a> <a id="991" class="Comment">-- this should not be used as it is using compCCHM</a>
+
+<a id="1043" class="Comment">{- BUILTIN ID Id -}</a>
+<a id="_≡_"></a><a id="1063" href="Cubical.Core.Id.html#1063" class="Function Operator">_≡_</a> <a id="1067" class="Symbol">:</a> <a id="1069" class="Symbol">∀</a> <a id="1071" class="Symbol">{</a><a id="1072" href="Cubical.Core.Id.html#1072" class="Bound">ℓ</a><a id="1073" class="Symbol">}</a> <a id="1075" class="Symbol">{</a><a id="1076" href="Cubical.Core.Id.html#1076" class="Bound">A</a> <a id="1078" class="Symbol">:</a> <a id="1080" href="Cubical.Core.Primitives.html#1259" class="Function">Type</a> <a id="1085" href="Cubical.Core.Id.html#1072" class="Bound">ℓ</a><a id="1086" class="Symbol">}</a> <a id="1088" class="Symbol">→</a> <a id="1090" href="Cubical.Core.Id.html#1076" class="Bound">A</a> <a id="1092" class="Symbol">→</a> <a id="1094" href="Cubical.Core.Id.html#1076" class="Bound">A</a> <a id="1096" class="Symbol">→</a> <a id="1098" href="Cubical.Core.Primitives.html#1259" class="Function">Type</a> <a id="1103" href="Cubical.Core.Id.html#1072" class="Bound">ℓ</a>
+<a id="1105" href="Cubical.Core.Id.html#1063" class="Function Operator">_≡_</a> <a id="1109" class="Symbol">=</a> <a id="1111" href="Agda.Builtin.Cubical.Id.html#311" class="Postulate">Id</a>
+</pre></body></html>

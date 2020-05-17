@@ -1,0 +1,17 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Cubical.Data.Empty.Properties</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Pragma">--safe</a> <a id="30" class="Symbol">#-}</a>
+<a id="34" class="Keyword">module</a> <a id="41" href="Cubical.Data.Empty.Properties.html" class="Module">Cubical.Data.Empty.Properties</a> <a id="71" class="Keyword">where</a>
+
+<a id="78" class="Keyword">open</a> <a id="83" class="Keyword">import</a> <a id="90" href="Cubical.Core.Everything.html" class="Module">Cubical.Core.Everything</a>
+
+<a id="115" class="Keyword">open</a> <a id="120" class="Keyword">import</a> <a id="127" href="Cubical.Foundations.Prelude.html" class="Module">Cubical.Foundations.Prelude</a>
+
+<a id="156" class="Keyword">open</a> <a id="161" class="Keyword">import</a> <a id="168" href="Cubical.Data.Empty.Base.html" class="Module">Cubical.Data.Empty.Base</a>
+
+<a id="isProp⊥"></a><a id="193" href="Cubical.Data.Empty.Properties.html#193" class="Function">isProp⊥</a> <a id="201" class="Symbol">:</a> <a id="203" href="Cubical.Foundations.Prelude.html#7741" class="Function">isProp</a> <a id="210" href="Cubical.Data.Empty.Base.html#114" class="Datatype">⊥</a>
+<a id="212" href="Cubical.Data.Empty.Properties.html#193" class="Function">isProp⊥</a> <a id="220" class="Symbol">()</a>
+
+<a id="isContr⊥→A"></a><a id="224" href="Cubical.Data.Empty.Properties.html#224" class="Function">isContr⊥→A</a> <a id="235" class="Symbol">:</a> <a id="237" class="Symbol">∀</a> <a id="239" class="Symbol">{</a><a id="240" href="Cubical.Data.Empty.Properties.html#240" class="Bound">ℓ</a><a id="241" class="Symbol">}</a> <a id="243" class="Symbol">{</a><a id="244" href="Cubical.Data.Empty.Properties.html#244" class="Bound">A</a> <a id="246" class="Symbol">:</a> <a id="248" href="Cubical.Core.Primitives.html#1259" class="Function">Type</a> <a id="253" href="Cubical.Data.Empty.Properties.html#240" class="Bound">ℓ</a><a id="254" class="Symbol">}</a> <a id="256" class="Symbol">→</a> <a id="258" href="Cubical.Foundations.Prelude.html#7677" class="Function">isContr</a> <a id="266" class="Symbol">(</a><a id="267" href="Cubical.Data.Empty.Base.html#114" class="Datatype">⊥</a> <a id="269" class="Symbol">→</a> <a id="271" href="Cubical.Data.Empty.Properties.html#244" class="Bound">A</a><a id="272" class="Symbol">)</a>
+<a id="274" href="Agda.Builtin.Sigma.html#252" class="Field">fst</a> <a id="278" href="Cubical.Data.Empty.Properties.html#224" class="Function">isContr⊥→A</a> <a id="289" class="Symbol">()</a>
+<a id="292" href="Agda.Builtin.Sigma.html#264" class="Field">snd</a> <a id="296" href="Cubical.Data.Empty.Properties.html#224" class="Function">isContr⊥→A</a> <a id="307" href="Cubical.Data.Empty.Properties.html#307" class="Bound">f</a> <a id="309" href="Cubical.Data.Empty.Properties.html#309" class="Bound">i</a> <a id="311" class="Symbol">()</a>
+</pre></body></html>

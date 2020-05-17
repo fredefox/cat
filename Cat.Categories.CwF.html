@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><title>Cat.Categories.CwF</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Symbol">{-#</a> <a id="5" class="Keyword">OPTIONS</a> <a id="13" class="Pragma">--cubical</a> <a id="23" class="Symbol">#-}</a>
+<a id="27" class="Keyword">module</a> <a id="34" href="Cat.Categories.CwF.html" class="Module">Cat.Categories.CwF</a> <a id="53" class="Keyword">where</a>
+
+<a id="60" class="Keyword">open</a> <a id="65" class="Keyword">import</a> <a id="72" href="Cat.Prelude.html" class="Module">Cat.Prelude</a>
+
+<a id="85" class="Keyword">open</a> <a id="90" class="Keyword">import</a> <a id="97" href="Cat.Category.html" class="Module">Cat.Category</a>
+<a id="110" class="Keyword">open</a> <a id="115" class="Keyword">import</a> <a id="122" href="Cat.Category.Functor.html" class="Module">Cat.Category.Functor</a>
+<a id="143" class="Keyword">open</a> <a id="148" class="Keyword">import</a> <a id="155" href="Cat.Categories.Fam.html" class="Module">Cat.Categories.Fam</a>
+<a id="174" class="Keyword">open</a> <a id="179" class="Keyword">import</a> <a id="186" href="Cat.Categories.Opposite.html" class="Module">Cat.Categories.Opposite</a>
+
+<a id="211" class="Keyword">module</a> <a id="218" href="Cat.Categories.CwF.html#218" class="Module">_</a> <a id="220" class="Symbol">{</a><a id="221" href="Cat.Categories.CwF.html#221" class="Bound">ℓa</a> <a id="224" href="Cat.Categories.CwF.html#224" class="Bound">ℓb</a> <a id="227" class="Symbol">:</a> <a id="229" href="Agda.Primitive.html#423" class="Postulate">Level</a><a id="234" class="Symbol">}</a> <a id="236" class="Keyword">where</a>
+  <a id="244" class="Keyword">record</a> <a id="251" href="Cat.Categories.CwF.html#251" class="Record">CwF</a> <a id="255" class="Symbol">:</a> <a id="257" class="PrimitiveType">Set</a> <a id="261" class="Symbol">(</a><a id="262" href="Agda.Primitive.html#606" class="Primitive">lsuc</a> <a id="267" class="Symbol">(</a><a id="268" href="Cat.Categories.CwF.html#221" class="Bound">ℓa</a> <a id="271" href="Agda.Primitive.html#636" class="Primitive Operator">⊔</a> <a id="273" href="Cat.Categories.CwF.html#224" class="Bound">ℓb</a><a id="275" class="Symbol">))</a> <a id="278" class="Keyword">where</a>
+    <a id="288" class="Comment">-- &quot;A category with families consists of&quot;</a>
+    <a id="334" class="Keyword">field</a>
+      <a id="346" class="Comment">-- &quot;A base category&quot;</a>
+      <a id="373" href="Cat.Categories.CwF.html#373" class="Field">ℂ</a> <a id="375" class="Symbol">:</a> <a id="377" href="Cat.Category.html#21111" class="Record">Category</a> <a id="386" href="Cat.Categories.CwF.html#221" class="Bound">ℓa</a> <a id="389" href="Cat.Categories.CwF.html#224" class="Bound">ℓb</a>
+    <a id="396" class="Keyword">module</a> <a id="ℂ"></a><a id="403" href="Cat.Categories.CwF.html#403" class="Module">ℂ</a> <a id="405" class="Symbol">=</a> <a id="407" href="Cat.Category.html#21111" class="Module">Category</a> <a id="416" href="Cat.Categories.CwF.html#373" class="Field">ℂ</a>
+    <a id="422" class="Comment">-- It&#39;s objects are called contexts</a>
+    <a id="462" href="Cat.Categories.CwF.html#462" class="Function">Contexts</a> <a id="471" class="Symbol">=</a> <a id="473" href="Cat.Category.html#897" class="Function">ℂ.Object</a>
+    <a id="486" class="Comment">-- It&#39;s arrows are called substitutions</a>
+    <a id="530" href="Cat.Categories.CwF.html#530" class="Function">Substitutions</a> <a id="544" class="Symbol">=</a> <a id="546" href="Cat.Category.html#919" class="Function">ℂ.Arrow</a>
+    <a id="558" class="Keyword">field</a>
+      <a id="570" class="Comment">-- A functor T</a>
+      <a id="591" href="Cat.Categories.CwF.html#591" class="Field">T</a> <a id="593" class="Symbol">:</a> <a id="595" href="Cat.Category.Functor.html#1819" class="Record">Functor</a> <a id="603" class="Symbol">(</a><a id="604" href="Cat.Categories.Opposite.html#2543" class="Function">opposite</a> <a id="613" href="Cat.Categories.CwF.html#373" class="Field">ℂ</a><a id="614" class="Symbol">)</a> <a id="616" class="Symbol">(</a><a id="617" href="Cat.Categories.Fam.html#1943" class="Function">Fam</a> <a id="621" href="Cat.Categories.CwF.html#221" class="Bound">ℓa</a> <a id="624" href="Cat.Categories.CwF.html#224" class="Bound">ℓb</a><a id="626" class="Symbol">)</a>
+      <a id="634" class="Comment">-- Empty context</a>
+      <a id="657" href="Cat.Categories.CwF.html#657" class="Field">[]</a> <a id="660" class="Symbol">:</a> <a id="662" href="Cat.Category.html#2601" class="Function">ℂ.Terminal</a>
+    <a id="677" class="Keyword">private</a>
+      <a id="691" class="Keyword">module</a> <a id="T"></a><a id="698" href="Cat.Categories.CwF.html#698" class="Module">T</a> <a id="700" class="Symbol">=</a> <a id="702" href="Cat.Category.Functor.html#1819" class="Module">Functor</a> <a id="710" href="Cat.Categories.CwF.html#591" class="Field">T</a>
+    <a id="716" href="Cat.Categories.CwF.html#716" class="Function">Ty</a> <a id="719" class="Symbol">:</a> <a id="721" class="Symbol">(</a><a id="722" href="Cat.Categories.CwF.html#722" class="Bound">Γ</a> <a id="724" class="Symbol">:</a> <a id="726" href="Cat.Category.html#897" class="Function">ℂ.Object</a><a id="734" class="Symbol">)</a> <a id="736" class="Symbol">→</a> <a id="738" class="PrimitiveType">Set</a> <a id="742" href="Cat.Categories.CwF.html#221" class="Bound">ℓa</a>
+    <a id="749" href="Cat.Categories.CwF.html#716" class="Function">Ty</a> <a id="752" href="Cat.Categories.CwF.html#752" class="Bound">Γ</a> <a id="754" class="Symbol">=</a> <a id="756" href="Agda.Builtin.Sigma.html#252" class="Field">fst</a> <a id="760" class="Symbol">(</a><a id="761" href="Agda.Builtin.Sigma.html#252" class="Field">fst</a> <a id="765" class="Symbol">(</a><a id="766" href="Cat.Category.Functor.html#466" class="Function">T.omap</a> <a id="773" href="Cat.Categories.CwF.html#752" class="Bound">Γ</a><a id="774" class="Symbol">))</a>
+
+    <a id="782" class="Keyword">module</a> <a id="789" href="Cat.Categories.CwF.html#789" class="Module">_</a> <a id="791" class="Symbol">{</a><a id="792" href="Cat.Categories.CwF.html#792" class="Bound">Γ</a> <a id="794" class="Symbol">:</a> <a id="796" href="Cat.Category.html#897" class="Function">ℂ.Object</a><a id="804" class="Symbol">}</a> <a id="806" class="Symbol">{</a><a id="807" href="Cat.Categories.CwF.html#807" class="Bound">A</a> <a id="809" class="Symbol">:</a> <a id="811" href="Cat.Categories.CwF.html#716" class="Function">Ty</a> <a id="814" href="Cat.Categories.CwF.html#792" class="Bound">Γ</a><a id="815" class="Symbol">}</a> <a id="817" class="Keyword">where</a>
+
+      <a id="830" class="Comment">-- module _ {A B : Object ℂ} {γ : ℂ [ A , B ]} where</a>
+      <a id="889" class="Comment">--   k : Σ (fst (omap T B) → fst (omap T A))</a>
+      <a id="940" class="Comment">--     (λ f →</a>
+      <a id="960" class="Comment">--     {x : fst (omap T B)} →</a>
+      <a id="996" class="Comment">--     snd (omap T B) x → snd (omap T A) (f x))</a>
+      <a id="1050" class="Comment">--   k = T.fmap γ</a>
+      <a id="1074" class="Comment">--   k₁ : fst (omap T B) → fst (omap T A)</a>
+      <a id="1122" class="Comment">--   k₁ = fst k</a>
+      <a id="1144" class="Comment">--   k₂ : ({x : fst (omap T B)} →</a>
+      <a id="1184" class="Comment">--     snd (omap T B) x → snd (omap T A) (k₁ x))</a>
+      <a id="1239" class="Comment">--   k₂ = snd k</a>
+
+      <a id="1262" class="Keyword">record</a> <a id="1269" href="Cat.Categories.CwF.html#1269" class="Record">ContextComprehension</a> <a id="1290" class="Symbol">:</a> <a id="1292" class="PrimitiveType">Set</a> <a id="1296" class="Symbol">(</a><a id="1297" href="Cat.Categories.CwF.html#221" class="Bound">ℓa</a> <a id="1300" href="Agda.Primitive.html#636" class="Primitive Operator">⊔</a> <a id="1302" href="Cat.Categories.CwF.html#224" class="Bound">ℓb</a><a id="1304" class="Symbol">)</a> <a id="1306" class="Keyword">where</a>
+        <a id="1320" class="Keyword">field</a>
+          <a id="1336" href="Cat.Categories.CwF.html#1336" class="Field">Γ&amp;A</a> <a id="1340" class="Symbol">:</a> <a id="1342" href="Cat.Category.html#897" class="Function">ℂ.Object</a>
+          <a id="1361" href="Cat.Categories.CwF.html#1361" class="Field">proj1</a> <a id="1367" class="Symbol">:</a> <a id="1369" href="Cat.Categories.CwF.html#373" class="Field">ℂ</a> <a id="1371" href="Cat.Category.html#21998" class="Function Operator">[</a> <a id="1373" href="Cat.Categories.CwF.html#1336" class="Bound">Γ&amp;A</a> <a id="1377" href="Cat.Category.html#21998" class="Function Operator">,</a> <a id="1379" href="Cat.Categories.CwF.html#792" class="Bound">Γ</a> <a id="1381" href="Cat.Category.html#21998" class="Function Operator">]</a>
+          <a id="1393" class="Comment">-- proj2 : ????</a>
+
+        <a id="1418" class="Comment">-- if γ : ℂ [ A , B ]</a>
+        <a id="1448" class="Comment">-- then T .fmap γ (written T[γ]) interpret substitutions in types and terms respectively.</a>
+        <a id="1546" class="Comment">-- field</a>
+        <a id="1563" class="Comment">--   ump : {Δ : ℂ .Object} → (γ : ℂ [ Δ , Γ ])</a>
+        <a id="1618" class="Comment">--     → (a : {!!}) → {!!}</a>
+</pre></body></html>
