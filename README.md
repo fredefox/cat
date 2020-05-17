@@ -1,3 +1,5 @@
+![Type checking](https://github.com/fredefox/cat/workflows/.github/workflows/main.yml/badge.svg?branch=master)
+
 Description
 ===========
 This project aims to formalize some parts of category theory using
