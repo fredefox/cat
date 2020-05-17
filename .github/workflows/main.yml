@@ -16,9 +16,15 @@ jobs:
         main-file: src/Cat.agda
         source-dir: .
         unsafe: true
-    - name: Upload HTML
+    - name: Upload HTML as build artifact
       id: html-upload
       uses: actions/upload-artifact@v1
       with:
         name: html
         path: html
+    - name: Upload HTML to Github Pages
+      uses: fredefox/github-pages-deploy-action@9913f79fa1eda103201056c00c8e1897ac4f921e
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: html
