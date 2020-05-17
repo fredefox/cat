@@ -9,11 +9,15 @@ This project draws a lot of inspiration from [the
 HoTT-book](https://homotopytypetheory.org/book/).
 
 If you want more information about this project, then you're in luck.
-This is my masters thesis.  It can be accessed here
+This is my masters thesis.  It can be accessed
 [here](https://hdl.handle.net/20.500.12380/256404) or build like so:
 
     cd doc/
     make
+
+You can browse a syntax-highlighted version of the formalization
+[here](https://fredefox.github.io/cat/).
+
 
 Dependencies
 ============
