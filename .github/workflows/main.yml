@@ -18,11 +18,13 @@ jobs:
         unsafe: true
     - name: Upload HTML as build artifact
       id: html-upload
+      if: github.ref == 'refs/heads/master'
       uses: actions/upload-artifact@v1
       with:
         name: html
         path: html
     - name: Upload HTML to Github Pages
+      if: github.ref == 'refs/heads/master'
       uses: fredefox/github-pages-deploy-action@9913f79fa1eda103201056c00c8e1897ac4f921e
       with:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
